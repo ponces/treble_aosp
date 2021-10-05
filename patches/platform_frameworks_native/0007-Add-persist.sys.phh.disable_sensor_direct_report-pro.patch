@@ -1,0 +1,42 @@
+From ff689995761dcbfceba32ab068e79e293fae8f5f Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Wed, 30 Sep 2020 22:51:37 +0200
+Subject: [PATCH 07/14] Add persist.sys.phh.disable_sensor_direct_report
+ property to disable Sensors direct report (it seems to break Qin 2 Pro
+ sensors HAL)
+
+Change-Id: I0763324a4bd6a3ba6716c396c4cb3f0772b85d62
+---
+ services/sensorservice/SensorDevice.cpp | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/services/sensorservice/SensorDevice.cpp b/services/sensorservice/SensorDevice.cpp
+index 99b10faf5..eb5bfe281 100644
+--- a/services/sensorservice/SensorDevice.cpp
++++ b/services/sensorservice/SensorDevice.cpp
+@@ -22,6 +22,7 @@
+ #include "convertV2_1.h"
+ 
+ #include <android-base/logging.h>
++#include <android-base/properties.h>
+ #include <android/util/ProtoOutputStream.h>
+ #include <frameworks/base/core/proto/android/service/sensor_service.proto.h>
+ #include <sensors/convert.h>
+@@ -129,8 +130,12 @@ SensorDevice::SensorDevice()
+ 
+     initializeSensorList();
+ 
+-    mIsDirectReportSupported =
+-            (checkReturnAndGetStatus(mSensors->unregisterDirectChannel(-1)) != INVALID_OPERATION);
++    if(::android::base::GetBoolProperty("persist.sys.phh.disable_sensor_direct_report", false)) {
++        mIsDirectReportSupported = false;
++    } else {
++        mIsDirectReportSupported =
++                (checkReturnAndGetStatus(mSensors->unregisterDirectChannel(-1)) != INVALID_OPERATION);
++    }
+ }
+ 
+ void SensorDevice::initializeSensorList() {
+-- 
+2.25.1
+

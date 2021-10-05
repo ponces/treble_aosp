@@ -1,0 +1,28 @@
+From 40fa07e9cd8809261280d90c1b9b91ae1683e2cc Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 28 Sep 2020 22:03:00 +0200
+Subject: [PATCH] Enable passcred (useful on A-only when init cant do it for
+ us)
+
+Change-Id: I0984518531011276acf21c4f226dea35a7f9373f
+---
+ lmkd.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/lmkd.cpp b/lmkd.cpp
+index 3515fdb..25f5990 100644
+--- a/lmkd.cpp
++++ b/lmkd.cpp
+@@ -3037,6 +3037,9 @@ static int init(void) {
+         return -1;
+     }
+ 
++    int on = 1;
++    setsockopt(ctrl_sock.sock, SOL_SOCKET, SO_PASSCRED, &on, sizeof(on));
++
+     ret = listen(ctrl_sock.sock, MAX_DATA_CONN);
+     if (ret < 0) {
+         ALOGE("lmkd control socket listen failed (errno=%d)", errno);
+-- 
+2.25.1
+

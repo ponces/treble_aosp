@@ -1,0 +1,38 @@
+From 3d00526f0fa424d8ead7befcec376c66438557f9 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sun, 11 Aug 2019 10:30:37 +0200
+Subject: [PATCH 13/50] Add property to use linear brightness slider
+
+Change-Id: I1af7eb923779fa60c7a735904ba8fc82d0622c1d
+---
+ .../com/android/settingslib/display/BrightnessUtils.java    | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/packages/SettingsLib/src/com/android/settingslib/display/BrightnessUtils.java b/packages/SettingsLib/src/com/android/settingslib/display/BrightnessUtils.java
+index 4f86afaa995c..f1fe73a6a1dc 100644
+--- a/packages/SettingsLib/src/com/android/settingslib/display/BrightnessUtils.java
++++ b/packages/SettingsLib/src/com/android/settingslib/display/BrightnessUtils.java
+@@ -51,7 +51,12 @@ public class BrightnessUtils {
+      * @param max The maximum acceptable value for the setting.
+      * @return The corresponding setting value.
+      */
++    private static final boolean useLinearBrightness = android.os.SystemProperties.getBoolean("persist.sys.phh.linear_brightness", false);
+     public static final int convertGammaToLinear(int val, int min, int max) {
++        if(useLinearBrightness) {
++            if(val < 4) return 1;
++            return val/4;
++        }
+         final float normalizedVal = MathUtils.norm(GAMMA_SPACE_MIN, GAMMA_SPACE_MAX, val);
+         final float ret;
+         if (normalizedVal <= R) {
+@@ -127,6 +132,7 @@ public class BrightnessUtils {
+      * @return The corresponding slider value
+      */
+     public static final int convertLinearToGammaFloat(float val, float min, float max) {
++        if(useLinearBrightness) return (int)(val*4);
+         // For some reason, HLG normalizes to the range [0, 12] rather than [0, 1]
+         final float normalizedVal = MathUtils.norm(min, max, val) * 12;
+         final float ret;
+-- 
+2.25.1
+

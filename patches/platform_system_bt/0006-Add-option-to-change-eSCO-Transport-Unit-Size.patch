@@ -1,0 +1,43 @@
+From a1234ef43742a2da07c9868c7559ffde5f7d316e Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Thu, 17 Jun 2021 15:48:53 +0100
+Subject: [PATCH 6/6] Add option to change eSCO Transport Unit Size
+
+Fixes Bluetooth calls on some Samsung devices if set to 16.
+
+It's still unknown if other Treble devices need other values so it's preferred to leave this able to be configured with another integer.
+
+This applies to mSBC T2, T1 and CVSD codecs
+---
+ device/src/esco_parameters.cc | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/device/src/esco_parameters.cc b/device/src/esco_parameters.cc
+index 7f550a142..99e1c2a8f 100644
+--- a/device/src/esco_parameters.cc
++++ b/device/src/esco_parameters.cc
+@@ -20,7 +20,9 @@
+ 
+ #include "device/include/esco_parameters.h"
+ 
+-static const enh_esco_params_t default_esco_parameters[ESCO_NUM_CODECS] = {
++#include <cutils/properties.h>
++
++static enh_esco_params_t default_esco_parameters[ESCO_NUM_CODECS] = {
+     // CVSD
+     {.transmit_bandwidth = TXRX_64KBITS_RATE,
+      .receive_bandwidth = TXRX_64KBITS_RATE,
+@@ -143,5 +145,10 @@ enh_esco_params_t esco_parameters_for_codec(esco_codec_t codec) {
+   CHECK(codec >= 0) << "codec index " << (int)codec << "< 0";
+   CHECK(codec < ESCO_NUM_CODECS) << "codec index " << (int)codec << " > "
+                                  << ESCO_NUM_CODECS;
++  int escoTransportUnitSize = property_get_int32("persist.sys.bt.esco_transport_unit_size", 0);
++  if(escoTransportUnitSize) {
++    default_esco_parameters[codec].input_transport_unit_size = escoTransportUnitSize;
++    default_esco_parameters[codec].output_transport_unit_size = escoTransportUnitSize;
++  }
+   return default_esco_parameters[codec];
+ }
+-- 
+2.25.1
+

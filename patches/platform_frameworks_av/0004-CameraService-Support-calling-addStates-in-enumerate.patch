@@ -1,0 +1,62 @@
+From 56cad621647e1ee87fa8c6233ae2a8bc20f7dc73 Mon Sep 17 00:00:00 2001
+From: Artem Borisov <dedsa2002@gmail.com>
+Date: Tue, 25 Sep 2018 12:39:22 +0300
+Subject: [PATCH 04/40] CameraService: Support calling addStates in
+ enumerateProviders
+
+Some pre-P camera HALs trigger onDeviceStatusChange callback during HAL init.
+This is horribly wrong and causes a race condition between enumerateProviders
+and onDeviceStatusChange. While it wasn't really harmful in O, in P call sequence
+was changed and now this race condition leads to two problems: null pointer dereference
+in addStates because mFlashlight is not initialized at a proper timing; mServiceLock
+deadlock because updateCameraNumAndIds and enumerateProviders are called at the same time.
+Moving addStates back to enumerateProviders makes the sequence more similar to O, and doesn't
+let these two issues to happen.
+Enable TARGET_CAMERA_NEEDS_ADD_STATES_IN_ENUMERATE when it is necessary.
+
+@Dil3mm4 edit: Instead of TARGET_CAMERA_NEEDS_ADD_STATES_IN_ENUMERATE let's use a system property to make it more generic and suitable for GSI use.
+
+Change-Id: Ife25b9753fdb679ab0c77f385e1b8527551a4711
+---
+ .../camera/libcameraservice/CameraService.cpp    | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/services/camera/libcameraservice/CameraService.cpp b/services/camera/libcameraservice/CameraService.cpp
+index 941297de5d..883bf24725 100644
+--- a/services/camera/libcameraservice/CameraService.cpp
++++ b/services/camera/libcameraservice/CameraService.cpp
+@@ -221,6 +221,20 @@ status_t CameraService::enumerateProviders() {
+ 
+     for (auto& cameraId : deviceIds) {
+         String8 id8 = String8(cameraId.c_str());
++        if (property_get_bool("persist.sys.camera.huawei", false)) {
++            bool cameraFound = false;
++            {
++                Mutex::Autolock lock(mCameraStatesLock);
++                auto iter = mCameraStates.find(id8);
++                if (iter != mCameraStates.end()) {
++                    cameraFound = true;
++                }
++            }
++            if (!cameraFound) {
++                addStates(id8);
++            }
++        }
++
+         if (getCameraState(id8) == nullptr) {
+             onDeviceStatusChanged(id8, CameraDeviceStatus::PRESENT);
+         }
+@@ -381,8 +395,10 @@ void CameraService::onDeviceStatusChanged(const String8& id,
+             ALOGI("%s: Unknown camera ID %s, a new camera is added",
+                     __FUNCTION__, id.string());
+ 
++   if (!property_get_bool("persist.sys.camera.huawei", false)) {
+             // First add as absent to make sure clients are notified below
+             addStates(id);
++   }
+ 
+             updateStatus(newStatus, id);
+         } else {
+-- 
+2.25.1
+

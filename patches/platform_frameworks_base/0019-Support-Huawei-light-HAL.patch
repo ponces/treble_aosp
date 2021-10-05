@@ -1,0 +1,88 @@
+From 0385f7be53c3db550a7c05d8501a66afff2837e3 Mon Sep 17 00:00:00 2001
+From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
+Date: Mon, 30 Mar 2020 10:07:00 +0000
+Subject: [PATCH 19/50] Support Huawei light HAL
+
+For https://github.com/phhusson/treble_experimentations/issues/1204
+
+Change-Id: I719a13eb66a46703b7ff0e00113f9b98b3244996
+---
+ services/core/jni/Android.bp                  |  1 +
+ ...om_android_server_lights_LightsService.cpp | 30 +++++++++++++++++++
+ 2 files changed, 31 insertions(+)
+
+diff --git a/services/core/jni/Android.bp b/services/core/jni/Android.bp
+index 7a1192cf4b97..7ba42e077b87 100644
+--- a/services/core/jni/Android.bp
++++ b/services/core/jni/Android.bp
+@@ -171,6 +171,7 @@ cc_defaults {
+         "vendor.samsung.hardware.miscpower@2.0",
+         "vendor.samsung.hardware.light@2.0",
+         "vendor.samsung.hardware.light@3.0",
++        "vendor.huawei.hardware.light@2.0",
+     ],
+ 
+     static_libs: [
+diff --git a/services/core/jni/com_android_server_lights_LightsService.cpp b/services/core/jni/com_android_server_lights_LightsService.cpp
+index 268b59a58010..5e535e3dcbf5 100644
+--- a/services/core/jni/com_android_server_lights_LightsService.cpp
++++ b/services/core/jni/com_android_server_lights_LightsService.cpp
+@@ -26,6 +26,7 @@
+ #include <vendor/samsung/hardware/light/2.0/types.h>
+ #include <vendor/samsung/hardware/light/3.0/ISehLight.h>
+ #include <vendor/samsung/hardware/light/3.0/types.h>
++#include <vendor/huawei/hardware/light/2.0/ILight.h>
+ #include <android-base/chrono_utils.h>
+ #include <utils/misc.h>
+ #include <utils/Log.h>
+@@ -48,11 +49,15 @@ using SecType    = ::vendor::samsung::hardware::light::V2_0::SecType;
+ using ISehLight  = ::vendor::samsung::hardware::light::V3_0::ISehLight;
+ using SehType    = ::vendor::samsung::hardware::light::V3_0::SehType;
+ using SehLightState = ::vendor::samsung::hardware::light::V3_0::SehLightState;
++using ILightHw   = ::vendor::huawei::hardware::light::V2_0::ILight;
++using LightStateHw = ::android::hardware::light::V2_0::LightState;
+ static bool sLightSupported = true;
+ 
+ static sp<ISecLight> sSecHal;
+ static sp<ISehLight> sSehHal;
+ static bool sSecTried = false;
++static sp<ILightHw> sHwHal;
++static bool sHwTried = false;
+ 
+ static bool validate(jint light, jint flash, jint brightness) {
+     bool valid = true;
+@@ -192,6 +197,31 @@ static void setLight_native(
+ 	return;
+     }
+ 
++    if (!sHwTried) {
++        sHwHal = ILightHw::getService();
++        //sHwTried = true;
++    }
++
++    if (sHwHal != nullptr && light == 0) {
++        ALOGE("sHwHal triggered!");
++        int brightness = colorARGB & 0xff;
++        int hwBrightness = brightness << 4;
++        LightState state = constructState(hwBrightness, flashMode, onMS, offMS, brightnessMode);
++        bool got260 = false;
++        sHwHal->HWgetSupportedTypes([&](auto types) {
++            for (const auto& type: types) {
++                if (type == 260) {
++                    ALOGE("sHwHal reports 260 as a supported type");
++                    got260 = true;
++                }
++            }
++        });
++        if (got260) {
++            sHwHal->HWsetLight(260, state);
++            return;
++        }
++    }
++
+     Type type = static_cast<Type>(light);
+     LightState state = constructState(
+         colorARGB, flashMode, onMS, offMS, brightnessMode);
+-- 
+2.25.1
+

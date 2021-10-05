@@ -1,0 +1,96 @@
+From 1d1570edc35c43536d7ba05540732434ba9b0577 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <pierre-hugues.husson@softathome.com>
+Date: Tue, 18 Sep 2018 17:05:07 +0200
+Subject: [PATCH 2/4] Support hostap on O/O-MR1 vendors
+
+Two issues are fixed here:
+- some vendor HALs lied (because of Android behaviour) about ap interface name.
+O/O-MR1 behaviour meant hostap/sta had same interface. So "wlan0" sound
+quite a good guess
+- doing multiple configureChip in one IWifi session wasn't allowed.
+Now, it is a requirement to be supported, so most(all?) HALs don't
+support it. force stop/start for every reconfiguration
+
+Change-Id: Ib2f1c94e7f794af65a7006fb05f14b31c910a238
+---
+ .../android/server/wifi/HalDeviceManager.java | 22 +++++++++++++++++--
+ .../com/android/server/wifi/WifiNative.java   | 15 ++++++++++++-
+ 2 files changed, 34 insertions(+), 3 deletions(-)
+
+diff --git a/service/java/com/android/server/wifi/HalDeviceManager.java b/service/java/com/android/server/wifi/HalDeviceManager.java
+index 3d0c89c4a..dd814b99d 100644
+--- a/service/java/com/android/server/wifi/HalDeviceManager.java
++++ b/service/java/com/android/server/wifi/HalDeviceManager.java
+@@ -62,8 +62,8 @@ import java.util.Set;
+  */
+ public class HalDeviceManager {
+     private static final String TAG = "HalDevMgr";
+-    private static final boolean VDBG = false;
+-    private boolean mDbg = false;
++    private static final boolean VDBG = true;
++    private boolean mDbg = true;
+ 
+     private static final int START_HAL_RETRY_INTERVAL_MS = 20;
+     // Number of attempts a start() is re-tried. A value of 0 means no retries after a single
+@@ -229,6 +229,16 @@ public class HalDeviceManager {
+      */
+     public IWifiStaIface createStaIface(
+             @Nullable InterfaceDestroyedListener destroyedListener, @Nullable Handler handler) {
++        //As of O and O-MR1, configureChip MUST BE after a startWifi
++        //Pie changed this to allow dynamic configureChip
++        //No O/O-MR1 HAL support that, so restart wifi HAL when we do that
++        if(android.os.SystemProperties.getInt("persist.sys.vndk", 28) < 28) {
++            Log.e(TAG, "createStaIface: Stopping wifi");
++            stopWifi();
++            Log.e(TAG, "createStaIface: Starting wifi");
++            startWifi();
++            Log.e(TAG, "createStaIface: Creating iface");
++        }
+         return (IWifiStaIface) createIface(IfaceType.STA, destroyedListener, handler);
+     }
+ 
+@@ -237,6 +247,14 @@ public class HalDeviceManager {
+      */
+     public IWifiApIface createApIface(@Nullable InterfaceDestroyedListener destroyedListener,
+             @Nullable Handler handler) {
++        //cf createStaIface
++        if(android.os.SystemProperties.getInt("persist.sys.vndk", 28) < 28) {
++            Log.e(TAG, "createApIface: Stopping wifi");
++            stopWifi();
++            Log.e(TAG, "createApIface: Starting wifi");
++            startWifi();
++            Log.e(TAG, "createApIface: Creating iface");
++        }
+         return (IWifiApIface) createIface(IfaceType.AP, destroyedListener, handler);
+     }
+ 
+diff --git a/service/java/com/android/server/wifi/WifiNative.java b/service/java/com/android/server/wifi/WifiNative.java
+index cf362d6a8..41b6ff604 100644
+--- a/service/java/com/android/server/wifi/WifiNative.java
++++ b/service/java/com/android/server/wifi/WifiNative.java
+@@ -833,8 +833,21 @@ public class WifiNative {
+     private String createApIface(@NonNull Iface iface) {
+         synchronized (mLock) {
+             if (mWifiVendorHal.isVendorHalSupported()) {
+-                return mWifiVendorHal.createApIface(
++                String ret = mWifiVendorHal.createApIface(
+                         new InterfaceDestoyedListenerInternal(iface.id));
++                //In O and O-MR1, there was only ONE wifi interface for everything (sta and ap)
++                //Most vendors used "wlan0" for those interfaces, but there is no guarantee
++                //This override exists here, because most OEMs return "ap0" when doing createApIface,
++                //even when the iface is actually called "wlan0"
++                //
++                //To be perfectly clean, we should check what value createStaIface (would have) returned
++                //and use the same one.
++                //That's overly complicated, so let's assume this is wlan0 for the moment
++                if(android.os.SystemProperties.getInt("persist.sys.vndk", 28) < 28) {
++                    ret = "wlan0";
++                }
++
++                return ret;
+             } else {
+                 Log.i(TAG, "Vendor Hal not supported, ignoring createApIface.");
+                 return handleIfaceCreationWhenVendorHalNotSupported(iface);
+-- 
+2.25.1
+

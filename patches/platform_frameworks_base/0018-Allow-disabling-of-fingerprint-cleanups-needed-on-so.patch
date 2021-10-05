@@ -1,0 +1,39 @@
+From b77e117ab915590b54a202f7025bf8e7066aa475 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 10 Mar 2020 23:30:17 +0100
+Subject: [PATCH 18/50] Allow disabling of fingerprint cleanups, needed on some
+ Realme devices that cant enumerate
+
+Change-Id: I8a486e707712b81711fb1a691faec029499fa897
+---
+ .../android/server/biometrics/BiometricServiceBase.java    | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/services/core/java/com/android/server/biometrics/BiometricServiceBase.java b/services/core/java/com/android/server/biometrics/BiometricServiceBase.java
+index 20c004db4c9f..ec26f9d0cf82 100644
+--- a/services/core/java/com/android/server/biometrics/BiometricServiceBase.java
++++ b/services/core/java/com/android/server/biometrics/BiometricServiceBase.java
+@@ -344,6 +344,7 @@ public abstract class BiometricServiceBase extends SystemService
+         private List<? extends BiometricAuthenticator.Identifier> mEnrolledList;
+         // List of templates to remove from the HAL
+         private List<BiometricAuthenticator.Identifier> mUnknownHALTemplates = new ArrayList<>();
++        final boolean mNocleanup = android.os.SystemProperties.getBoolean("persist.sys.phh.fingerprint.nocleanup", false);
+ 
+         InternalEnumerateClient(Context context,
+                 DaemonWrapper daemon, long halDeviceId, IBinder token,
+@@ -389,8 +390,10 @@ public abstract class BiometricServiceBase extends SystemService
+                 Slog.e(getTag(), "doTemplateCleanup(): Removing dangling template from framework: "
+                         + identifier.getBiometricId() + " "
+                         + identifier.getName());
+-                mUtils.removeBiometricForUser(getContext(),
+-                        getTargetUserId(), identifier.getBiometricId());
++                if(!mNocleanup) {
++                    mUtils.removeBiometricForUser(getContext(),
++                            getTargetUserId(), identifier.getBiometricId());
++                }
+                 FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
+                         statsModality(),
+                         BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_FRAMEWORK);
+-- 
+2.25.1
+

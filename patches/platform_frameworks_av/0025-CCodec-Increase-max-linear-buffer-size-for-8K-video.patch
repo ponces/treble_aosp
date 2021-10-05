@@ -1,0 +1,37 @@
+From 6945acc615053a011edd9391ebd0d7d2f70686e0 Mon Sep 17 00:00:00 2001
+From: Sungtak Lee <taklee@google.com>
+Date: Sun, 8 Nov 2020 00:07:27 -0800
+Subject: [PATCH 25/40] CCodec: Increase max linear buffer size for 8K video
+
+Increase max linear buffer size to fit a 8K video frame.
+
+Bug: 172190459
+Bug: 173683705
+Bug: 173725276
+Bug: 173768931
+Test: atest CtsMediaTestCases -- --module-arg CtsMediaTestCases:size:small
+
+Change-Id: I47cfc2718447ac51be0f90638d7e7055fd7d95ba
+(cherry picked from commit 5692578e0d3ff5eb273a63ee9a4f07b719508973)
+---
+ media/codec2/sfplugin/CCodecBuffers.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/media/codec2/sfplugin/CCodecBuffers.h b/media/codec2/sfplugin/CCodecBuffers.h
+index 4772ab53eb..c383a7ce1a 100644
+--- a/media/codec2/sfplugin/CCodecBuffers.h
++++ b/media/codec2/sfplugin/CCodecBuffers.h
+@@ -33,8 +33,8 @@ class MemoryDealer;
+ class SkipCutBuffer;
+ 
+ constexpr size_t kLinearBufferSize = 1048576;
+-// This can fit 4K RGBA frame, and most likely client won't need more than this.
+-constexpr size_t kMaxLinearBufferSize = 4096 * 2304 * 4;
++// This can fit an 8K frame.
++constexpr size_t kMaxLinearBufferSize = 7680 * 4320 * 2;
+ 
+ /**
+  * Base class for representation of buffers at one port.
+-- 
+2.25.1
+

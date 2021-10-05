@@ -1,0 +1,121 @@
+From 90905f33c7b3ec59537819353f9a8653d4960b50 Mon Sep 17 00:00:00 2001
+From: David Stevens <stevensd@google.com>
+Date: Tue, 20 Oct 2020 15:00:41 +0900
+Subject: [PATCH 19/40] BufferPool: limit number of idle buffers in caches
+
+Some systems have limits on the total number of graphics buffers that
+can be allocated, not just the total size. When dealing with
+particularly small buffers, the caches could end up retaining 1000s of
+buffers.  This change adds an additional eviction trigger based on the
+number of idle cached buffers.
+
+Bug: 170702290
+Bug: 171553040
+Test: android.video.cts.VideoEncoderDecoderTest on ARCVM
+Change-Id: If3f4433ba1794ccb624b864a56619c8613a315f2
+(cherry picked from commit 0f50e523ef1404f9afbaa7b919e2801e5d94012a)
+Merged-In: If3f4433ba1794ccb624b864a56619c8613a315f2
+---
+ media/bufferpool/2.0/AccessorImpl.cpp     | 13 +++++++++----
+ media/bufferpool/2.0/AccessorImpl.h       |  6 ++++++
+ media/bufferpool/2.0/BufferPoolClient.cpp | 12 ++++++++++--
+ 3 files changed, 25 insertions(+), 6 deletions(-)
+
+diff --git a/media/bufferpool/2.0/AccessorImpl.cpp b/media/bufferpool/2.0/AccessorImpl.cpp
+index 6111feafb9..1d2562e41d 100644
+--- a/media/bufferpool/2.0/AccessorImpl.cpp
++++ b/media/bufferpool/2.0/AccessorImpl.cpp
+@@ -39,6 +39,8 @@ namespace {
+ 
+     static constexpr size_t kMinAllocBytesForEviction = 1024*1024*15;
+     static constexpr size_t kMinBufferCountForEviction = 25;
++    static constexpr size_t kMaxUnusedBufferCount = 64;
++    static constexpr size_t kUnusedBufferCountTarget = kMaxUnusedBufferCount - 16;
+ 
+     static constexpr nsecs_t kEvictGranularityNs = 1000000000; // 1 sec
+     static constexpr nsecs_t kEvictDurationNs = 5000000000; // 5 secs
+@@ -724,9 +726,11 @@ ResultStatus Accessor::Impl::BufferPool::addNewBuffer(
+ }
+ 
+ void Accessor::Impl::BufferPool::cleanUp(bool clearCache) {
+-    if (clearCache || mTimestampUs > mLastCleanUpUs + kCleanUpDurationUs) {
++    if (clearCache || mTimestampUs > mLastCleanUpUs + kCleanUpDurationUs ||
++            mStats.buffersNotInUse() > kMaxUnusedBufferCount) {
+         mLastCleanUpUs = mTimestampUs;
+-        if (mTimestampUs > mLastLogUs + kLogDurationUs) {
++        if (mTimestampUs > mLastLogUs + kLogDurationUs ||
++                mStats.buffersNotInUse() > kMaxUnusedBufferCount) {
+             mLastLogUs = mTimestampUs;
+             ALOGD("bufferpool2 %p : %zu(%zu size) total buffers - "
+                   "%zu(%zu size) used buffers - %zu/%zu (recycle/alloc) - "
+@@ -737,8 +741,9 @@ void Accessor::Impl::BufferPool::cleanUp(bool clearCache) {
+                   mStats.mTotalFetches, mStats.mTotalTransfers);
+         }
+         for (auto freeIt = mFreeBuffers.begin(); freeIt != mFreeBuffers.end();) {
+-            if (!clearCache && (mStats.mSizeCached < kMinAllocBytesForEviction
+-                    || mBuffers.size() < kMinBufferCountForEviction)) {
++            if (!clearCache && mStats.buffersNotInUse() <= kUnusedBufferCountTarget &&
++                    (mStats.mSizeCached < kMinAllocBytesForEviction ||
++                     mBuffers.size() < kMinBufferCountForEviction)) {
+                 break;
+             }
+             auto it = mBuffers.find(*freeIt);
+diff --git a/media/bufferpool/2.0/AccessorImpl.h b/media/bufferpool/2.0/AccessorImpl.h
+index cd1b4d08c1..3d39941337 100644
+--- a/media/bufferpool/2.0/AccessorImpl.h
++++ b/media/bufferpool/2.0/AccessorImpl.h
+@@ -193,6 +193,12 @@ private:
+                 : mSizeCached(0), mBuffersCached(0), mSizeInUse(0), mBuffersInUse(0),
+                   mTotalAllocations(0), mTotalRecycles(0), mTotalTransfers(0), mTotalFetches(0) {}
+ 
++            /// # of currently unused buffers
++            size_t buffersNotInUse() const {
++                ALOG_ASSERT(mBuffersCached >= mBuffersInUse);
++                return mBuffersCached - mBuffersInUse;
++            }
++
+             /// A new buffer is allocated on an allocation request.
+             void onBufferAllocated(size_t allocSize) {
+                 mSizeCached += allocSize;
+diff --git a/media/bufferpool/2.0/BufferPoolClient.cpp b/media/bufferpool/2.0/BufferPoolClient.cpp
+index 342fef6b9d..9308b8159b 100644
+--- a/media/bufferpool/2.0/BufferPoolClient.cpp
++++ b/media/bufferpool/2.0/BufferPoolClient.cpp
+@@ -32,6 +32,8 @@ namespace implementation {
+ static constexpr int64_t kReceiveTimeoutUs = 1000000; // 100ms
+ static constexpr int kPostMaxRetry = 3;
+ static constexpr int kCacheTtlUs = 1000000; // TODO: tune
++static constexpr size_t kMaxCachedBufferCount = 64;
++static constexpr size_t kCachedBufferCountTarget = kMaxCachedBufferCount - 16;
+ 
+ class BufferPoolClient::Impl
+         : public std::enable_shared_from_this<BufferPoolClient::Impl> {
+@@ -136,6 +138,10 @@ private:
+             --mActive;
+             mLastChangeUs = getTimestampNow();
+         }
++
++        int cachedBufferCount() const {
++            return mBuffers.size() - mActive;
++        }
+     } mCache;
+ 
+     // FMQ - release notifier
+@@ -668,10 +674,12 @@ bool BufferPoolClient::Impl::syncReleased(uint32_t messageId) {
+ // should have mCache.mLock
+ void BufferPoolClient::Impl::evictCaches(bool clearCache) {
+     int64_t now = getTimestampNow();
+-    if (now >= mLastEvictCacheUs + kCacheTtlUs || clearCache) {
++    if (now >= mLastEvictCacheUs + kCacheTtlUs ||
++            clearCache || mCache.cachedBufferCount() > kMaxCachedBufferCount) {
+         size_t evicted = 0;
+         for (auto it = mCache.mBuffers.begin(); it != mCache.mBuffers.end();) {
+-            if (!it->second->hasCache() && (it->second->expire() || clearCache)) {
++            if (!it->second->hasCache() && (it->second->expire() ||
++                        clearCache || mCache.cachedBufferCount() > kCachedBufferCountTarget)) {
+                 it = mCache.mBuffers.erase(it);
+                 ++evicted;
+             } else {
+-- 
+2.25.1
+

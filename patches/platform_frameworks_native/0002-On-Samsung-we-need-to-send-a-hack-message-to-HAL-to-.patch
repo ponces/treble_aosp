@@ -1,0 +1,51 @@
+From 062f9351754956f72add60f9cec4b316b89dfeb0 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Wed, 14 Aug 2019 23:37:10 +0200
+Subject: [PATCH 02/14] On Samsung, we need to send a hack-message to HAL to
+ get all Sensors
+
+Change-Id: Id6a1fa48340de61c418493668e9abd22c2599376
+---
+ opengl/libs/EGL/egl_platform_entries.cpp | 2 +-
+ services/sensorservice/SensorDevice.cpp  | 4 ++++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/opengl/libs/EGL/egl_platform_entries.cpp b/opengl/libs/EGL/egl_platform_entries.cpp
+index 1c6380f6f..6e810e592 100644
+--- a/opengl/libs/EGL/egl_platform_entries.cpp
++++ b/opengl/libs/EGL/egl_platform_entries.cpp
+@@ -457,7 +457,7 @@ EGLBoolean eglGetConfigAttribImpl(EGLDisplay dpy, EGLConfig config,
+ static int samsungColorspace = -1;
+ static android_dataspace dataSpaceFromEGLColorSpace(EGLint colorspace) {
+     if(samsungColorspace == -1) {
+-        samsungColorspace = property_get_bool("persist.sys.phh.samsung_colorspace", false);
++        samsungColorspace = base::GetBoolProperty("persist.sys.phh.samsung_colorspace", false);
+     }
+     if (colorspace == EGL_GL_COLORSPACE_LINEAR_KHR) {
+         if(samsungColorspace)
+diff --git a/services/sensorservice/SensorDevice.cpp b/services/sensorservice/SensorDevice.cpp
+index e35559417..99b10faf5 100644
+--- a/services/sensorservice/SensorDevice.cpp
++++ b/services/sensorservice/SensorDevice.cpp
+@@ -34,7 +34,9 @@
+ #include <cinttypes>
+ #include <thread>
+ 
++#include <android-base/properties.h>
+ using namespace android::hardware::sensors;
++
+ using namespace android::hardware::sensors::V1_0;
+ using namespace android::hardware::sensors::V1_0::implementation;
+ using android::hardware::sensors::V2_0::EventQueueFlagBits;
+@@ -134,6 +136,8 @@ SensorDevice::SensorDevice()
+ void SensorDevice::initializeSensorList() {
+     float minPowerMa = 0.001; // 1 microAmp
+ 
++    if(::android::base::GetBoolProperty("persist.sys.phh.samsung_sensors", false))
++        setMode(5555);
+     checkReturn(mSensors->getSensorsList(
+             [&](const auto &list) {
+                 const size_t count = list.size();
+-- 
+2.25.1
+

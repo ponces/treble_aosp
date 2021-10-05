@@ -1,0 +1,43 @@
+From e9085086e8a9d2a7b6616a92d340de0e8b4ba679 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 1 May 2018 17:47:36 +0200
+Subject: [PATCH 03/50] Also scan /system/overlay
+
+Change-Id: Ib0223560606b80cdaaa986b159b34b4db0154589
+---
+ core/jni/android_util_AssetManager.cpp | 4 ++++
+ core/jni/fd_utils.cpp                  | 3 ++-
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/core/jni/android_util_AssetManager.cpp b/core/jni/android_util_AssetManager.cpp
+index 12abc256a20e..3133f2f30230 100644
+--- a/core/jni/android_util_AssetManager.cpp
++++ b/core/jni/android_util_AssetManager.cpp
+@@ -140,6 +140,10 @@ static jobjectArray NativeCreateIdmapsForStaticOverlaysTargetingAndroid(JNIEnv*
+     input_dirs.push_back(AssetManager::OEM_OVERLAY_DIR);
+   }
+ 
++  if (stat("/system/overlay", &st) == 0) {
++    input_dirs.push_back("/system/overlay");
++  }
++
+   if (input_dirs.empty()) {
+     LOG(WARNING) << "no directories for idmap2 to scan";
+     return env->NewObjectArray(0, g_stringClass, nullptr);
+diff --git a/core/jni/fd_utils.cpp b/core/jni/fd_utils.cpp
+index c72668f84fb1..d4307ae6579e 100644
+--- a/core/jni/fd_utils.cpp
++++ b/core/jni/fd_utils.cpp
+@@ -135,7 +135,8 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
+        || android::base::StartsWith(path, kSystemOdmOverlayDir)
+        || android::base::StartsWith(path, kOdmOverlayDir)
+        || android::base::StartsWith(path, kSystemOemOverlayDir)
+-       || android::base::StartsWith(path, kOemOverlayDir))
++       || android::base::StartsWith(path, kOemOverlayDir)
++       || android::base::StartsWith(path, "/system/overlay"))
+       && android::base::EndsWith(path, kApkSuffix)
+       && path.find("/../") == std::string::npos) {
+     return true;
+-- 
+2.25.1
+

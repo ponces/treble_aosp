@@ -1,0 +1,33 @@
+From ac40796f007fbaae611a575918b5580a4085b980 Mon Sep 17 00:00:00 2001
+From: Qilin Tan <qilin.tan@mediatek.com>
+Date: Mon, 2 Nov 2020 11:25:09 +0800
+Subject: [PATCH 11/12] Store result of mount_all for mounted userdata by
+ metadata encryption
+
+When the userdata is mounted, its result will be stored and return.
+But the result is not stored when the userdata is mounted with
+metadata encryption. Store the result of metadata encryption mount.
+
+Bug: 172180818
+Test: run cts-on-gsi -m CtsUserspaceRebootHostSideTestCases
+Change-Id: I88b1b4f6a2b1ed81773e18243cb6c46244dc1ba5
+---
+ fs_mgr/fs_mgr.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/fs_mgr/fs_mgr.cpp b/fs_mgr/fs_mgr.cpp
+index bc2d8a475..b20086e5d 100644
+--- a/fs_mgr/fs_mgr.cpp
++++ b/fs_mgr/fs_mgr.cpp
+@@ -1521,6 +1521,8 @@ MountAllResult fs_mgr_mount_all(Fstab* fstab, int mount_mode) {
+                            attempted_entry.mount_point},
+                           nullptr)) {
+                 ++error_count;
++            } else if (current_entry.mount_point == "/data") {
++                userdata_mounted = true;
+             }
+             encryptable = FS_MGR_MNTALL_DEV_IS_METADATA_ENCRYPTED;
+             continue;
+-- 
+2.25.1
+

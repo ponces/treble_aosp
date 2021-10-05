@@ -1,0 +1,31 @@
+From 05ddaf3ef4419a5750029169e4dc328ac6501bf6 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 7 Jun 2021 17:09:13 -0400
+Subject: [PATCH 5/6] Add a property to disable eSCO
+
+eSCO is troublesome on some old devices.
+It is unknown whether it applies to any Treble device, but investigation
+is ongoing, this will help the investigation.
+---
+ hci/src/hci_packet_parser.cc | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/hci/src/hci_packet_parser.cc b/hci/src/hci_packet_parser.cc
+index 88dc4c6cd..3bd0efe21 100644
+--- a/hci/src/hci_packet_parser.cc
++++ b/hci/src/hci_packet_parser.cc
+@@ -107,6 +107,11 @@ static void parse_read_local_supported_commands_response(
+   STREAM_TO_ARRAY(supported_commands_ptr, stream,
+                   (int)supported_commands_length);
+ 
++  bool disable_eSCO = property_get_bool("persist.sys.bt.disable_esco", false);
++  if(disable_eSCO) {
++    supported_commands_ptr[29] &= ~0x08;
++  }
++
+   buffer_allocator->free(response);
+ }
+ 
+-- 
+2.25.1
+

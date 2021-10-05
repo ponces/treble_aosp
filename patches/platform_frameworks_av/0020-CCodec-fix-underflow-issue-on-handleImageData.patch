@@ -1,0 +1,37 @@
+From 4b8ed3d8f409314fd68b96d6d59a6c1a90038f8f Mon Sep 17 00:00:00 2001
+From: Taehwan Kim <t_h.kim@samsung.com>
+Date: Thu, 17 Sep 2020 12:26:40 +0900
+Subject: [PATCH 20/40] CCodec: fix underflow issue on handleImageData
+
+the logic is assumed that gralloc does assume a contiguous mapping
+at GraphicView2MediaImageConverter() in Codec2Buffer.
+if it doesn't, underflow could happen because
+type of variable is unsigned.
+
+Bug: 168757280
+
+Change-Id: I04e13d0680af74e76d96d3ab10a549f6368205cf
+Signed-off-by: Taehwan Kim <t_h.kim@samsung.com>
+(cherry picked from commit fd9b809147b78330d1db7ec17e200071e779fd46)
+---
+ media/codec2/sfplugin/CCodecBuffers.cpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/media/codec2/sfplugin/CCodecBuffers.cpp b/media/codec2/sfplugin/CCodecBuffers.cpp
+index bddaa9f22b..692da584ce 100644
+--- a/media/codec2/sfplugin/CCodecBuffers.cpp
++++ b/media/codec2/sfplugin/CCodecBuffers.cpp
+@@ -91,7 +91,9 @@ void CCodecBuffers::handleImageData(const sp<Codec2Buffer> &buffer) {
+             newFormat->setInt32(KEY_STRIDE, stride);
+             ALOGD("[%s] updating stride = %d", mName, stride);
+             if (img->mNumPlanes > 1 && stride > 0) {
+-                int32_t vstride = (img->mPlane[1].mOffset - img->mPlane[0].mOffset) / stride;
++                int64_t offsetDelta =
++                    (int64_t)img->mPlane[1].mOffset - (int64_t)img->mPlane[0].mOffset;
++                int32_t vstride = int32_t(offsetDelta / stride);
+                 newFormat->setInt32(KEY_SLICE_HEIGHT, vstride);
+                 ALOGD("[%s] updating vstride = %d", mName, vstride);
+             }
+-- 
+2.25.1
+

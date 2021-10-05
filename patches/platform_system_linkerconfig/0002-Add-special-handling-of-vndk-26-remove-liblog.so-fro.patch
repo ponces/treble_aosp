@@ -1,0 +1,72 @@
+From e396971c2228ecfbc5a2ccb9348a29c693157c14 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 28 Sep 2020 21:02:19 +0200
+Subject: [PATCH 2/2] Add special handling of vndk 26 (remove liblog.so from
+ llndk, it is provided by vndk, and allow linking against libnativeloader)
+
+Change-Id: I29b0bb6087ba58f69ee6406e003513bceb6785d8
+---
+ contents/namespace/vendordefault.cc | 14 +++++++++++++-
+ contents/namespace/vndk.cc          |  5 +++++
+ 2 files changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/contents/namespace/vendordefault.cc b/contents/namespace/vendordefault.cc
+index b3be200..af53602 100644
+--- a/contents/namespace/vendordefault.cc
++++ b/contents/namespace/vendordefault.cc
+@@ -17,6 +17,7 @@
+ // This is the default linker namespace for a vendor process (a process started
+ // from /vendor/bin/*).
+ 
++#include <iostream>
+ #include "linkerconfig/namespacebuilder.h"
+ 
+ #include "linkerconfig/common.h"
+@@ -105,9 +106,20 @@ Namespace BuildVendorDefaultNamespace([[maybe_unused]] const Context& ctx) {
+     ns.AddRequires(kVndkLiteVendorRequires);
+     ns.AddProvides(GetSystemStubLibraries());
+   } else {
++    auto llndk = Var("LLNDK_LIBRARIES_VENDOR");
++    std::cerr << "handing llndk for default vendor namespace" << std::endl;
++    if(GetVendorVndkVersion()== "26") {
++        std::cerr << "vndk 26" << std::endl;
++        std::string lookFor = ":liblog.so";
++        std::cerr << "Before " << llndk << std::endl;
++
++        llndk = llndk.replace(llndk.find(lookFor), lookFor.length(), "");
++        std::cerr << "After " << llndk << std::endl;
++    }
++
+     ns.GetLink(ctx.GetSystemNamespaceName())
+         .AddSharedLib(
+-            {Var("LLNDK_LIBRARIES_VENDOR"), Var("SANITIZER_DEFAULT_VENDOR")});
++            {llndk, Var("SANITIZER_DEFAULT_VENDOR")});
+     ns.GetLink("vndk").AddSharedLib({Var("VNDK_SAMEPROCESS_LIBRARIES_VENDOR"),
+                                      Var("VNDK_CORE_LIBRARIES_VENDOR")});
+     if (android::linkerconfig::modules::IsVndkInSystemNamespace()) {
+diff --git a/contents/namespace/vndk.cc b/contents/namespace/vndk.cc
+index a95db80..589f745 100644
+--- a/contents/namespace/vndk.cc
++++ b/contents/namespace/vndk.cc
+@@ -17,6 +17,7 @@
+ // This namespace is exclusively for vndk-sp libs.
+ 
+ #include "linkerconfig/environment.h"
++using android::linkerconfig::modules::GetVendorVndkVersion;
+ #include "linkerconfig/namespacebuilder.h"
+ 
+ using android::linkerconfig::modules::AsanPath;
+@@ -121,6 +122,10 @@ Namespace BuildVndkNamespace([[maybe_unused]] const Context& ctx,
+ 
+   ns.AddRequires(std::vector{"libneuralnetworks.so"});
+ 
++  if(GetVendorVndkVersion() == "26" || GetVendorVndkVersion() == "27" ) {
++      ns.GetLink("com_android_art").AddSharedLib("libnativeloader.so");
++  }
++
+   return ns;
+ }
+ }  // namespace contents
+-- 
+2.25.1
+

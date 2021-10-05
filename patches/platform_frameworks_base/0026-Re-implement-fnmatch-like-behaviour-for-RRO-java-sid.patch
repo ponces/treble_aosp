@@ -1,0 +1,37 @@
+From fda20adb9fd52dc99c2c552e9482855d92fb3b7b Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sun, 25 Oct 2020 23:57:26 +0100
+Subject: [PATCH 26/50] Re-implement fnmatch-like behaviour for RRO java-side
+
+Change-Id: Id38292a9a1453aa87b8401c1fdb390fa4e63c7d1
+---
+ core/java/android/content/pm/PackageParser.java | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/core/java/android/content/pm/PackageParser.java b/core/java/android/content/pm/PackageParser.java
+index 70e4e6cbf622..a4d8941d1e59 100644
+--- a/core/java/android/content/pm/PackageParser.java
++++ b/core/java/android/content/pm/PackageParser.java
+@@ -2476,8 +2476,17 @@ public class PackageParser {
+         for (int i = 0; i < propNames.length; i++) {
+             // Check property value: make sure it is both set and equal to expected value
+             final String currValue = SystemProperties.get(propNames[i]);
+-            if (!TextUtils.equals(currValue, propValues[i])) {
+-                return false;
++            final String value = propValues[i];
++            if(value.startsWith("+")) {
++                final java.util.regex.Pattern regex = java.util.regex.Pattern.compile(value.substring(1, value.length()).replace("*", ".*"));
++                java.util.regex.Matcher matcher = regex.matcher(currValue);
++                if (!matcher.find()) {
++                    return false;
++                }
++            } else {
++                if(!value.equals(currValue)) {
++                    return false;
++                }
+             }
+         }
+         return true;
+-- 
+2.25.1
+

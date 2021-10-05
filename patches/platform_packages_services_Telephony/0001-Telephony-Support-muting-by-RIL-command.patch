@@ -1,0 +1,41 @@
+From 3cfc3ba2fcabea88307b9815fd703baf649be63f Mon Sep 17 00:00:00 2001
+From: Artem Borisov <dedsa2002@gmail.com>
+Date: Wed, 19 Sep 2018 17:02:06 +0300
+Subject: [PATCH] Telephony: Support muting by RIL command
+
+While almost everyone already moved to AudioManager years ago,
+some OEMs (cough Huawei) still use RIL for muting and don't
+promote the necessary calls in their audio HAL.
+Let's handle these odd cases too when it's necessary.
+
+Change-Id: Id916dec2574d6e57b6f809fbaf2b0959c0cc7256
+---
+ src/com/android/services/telephony/TelephonyConnection.java | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/src/com/android/services/telephony/TelephonyConnection.java b/src/com/android/services/telephony/TelephonyConnection.java
+index b4dd050ee..52224f8f1 100755
+--- a/src/com/android/services/telephony/TelephonyConnection.java
++++ b/src/com/android/services/telephony/TelephonyConnection.java
+@@ -28,6 +28,7 @@ import android.os.Handler;
+ import android.os.Looper;
+ import android.os.Message;
+ import android.os.PersistableBundle;
++import android.os.SystemProperties;
+ import android.telecom.CallAudioState;
+ import android.telecom.Conference;
+ import android.telecom.Connection;
+@@ -822,6 +823,10 @@ abstract class TelephonyConnection extends Connection implements Holdable {
+         // TODO: update TTY mode.
+         if (getPhone() != null) {
+             getPhone().setEchoSuppressionEnabled();
++
++        if (SystemProperties.getBoolean("persist.sys.radio.huawei", false)) {
++                getPhone().setMute(audioState.isMuted());
++            }
+         }
+     }
+ 
+-- 
+2.25.1
+

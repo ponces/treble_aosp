@@ -1,0 +1,108 @@
+From 1488c7e2c311328aba5c14e9b59f08f149b92491 Mon Sep 17 00:00:00 2001
+From: Danny Baumann <dannybaumann@web.de>
+Date: Wed, 29 Aug 2018 11:21:52 +0200
+Subject: [PATCH 2/3] Implement per-process target SDK version override.
+
+Change-Id: I65bbdbe96541d8aacdd4de125cdb9c1435129413
+
+This is only partial cherry-pick. Value won't be set via Android.bp
+
+Actually restore pre-P mutex behavior
+
+Apps built against versions < P may not actually expect the EBUSY return
+code, and may crash or otherwise misbehave. Check for target SDK
+versions earlier than P when performing the IsMutexDestroyed check so
+any invocation of HandleUsingDestroyedMutex is bypassed and pre-P mutex
+behavior is restored.
+
+See 9e989f12d1186231d97dac6d038db7955acebdf3 for the change that
+introduced this new behavior.
+
+Change-Id: I45f8882c9527c63eed1ef5820a5004b8958d58ea
+
+bionic: Use legacy pthread_mutex_init() behavior on pre-P API levels
+
+* Google's changes to pthread_mutex_init is breaking RIL
+  on certain Samsung devices like klte and hlte
+* To resolve this, add a check for their new additions
+  to only apply the new behavior for P and higher APIs
+
+Change-Id: I41335c5c436fa28a66d044e6634466556dfd7f95
+
+Read SDK version override from property
+
+Change-Id: I88ca5d0bde15ee4f2b2bd1255e98f9592973dbf9
+
+fixup! Actually restore pre-P mutex behavior
+
+Change-Id: I81ac498af74144fb830baa6858f005096e53049c
+---
+ libc/bionic/pthread_mutex.cpp | 12 +++++++-----
+ linker/linker.cpp             | 15 ++++++++++++++-
+ 2 files changed, 21 insertions(+), 6 deletions(-)
+
+diff --git a/libc/bionic/pthread_mutex.cpp b/libc/bionic/pthread_mutex.cpp
+index a15e98149..dc49cb947 100644
+--- a/libc/bionic/pthread_mutex.cpp
++++ b/libc/bionic/pthread_mutex.cpp
+@@ -527,7 +527,8 @@ int pthread_mutex_init(pthread_mutex_t* mutex_interface, const pthread_mutexattr
+         return EINVAL;
+     }
+ 
+-    if (((*attr & MUTEXATTR_PROTOCOL_MASK) >> MUTEXATTR_PROTOCOL_SHIFT) == PTHREAD_PRIO_INHERIT) {
++    if (((*attr & MUTEXATTR_PROTOCOL_MASK) >> MUTEXATTR_PROTOCOL_SHIFT) == PTHREAD_PRIO_INHERIT
++            && android_get_application_target_sdk_version() >= __ANDROID_API_P__) {
+ #if !defined(__LP64__)
+         if (state & MUTEX_SHARED_MASK) {
+             return EINVAL;
+@@ -792,16 +793,17 @@ static int MutexLockWithTimeout(pthread_mutex_internal_t* mutex, bool use_realti
+ }  // namespace NonPI
+ 
+ static inline __always_inline bool IsMutexDestroyed(uint16_t mutex_state) {
+-    return mutex_state == 0xffff;
++    if (android_get_application_target_sdk_version() >= __ANDROID_API_P__) {
++        return mutex_state == 0xffff;
++    }
++    return false;
+ }
+ 
+ // Inlining this function in pthread_mutex_lock() adds the cost of stack frame instructions on
+ // ARM64. So make it noinline.
+ static int __attribute__((noinline)) HandleUsingDestroyedMutex(pthread_mutex_t* mutex,
+                                                                const char* function_name) {
+-    if (android_get_application_target_sdk_version() >= 28) {
+-        __fortify_fatal("%s called on a destroyed mutex (%p)", function_name, mutex);
+-    }
++    __fortify_fatal("%s called on a destroyed mutex (%p)", function_name, mutex);
+     return EBUSY;
+ }
+ 
+diff --git a/linker/linker.cpp b/linker/linker.cpp
+index a82d7c430..ae2c00c21 100644
+--- a/linker/linker.cpp
++++ b/linker/linker.cpp
+@@ -3533,7 +3533,20 @@ std::vector<android_namespace_t*> init_default_namespaces(const char* executable
+     }
+   }
+ 
+-  set_application_target_sdk_version(config->target_sdk_version());
++  uint32_t target_sdk = config->target_sdk_version();
++
++  std::string sdkVersionOverrides = android::base::GetProperty("persist.sys.phh.sdk_override", "");
++  static const char *SDK_VERSION_OVERRIDES = sdkVersionOverrides.c_str();
++  for (const auto& entry : android::base::Split(SDK_VERSION_OVERRIDES, " ")) {
++    auto splitted = android::base::Split(entry, "=");
++    if (splitted.size() == 2 && splitted[0] == executable_path) {
++      target_sdk = static_cast<uint32_t>(std::stoul(splitted[1]));
++      break;
++    }
++  }
++  DEBUG("Target SDK for %s = %d", executable_path, target_sdk);
++
++  set_application_target_sdk_version(target_sdk);
+ 
+   std::vector<android_namespace_t*> created_namespaces;
+   created_namespaces.reserve(namespaces.size());
+-- 
+2.25.1
+

@@ -1,0 +1,67 @@
+From 420177677d79a3ba295a4373feae4b40a42b92aa Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 25 May 2020 21:25:12 +0200
+Subject: [PATCH 3/6] Add persist.sys.phh.disable_a2dp_offload property to
+ force a2dp offload
+
+---
+ btif/src/btif_av.cc             | 7 ++++++-
+ stack/a2dp/a2dp_codec_config.cc | 9 +++++++--
+ 2 files changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/btif/src/btif_av.cc b/btif/src/btif_av.cc
+index 679ec5ef5..0cab72a4a 100644
+--- a/btif/src/btif_av.cc
++++ b/btif/src/btif_av.cc
+@@ -971,9 +971,14 @@ bt_status_t BtifAvSource::Init(
+   osi_property_get("ro.bluetooth.a2dp_offload.supported", value_sup, "false");
+   osi_property_get("persist.bluetooth.a2dp_offload.disabled", value_dis,
+                    "false");
++  char value_phh[PROPERTY_VALUE_MAX] = {'\0'};
++  osi_property_get("persist.sys.phh.disable_a2dp_offload", value_phh, "false");
+   a2dp_offload_enabled_ =
+       (strcmp(value_sup, "true") == 0) && (strcmp(value_dis, "false") == 0);
+-  BTIF_TRACE_DEBUG("a2dp_offload.enable = %d", a2dp_offload_enabled_);
++  if(strcmp(value_phh, "true") == 0)
++      a2dp_offload_enabled_ = false;
++
++  LOG_ERROR(LOG_TAG, "a2dp_offload.enable = %s", a2dp_offload_enabled_ ? "on" : "off");
+ 
+   callbacks_ = callbacks;
+   if (a2dp_offload_enabled_) {
+diff --git a/stack/a2dp/a2dp_codec_config.cc b/stack/a2dp/a2dp_codec_config.cc
+index edf7e0c46..795cbab9c 100644
+--- a/stack/a2dp/a2dp_codec_config.cc
++++ b/stack/a2dp/a2dp_codec_config.cc
+@@ -560,13 +560,18 @@ bool A2dpCodecs::init() {
+   char* tok = NULL;
+   char* tmp_token = NULL;
+   bool offload_codec_support[BTAV_A2DP_CODEC_INDEX_MAX] = {false};
+-  char value_sup[PROPERTY_VALUE_MAX], value_dis[PROPERTY_VALUE_MAX];
++  char value_sup[PROPERTY_VALUE_MAX], value_dis[PROPERTY_VALUE_MAX], value_phh[PROPERTY_VALUE_MAX];
+ 
+   osi_property_get("ro.bluetooth.a2dp_offload.supported", value_sup, "false");
+   osi_property_get("persist.bluetooth.a2dp_offload.disabled", value_dis,
+                    "false");
++  osi_property_get("persist.sys.phh.disable_a2dp_offload", value_phh, "false");
+   a2dp_offload_status =
+       (strcmp(value_sup, "true") == 0) && (strcmp(value_dis, "false") == 0);
++  if(strcmp(value_phh, "true") == 0)
++      a2dp_offload_status = false;
++
++  LOG_ERROR(LOG_TAG, "Got a2dp offload status %s", a2dp_offload_status ? "on" : "off");
+ 
+   if (a2dp_offload_status) {
+     char value_cap[PROPERTY_VALUE_MAX];
+@@ -654,7 +659,7 @@ bool A2dpCodecs::init() {
+     }
+   }
+ 
+-  return (!ordered_source_codecs_.empty() && !ordered_sink_codecs_.empty());
++  return (!ordered_source_codecs_.empty() && !ordered_sink_codecs_.empty()) && !a2dp_offload_status;
+ }
+ 
+ A2dpCodecConfig* A2dpCodecs::findSourceCodecConfig(
+-- 
+2.25.1
+

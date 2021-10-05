@@ -1,0 +1,29 @@
+From 7afc4dc044b6429371fd69648cd5f24762189bb8 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 14 Aug 2018 19:33:03 +0200
+Subject: [PATCH 01/12] Detect allowed sdcard options based on vndk
+
+Some kernel crashes when using too recent sdcardfs options
+
+Change-Id: I632e485f9b2a09a46d4a1fde2ea15217f8d92eff
+---
+ sdcard/sdcard.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/sdcard/sdcard.cpp b/sdcard/sdcard.cpp
+index 622de5b7a..955ddbb4c 100644
+--- a/sdcard/sdcard.cpp
++++ b/sdcard/sdcard.cpp
+@@ -110,7 +110,8 @@ static bool sdcardfs_setup(const std::string& source_path, const std::string& de
+     if (unshared_obb) new_opts_list.push_back("unshared_obb,");
+     // Try several attempts, each time with one less option, to gracefully
+     // handle older kernels that aren't updated yet.
+-    for (int i = 0; i <= new_opts_list.size(); ++i) {
++    int first_option_to_try = property_get_bool("persist.sys.phh.modern_sdcard", false) ? 0 : 2;
++    for (int i = first_option_to_try; i <= new_opts_list.size(); ++i) {
+         std::string new_opts;
+         for (int j = 0; j < new_opts_list.size() - i; ++j) {
+             new_opts += new_opts_list[j];
+-- 
+2.25.1
+

@@ -1,0 +1,50 @@
+From 16e0410a148e32e630b0d4d9d41d2e17b4b5e680 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Wed, 30 Sep 2020 22:41:39 +0200
+Subject: [PATCH 06/14] Add persist.sys.phh.no_present_or_validate property to
+ disable presentOrValidate since on vndk 26/27 presentOrValidate can be broken
+
+Change-Id: I5f0c6c5e129bc21348d6f279d3ba455a5a0f008b
+---
+ .../surfaceflinger/DisplayHardware/HWComposer.cpp   | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/services/surfaceflinger/DisplayHardware/HWComposer.cpp b/services/surfaceflinger/DisplayHardware/HWComposer.cpp
+index 7a2f0f34e..1ea104521 100644
+--- a/services/surfaceflinger/DisplayHardware/HWComposer.cpp
++++ b/services/surfaceflinger/DisplayHardware/HWComposer.cpp
+@@ -34,6 +34,7 @@
+ #include <ui/GraphicBuffer.h>
+ #include <utils/Errors.h>
+ #include <utils/Trace.h>
++#include <android-base/properties.h>
+ 
+ #include "../Layer.h" // needed only for debugging
+ #include "../Promise.h"
+@@ -500,12 +501,22 @@ status_t HWComposer::getDeviceCompositionChanges(
+ 
+     hal::Error error = hal::Error::NONE;
+ 
++    static int forceNoPresentOrValidate = -1;
++    if(forceNoPresentOrValidate == -1) {
++        bool res = android::base::GetBoolProperty("persist.sys.phh.no_present_or_validate", false);
++        if(res) {
++            forceNoPresentOrValidate = 1;
++        } else {
++            forceNoPresentOrValidate = 0;
++        }
++    }
++
+     // First try to skip validate altogether when there is no client
+     // composition.  When there is client composition, since we haven't
+     // rendered to the client target yet, we should not attempt to skip
+     // validate.
+     displayData.validateWasSkipped = false;
+-    if (!frameUsesClientComposition) {
++    if (forceNoPresentOrValidate == 0 && !frameUsesClientComposition) {
+         sp<Fence> outPresentFence;
+         uint32_t state = UINT32_MAX;
+         error = hwcDisplay->presentOrValidate(&numTypes, &numRequests, &outPresentFence , &state);
+-- 
+2.25.1
+

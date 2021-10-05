@@ -1,0 +1,32 @@
+From afa54dda32c34d9ef5240bfcbe73a85da0526847 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sun, 5 Apr 2020 16:32:46 +0200
+Subject: [PATCH 20/50] Always allow overriding the number of work profiles
+
+Change-Id: I6eb09aa71663c6fbe7563e3038bffcabdba0ff6a
+---
+ .../java/com/android/server/pm/UserManagerService.java    | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/services/core/java/com/android/server/pm/UserManagerService.java b/services/core/java/com/android/server/pm/UserManagerService.java
+index f5d7d9eda1ba..1e1c9a463044 100644
+--- a/services/core/java/com/android/server/pm/UserManagerService.java
++++ b/services/core/java/com/android/server/pm/UserManagerService.java
+@@ -5353,12 +5353,8 @@ public class UserManagerService extends IUserManager.Stub {
+      */
+     private static int getMaxUsersOfTypePerParent(UserTypeDetails userTypeDetails) {
+         final int defaultMax = userTypeDetails.getMaxAllowedPerParent();
+-        if (!Build.IS_DEBUGGABLE) {
+-            return defaultMax;
+-        } else {
+-            if (userTypeDetails.isManagedProfile()) {
+-                return SystemProperties.getInt("persist.sys.max_profiles", defaultMax);
+-            }
++        if (userTypeDetails.isManagedProfile()) {
++            return SystemProperties.getInt("persist.sys.max_profiles", defaultMax);
+         }
+         return defaultMax;
+     }
+-- 
+2.25.1
+

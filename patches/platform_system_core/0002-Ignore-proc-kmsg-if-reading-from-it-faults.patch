@@ -1,0 +1,33 @@
+From b6d79f404a9148ed521eb0075df63675a4438fd1 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Wed, 2 Jan 2019 17:17:20 +0100
+Subject: [PATCH 02/12] Ignore /proc/kmsg if reading from it faults
+
+On some devices, (The only known one is Y6 2018), reading from
+/proc/kmsg fails, with a status EFAULT
+This isn't just from logd, a simple cat /proc/kmsg does that as well.
+
+Simply stop reading logs from kernel in that case
+
+Change-Id: I4b902b7ec36107c722e2f5cc5dbb7964734bb71d
+---
+ logd/LogKlog.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/logd/LogKlog.cpp b/logd/LogKlog.cpp
+index edd326aec..8ff719f6e 100644
+--- a/logd/LogKlog.cpp
++++ b/logd/LogKlog.cpp
+@@ -238,6 +238,9 @@ bool LogKlog::onDataAvailable(SocketClient* cli) {
+             break;
+         }
+         if (retval < 0) {
++	    if(errno == EFAULT) {
++	        stopListener();
++	    }
+             return false;
+         }
+         len += retval;
+-- 
+2.25.1
+

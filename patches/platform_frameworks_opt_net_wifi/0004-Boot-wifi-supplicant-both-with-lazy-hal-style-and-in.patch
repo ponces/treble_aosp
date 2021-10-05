@@ -1,0 +1,36 @@
+From 82387222b7cbbc733ee14b8b64b1156adc1c1684 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 16 Sep 2019 22:47:37 +0200
+Subject: [PATCH 4/4] Boot wifi supplicant both with lazy-hal style and init
+ style
+
+Change-Id: I7e23348d4d16d3787f2c80bce3f8d0178dd5c4c7
+---
+ .../com/android/server/wifi/SupplicantStaIfaceHal.java     | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/service/java/com/android/server/wifi/SupplicantStaIfaceHal.java b/service/java/com/android/server/wifi/SupplicantStaIfaceHal.java
+index 22aa62402..85cd1bf07 100644
+--- a/service/java/com/android/server/wifi/SupplicantStaIfaceHal.java
++++ b/service/java/com/android/server/wifi/SupplicantStaIfaceHal.java
+@@ -690,14 +690,13 @@ public class SupplicantStaIfaceHal {
+      */
+     public boolean startDaemon() {
+         synchronized (mLock) {
++            Log.i(TAG, "Starting supplicant using init");
++            mFrameworkFacade.startSupplicant();
+             if (isV1_1()) {
+                 Log.i(TAG, "Starting supplicant using HIDL");
+                 return startDaemon_V1_1();
+-            } else {
+-                Log.i(TAG, "Starting supplicant using init");
+-                mFrameworkFacade.startSupplicant();
+-                return true;
+             }
++            return true;
+         }
+     }
+ 
+-- 
+2.25.1
+

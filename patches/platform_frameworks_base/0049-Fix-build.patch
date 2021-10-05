@@ -1,0 +1,24 @@
+From 8ed1fcc88ffb171fae05692278bc30a50e13a8d3 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 19 Apr 2021 21:03:45 +0200
+Subject: [PATCH 49/50] Fix build
+
+---
+ .../java/com/android/server/display/DisplayPowerController.java  | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/services/core/java/com/android/server/display/DisplayPowerController.java b/services/core/java/com/android/server/display/DisplayPowerController.java
+index 908c3b852fe1..550965ef7cd2 100644
+--- a/services/core/java/com/android/server/display/DisplayPowerController.java
++++ b/services/core/java/com/android/server/display/DisplayPowerController.java
+@@ -62,6 +62,7 @@ import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
+ import com.android.server.display.whitebalance.DisplayWhiteBalanceFactory;
+ import com.android.server.display.whitebalance.DisplayWhiteBalanceSettings;
+ import com.android.server.lights.LightsManager;
++import com.android.server.lights.LogicalLight;
+ import com.android.server.policy.WindowManagerPolicy;
+ 
+ import java.io.PrintWriter;
+-- 
+2.25.1
+

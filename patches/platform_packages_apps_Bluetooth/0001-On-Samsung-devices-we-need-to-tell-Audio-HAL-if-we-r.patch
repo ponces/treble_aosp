@@ -1,0 +1,54 @@
+From 48da9b9078dbde9a80f9b3bae22cd3d2ccc0ba35 Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@cryptomilk.org>
+Date: Mon, 7 Jun 2021 13:23:02 -0400
+Subject: [PATCH] On Samsung devices, we need to tell Audio HAL if we're
+ running narrow band or wide band
+
+Change-Id: Ibfa0f632d9acbb920a85a613ce4e2f1d26556bd1
+---
+ .../android/bluetooth/hfp/HeadsetStateMachine.java    | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/src/com/android/bluetooth/hfp/HeadsetStateMachine.java b/src/com/android/bluetooth/hfp/HeadsetStateMachine.java
+index 8a6bc5527..667f215b6 100644
+--- a/src/com/android/bluetooth/hfp/HeadsetStateMachine.java
++++ b/src/com/android/bluetooth/hfp/HeadsetStateMachine.java
+@@ -82,6 +82,9 @@ public class HeadsetStateMachine extends StateMachine {
+     private static final String HEADSET_WBS = "bt_wbs";
+     private static final String HEADSET_AUDIO_FEATURE_ON = "on";
+     private static final String HEADSET_AUDIO_FEATURE_OFF = "off";
++    private static final String HEADSET_G_SCO_SAMPLERATE = "g_sco_samplerate";
++    private static final String HEADSET_G_WB_SAMPLERATE = "16000";
++    private static final String HEADSET_G_NB_SAMPLERATE = "8000";
+ 
+     static final int CONNECT = 1;
+     static final int DISCONNECT = 2;
+@@ -1511,6 +1514,12 @@ public class HeadsetStateMachine extends StateMachine {
+                 HEADSET_WBS + "=" + mAudioParams.getOrDefault(HEADSET_WBS,
+                         HEADSET_AUDIO_FEATURE_OFF)
+         });
++        keyValuePairs = keyValuePairs.concat(";"
++                + HEADSET_G_SCO_SAMPLERATE
++                + "="
++                + mAudioParams.getOrDefault(
++                    HEADSET_G_SCO_SAMPLERATE,
++                    HEADSET_G_NB_SAMPLERATE));
+         Log.i(TAG, "setAudioParameters for " + mDevice + ": " + keyValuePairs);
+         mSystemInterface.getAudioManager().setParameters(keyValuePairs);
+     }
+@@ -1649,10 +1658,12 @@ public class HeadsetStateMachine extends StateMachine {
+         String prevWbs = mAudioParams.getOrDefault(HEADSET_WBS, HEADSET_AUDIO_FEATURE_OFF);
+         switch (wbsConfig) {
+             case HeadsetHalConstants.BTHF_WBS_YES:
++                mAudioParams.put(HEADSET_G_SCO_SAMPLERATE, HEADSET_G_WB_SAMPLERATE);
+                 mAudioParams.put(HEADSET_WBS, HEADSET_AUDIO_FEATURE_ON);
+                 break;
+             case HeadsetHalConstants.BTHF_WBS_NO:
+             case HeadsetHalConstants.BTHF_WBS_NONE:
++                mAudioParams.put(HEADSET_G_SCO_SAMPLERATE, HEADSET_G_NB_SAMPLERATE);
+                 mAudioParams.put(HEADSET_WBS, HEADSET_AUDIO_FEATURE_OFF);
+                 break;
+             default:
+-- 
+2.25.1
+

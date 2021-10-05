@@ -1,0 +1,153 @@
+From 4a90b6e4f25a070057f25947b07164ba5f453ee7 Mon Sep 17 00:00:00 2001
+From: penn5 <penn5@users.noreply.github.com>
+Date: Mon, 4 Mar 2019 22:21:07 +0000
+Subject: [PATCH 2/6] Add props to control supported features and states (#1)
+
+* Add bitmask for supported fields
+Use persist.sys.bt.unsupport.states, defaults to 0, left-aligned.
+Huawei suggest to use 000000000000000000000011111
+
+* Add bitmask to LOCAL_SUPPORTED_FEATURES
+For Huawei, suggest to use 00000001
+
+Documentation:
+- persist.sys.bt.unsupport.features matches the values:
+HCI_3_SLOT_PACKETS..HCI_LMP_EXTENDED_SUPPORTED (max 8bits * 8 bytes =
+64 bits)
+- persist.sys.bt.unsupport.states matches the values:
+BTM_BLE_STATE_INVALID..BTM_BLE_STATE_SCAN_ADV (max = 0x3ff, 11 bits)
+- persist.sys.bt.unsupport.stdfeatures ( max: 16 bits)
+HCI_LE_ENCRYPTION..HCI_LE_PERIODIC_ADVERTISING
+---
+ hci/src/hci_packet_parser.cc | 77 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 77 insertions(+)
+
+diff --git a/hci/src/hci_packet_parser.cc b/hci/src/hci_packet_parser.cc
+index b1efd444d..88dc4c6cd 100644
+--- a/hci/src/hci_packet_parser.cc
++++ b/hci/src/hci_packet_parser.cc
+@@ -27,6 +27,8 @@
+ #include "hcimsgs.h"
+ #include "osi/include/log.h"
+ 
++#include <cutils/properties.h>
++
+ static const command_opcode_t NO_OPCODE_CHECKING = 0;
+ 
+ static const allocator_t* buffer_allocator;
+@@ -108,6 +110,31 @@ static void parse_read_local_supported_commands_response(
+   buffer_allocator->free(response);
+ }
+ 
++static void setup_bitmask(uint8_t *v, const char* property) {
++  char str[PROPERTY_VALUE_MAX];
++  int len = property_get(property, str, "");
++  memset(v, 255, 8);
++  for(int i = 0; i<len; i++) {
++    if(str[i] == '1') {
++      v[i/8] &= ~(1 << (i%8));
++    } else if(str[i] != '0') {
++      LOG_ERROR(LOG_TAG, "invalid characters in bitmask; skipping %c", str[i]);
++    }
++  }
++}
++
++static void filter_supported_feature(uint8_t *v) {
++  static int setup = 0;
++  static uint8_t unsupport_bitmask[8];
++  if(!setup) {
++    setup = 1;
++    setup_bitmask(unsupport_bitmask, "persist.sys.bt.unsupport.features");
++  }
++
++  for(unsigned i=0; i<sizeof(bt_device_features_t); i++)
++    v[i] &= unsupport_bitmask[i];
++}
++
+ static void parse_read_local_extended_features_response(
+     BT_HDR* response, uint8_t* page_number_ptr, uint8_t* max_page_number_ptr,
+     bt_device_features_t* feature_pages, size_t feature_pages_count) {
+@@ -123,6 +150,16 @@ static void parse_read_local_extended_features_response(
+   STREAM_TO_ARRAY(feature_pages[*page_number_ptr].as_array, stream,
+                   (int)sizeof(bt_device_features_t));
+ 
++  for (int i = 0; i < ((int)sizeof(bt_device_features_t)); i++)
++    LOG_DEBUG(LOG_TAG, "supported feature 0x%x is 0x%x", i, feature_pages[*page_number_ptr].as_array[i]);
++
++  filter_supported_feature(feature_pages[*page_number_ptr].as_array);
++
++  for (int i = 0; i < ((int)sizeof(bt_device_features_t)); i++)
++    LOG_DEBUG(LOG_TAG, "post-filtering supported feature 0x%x is 0x%x", i, feature_pages[*page_number_ptr].as_array[i]);
++
++  LOG_DEBUG(LOG_TAG, "supported_features array done");
++
+   buffer_allocator->free(response);
+ }
+ 
+@@ -148,6 +185,19 @@ static void parse_ble_read_buffer_size_response(BT_HDR* response,
+   buffer_allocator->free(response);
+ }
+ 
++
++static void filter_supported_states(uint8_t *v, int size) {
++  static int setup = 0;
++  static uint8_t unsupport_bitmask[8];
++  if(!setup) {
++    setup = 1;
++    setup_bitmask(unsupport_bitmask, "persist.sys.bt.unsupport.states");
++  }
++
++  for(int i=0; i<size && i<8; i++)
++    v[i] &= unsupport_bitmask[i];
++}
++
+ static void parse_ble_read_supported_states_response(
+     BT_HDR* response, uint8_t* supported_states, size_t supported_states_size) {
+   uint8_t* stream =
+@@ -156,9 +206,30 @@ static void parse_ble_read_supported_states_response(
+   CHECK(stream != NULL);
+   STREAM_TO_ARRAY(supported_states, stream, (int)supported_states_size);
+ 
++  for (int i = 0; i < ((int)supported_states_size); i++)
++    LOG_DEBUG(LOG_TAG, "supported state 0x%x is 0x%x", i, supported_states[i]);
++
++  filter_supported_states(supported_states, supported_states_size);
++
++  for (int i = 0; i < ((int)supported_states_size); i++)
++    LOG_DEBUG(LOG_TAG, "supported.2 state 0x%x is 0x%x", i, supported_states[i]);
++
++  LOG_DEBUG(LOG_TAG, "supported_states array done");
+   buffer_allocator->free(response);
+ }
+ 
++static void filter_supported_stdfeatures(uint8_t *v) {
++  static int setup = 0;
++  static uint8_t unsupport_bitmask[8];
++  if(!setup) {
++    setup = 1;
++    setup_bitmask(unsupport_bitmask, "persist.sys.bt.unsupport.stdfeatures");
++  }
++
++  for(unsigned i=0; i<sizeof(bt_device_features_t); i++)
++    v[i] &= unsupport_bitmask[i];
++}
++
+ static void parse_ble_read_local_supported_features_response(
+     BT_HDR* response, bt_device_features_t* supported_features) {
+   uint8_t* stream = read_command_complete_header(
+@@ -168,6 +239,12 @@ static void parse_ble_read_local_supported_features_response(
+   STREAM_TO_ARRAY(supported_features->as_array, stream,
+                   (int)sizeof(bt_device_features_t));
+ 
++  for (int i = 0; i < ((int)sizeof(bt_device_features_t)); i++)
++    LOG_DEBUG(LOG_TAG, "supported state 0x%x is 0x%x", i, supported_features->as_array[i]);
++  filter_supported_stdfeatures(supported_features->as_array);
++  for (int i = 0; i < ((int)sizeof(bt_device_features_t)); i++)
++    LOG_DEBUG(LOG_TAG, "supported.2 state 0x%x is 0x%x", i, supported_features->as_array[i]);
++
+   buffer_allocator->free(response);
+ }
+ 
+-- 
+2.25.1
+

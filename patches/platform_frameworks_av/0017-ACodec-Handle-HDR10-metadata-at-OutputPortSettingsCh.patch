@@ -1,0 +1,88 @@
+From 57d235ef14c60066da91b5b847b587d6e2982bc2 Mon Sep 17 00:00:00 2001
+From: Houxiang Dai <houxiang.dai@mediatek.com>
+Date: Thu, 23 Jul 2020 14:07:22 +0800
+Subject: [PATCH 17/40] ACodec: Handle HDR10+ metadata at
+ OutputPortSettingsChangedState
+
+[Description]
+handle kWhatSetParameters message in OutputPortSettingsChangedState
+handle OMX_EventConfigUpdate event in OutputPortSettingsChangedState
+
+In HDR10+ test, we have to associate each HDR10+ metadata to a particular
+frame. If receive a kWhatSetParameters message with "hdr10-plus-info"
+buffer, it should not be deferred in OutputPortSettingsChangedState and
+adopt OMX_SetConfig to associates this config with the next input buffer
+sent in OMX_EmptyThisBuffer. The OMX_EventConfigUpdate event report from
+component should be handled also in OutputPortSettingsChangedState,
+where is to associate updated "hdr10-plus-info" metadata with the next
+output buffer sent via FillBufferDone callback.
+
+Bug: 157213958
+Bug: 157435393
+Change-Id: I27e4614487414063831fa760b9e9ca96b1c3712c
+(cherry picked from commit c111aa4fda9b5b434edb1b46898ff8dd7e51cec6)
+---
+ media/libstagefright/ACodec.cpp | 36 ++++++++++++++++++++++++++++++---
+ 1 file changed, 33 insertions(+), 3 deletions(-)
+
+diff --git a/media/libstagefright/ACodec.cpp b/media/libstagefright/ACodec.cpp
+index 344eb8fd4c..704f3e73c8 100644
+--- a/media/libstagefright/ACodec.cpp
++++ b/media/libstagefright/ACodec.cpp
+@@ -8295,13 +8295,34 @@ bool ACodec::OutputPortSettingsChangedState::onMessageReceived(
+             FALLTHROUGH_INTENDED;
+         }
+         case kWhatResume:
++        {
++            ALOGV("[%s] Deferring resume", mCodec->mComponentName.c_str());
++
++            mCodec->deferMessage(msg);
++            handled = true;
++            break;
++        }
++
+         case kWhatSetParameters:
+         {
+-            if (msg->what() == kWhatResume) {
+-                ALOGV("[%s] Deferring resume", mCodec->mComponentName.c_str());
++            sp<AMessage> params;
++            CHECK(msg->findMessage("params", &params));
++
++            sp<ABuffer> hdr10PlusInfo;
++            if (params->findBuffer("hdr10-plus-info", &hdr10PlusInfo)) {
++                if (hdr10PlusInfo != nullptr && hdr10PlusInfo->size() > 0) {
++                    (void)mCodec->setHdr10PlusInfo(hdr10PlusInfo);
++                }
++                params->removeEntryAt(params->findEntryByName("hdr10-plus-info"));
++
++                if (params->countEntries() == 0) {
++                    msg->removeEntryAt(msg->findEntryByName("params"));
++                }
+             }
+ 
+-            mCodec->deferMessage(msg);
++            if (msg->countEntries() > 0) {
++                mCodec->deferMessage(msg);
++            }
+             handled = true;
+             break;
+         }
+@@ -8416,6 +8437,15 @@ bool ACodec::OutputPortSettingsChangedState::onOMXEvent(
+             return false;
+         }
+ 
++        case OMX_EventConfigUpdate:
++        {
++            CHECK_EQ(data1, (OMX_U32)kPortIndexOutput);
++
++            mCodec->onConfigUpdate((OMX_INDEXTYPE)data2);
++
++            return true;
++        }
++
+         default:
+             return BaseState::onOMXEvent(event, data1, data2);
+     }
+-- 
+2.25.1
+

@@ -1,0 +1,139 @@
+From 2abe843c633dca4d70cb36cc13babf4600ee2060 Mon Sep 17 00:00:00 2001
+From: Ray Essick <essick@google.com>
+Date: Mon, 14 Sep 2020 17:05:07 -0700
+Subject: [PATCH 21/40] OMX Opus decoder omits sample rate / channel count
+
+The OMX Opus decoder doesn't signal back the channel/samplerate info to
+the framework, leading to a CTS failure when checking required values.
+
+Based on an AOSP patch provided by denis.hsu@mediatek.com
+
+Bug: 166695414
+Test: CtsMediaTestCases android.media.cts.DecoderTest#testDecodeOpusChannelsAndRates
+Change-Id: If710405caea4be6336b4aec3aa0c051ad3c0fe95
+(cherry picked from commit 74d4b70841b2aa3154b10b82ebcc6737d1d36a6d)
+---
+ media/libstagefright/ACodec.cpp               | 26 +++++++++++++++++++
+ .../codecs/opus/dec/SoftOpus.cpp              | 11 +++++---
+ .../libstagefright/codecs/opus/dec/SoftOpus.h |  2 ++
+ .../include/media/stagefright/ACodec.h        |  1 +
+ 4 files changed, 37 insertions(+), 3 deletions(-)
+
+diff --git a/media/libstagefright/ACodec.cpp b/media/libstagefright/ACodec.cpp
+index 704f3e73c8..d945d78094 100644
+--- a/media/libstagefright/ACodec.cpp
++++ b/media/libstagefright/ACodec.cpp
+@@ -2247,6 +2247,12 @@ status_t ACodec::configureCodec(
+             }
+             err = setupG711Codec(encoder, sampleRate, numChannels);
+         }
++    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_OPUS)) {
++        int32_t numChannels = 1, sampleRate = 48000;
++        if (msg->findInt32("channel-count", &numChannels) &&
++            msg->findInt32("sample-rate", &sampleRate)) {
++            err = setupOpusCodec(encoder, sampleRate, numChannels);
++        }
+     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_FLAC)) {
+         // numChannels needs to be set to properly communicate PCM values.
+         int32_t numChannels = 2, sampleRate = 44100, compressionLevel = -1;
+@@ -3120,6 +3126,26 @@ status_t ACodec::setupG711Codec(bool encoder, int32_t sampleRate, int32_t numCha
+             kPortIndexInput, sampleRate, numChannels);
+ }
+ 
++status_t ACodec::setupOpusCodec(bool encoder, int32_t sampleRate, int32_t numChannels) {
++    if (encoder) {
++        return INVALID_OPERATION;
++    }
++    OMX_AUDIO_PARAM_ANDROID_OPUSTYPE def;
++    InitOMXParams(&def);
++    def.nPortIndex = kPortIndexInput;
++    status_t err = mOMXNode->getParameter(
++            (OMX_INDEXTYPE)OMX_IndexParamAudioAndroidOpus, &def, sizeof(def));
++    if (err != OK) {
++        ALOGE("setupOpusCodec(): Error %d getting OMX_IndexParamAudioAndroidOpus parameter", err);
++        return err;
++    }
++    def.nSampleRate = sampleRate;
++    def.nChannels = numChannels;
++    err = mOMXNode->setParameter(
++           (OMX_INDEXTYPE)OMX_IndexParamAudioAndroidOpus, &def, sizeof(def));
++    return err;
++}
++
+ status_t ACodec::setupFlacCodec(
+         bool encoder, int32_t numChannels, int32_t sampleRate, int32_t compressionLevel,
+         AudioEncoding encoding) {
+diff --git a/media/libstagefright/codecs/opus/dec/SoftOpus.cpp b/media/libstagefright/codecs/opus/dec/SoftOpus.cpp
+index 4f61aa8be2..5bb1879da1 100644
+--- a/media/libstagefright/codecs/opus/dec/SoftOpus.cpp
++++ b/media/libstagefright/codecs/opus/dec/SoftOpus.cpp
+@@ -58,6 +58,8 @@ SoftOpus::SoftOpus(
+       mInputBufferCount(0),
+       mDecoder(NULL),
+       mHeader(NULL),
++      mNumChannels(1),
++      mSamplingRate(kRate),
+       mCodecDelay(0),
+       mSeekPreRoll(0),
+       mAnchorTimeUs(0),
+@@ -169,11 +171,11 @@ OMX_ERRORTYPE SoftOpus::internalGetParameter(
+             }
+ 
+             opusParams->nAudioBandWidth = 0;
+-            opusParams->nSampleRate = kRate;
++            opusParams->nSampleRate = mSamplingRate;
+             opusParams->nBitRate = 0;
+ 
+             if (!isConfigured()) {
+-                opusParams->nChannels = 1;
++                opusParams->nChannels = mNumChannels;
+             } else {
+                 opusParams->nChannels = mHeader->channels;
+             }
+@@ -274,7 +276,8 @@ OMX_ERRORTYPE SoftOpus::internalSetParameter(
+             if (opusParams->nPortIndex != 0) {
+                 return OMX_ErrorUndefined;
+             }
+-
++            mNumChannels = opusParams->nChannels;
++            mSamplingRate = opusParams->nSampleRate;
+             return OMX_ErrorNone;
+         }
+ 
+@@ -496,6 +499,8 @@ void SoftOpus::onQueueFilled(OMX_U32 /* portIndex */) {
+                                    *(reinterpret_cast<int64_t*>(inHeader->pBuffer +
+                                                                 inHeader->nOffset)),
+                                    kRate);
++                mSamplingRate = kRate;
++                mNumChannels = mHeader->channels;
+                 notify(OMX_EventPortSettingsChanged, 1, 0, NULL);
+                 mOutputPortSettingsChange = AWAITING_DISABLED;
+             }
+diff --git a/media/libstagefright/codecs/opus/dec/SoftOpus.h b/media/libstagefright/codecs/opus/dec/SoftOpus.h
+index 91cafa14c7..00058c8212 100644
+--- a/media/libstagefright/codecs/opus/dec/SoftOpus.h
++++ b/media/libstagefright/codecs/opus/dec/SoftOpus.h
+@@ -70,6 +70,8 @@ private:
+     OpusMSDecoder *mDecoder;
+     OpusHeader *mHeader;
+ 
++    int32_t mNumChannels;
++    int32_t mSamplingRate;
+     int64_t mCodecDelay;
+     int64_t mSeekPreRoll;
+     int64_t mSamplesToDiscard;
+diff --git a/media/libstagefright/include/media/stagefright/ACodec.h b/media/libstagefright/include/media/stagefright/ACodec.h
+index 83e92b9f43..105e7f7f98 100644
+--- a/media/libstagefright/include/media/stagefright/ACodec.h
++++ b/media/libstagefright/include/media/stagefright/ACodec.h
+@@ -499,6 +499,7 @@ private:
+     status_t setupAMRCodec(bool encoder, bool isWAMR, int32_t bitRate);
+     status_t setupG711Codec(bool encoder, int32_t sampleRate, int32_t numChannels);
+ 
++    status_t setupOpusCodec(bool encoder, int32_t sampleRate, int32_t numChannels);
+     status_t setupFlacCodec(
+             bool encoder, int32_t numChannels, int32_t sampleRate, int32_t compressionLevel,
+             AudioEncoding encoding);
+-- 
+2.25.1
+

@@ -1,0 +1,43 @@
+From 16dd68e97b1f0aa5d7df67f6e6b2bdb696f3ffe0 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 23 Mar 2021 19:43:26 +0100
+Subject: [PATCH 45/50] Catch broken mainBuiltInDisplayCutoutRectApproximation
+
+Some devices (Redmi Note 9T) have:
+mainBuiltInDisplayCutoutRectApproximation = @android:mainBuiltInDisplayCutout
+Since mainBuiltInDisplayCutout is private, its ID is dynamic and can't
+be relied upon.
+This means that we'll get garbage in mainBuiltInDisplayCutoutRectApproximation
+The SVG Path parser will fail, triggering an exception.
+
+Fix it by catching it, and parsing mainBuiltInDisplayCutout instead
+---
+ core/java/android/view/DisplayCutout.java | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/core/java/android/view/DisplayCutout.java b/core/java/android/view/DisplayCutout.java
+index b4863f9c6dd0..e1d57e6869aa 100644
+--- a/core/java/android/view/DisplayCutout.java
++++ b/core/java/android/view/DisplayCutout.java
+@@ -681,9 +681,15 @@ public final class DisplayCutout {
+      * @hide
+      */
+     public static DisplayCutout fromResourcesRectApproximation(Resources res, int displayWidth, int displayHeight) {
+-        return fromSpec(res.getString(R.string.config_mainBuiltInDisplayCutoutRectApproximation),
+-                displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
+-                loadWaterfallInset(res));
++        try {
++            return fromSpec(res.getString(R.string.config_mainBuiltInDisplayCutoutRectApproximation),
++                    displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
++                    loadWaterfallInset(res));
++        } catch(java.lang.IllegalArgumentException e) {
++            return fromSpec(res.getString(R.string.config_mainBuiltInDisplayCutout),
++                    displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
++                    loadWaterfallInset(res));
++        }
+     }
+ 
+     /**
+-- 
+2.25.1
+

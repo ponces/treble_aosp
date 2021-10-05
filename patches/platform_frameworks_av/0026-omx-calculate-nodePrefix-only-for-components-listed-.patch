@@ -1,0 +1,56 @@
+From 5604ec2f9c99daa56b5b67bc3cdc8a8be5942037 Mon Sep 17 00:00:00 2001
+From: Lajos Molnar <lajos@google.com>
+Date: Wed, 12 Aug 2020 15:56:31 -0700
+Subject: [PATCH 26/40] omx: calculate nodePrefix only for components listed in
+ IOmx
+
+Also make common prefix matching case insensitive.
+
+Bug: 162578527
+Change-Id: Iaf66967fd519e0c3eabb8f0c320b8c7e7fd03497
+(cherry picked from commit 42f653bd87672f3427bdb522f46c55502e6d20d1)
+---
+ media/libstagefright/omx/1.0/OmxStore.cpp | 20 ++++++++++++++++++--
+ 1 file changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/media/libstagefright/omx/1.0/OmxStore.cpp b/media/libstagefright/omx/1.0/OmxStore.cpp
+index 67f478ead0..b5c116656f 100644
+--- a/media/libstagefright/omx/1.0/OmxStore.cpp
++++ b/media/libstagefright/omx/1.0/OmxStore.cpp
+@@ -54,6 +54,24 @@ OmxStore::OmxStore(
+         });
+     }
+ 
++    if (!nodes.empty()) {
++        auto anyNode = nodes.cbegin();
++        std::string::const_iterator first = anyNode->cbegin();
++        std::string::const_iterator last = anyNode->cend();
++        for (const std::string &name : nodes) {
++            std::string::const_iterator it1 = first;
++            for (std::string::const_iterator it2 = name.cbegin();
++                    it1 != last && it2 != name.cend() && tolower(*it1) == tolower(*it2);
++                    ++it1, ++it2) {
++            }
++            last = it1;
++        }
++        mPrefix = std::string(first, last);
++        LOG(INFO) << "omx common prefix: '" << mPrefix.c_str() << "'";
++    } else {
++        LOG(INFO) << "omx common prefix: no nodes";
++    }
++
+     MediaCodecsXmlParser parser;
+     parser.parseXmlFilesInSearchDirs(xmlNames, searchDirs);
+     if (profilingResultsXmlPath != nullptr) {
+@@ -112,8 +130,6 @@ OmxStore::OmxStore(
+         mRoleList[i] = std::move(role);
+         ++i;
+     }
+-
+-    mPrefix = parser.getCommonPrefix();
+ }
+ 
+ OmxStore::~OmxStore() {
+-- 
+2.25.1
+

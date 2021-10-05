@@ -1,0 +1,176 @@
+From 34f436f357bcb286023e54902492e3e93e60fda3 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sun, 24 Mar 2019 23:05:14 +0100
+Subject: [PATCH 11/50] Support new samsung Pie and Q light hal and Samsung
+ Power HALs
+
+---
+ services/core/jni/Android.bp                  |  4 ++
+ ...om_android_server_lights_LightsService.cpp | 51 +++++++++++++++++++
+ ...droid_server_power_PowerManagerService.cpp | 22 ++++++++
+ 3 files changed, 77 insertions(+)
+
+diff --git a/services/core/jni/Android.bp b/services/core/jni/Android.bp
+index 460842e56764..7a1192cf4b97 100644
+--- a/services/core/jni/Android.bp
++++ b/services/core/jni/Android.bp
+@@ -167,6 +167,10 @@ cc_defaults {
+         "android.system.suspend@1.0",
+         "service.incremental",
+         "suspend_control_aidl_interface-cpp",
++
++        "vendor.samsung.hardware.miscpower@2.0",
++        "vendor.samsung.hardware.light@2.0",
++        "vendor.samsung.hardware.light@3.0",
+     ],
+ 
+     static_libs: [
+diff --git a/services/core/jni/com_android_server_lights_LightsService.cpp b/services/core/jni/com_android_server_lights_LightsService.cpp
+index 26f6d7428fcc..268b59a58010 100644
+--- a/services/core/jni/com_android_server_lights_LightsService.cpp
++++ b/services/core/jni/com_android_server_lights_LightsService.cpp
+@@ -22,6 +22,10 @@
+ 
+ #include <android/hardware/light/2.0/ILight.h>
+ #include <android/hardware/light/2.0/types.h>
++#include <vendor/samsung/hardware/light/2.0/ISecLight.h>
++#include <vendor/samsung/hardware/light/2.0/types.h>
++#include <vendor/samsung/hardware/light/3.0/ISehLight.h>
++#include <vendor/samsung/hardware/light/3.0/types.h>
+ #include <android-base/chrono_utils.h>
+ #include <utils/misc.h>
+ #include <utils/Log.h>
+@@ -39,8 +43,17 @@ using Type       = ::android::hardware::light::V2_0::Type;
+ template<typename T>
+ using Return     = ::android::hardware::Return<T>;
+ 
++using ISecLight  = ::vendor::samsung::hardware::light::V2_0::ISecLight;
++using SecType    = ::vendor::samsung::hardware::light::V2_0::SecType;
++using ISehLight  = ::vendor::samsung::hardware::light::V3_0::ISehLight;
++using SehType    = ::vendor::samsung::hardware::light::V3_0::SehType;
++using SehLightState = ::vendor::samsung::hardware::light::V3_0::SehLightState;
+ static bool sLightSupported = true;
+ 
++static sp<ISecLight> sSecHal;
++static sp<ISehLight> sSehHal;
++static bool sSecTried = false;
++
+ static bool validate(jint light, jint flash, jint brightness) {
+     bool valid = true;
+ 
+@@ -141,6 +154,44 @@ static void setLight_native(
+         return;
+     }
+ 
++    if(!sSecTried) {
++        sSecHal = ISecLight::getService();
++        sSehHal = ISehLight::getService();
++        //sSecTried = true;
++    }
++
++    if(sSecHal != nullptr) {
++        SecType type = static_cast<SecType>(light);
++        LightState state = constructState(
++                colorARGB, flashMode, onMS, offMS, brightnessMode);
++
++        {
++            android::base::Timer t;
++            Return<Status> ret = sSecHal->setLightSec(type, state);
++            processReturn(ret, static_cast<Type>(light), state);
++            if (t.duration() > 50ms) ALOGD("Excessive delay setting light");
++        }
++    }
++
++    if(sSehHal != nullptr && light == 0 && flashMode == static_cast<jint>(Flash::HARDWARE)) {
++        SehType type = static_cast<SehType>(light);
++        SehLightState state {};
++        state.flashMode = Flash::NONE;
++	Brightness brightness = static_cast<Brightness>(brightnessMode);
++	state.brightnessMode = brightness;
++	state.extendedBrightness = colorARGB;
++
++        {
++            android::base::Timer t;
++            Return<Status> ret = sSehHal->sehSetLight(type, state);
++	    if(!ret.isOk()) {
++		    ALOGE("Failed to issue set light command.");
++	    }
++            if (t.duration() > 50ms) ALOGD("Excessive delay setting light");
++        }
++	return;
++    }
++
+     Type type = static_cast<Type>(light);
+     LightState state = constructState(
+         colorARGB, flashMode, onMS, offMS, brightnessMode);
+diff --git a/services/core/jni/com_android_server_power_PowerManagerService.cpp b/services/core/jni/com_android_server_power_PowerManagerService.cpp
+index 85d5c1f25693..07c2356b31d0 100644
+--- a/services/core/jni/com_android_server_power_PowerManagerService.cpp
++++ b/services/core/jni/com_android_server_power_PowerManagerService.cpp
+@@ -24,6 +24,7 @@
+ #include <android/hardware/power/Mode.h>
+ #include <android/system/suspend/1.0/ISystemSuspend.h>
+ #include <android/system/suspend/ISuspendControlService.h>
++#include <vendor/samsung/hardware/miscpower/2.0/ISehMiscPower.h>
+ #include <nativehelper/JNIHelp.h>
+ #include "jni.h"
+ 
+@@ -60,6 +61,7 @@ using android::system::suspend::ISuspendControlService;
+ using IPowerV1_1 = android::hardware::power::V1_1::IPower;
+ using IPowerV1_0 = android::hardware::power::V1_0::IPower;
+ using IPowerAidl = android::hardware::power::IPower;
++using ISehMiscPower = vendor::samsung::hardware::miscpower::V2_0::ISehMiscPower;
+ 
+ namespace android {
+ 
+@@ -75,6 +77,8 @@ static jobject gPowerManagerServiceObj;
+ static sp<IPowerV1_0> gPowerHalHidlV1_0_ = nullptr;
+ static sp<IPowerV1_1> gPowerHalHidlV1_1_ = nullptr;
+ static sp<IPowerAidl> gPowerHalAidl_ = nullptr;
++static sp<ISehMiscPower> gSehMiscPower = nullptr;
++static bool gPowerHalExists = true;
+ static std::mutex gPowerHalMutex;
+ 
+ enum class HalVersion {
+@@ -120,6 +124,10 @@ static HalVersion connectPowerHalLocked() {
+             gPowerHalAidlExists = false;
+         }
+     }
++    if (gPowerHalExists && gPowerHalHidlV1_0_ == nullptr) {
++        gSehMiscPower = ISehMiscPower::getService();
++        gPowerHalHidlV1_0_ = IPowerV1_0::getService("miscpower");
++    }
+     if (gPowerHalHidlExists && gPowerHalHidlV1_0_ == nullptr) {
+         gPowerHalHidlV1_0_ = IPowerV1_0::getService();
+         if (gPowerHalHidlV1_0_) {
+@@ -143,6 +151,12 @@ static HalVersion connectPowerHalLocked() {
+     return HalVersion::NONE;
+ }
+ 
++sp<ISehMiscPower> getSehMiscPower() {
++    std::lock_guard<std::mutex> lock(gPowerHalMutex);
++    connectPowerHalLocked();
++    return gSehMiscPower;
++}
++
+ // Retrieve a copy of PowerHAL HIDL V1_0
+ sp<IPowerV1_0> getPowerHalHidlV1_0() {
+     std::lock_guard<std::mutex> lock(gPowerHalMutex);
+@@ -452,6 +466,14 @@ static void nativeSetInteractive(JNIEnv* /* env */, jclass /* clazz */, jboolean
+             return;
+         }
+     }
++    sp<ISehMiscPower> sehMiscPower = getSehMiscPower();
++    if(sehMiscPower != nullptr) {
++        android::base::Timer t;
++        Return<void> ret = sehMiscPower->setInteractiveAsync(enable, 0);
++        if(!ret.isOk()) {
++            ALOGE("set interactive async() failed: seh misc setInteractiveAsync");
++        }
++    }
+ }
+ 
+ static void nativeSetAutoSuspend(JNIEnv* /* env */, jclass /* clazz */, jboolean enable) {
+-- 
+2.25.1
+

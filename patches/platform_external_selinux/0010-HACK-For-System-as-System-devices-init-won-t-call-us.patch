@@ -1,0 +1,83 @@
+From 3d53ffda14213de3d828c345454dfa9f6c840dce Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sun, 27 Sep 2020 20:20:35 +0200
+Subject: [PATCH 10/11] [HACK] For System-as-System devices, init won't call us
+ with /system_ext sepolicy
+
+So add system_ext sepolicy ourselves
+---
+ secilc/secilc.c | 44 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 44 insertions(+)
+
+diff --git a/secilc/secilc.c b/secilc/secilc.c
+index 375320e6..162b87fb 100644
+--- a/secilc/secilc.c
++++ b/secilc/secilc.c
+@@ -233,6 +233,7 @@ int main(int argc, char *argv[])
+ 				usage(argv[0]);
+ 		}
+ 	}
++
+ 	if (optind >= argc) {
+ 		fprintf(stderr, "No cil files specified\n");
+ 		usage(argv[0]);
+@@ -240,6 +241,11 @@ int main(int argc, char *argv[])
+ 
+ 	cil_set_log_level(log_level);
+ 
++    int needSystemExt = 1;
++	for (i = optind; i < argc; i++) {
++        if(strstr(argv[i], "system_ext")) needSystemExt = 0;
++    }
++
+ 	cil_db_init(&db);
+ 	cil_set_disable_dontaudit(db, disable_dontaudit);
+ 	cil_set_multiple_decls(db, multiple_decls);
+@@ -261,6 +267,44 @@ int main(int argc, char *argv[])
+ 	}
+ 
+ 	for (i = optind; i < argc; i++) {
++        fprintf(stderr, "Hello, parsing %s\n", argv[i]);
++        if(needSystemExt && strstr(argv[i], "/etc/selinux/")) {
++            fprintf(stderr, "Hello, I'm adding system_ext to the mix!\n");
++            char *path = "/system/system_ext/etc/selinux/system_ext_sepolicy.cil";
++            file = fopen(path, "r");
++            if (!file) {
++                fprintf(stderr, "Could not open file: %s\n", path);
++                rc = SEPOL_ERR;
++                goto exit;
++            }
++            rc = stat(path, &filedata);
++            if (rc == -1) {
++                fprintf(stderr, "Could not stat file: %s\n", path);
++                rc = SEPOL_ERR;
++                goto exit;
++            }
++            file_size = filedata.st_size;
++
++            buffer = malloc(file_size);
++            rc = fread(buffer, file_size, 1, file);
++            if (rc != 1) {
++                fprintf(stderr, "Failure reading file: %s\n", path);
++                rc = SEPOL_ERR;
++                goto exit;
++            }
++            fclose(file);
++            file = NULL;
++
++            rc = cil_add_file(db, path, buffer, file_size);
++            if (rc != SEPOL_OK) {
++                fprintf(stderr, "Failure adding %s\n", path);
++                goto exit;
++            }
++
++            free(buffer);
++            buffer = NULL;
++
++        }
+ 		file = fopen(argv[i], "r");
+ 		if (!file) {
+ 			fprintf(stderr, "Could not open file: %s\n", argv[i]);
+-- 
+2.25.1
+

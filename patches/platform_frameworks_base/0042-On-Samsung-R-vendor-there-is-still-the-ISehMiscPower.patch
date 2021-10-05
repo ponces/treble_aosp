@@ -1,0 +1,46 @@
+From f9c9698b5775754e96eecdc67266b3bfd2c40634 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sat, 13 Mar 2021 13:21:46 -0500
+Subject: [PATCH 42/50] On Samsung R vendor, there is still the ISehMiscPower
+ HIDL HAL, but there is also the AOSP's AIDL HAL. It was previously assumed
+ this wouldn't happen, fix this assumption.
+
+---
+ ...om_android_server_power_PowerManagerService.cpp | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/services/core/jni/com_android_server_power_PowerManagerService.cpp b/services/core/jni/com_android_server_power_PowerManagerService.cpp
+index c6ed7473c4cd..23dc1c08d646 100644
+--- a/services/core/jni/com_android_server_power_PowerManagerService.cpp
++++ b/services/core/jni/com_android_server_power_PowerManagerService.cpp
+@@ -112,6 +112,14 @@ static HalVersion connectPowerHalLocked() {
+     if (!gPowerHalHidlExists && !gPowerHalAidlExists) {
+         return HalVersion::NONE;
+     }
++    if (
++		    gPowerHalAidl_ == nullptr &&
++		    gPowerHalHidlV1_0_ == nullptr) {
++	ALOGE("Trying to connect to Samsung Power HAL");
++        gSehMiscPower = ISehMiscPower::getService();
++        gPowerHalHidlV1_0_ = IPowerV1_0::getService("miscpower");
++	ALOGE("Got miscpower = %d, SehMiscPower = %d", gPowerHalHidlV1_0_ != nullptr ? 1 : 0, gSehMiscPower ? 1 : 0);
++    }
+     if (gPowerHalAidlExists) {
+         if (!gPowerHalAidl_) {
+             gPowerHalAidl_ = waitForVintfService<IPowerAidl>();
+@@ -123,12 +131,6 @@ static HalVersion connectPowerHalLocked() {
+             gPowerHalAidlExists = false;
+         }
+     }
+-    if (gPowerHalHidlExists && gPowerHalHidlV1_0_ == nullptr) {
+-	ALOGE("Trying to connect to Samsung Power HAL");
+-        gSehMiscPower = ISehMiscPower::getService();
+-        gPowerHalHidlV1_0_ = IPowerV1_0::getService("miscpower");
+-	ALOGE("Got miscpower = %d, SehMiscPower = %d", gPowerHalHidlV1_0_ != nullptr ? 1 : 0, gSehMiscPower ? 1 : 0);
+-    }
+     if (gPowerHalHidlExists && gPowerHalHidlV1_0_ == nullptr) {
+         gPowerHalHidlV1_0_ = IPowerV1_0::getService();
+         if (gPowerHalHidlV1_0_) {
+-- 
+2.25.1
+

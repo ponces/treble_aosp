@@ -1,0 +1,39 @@
+From 8fa10d3e14e09bb263738cb78e116b96e828da28 Mon Sep 17 00:00:00 2001
+From: Paras Nagda <pnagda@codeaurora.org>
+Date: Tue, 27 Oct 2020 13:01:47 +0530
+Subject: [PATCH 23/40] NuPlayerRenderer: Reset negative media time to zero
+
+Reset negative media time to zero before call is made to
+Mediaclock's setStartingTimeMedia().
+
+Test:run android.mediastress.cts.HEVCR1080pAacLongPlayerTest#testPlay00 on gsi
+
+Bug: 170621757
+Bug: 171945667
+Bug: 170797642
+Bug: 171562715
+Bug: 171850618
+Change-Id: I2c405007b38229038119760423156bd53a2701c0
+---
+ media/libmediaplayerservice/nuplayer/NuPlayerRenderer.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/media/libmediaplayerservice/nuplayer/NuPlayerRenderer.cpp b/media/libmediaplayerservice/nuplayer/NuPlayerRenderer.cpp
+index c30f048c2d..7e8fe45121 100644
+--- a/media/libmediaplayerservice/nuplayer/NuPlayerRenderer.cpp
++++ b/media/libmediaplayerservice/nuplayer/NuPlayerRenderer.cpp
+@@ -922,6 +922,11 @@ size_t NuPlayer::Renderer::fillAudioBuffer(void *buffer, size_t size) {
+             firstEntry = false;
+             int64_t mediaTimeUs;
+             CHECK(entry->mBuffer->meta()->findInt64("timeUs", &mediaTimeUs));
++            if (mediaTimeUs < 0) {
++                ALOGD("fillAudioBuffer: reset negative media time %.2f secs to zero",
++                       mediaTimeUs / 1E6);
++                mediaTimeUs = 0;
++            }
+             ALOGV("fillAudioBuffer: rendering audio at media time %.2f secs", mediaTimeUs / 1E6);
+             setAudioFirstAnchorTimeIfNeeded_l(mediaTimeUs);
+         }
+-- 
+2.25.1
+

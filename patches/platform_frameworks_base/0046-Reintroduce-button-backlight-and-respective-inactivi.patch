@@ -1,0 +1,120 @@
+From d2ad3d6f3d1840ab783c1e1eb3da1a1c25899f8d Mon Sep 17 00:00:00 2001
+From: Ricardo Cerqueira <cyanogenmod@cerqueira.org>
+Date: Fri, 23 Nov 2012 14:23:16 +0000
+Subject: [PATCH 46/50] Reintroduce button-backlight (and respective inactivity
+ timeout)
+
+The power manager rewrite from Change I1d7a52e98f0449f76d70bf421f6a7f245957d1d7
+completely removed support for control of the button backlights, which makes
+all capacitive buttons out there stay dark. The commit message in that change
+mentions it hasn't been implemented _yet_, so this fix should be temporary
+until upstream does their own implementation
+
+[RC: Updated to 5.0]
+[PeterCxy: Updated to R, thanks to LineageOS for forward-porting the commit]
+
+Change-Id: I6094c446e0b8c23f57d30652a3cbd35dee5e821a
+---
+ .../server/display/DisplayPowerController.java   | 11 +++++++++++
+ .../server/power/PowerManagerService.java        | 16 ++++++++++++++++
+ 2 files changed, 27 insertions(+)
+
+diff --git a/services/core/java/com/android/server/display/DisplayPowerController.java b/services/core/java/com/android/server/display/DisplayPowerController.java
+index 0d160c37f6ea..825c109d8dc3 100644
+--- a/services/core/java/com/android/server/display/DisplayPowerController.java
++++ b/services/core/java/com/android/server/display/DisplayPowerController.java
+@@ -61,6 +61,7 @@ import com.android.server.am.BatteryStatsService;
+ import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
+ import com.android.server.display.whitebalance.DisplayWhiteBalanceFactory;
+ import com.android.server.display.whitebalance.DisplayWhiteBalanceSettings;
++import com.android.server.lights.LightsManager;
+ import com.android.server.policy.WindowManagerPolicy;
+ 
+ import java.io.PrintWriter;
+@@ -154,6 +155,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
+     // Battery stats.
+     private final IBatteryStats mBatteryStats;
+ 
++    // The lights manager.
++    private final LightsManager mLights;
++
+     // The sensor manager.
+     private final SensorManager mSensorManager;
+ 
+@@ -412,6 +416,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
+         mSettingsObserver = new SettingsObserver(mHandler);
+         mCallbacks = callbacks;
+         mBatteryStats = BatteryStatsService.getService();
++        mLights = LocalServices.getService(LightsManager.class);
+         mSensorManager = sensorManager;
+         mWindowManagerPolicy = LocalServices.getService(WindowManagerPolicy.class);
+         mBlanker = blanker;
+@@ -904,6 +909,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
+         if (state == Display.STATE_OFF) {
+             brightnessState = PowerManager.BRIGHTNESS_OFF_FLOAT;
+             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_SCREEN_OFF);
++            mLights.getLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(brightnessState);
++        }
++
++        // Disable button lights when dozing
++        if (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND) {
++            mLights.getLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(PowerManager.BRIGHTNESS_OFF_FLOAT);
+         }
+ 
+         // Always use the VR brightness when in the VR state.
+diff --git a/services/core/java/com/android/server/power/PowerManagerService.java b/services/core/java/com/android/server/power/PowerManagerService.java
+index 4ad0877124e1..f7a7d1829dc3 100644
+--- a/services/core/java/com/android/server/power/PowerManagerService.java
++++ b/services/core/java/com/android/server/power/PowerManagerService.java
+@@ -240,6 +240,9 @@ public final class PowerManagerService extends SystemService
+     private static final int HALT_MODE_REBOOT = 1;
+     private static final int HALT_MODE_REBOOT_SAFE_MODE = 2;
+ 
++    // Add button light timeout
++    private static final int BUTTON_ON_DURATION = 5 * 1000;
++
+     private final Context mContext;
+     private final ServiceThread mHandlerThread;
+     private final Handler mHandler;
+@@ -267,6 +270,7 @@ public final class PowerManagerService extends SystemService
+     private SettingsObserver mSettingsObserver;
+     private DreamManagerInternal mDreamManager;
+     private LogicalLight mAttentionLight;
++    private LogicalLight mButtonsLight;
+ 
+     private InattentiveSleepWarningController mInattentiveSleepWarningOverlayController;
+     private final AmbientDisplaySuppressionController mAmbientDisplaySuppressionController;
+@@ -1078,6 +1082,7 @@ public final class PowerManagerService extends SystemService
+ 
+             mLightsManager = getLocalService(LightsManager.class);
+             mAttentionLight = mLightsManager.getLight(LightsManager.LIGHT_ID_ATTENTION);
++            mButtonsLight = mLightsManager.getLight(LightsManager.LIGHT_ID_BUTTONS);
+ 
+             // Initialize display power management.
+             mDisplayManagerInternal.initPowerManagement(
+@@ -2291,11 +2296,22 @@ public final class PowerManagerService extends SystemService
+                     nextTimeout = mLastUserActivityTime
+                             + screenOffTimeout - screenDimDuration;
+                     if (now < nextTimeout) {
++                        if (getWakefulnessLocked() == WAKEFULNESS_AWAKE) {
++                            if (now > mLastUserActivityTime + BUTTON_ON_DURATION) {
++                                mButtonsLight.setBrightness(PowerManager.BRIGHTNESS_OFF_FLOAT);
++                            } else {
++                                mButtonsLight.setBrightness(mScreenBrightnessSettingDefault);
++                                nextTimeout = now + BUTTON_ON_DURATION;
++                            }
++                        }
+                         mUserActivitySummary = USER_ACTIVITY_SCREEN_BRIGHT;
+                     } else {
+                         nextTimeout = mLastUserActivityTime + screenOffTimeout;
+                         if (now < nextTimeout) {
+                             mUserActivitySummary = USER_ACTIVITY_SCREEN_DIM;
++                            if (getWakefulnessLocked() == WAKEFULNESS_AWAKE) {
++                                mButtonsLight.setBrightness(PowerManager.BRIGHTNESS_OFF_FLOAT);
++                            }
+                         }
+                     }
+                 }
+-- 
+2.25.1
+

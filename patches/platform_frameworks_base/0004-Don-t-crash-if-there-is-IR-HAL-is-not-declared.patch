@@ -1,0 +1,25 @@
+From b36e36e0b44ff59a58a071bfaae0449c00e428b8 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Thu, 17 May 2018 20:28:35 +0200
+Subject: [PATCH 04/50] Don't crash if there is IR HAL is not declared
+
+---
+ services/core/java/com/android/server/ConsumerIrService.java | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/services/core/java/com/android/server/ConsumerIrService.java b/services/core/java/com/android/server/ConsumerIrService.java
+index 2ed6c77baa0d..c574a03c9a39 100644
+--- a/services/core/java/com/android/server/ConsumerIrService.java
++++ b/services/core/java/com/android/server/ConsumerIrService.java
+@@ -50,8 +50,6 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
+             if (!mHasNativeHal) {
+                 throw new RuntimeException("FEATURE_CONSUMER_IR present, but no IR HAL loaded!");
+             }
+-        } else if (mHasNativeHal) {
+-            throw new RuntimeException("IR HAL present, but FEATURE_CONSUMER_IR is not set!");
+         }
+     }
+ 
+-- 
+2.25.1
+

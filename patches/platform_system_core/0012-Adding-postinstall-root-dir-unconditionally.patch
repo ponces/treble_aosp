@@ -1,0 +1,45 @@
+From fe4a02947b5747b49ce052f3a1df9d37cade3cbe Mon Sep 17 00:00:00 2001
+From: Bowgo Tsai <bowgotsai@google.com>
+Date: Fri, 4 Dec 2020 17:04:34 +0800
+Subject: [PATCH 12/12] Adding 'postinstall' root dir unconditionally.
+
+It is required to pass update_engine_unittests in GSI
+compliance test. And it's clean to just add this mount
+dir unconditionally.
+
+Bug: 172696594
+Test: `m init.environ.rc` and checks that $OUT/root/postinstall exists
+Change-Id: Ib340a78af442ea66c45cecb373a9eb3c428f8dda
+Merged-In: Ib340a78af442ea66c45cecb373a9eb3c428f8dda
+---
+ rootdir/Android.mk | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
+
+diff --git a/rootdir/Android.mk b/rootdir/Android.mk
+index a9d0ed08a..7d383f522 100644
+--- a/rootdir/Android.mk
++++ b/rootdir/Android.mk
+@@ -78,7 +78,7 @@ endif
+ # create some directories (some are mount points) and symlinks
+ LOCAL_POST_INSTALL_CMD := mkdir -p $(addprefix $(TARGET_ROOT_OUT)/, \
+     dev proc sys system data data_mirror odm oem acct config storage mnt apex debug_ramdisk \
+-    linkerconfig $(BOARD_ROOT_EXTRA_FOLDERS)); \
++    linkerconfig postinstall $(BOARD_ROOT_EXTRA_FOLDERS)); \
+     ln -sf /system/bin $(TARGET_ROOT_OUT)/bin; \
+     ln -sf /system/etc $(TARGET_ROOT_OUT)/etc; \
+     ln -sf /data/user_de/0/com.android.shell/files/bugreports $(TARGET_ROOT_OUT)/bugreports; \
+@@ -132,11 +132,6 @@ ifdef BOARD_ROOT_EXTRA_SYMLINKS
+     ; mkdir -p $(dir $(TARGET_ROOT_OUT)/$(word 2,$(p))) \
+     ; ln -sf $(word 1,$(p)) $(TARGET_ROOT_OUT)/$(word 2,$(p)))
+ endif
+-# The A/B updater uses a top-level /postinstall directory to mount the new
+-# system before reboot.
+-ifeq ($(AB_OTA_UPDATER),true)
+-  LOCAL_POST_INSTALL_CMD += ; mkdir -p $(TARGET_ROOT_OUT)/postinstall
+-endif
+ 
+ # The init symlink must be a post install command of a file that is to TARGET_ROOT_OUT.
+ # Since init.environ.rc is required for init and satisfies that requirement, we hijack it to create the symlink.
+-- 
+2.25.1
+

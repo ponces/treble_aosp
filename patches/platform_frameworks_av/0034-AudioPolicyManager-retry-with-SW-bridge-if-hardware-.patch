@@ -1,0 +1,99 @@
+From bde6baf392cc92ae53f058c3814c471488c1238b Mon Sep 17 00:00:00 2001
+From: Peter Cai <peter@typeblog.net>
+Date: Sun, 28 Mar 2021 16:17:36 +0800
+Subject: [PATCH 34/40] AudioPolicyManager: retry with SW bridge if hardware
+ audio patch fails
+
+* On two of my MT6771 Q vendor devices, in-call audio is broken due to
+  the audio HAL claiming to support HW audio patch between the Rx / Tx
+  devices but failing when called with `createAudioPatch`.
+
+> 03-28 11:56:42.300  1345  1345 W AudioALSAHardware: sinks[0].type ==
+AUDIO_PORT_TYPE_DEVICE
+> 03-28 11:56:42.300  1345  1345 W AudioALSAHardware: [createAudioPatch]
+[5082]
+> 03-28 11:56:42.300  1345  1345 E AudioALSAHardware: Fail status -38
+> 03-28 11:56:42.300  1345  1345 W DeviceHAL: Error from HAL Device in
+function create_audio_patch: Function not implemented
+> 03-28 11:56:42.301  1358  1374 W APM_AudioPolicyManager:
+createAudioPatchInternal patch panel could not connect device patch,
+error -38
+> 03-28 11:56:42.301  1358  1374 W APM_AudioPolicyManager:
+createTelephonyPatch() error -38 creating RX audio patch
+
+* This was not broken on Q because
+  `AudioPolicyManager::updateCallRouting` bypasses `createAudioPatch` by
+  directly calling the legacy `setOutputDevice` when `supportsPatch` is
+  true, i.e. `createAudioPatch` was *only* used for SW bridge for
+  in-call audio before R.
+
+* As a workaround, re-try by forcing the creation of a SW bridge after
+  `createAudioPatch` fails. We could also restore the old behavior of
+  `updateCallRouting`, but that would probably break in-call audio on
+  newer HALs that may or may not work properly with `setOutputDevice`.
+---
+ .../managerdefault/AudioPolicyManager.cpp           | 13 ++++++++++---
+ .../audiopolicy/managerdefault/AudioPolicyManager.h |  4 +++-
+ 2 files changed, 13 insertions(+), 4 deletions(-)
+
+diff --git a/services/audiopolicy/managerdefault/AudioPolicyManager.cpp b/services/audiopolicy/managerdefault/AudioPolicyManager.cpp
+index 63dcd538b1..6d2c38811e 100644
+--- a/services/audiopolicy/managerdefault/AudioPolicyManager.cpp
++++ b/services/audiopolicy/managerdefault/AudioPolicyManager.cpp
+@@ -3490,7 +3490,8 @@ status_t AudioPolicyManager::getAudioPort(struct audio_port *port)
+ status_t AudioPolicyManager::createAudioPatchInternal(const struct audio_patch *patch,
+                                                       audio_patch_handle_t *handle,
+                                                       uid_t uid, uint32_t delayMs,
+-                                                      const sp<SourceClientDescriptor>& sourceDesc)
++                                                      const sp<SourceClientDescriptor>& sourceDesc,
++                                                      bool forceSwBridge)
+ {
+     ALOGV("%s", __func__);
+     if (handle == NULL || patch == NULL) {
+@@ -3694,7 +3695,8 @@ status_t AudioPolicyManager::createAudioPatchInternal(const struct audio_patch *
+                 // - audio HAL version is >= 3.0 but no route has been declared between devices
+                 // - called from startAudioSource (aka sourceDesc != nullptr) and source device does
+                 //   not have a gain controller
+-                if (!srcDevice->hasSameHwModuleAs(sinkDevice) ||
++                // - a previous attempt at using HW bridge failed (forceSwBridge)
++                if (forceSwBridge || !srcDevice->hasSameHwModuleAs(sinkDevice) ||
+                         (srcDevice->getModuleVersionMajor() < 3) ||
+                         !srcDevice->getModule()->supportsPatch(srcDevice, sinkDevice) ||
+                         (sourceDesc != nullptr &&
+@@ -3759,7 +3761,12 @@ status_t AudioPolicyManager::createAudioPatchInternal(const struct audio_patch *
+                         __func__, index, handle, patchBuilder.patch(), delayMs, uid, &patchDesc);
+             if (status != NO_ERROR) {
+                 ALOGW("%s patch panel could not connect device patch, error %d", __func__, status);
+-                return INVALID_OPERATION;
++                if (forceSwBridge || patch->sinks[0].type != AUDIO_PORT_TYPE_DEVICE) {
++                    return INVALID_OPERATION;
++                } else {
++                    ALOGW("Retrying with software bridging.");
++                    return createAudioPatchInternal(patch, handle, uid, delayMs, sourceDesc, true);
++                }
+             }
+         } else {
+             return BAD_VALUE;
+diff --git a/services/audiopolicy/managerdefault/AudioPolicyManager.h b/services/audiopolicy/managerdefault/AudioPolicyManager.h
+index b588f898d4..60cbd7175e 100644
+--- a/services/audiopolicy/managerdefault/AudioPolicyManager.h
++++ b/services/audiopolicy/managerdefault/AudioPolicyManager.h
+@@ -910,12 +910,14 @@ private:
+          * @param[in] delayMs if required
+          * @param[in] sourceDesc [optional] in case of external source, source client to be
+          * configured by the patch, i.e. assigning an Output (HW or SW)
++         * @param[in] forceSwBridge [optional] force the creation of a SW bridge (internal use only)
+          * @return NO_ERROR if patch installed correctly, error code otherwise.
+          */
+         status_t createAudioPatchInternal(const struct audio_patch *patch,
+                                           audio_patch_handle_t *handle,
+                                           uid_t uid, uint32_t delayMs = 0,
+-                                          const sp<SourceClientDescriptor>& sourceDesc = nullptr);
++                                          const sp<SourceClientDescriptor>& sourceDesc = nullptr,
++                                          bool forceSwBridge = false);
+         /**
+          * @brief releaseAudioPatchInternal internal function to remove an audio patch
+          * @param[in] handle of the patch to be removed
+-- 
+2.25.1
+

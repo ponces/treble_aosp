@@ -1,0 +1,39 @@
+From 61bba92524f751de389699189de7ea8656131a98 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 26 Oct 2020 23:23:24 +0100
+Subject: [PATCH 3/3] Ignore vndk lite when looking for ld.config
+
+Change-Id: I6927ba11dcb8435fab1866985c177a1852488414
+---
+ linker/linker.cpp | 8 --------
+ 1 file changed, 8 deletions(-)
+
+diff --git a/linker/linker.cpp b/linker/linker.cpp
+index ae2c00c21..ea504c91e 100644
+--- a/linker/linker.cpp
++++ b/linker/linker.cpp
+@@ -93,7 +93,6 @@ static uint64_t g_module_unload_counter = 0;
+ static const char* const kLdConfigArchFilePath = "/system/etc/ld.config." ABI_STRING ".txt";
+ 
+ static const char* const kLdConfigFilePath = "/system/etc/ld.config.txt";
+-static const char* const kLdConfigVndkLiteFilePath = "/system/etc/ld.config.vndk_lite.txt";
+ 
+ static const char* const kLdGeneratedConfigFilePath = "/linkerconfig/ld.config.txt";
+ 
+@@ -3372,13 +3371,6 @@ static std::string get_ld_config_file_apex_path(const char* executable_path) {
+ }
+ 
+ static std::string get_ld_config_file_vndk_path() {
+-  bool same_version_system_vendor = false;
+-  if(std::to_string(__ANDROID_API__) == Config::get_vndk_version_string('.'))
+-    same_version_system_vendor = true;
+-  if (android::base::GetBoolProperty("ro.vndk.lite", false) && same_version_system_vendor) {
+-    return kLdConfigVndkLiteFilePath;
+-  }
+-
+   std::string ld_config_file_vndk = kLdConfigFilePath;
+   size_t insert_pos = ld_config_file_vndk.find_last_of('.');
+   if (insert_pos == std::string::npos) {
+-- 
+2.25.1
+

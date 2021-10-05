@@ -1,0 +1,32 @@
+From 7537e47f89e9ccbedb6ca91c691daf9af86a16db Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 16 Sep 2019 13:49:05 +0200
+Subject: [PATCH 3/7] Check needsCheckpoint only if checkpoint is supported
+
+This is needed because some devices (Xiaomi MiPad 4, uncertified)
+declares a bootctrl HAL in manifest, but doesn't have it.
+vold will then hang in needsCheckpoint waiting for bootctrl
+
+Change-Id: I2dafcbca7e994d7a3ac36ef3698590db2ab482fa
+---
+ cryptfs.cpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/cryptfs.cpp b/cryptfs.cpp
+index 8b7ac0a..9fc1364 100644
+--- a/cryptfs.cpp
++++ b/cryptfs.cpp
+@@ -1623,7 +1623,9 @@ static int cryptfs_restart_internal(int restart_main) {
+             SLOGE("Failed to setexeccon");
+             return -1;
+         }
+-        bool needs_cp = android::vold::cp_needsCheckpoint();
++        bool supportsCheckpoint = false;
++        android::vold::cp_supportsCheckpoint(supportsCheckpoint);
++        bool needs_cp = supportsCheckpoint && android::vold::cp_needsCheckpoint();
+         while ((mount_rc = fs_mgr_do_mount(&fstab_default, DATA_MNT_POINT, crypto_blkdev, 0,
+                                            needs_cp, false)) != 0) {
+             if (mount_rc == FS_MGR_DOMNT_BUSY) {
+-- 
+2.25.1
+

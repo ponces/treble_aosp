@@ -1,0 +1,823 @@
+From 0cbfed75a874f02212d41b16e9e118dd55b25cd2 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 10 Aug 2021 19:09:56 -0400
+Subject: [PATCH 50/50] Import back FacolaView for under-display fingerprint
+
+Tested, working-ish on OnePlus Nord2
+---
+ services/core/Android.bp                      |   6 +
+ .../biometrics/fingerprint/FacolaView.java    | 703 ++++++++++++++++++
+ .../fingerprint/FingerprintService.java       |  35 +
+ 3 files changed, 744 insertions(+)
+ create mode 100644 services/core/java/com/android/server/biometrics/fingerprint/FacolaView.java
+
+diff --git a/services/core/Android.bp b/services/core/Android.bp
+index 7585d6ba9c60..0d75dbd29b4d 100644
+--- a/services/core/Android.bp
++++ b/services/core/Android.bp
+@@ -138,6 +138,12 @@ java_library_static {
+         "netd_aidl_interfaces-platform-java",
+         "overlayable_policy_aidl-java",
+         "SurfaceFlingerProperties",
++        "vendor.goodix.extend.service-V2.0-java",
++        "vendor.goodix.hardware.biometrics.fingerprint-V2.1-java",
++        "vendor.samsung.hardware.biometrics.fingerprint-V2.1-java",
++        "vendor.samsung.hardware.biometrics.fingerprint-V3.0-java",
++        "vendor.oppo.hardware.biometrics.fingerprint-V2.1-java",
++        "vendor.xiaomi.hardware.fingerprintextension-V1.0-java",
+     ],
+ }
+ 
+diff --git a/services/core/java/com/android/server/biometrics/fingerprint/FacolaView.java b/services/core/java/com/android/server/biometrics/fingerprint/FacolaView.java
+new file mode 100644
+index 000000000000..1b052db6fea3
+--- /dev/null
++++ b/services/core/java/com/android/server/biometrics/fingerprint/FacolaView.java
+@@ -0,0 +1,703 @@
++/**
++ * Copyright (C) 2019 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package com.android.server.biometrics.fingerprint;
++
++import android.graphics.Canvas;
++import android.graphics.Color;
++import android.graphics.Paint;
++import android.graphics.Point;
++import android.content.Context;
++import android.view.View.OnTouchListener;
++import android.view.View;
++import android.widget.ImageView;
++import android.view.MotionEvent;
++import android.util.Slog;
++
++import android.view.WindowManager;
++import android.graphics.PixelFormat;
++import android.view.Gravity;
++
++import java.io.BufferedReader;
++import java.io.File;
++import java.io.FileReader;
++import java.io.PrintWriter;
++import java.util.Arrays;
++
++import vendor.xiaomi.hardware.fingerprintextension.V1_0.IXiaomiFingerprint;
++import vendor.goodix.extend.service.V2_0.IGoodixFPExtendService;
++import vendor.samsung.hardware.biometrics.fingerprint.V2_1.ISecBiometricsFingerprint;
++import vendor.samsung.hardware.biometrics.fingerprint.V3_0.ISehBiometricsFingerprint;
++
++import android.hardware.display.DisplayManager;
++
++import android.os.Build;
++import android.os.FileObserver;
++import android.os.Handler;
++import android.os.HandlerThread;
++import android.os.ServiceManager;
++
++import android.util.DisplayMetrics;
++
++public class FacolaView extends ImageView implements OnTouchListener {
++    private int mX, mY, mW, mH;
++    private final Paint mPaintFingerprint = new Paint();
++    private final Paint mPaintShow = new Paint();
++    private IXiaomiFingerprint mXiaomiFingerprint = null;
++    private IGoodixFPExtendService mGoodixFingerprint = null;
++    private vendor.goodix.hardware.biometrics.fingerprint.V2_1.IGoodixFingerprintDaemon mGoodixFingerprintV2_1 = null;
++    private ISecBiometricsFingerprint mSamsungFingerprint = null;
++    private ISehBiometricsFingerprint mSamsungFingerprint3_0 = null;
++    private vendor.oppo.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint mOppoFingerprint = null;
++    private boolean mInsideCircle = false;
++    private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
++    private final WindowManager.LayoutParams mParamsTouched = new WindowManager.LayoutParams();
++
++    private final static float UNTOUCHED_DIM = .0f;
++    private final static float TOUCHED_DIM = .9f;
++
++    private final HandlerThread mHandlerThread;
++    private final Handler mHandler;
++
++    private final WindowManager mWM;
++    private final DisplayManager mDM;
++    private final boolean samsungFod = samsungHasCmd("fod_enable");
++    private boolean noDim;
++    private boolean bypassedBrightness;
++    private boolean isDown = false;
++
++    private java.util.ArrayList<Object> objectsToKeep = new java.util.ArrayList();
++
++    private boolean mFullGreenDisplayed = false;
++    private final View mFullGreen;
++    private boolean mHidden = true;
++    private boolean mUiHidden = true;
++    private boolean xiaomiAsynchronous = false;
++    FacolaView(Context context) {
++        super(context);
++
++        mFullGreen = new ImageView(context) {
++            @Override
++            protected void onDraw(Canvas canvas) {
++                super.onDraw(canvas);
++                canvas.drawCircle(mW/2, mH/2, (float) (mW/2.0f), mPaintFingerprint);
++            };
++        };
++
++        mWM = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
++        mDM = (DisplayManager) getContext().getSystemService(Context.DISPLAY_SERVICE);
++
++        Point displayRealSize = new Point();
++        DisplayMetrics displayMetrics = new DisplayMetrics();
++        mDM.getDisplay(0).getRealSize(displayRealSize);
++        mDM.getDisplay(0).getMetrics(displayMetrics);
++
++        android.util.Log.d("PHH", "Samsung FOD " + samsungFod);
++
++        mHandlerThread = new HandlerThread("FacolaThread");
++        mHandlerThread.start();
++        mHandler = new Handler(mHandlerThread.getLooper());
++
++        noDim = android.os.SystemProperties.getBoolean("persist.sys.phh.nodim", false);
++        String[] location = android.os.SystemProperties.get("persist.vendor.sys.fp.fod.location.X_Y", "").split(",");
++        if(location.length != 2)
++            location = android.os.SystemProperties.get("persist.sys.fp.fod.location.X_Y", "").split(",");
++        String[] size = android.os.SystemProperties.get("persist.vendor.sys.fp.fod.size.width_height", "").split(",");
++        if(size.length != 2)
++            size = android.os.SystemProperties.get("persist.sys.fp.fod.size.width_height", "").split(",");
++        Slog.d("PHH-Enroll", "FacolaView hello");
++        if(size.length == 2 && location.length == 2) {
++            Slog.d("PHH-Enroll", "Got real values");
++            mX = Integer.parseInt(location[0]);
++            mY = Integer.parseInt(location[1]);
++            mW = Integer.parseInt(size[0]);
++            mH = Integer.parseInt(size[1]);
++        } else {
++            //a50
++            //mX = -1;//443;// - 190/2;
++            //mY = -1;// 1972;// - 190 / 2;
++            //mW = -1;//190;
++            //mH = -1;//190;
++
++            //x2 pro
++            //mX = 445;// - 190/2;
++            //mY = 1988;// - 190/2;
++            //mW = 190;
++            //mH = 190;
++            mX = -1;
++            mY = -1;
++            mW = -1;
++            mH = -1;
++        }
++
++        mParamsTouched.dimAmount = 0;
++
++        int oppoSize = android.os.SystemProperties.getInt("persist.vendor.fingerprint.optical.iconsize", 0);
++        if(oppoSize > 0) {
++            mW = oppoSize;
++            mH = oppoSize;
++        }
++        int oppoLocation = android.os.SystemProperties.getInt("persist.vendor.fingerprint.optical.iconlocation", 0);
++        if(oppoLocation > 0) {
++            Slog.d("PHH-Enroll", "Got Oppo icon location " + oppoLocation);
++            Slog.d("PHH-Enroll", "\tscreen size " + displayRealSize.x + ", " + displayRealSize.y);
++            mX = displayRealSize.x/2 - mW/2;
++            mY = displayRealSize.y - mH/2 - oppoLocation;
++            Slog.d("PHH-Enroll", "\tfacola at  " + mX + ", " + mY);
++            noDim = true;
++        }
++
++        String gammaStr = android.os.SystemProperties.get("persist.sys.phh.fod.gamma", "2.2");
++        float gamma = Float.parseFloat(gammaStr);
++
++        mPaintFingerprint.setAntiAlias(true);
++        mPaintFingerprint.setColor(Color.GREEN);
++
++        mPaintShow.setAntiAlias(true);
++        mPaintShow.setColor(Color.argb(0x18, 0x00, 0xff, 0x00));
++        setOnTouchListener(this);
++        Slog.d("PHH-Enroll", "Created facola...");
++        try {
++            mXiaomiFingerprint = IXiaomiFingerprint.getService();
++        } catch(Exception e) {
++            Slog.d("PHH-Enroll", "Failed getting xiaomi fingerprint service", e);
++        }
++        try {
++            mGoodixFingerprint = IGoodixFPExtendService.getService();
++        } catch(Exception e) {
++            Slog.d("PHH-Enroll", "Failed getting goodix fingerprint service", e);
++        }
++        try {
++            mGoodixFingerprintV2_1 = vendor.goodix.hardware.biometrics.fingerprint.V2_1.IGoodixFingerprintDaemon.getService();
++        } catch(Exception e) {
++            Slog.d("PHH-Enroll", "Failed getting goodix2 fingerprint service", e);
++        }
++        try {
++            mSamsungFingerprint = ISecBiometricsFingerprint.getService();
++        } catch(Exception e) {
++            Slog.d("PHH-Enroll", "Failed getting samsung fingerprint service", e);
++        }
++        try {
++            mSamsungFingerprint3_0 = ISehBiometricsFingerprint.getService();
++        } catch(Exception e) {
++            Slog.d("PHH-Enroll", "Failed getting samsung 3.0 fingerprint service", e);
++        }
++        try {
++            mOppoFingerprint = vendor.oppo.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint.getService();
++        } catch(Exception e) {
++            Slog.d("PHH-Enroll", "Failed getting oppo fingerprint service", e);
++        }
++
++        if(mSamsungFingerprint3_0 != null || mSamsungFingerprint != null) {
++            noDim = true;
++            bypassedBrightness = true;
++
++            String fodPositionString = readFile("/sys/class/fingerprint/fingerprint/position");
++            final String brightnessFile;
++            if("qcom".equals(Build.HARDWARE))
++                brightnessFile = "/sys/class/backlight/panel0-backlight/brightness";
++            else
++                brightnessFile = "/sys/class/lcd/panel/device/backlight/panel/brightness";
++
++            String maskBrightnessStr = readFile("/sys/class/lcd/panel/mask_brightness");
++            if(maskBrightnessStr == null) {
++                maskBrightnessStr = readFile("/sys/class/backlight/panel0-backlight/max_brightness");
++            }
++            String actualMaskBrightnessPath = "/sys/class/lcd/panel/actual_mask_brightness";
++
++            Slog.d("PHH-Enroll", "Got fod position, mask brightness " + fodPositionString + ", " + maskBrightnessStr);
++
++            if(fodPositionString != null && maskBrightnessStr != null) {
++                double maskBrightness = Double.parseDouble(maskBrightnessStr);
++                String[] fodPositionArray = readFile("/sys/class/fingerprint/fingerprint/position").split(",");
++                float bottomMM = Float.parseFloat(fodPositionArray[0]);
++                float areaSizeMM = Float.parseFloat(fodPositionArray[5]);
++
++                float bottomInch = bottomMM * 0.0393700787f;
++                float areaSizeInch = areaSizeMM * 0.0393700787f;
++
++                int bottomPx = (int)(bottomInch * displayMetrics.ydpi);
++                int areaSizePx = (int)(areaSizeInch * displayMetrics.ydpi);
++                mW = areaSizePx;
++                mH = areaSizePx;
++                mX = displayRealSize.x/2 - mW/2;
++                mY = displayRealSize.y - bottomPx - mH;
++                Slog.d("PHH-Enroll", "Samsung computed " + mX + "," + mY + "; " + mW + "x" + mH);
++
++                String cmd = String.format("fod_rect,%d,%d,%d,%d", mX, mY, mX+mW, mY+mH);
++                samsungCmd(cmd);
++
++                Slog.d("PHH-Enroll", "Reading brightness file gives " + readFile(brightnessFile));
++                FileObserver samsungCallback = new FileObserver(brightnessFile, FileObserver.MODIFY) {
++                    //Don't use LightsService' observer, because Samsung's brightness file is in nits, which makes for much more accurate computation
++                    @Override
++                    public void onEvent(int event, String path) {
++                        String currentBrightnessStr = readFile(brightnessFile);
++                        Slog.d("PHH-Enroll", "New brightness is " + currentBrightnessStr);
++                        int currentBrightness = Integer.parseInt(currentBrightnessStr);
++
++                        mHandler.post( () -> {
++                            double dim = 1.0d - Math.pow( (currentBrightness / maskBrightness), 1/gamma);
++                            Slog.d("PHH-Enroll", "Setting dim to " + dim);
++                            mParamsTouched.dimAmount = (float)dim;
++                            if(!mHidden) {
++                                Slog.d("PHH-Enroll", "++Setting dim to " + dim);
++                                if(mFullGreenDisplayed && !mHidden) {
++                                    mWM.updateViewLayout(mFullGreen, mParamsTouched);
++                                }
++                            }
++                        });
++                    }
++                };
++                samsungCallback.startWatching();
++                objectsToKeep.add(samsungCallback);
++
++                Slog.d("PHH-Enroll", "Reading actual brightness file gives " + readFile(actualMaskBrightnessPath));
++                FileObserver actualMaskObserver = new FileObserver(actualMaskBrightnessPath, FileObserver.MODIFY) {
++                    @Override
++                    public void onEvent(int event, String path) {
++                        String actualMask = readFile(actualMaskBrightnessPath);
++                        Slog.d("PHH-Enroll", "New actual mask brightness is " + actualMask);
++                        try {
++                            int eventReq = 0;
++                            if("0".equals(actualMask)) {
++                                eventReq = 1; //released
++                            } else {
++                                eventReq = 2; //pressed
++                            }
++                            if(mSamsungFingerprint != null) {
++                                mSamsungFingerprint.request(22 /* SEM_FINGER_STATE */, 0, eventReq, new java.util.ArrayList<Byte>(),
++                                        (int retval, java.util.ArrayList<Byte> out) -> {} );
++                            } else if(mSamsungFingerprint3_0 != null) {
++                                mSamsungFingerprint3_0.sehRequest(22 /* SEM_FINGER_STATE */, eventReq, new java.util.ArrayList<Byte>(),
++                                        (int retval, java.util.ArrayList<Byte> out) -> {} );
++                            }
++                        } catch(Exception e) {
++                            Slog.d("PHH-Enroll", "Failed setting samsung event for mask observer", e);
++                        }
++                    }
++                };
++                actualMaskObserver.startWatching();
++                objectsToKeep.add(actualMaskObserver);
++
++            }
++        }
++
++        String xiaomiFodReadyPath = "/sys/class/drm/card0-DSI-1/fod_ui_ready";
++        if(new File(xiaomiFodReadyPath).exists()) {
++            xiaomiAsynchronous = true;
++            noDim = true;
++            FileObserver xiaomiUiReadyCb = new FileObserver(xiaomiFodReadyPath, FileObserver.MODIFY) {
++                @Override
++                public void onEvent(int event, String path) {
++                    String currentUiReady = readFile(xiaomiFodReadyPath);
++                    Slog.d("PHH-Enroll", "New fod ready is " + currentUiReady);
++
++                    mHandler.post( () -> {
++                        try {
++                        if("0".equals(currentUiReady)) {
++                            mXiaomiFingerprint.extCmd(0xa, 0);
++                        } else if("1".equals(currentUiReady)) {
++                            mXiaomiFingerprint.extCmd(0xa, 1);
++                        }
++                        } catch(Exception e) {
++                            Slog.d("PHH-Enroll", "Failed Xiaomi async extcmd", e);
++                        }
++                    });
++                }
++            };
++            xiaomiUiReadyCb.startWatching();
++            objectsToKeep.add(xiaomiUiReadyCb);
++        }
++
++        if(mX != -1) {
++            android.os.SystemProperties.set("persist.sys.phh.has_fod", "true");
++        } else {
++            android.os.SystemProperties.set("persist.sys.phh.has_fod", "false");
++        }
++	/*
++        com.android.server.lights.LightsService.backlightChangeListener = new com.android.server.lights.LightsService.OnBacklightChange() {
++            public void onBacklightChange(int brightness) {
++                //Simple (but wrong) math assuming 255 is max brightness with 2.2 screen gamma and linear backlight
++                double dim = (1.0 - Math.pow(brightness/255.0, 1/gamma));
++
++                int alpha = (int)(255.0*dim);
++                Slog.d("PHH-Enroll", "Setting Xiaomi dim alpha to " + alpha + ", from " + brightness);
++                writeFile("/sys/class/drm/card0-DSI-1/dim_alpha", Integer.toString(alpha));
++
++                mHandler.post( () -> {
++                    if(!noDim) {
++                        Slog.d("PHH-Enroll", "Setting dim to " + dim);
++                        mParams.dimAmount = (float)dim;
++                        if(!mUiHidden) {
++                            Slog.d("PHH-Enroll", "++Setting dim to " + dim);
++                            mWM.updateViewLayout(FacolaView.this, mParams);
++                        }
++                    }
++                });
++            }
++        };*/
++
++        bypassedBrightness = hbmCtrl1.exists() || noDim;
++    }
++
++    private final File hbmCtrl1 = new File("/proc/leds/hbm_mode");
++
++    private boolean oppoFodInited = false;
++    private File oppoFod;
++    private void oppoPress(boolean pressed) {
++	if(!oppoFodInited) {
++		oppoFodInited = true;
++		oppoFod = new File("/sys/kernel/oppo_display/notify_fppress");
++		if(!oppoFod.exists())
++			oppoFod = new File("/sys/kernel/oplus_display/oplus_notify_fppress");
++	}
++        if(oppoFod == null || !oppoFod.exists()) return;
++        try {
++            String v = "0";
++            if(pressed) v = "1";
++            PrintWriter writer = new PrintWriter(oppoFod, "UTF-8");
++            writer.println(v);
++            writer.close();
++        } catch(Exception e) {
++            Slog.d("PHH", "Failed to notify oppo fp press", e);
++        }
++    }
++
++    @Override
++    protected void onDraw(Canvas canvas) {
++        super.onDraw(canvas);
++
++        Slog.d("PHH-Enroll", "Drawing at " + mX + ", " + mY + ", " + mW + ", " + mH);
++        //TODO w!=h?
++        if(mInsideCircle) {
++            try {
++                mParamsTouched.x = mX;
++                mParamsTouched.y = mY;
++
++                mParamsTouched.height = mW;
++                mParamsTouched.width = mH;
++                mParamsTouched.format = PixelFormat.TRANSLUCENT;
++
++                mParamsTouched.type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
++                mParamsTouched.setTitle("Fingerprint on display.touched");
++                mParamsTouched.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
++                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
++                    WindowManager.LayoutParams.FLAG_DIM_BEHIND;
++                writeFile(hbmCtrl1, "1");
++                if(!noDim) {
++                    mParamsTouched.screenBrightness = 1.0f;
++                    if(!bypassedBrightness) {
++                        mParamsTouched.screenBrightness = 1.0f;
++                    }
++                }
++
++                mParamsTouched.packageName = "android";
++
++                mParamsTouched.gravity = Gravity.TOP | Gravity.LEFT;
++                if(!mFullGreenDisplayed && !mHidden) {
++                    mHandler.post( () -> {
++                        Slog.d("PHH-Enroll", "Adding full green because of finger pressed");
++                        mFullGreenDisplayed = true;
++                        mWM.addView(mFullGreen, mParamsTouched);
++                    });
++                }
++                if(!isDown) {
++                    isDown = true;
++                    int nitValue = 2;
++                    mHandler.postDelayed( () -> {
++                            try {
++                            if(mXiaomiFingerprint != null && !xiaomiAsynchronous) {
++                            mXiaomiFingerprint.extCmd(0xa, nitValue);
++                            } else if(mGoodixFingerprint != null) {
++                            mGoodixFingerprint.goodixExtendCommand(10, 1);
++                            } else if(mGoodixFingerprintV2_1 != null) {
++                            mGoodixFingerprintV2_1.sendCommand(0x600, new java.util.ArrayList<Byte>(),
++                                    (int retval, java.util.ArrayList<Byte> out) -> {} );
++                            }
++                            } catch(Exception e) {
++                            Slog.d("PHH-Enroll", "Failed calling late fp extcmd", e);
++                            }
++                     }, 200);
++                }
++            } catch(Exception e) {
++                Slog.d("PHH-Enroll", "Failed calling fp extcmd", e);
++            }
++            oppoPress(true);
++        } else {
++            writeFile(hbmCtrl1, "1");
++            oppoPress(false);
++            if(isDown) {
++                isDown = false;
++                try {
++                    if(mXiaomiFingerprint != null && !xiaomiAsynchronous) {
++                        mXiaomiFingerprint.extCmd(0xa, 0);
++                    } else if(mGoodixFingerprint != null) {
++                        mGoodixFingerprint.goodixExtendCommand(10, 0);
++                    } else if(mGoodixFingerprintV2_1 != null) {
++                        mGoodixFingerprintV2_1.sendCommand(0x601, new java.util.ArrayList<Byte>(),
++                                (int retval, java.util.ArrayList<Byte> out) -> {});
++                    } else if(mSamsungFingerprint != null) {
++                                mSamsungFingerprint.request(22 /* SEM_FINGER_STATE */, 0, 1 /* released */, new java.util.ArrayList<Byte>(),
++                                (int retval, java.util.ArrayList<Byte> out) -> {} );
++                    } else if(mSamsungFingerprint3_0 != null) {
++                                mSamsungFingerprint3_0.sehRequest(22 /* SEM_FINGER_STATE */, 1 /* released */, new java.util.ArrayList<Byte>(),
++                                (int retval, java.util.ArrayList<Byte> out) -> {} );
++                    }
++                } catch(Exception e) {
++                    Slog.d("PHH-Enroll", "Failed calling fp extcmd", e);
++                }
++
++            }
++            if(mFullGreenDisplayed) {
++                mHandler.post( () -> {
++                    Slog.d("PHH-Enroll", "Removing full green because of finger released");
++                    mFullGreenDisplayed = false;
++                    mWM.removeView(mFullGreen);
++                });
++            }
++        }
++        canvas.drawCircle(mW/2, mH/2, (float) (mW/2.0f), this.mPaintShow);
++    }
++
++    @Override
++    public boolean onTouch(View v, MotionEvent event) {
++        float x = event.getAxisValue(MotionEvent.AXIS_X);
++        float y = event.getAxisValue(MotionEvent.AXIS_Y);
++
++        boolean newInside = (x > 0 && x < mW) && (y > 0 && y < mW);
++        if(event.getAction() == MotionEvent.ACTION_UP)
++            newInside = false;
++
++        Slog.d("PHH-Enroll", "Got action " + event.getAction() + ", x = " + x + ", y = " + y + ", inside = " + mInsideCircle + "/" + newInside);
++        if(newInside == mInsideCircle) return mInsideCircle;
++        mInsideCircle = newInside;
++
++        invalidate();
++
++        if(!mInsideCircle) {
++            mParams.screenBrightness = .0f;
++            if(!noDim) {
++                mParams.dimAmount = UNTOUCHED_DIM;
++            }
++            mWM.updateViewLayout(this, mParams);
++            return false;
++        }
++
++        if(!noDim) {
++            mParams.dimAmount = TOUCHED_DIM;
++            mParams.screenBrightness = 1.0f;
++        }
++        mWM.updateViewLayout(this, mParams);
++
++        return true;
++    }
++
++    public void show() {
++        Slog.d("PHH-Enroll", "Show", new Exception());
++        if(!mHidden) return;
++        mHidden = false;
++        try {
++            mSamsungFingerprint = ISecBiometricsFingerprint.getService();
++            mSamsungFingerprint.request(20 /* SEM_FINGER_STATE */, 0, 0 /* released */, new java.util.ArrayList<Byte>(),
++                    (int retval, java.util.ArrayList<Byte> out) -> {} );
++        } catch(Exception e) {
++           Slog.d("PHH-Enroll", "Failed setting fast fingerprint recognition");
++        }
++        try {
++            mSamsungFingerprint3_0 = ISehBiometricsFingerprint.getService();
++            Slog.d("PHH-Enroll", "Samsung ask for sensor status");
++            mSamsungFingerprint3_0.sehRequest(6, 0, new java.util.ArrayList(), (int retval, java.util.ArrayList<Byte> out) -> {
++                Slog.d("PHH-Enroll", "Result is " + retval);
++                for(int i=0; i<out.size(); i++) {
++                    Slog.d("PHH-Enroll", "\t" + i + ":" + out.get(i));
++                }
++            } );
++            Slog.d("PHH-Enroll", "Samsung ask for sensor brightness value");
++            mSamsungFingerprint3_0.sehRequest(32, 0, new java.util.ArrayList(), (int retval, java.util.ArrayList<Byte> out) -> {
++                Slog.d("PHH-Enroll", "Result is " + retval);
++                for(int i=0; i<out.size(); i++) {
++                    Slog.d("PHH-Enroll", "\t" + i + ":" + out.get(i));
++                }
++            } );
++
++        } catch(Exception e) {
++           Slog.d("PHH-Enroll", "Failed setting samsung3.0 fingerprint recognition", e);
++        }
++
++        if(mOppoFingerprint != null) {
++            try {
++                mOppoFingerprint.setScreenState(vendor.oppo.hardware.biometrics.fingerprint.V2_1.FingerprintScreenState.FINGERPRINT_SCREEN_ON);
++            } catch(Exception e) {
++                Slog.d("PHH-Enroll", "Failed setting oppo screen state", e);
++            }
++        }
++        mInsideCircle = false;
++        writeFile("/sys/kernel/oppo_display/dimlayer_hbm", "1");
++        writeFile("/sys/kernel/oplus_display/dimlayer_bl_en", "1");
++        if(samsungFod) {
++            samsungCmd("fod_enable,1,1");
++            samsungCmd("fod_enable,1,1,0");
++        }
++        if(mX == -1 || mY == -1 || mW == -1 || mH == -1) return;
++
++        try {
++            PrintWriter writer = new PrintWriter("/sys/devices/virtual/touch/tp_dev/fod_status", "UTF-8");
++            writer.println("1");
++            writer.close();
++        } catch(Exception e) {
++            Slog.d("PHH-Enroll", "Failed setting fod status for touchscreen");
++        }
++
++        mParams.x = mX;
++        mParams.y = mY;
++
++        mParams.height = mW;
++        mParams.width = mH;
++        mParams.format = PixelFormat.TRANSLUCENT;
++
++        mParams.type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
++        mParams.setTitle("Fingerprint on display.untouched");
++        mParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
++            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH |
++            WindowManager.LayoutParams.FLAG_DIM_BEHIND |
++            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
++        if(!noDim) {
++            mParams.dimAmount = UNTOUCHED_DIM;
++            mParams.screenBrightness = .0f;
++        } else {
++            mParams.dimAmount = 0;
++        }
++
++        mParams.packageName = "android";
++
++        mParams.gravity = Gravity.TOP | Gravity.LEFT;
++        mHandler.post( () -> {
++            mUiHidden = false;
++            mWM.addView(this, mParams);
++        });
++
++    }
++
++    public void hide() {
++        mInsideCircle = false;
++        Slog.d("PHH-Enroll", "Hide", new Exception());
++        if(mHidden) return;
++        if(mOppoFingerprint != null) {
++            try {
++                mOppoFingerprint.setScreenState(vendor.oppo.hardware.biometrics.fingerprint.V2_1.FingerprintScreenState.FINGERPRINT_SCREEN_ON);
++            } catch(Exception e) {
++                Slog.d("PHH-Enroll", "Failed setting oppo screen state", e);
++            }
++        }
++        writeFile("/sys/kernel/oppo_display/dimlayer_hbm", "0");
++        writeFile("/sys/kernel/oplus_display/dimlayer_bl_en", "0");
++        mHidden = true;
++        if(mFullGreenDisplayed) {
++            Slog.d("PHH-Enroll", "Removing full green because of hide");
++            mFullGreenDisplayed = false;
++            mWM.removeView(mFullGreen);
++        }
++        if(samsungFod) {
++            samsungCmd("fod_enable,0");
++        }
++        if(mX == -1 || mY == -1 || mW == -1 || mH == -1) return;
++
++        try {
++            if(mXiaomiFingerprint != null) {
++                mXiaomiFingerprint.extCmd(0xa, 0);
++            }
++        } catch(Exception e) {
++            Slog.d("PHH-Enroll", "Failed calling xiaomi fp extcmd");
++        }
++        try {
++            PrintWriter writer = new PrintWriter("/sys/devices/virtual/touch/tp_dev/fod_status", "UTF-8");
++            writer.println("0");
++            writer.close();
++        } catch(Exception e) {
++            Slog.d("PHH-Enroll", "Failed setting fod status for touchscreen");
++        }
++
++        Slog.d("PHH-Enroll", "Removed facola");
++        mHandler.post( () -> {
++            mUiHidden = true;
++            mWM.removeView(this);
++        });
++    }
++
++    private static boolean samsungHasCmd(String cmd) {
++        try {
++            File f = new File("/sys/devices/virtual/sec/tsp/cmd_list");
++            if(!f.exists()) return false;
++
++            BufferedReader b = new BufferedReader(new FileReader(f));
++            String line = null;
++            while( (line = b.readLine()) != null) {
++                if(line.equals(cmd)) return true;
++            }
++            return false;
++        } catch(Exception e) {
++            return false;
++        }
++    }
++
++    private static String readFile(String path) {
++        try {
++            File f = new File(path);
++
++            BufferedReader b = new BufferedReader(new FileReader(f));
++            return b.readLine();
++        } catch(Exception e) {
++            return null;
++        }
++    }
++
++    public static void samsungCmd(String cmd) {
++        try {
++            PrintWriter writer = new PrintWriter("/sys/devices/virtual/sec/tsp/cmd", "UTF-8");
++            writer.println(cmd);
++            writer.close();
++
++            String status = readFile("/sys/devices/virtual/sec/tsp/cmd_status");
++            String ret = readFile("/sys/devices/virtual/sec/tsp/cmd_result");
++
++            android.util.Log.d("PHH", "Sending command " + cmd + " returned " + ret + ":" + status);
++        } catch(Exception e) {
++            android.util.Log.d("PHH", "Failed sending command " + cmd, e);
++        }
++    }
++
++    private static void writeFile(String path, String value) {
++        try {
++            PrintWriter writer = new PrintWriter(path, "UTF-8");
++            writer.println(value);
++            writer.close();
++        } catch(Exception e) {
++            android.util.Log.d("PHH", "Failed writing to " + path + ": " + value);
++        }
++    }
++
++    private static void writeFile(File file, String value) {
++        try {
++            PrintWriter writer = new PrintWriter(file, "UTF-8");
++            writer.println(value);
++            writer.close();
++        } catch(Exception e) {
++            android.util.Log.d("PHH", "Failed writing to " + file + ": " + value);
++        }
++    }
++
++}
+diff --git a/services/core/java/com/android/server/biometrics/fingerprint/FingerprintService.java b/services/core/java/com/android/server/biometrics/fingerprint/FingerprintService.java
+index def1a8735903..7143655d5dae 100644
+--- a/services/core/java/com/android/server/biometrics/fingerprint/FingerprintService.java
++++ b/services/core/java/com/android/server/biometrics/fingerprint/FingerprintService.java
+@@ -126,6 +126,7 @@ public class FingerprintService extends BiometricServiceBase {
+         }
+     }
+ 
++    private FacolaView mFacola;
+     private final class FingerprintAuthClient extends AuthenticationClientImpl {
+         private final boolean mDetectOnly;
+ 
+@@ -186,6 +187,34 @@ public class FingerprintService extends BiometricServiceBase {
+ 
+         boolean isDetectOnly() {
+             return mDetectOnly;
++        }
++
++	        @Override
++        public boolean onAcquired(int acquiredInfo, int vendorCode) {
++            boolean result = super.onAcquired(acquiredInfo, vendorCode);
++            if(result) mFacola.hide();
++            return result;
++        }
++
++        @Override
++        public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
++            boolean authenticated, ArrayList<Byte> token) {
++            boolean result = super.onAuthenticated(identifier, authenticated, token);
++            if(result) mFacola.hide();
++            return result;
++        }
++
++
++        @Override
++        public int start() {
++            mFacola.show();
++            return super.start();
++        }
++
++        @Override
++        public int stop(boolean initiatedByClient) {
++            mFacola.hide();
++            return super.stop(initiatedByClient);
+         }
+     }
+ 
+@@ -216,6 +245,7 @@ public class FingerprintService extends BiometricServiceBase {
+                 final IFingerprintServiceReceiver receiver, final int flags,
+                 final String opPackageName) {
+             checkPermission(MANAGE_FINGERPRINT);
++	    mFacola.show();
+ 
+             final boolean restricted = isRestricted();
+             final int groupId = userId; // default group for fingerprint enrollment
+@@ -707,6 +737,9 @@ public class FingerprintService extends BiometricServiceBase {
+         public void onError(final long deviceId, final int error, final int vendorCode) {
+             mHandler.post(() -> {
+                 FingerprintService.super.handleError(deviceId, error, vendorCode);
++		if ( error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
++			mFacola.hide();
++		}
+                 // TODO: this chunk of code should be common to all biometric services
+                 if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE) {
+                     // If we get HW_UNAVAILABLE, try to connect again later...
+@@ -794,6 +827,7 @@ public class FingerprintService extends BiometricServiceBase {
+                 Slog.w(TAG, "enroll(): no fingerprint HAL!");
+                 return ERROR_ESRCH;
+             }
++	    mFacola.show();
+             return daemon.enroll(cryptoToken, groupId, timeout);
+         }
+ 
+@@ -813,6 +847,7 @@ public class FingerprintService extends BiometricServiceBase {
+         context.registerReceiver(mLockoutReceiver, new IntentFilter(getLockoutResetIntent()),
+                 getLockoutBroadcastPermission(), null /* handler */);
+         mLockPatternUtils = new LockPatternUtils(context);
++	mFacola = new FacolaView(context);
+     }
+ 
+     @Override
+-- 
+2.25.1
+

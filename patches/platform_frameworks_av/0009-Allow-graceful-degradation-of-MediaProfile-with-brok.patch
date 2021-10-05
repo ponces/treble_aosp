@@ -1,0 +1,140 @@
+From be57397662e96cf35ff5aaeb5846a308a89ed9ab Mon Sep 17 00:00:00 2001
+From: Alex Zhang <difan@google.com>
+Date: Fri, 17 Apr 2020 16:08:24 -0700
+Subject: [PATCH 09/40] Allow graceful degradation of MediaProfile with broken
+ configuration.
+
+Currently, when media profile declares something unsupported / broken,
+MediaProfile will crash. This patch will change the behavior to
+gracefully degradation instead. b/147701370 is an example IRL. If
+vendor declares profile unsupported in AOSP, Treble firmware will crash
+instead of having a non-working or suboptimally working camera.
+
+Test: Compiles
+
+Signed-off-by: Alex Zhang <difan@google.com>
+Change-Id: Icc0f85fe0aac748be4d4f7dd94814f615d528a03
+---
+ media/libmedia/MediaProfiles.cpp | 42 +++++++++++++++++++++-----------
+ 1 file changed, 28 insertions(+), 14 deletions(-)
+
+diff --git a/media/libmedia/MediaProfiles.cpp b/media/libmedia/MediaProfiles.cpp
+index 637322f60a..ab5fb5a20b 100644
+--- a/media/libmedia/MediaProfiles.cpp
++++ b/media/libmedia/MediaProfiles.cpp
+@@ -240,7 +240,7 @@ MediaProfiles::createVideoCodec(const char **atts, MediaProfiles *profiles)
+ 
+     const size_t nMappings = sizeof(sVideoEncoderNameMap)/sizeof(sVideoEncoderNameMap[0]);
+     const int codec = findTagForName(sVideoEncoderNameMap, nMappings, atts[1]);
+-    CHECK(codec != -1);
++    if (codec == -1) return nullptr;
+ 
+     MediaProfiles::VideoCodec *videoCodec =
+         new MediaProfiles::VideoCodec(static_cast<video_encoder>(codec),
+@@ -262,7 +262,7 @@ MediaProfiles::createAudioCodec(const char **atts, MediaProfiles *profiles)
+           !strcmp("channels",   atts[6]));
+     const size_t nMappings = sizeof(sAudioEncoderNameMap)/sizeof(sAudioEncoderNameMap[0]);
+     const int codec = findTagForName(sAudioEncoderNameMap, nMappings, atts[1]);
+-    CHECK(codec != -1);
++    if (codec == -1) return nullptr;
+ 
+     MediaProfiles::AudioCodec *audioCodec =
+         new MediaProfiles::AudioCodec(static_cast<audio_encoder>(codec),
+@@ -282,7 +282,7 @@ MediaProfiles::createAudioDecoderCap(const char **atts)
+ 
+     const size_t nMappings = sizeof(sAudioDecoderNameMap)/sizeof(sAudioDecoderNameMap[0]);
+     const int codec = findTagForName(sAudioDecoderNameMap, nMappings, atts[1]);
+-    CHECK(codec != -1);
++    if (codec == -1) return nullptr;
+ 
+     MediaProfiles::AudioDecoderCap *cap =
+         new MediaProfiles::AudioDecoderCap(static_cast<audio_decoder>(codec));
+@@ -298,7 +298,7 @@ MediaProfiles::createVideoDecoderCap(const char **atts)
+ 
+     const size_t nMappings = sizeof(sVideoDecoderNameMap)/sizeof(sVideoDecoderNameMap[0]);
+     const int codec = findTagForName(sVideoDecoderNameMap, nMappings, atts[1]);
+-    CHECK(codec != -1);
++    if (codec == -1) return nullptr;
+ 
+     MediaProfiles::VideoDecoderCap *cap =
+         new MediaProfiles::VideoDecoderCap(static_cast<video_decoder>(codec));
+@@ -322,7 +322,7 @@ MediaProfiles::createVideoEncoderCap(const char **atts)
+ 
+     const size_t nMappings = sizeof(sVideoEncoderNameMap)/sizeof(sVideoEncoderNameMap[0]);
+     const int codec = findTagForName(sVideoEncoderNameMap, nMappings, atts[1]);
+-    CHECK(codec != -1);
++    if (codec == -1) return nullptr;
+ 
+     MediaProfiles::VideoEncoderCap *cap =
+         new MediaProfiles::VideoEncoderCap(static_cast<video_encoder>(codec),
+@@ -346,7 +346,7 @@ MediaProfiles::createAudioEncoderCap(const char **atts)
+ 
+     const size_t nMappings = sizeof(sAudioEncoderNameMap)/sizeof(sAudioEncoderNameMap[0]);
+     const int codec = findTagForName(sAudioEncoderNameMap, nMappings, atts[1]);
+-    CHECK(codec != -1);
++    if (codec == -1) return nullptr;
+ 
+     MediaProfiles::AudioEncoderCap *cap =
+         new MediaProfiles::AudioEncoderCap(static_cast<audio_encoder>(codec), atoi(atts[5]),
+@@ -386,11 +386,11 @@ MediaProfiles::createCamcorderProfile(int cameraId, const char **atts, Vector<in
+     const size_t nProfileMappings = sizeof(sCamcorderQualityNameMap)/
+             sizeof(sCamcorderQualityNameMap[0]);
+     const int quality = findTagForName(sCamcorderQualityNameMap, nProfileMappings, atts[1]);
+-    CHECK(quality != -1);
++    if (quality == -1) return nullptr;
+ 
+     const size_t nFormatMappings = sizeof(sFileFormatMap)/sizeof(sFileFormatMap[0]);
+     const int fileFormat = findTagForName(sFileFormatMap, nFormatMappings, atts[3]);
+-    CHECK(fileFormat != -1);
++    if (fileFormat == -1) return nullptr;
+ 
+     MediaProfiles::CamcorderProfile *profile = new MediaProfiles::CamcorderProfile;
+     profile->mCameraId = cameraId;
+@@ -462,24 +462,38 @@ MediaProfiles::startElementHandler(void *userData, const char *name, const char
+         createAudioCodec(atts, profiles);
+     } else if (strcmp("VideoEncoderCap", name) == 0 &&
+                strcmp("true", atts[3]) == 0) {
+-        profiles->mVideoEncoders.add(createVideoEncoderCap(atts));
++        MediaProfiles::VideoEncoderCap* cap = createVideoEncoderCap(atts);
++        if (cap != nullptr) {
++          profiles->mVideoEncoders.add(cap);
++        }
+     } else if (strcmp("AudioEncoderCap", name) == 0 &&
+                strcmp("true", atts[3]) == 0) {
+-        profiles->mAudioEncoders.add(createAudioEncoderCap(atts));
++        MediaProfiles::AudioEncoderCap* cap = createAudioEncoderCap(atts);
++        if (cap != nullptr) {
++          profiles->mAudioEncoders.add(cap);
++        }
+     } else if (strcmp("VideoDecoderCap", name) == 0 &&
+                strcmp("true", atts[3]) == 0) {
+-        profiles->mVideoDecoders.add(createVideoDecoderCap(atts));
++        MediaProfiles::VideoDecoderCap* cap = createVideoDecoderCap(atts);
++        if (cap != nullptr) {
++          profiles->mVideoDecoders.add(cap);
++        }
+     } else if (strcmp("AudioDecoderCap", name) == 0 &&
+                strcmp("true", atts[3]) == 0) {
+-        profiles->mAudioDecoders.add(createAudioDecoderCap(atts));
++        MediaProfiles::AudioDecoderCap* cap = createAudioDecoderCap(atts);
++        if (cap != nullptr) {
++          profiles->mAudioDecoders.add(cap);
++        }
+     } else if (strcmp("EncoderOutputFileFormat", name) == 0) {
+         profiles->mEncoderOutputFileFormats.add(createEncoderOutputFileFormat(atts));
+     } else if (strcmp("CamcorderProfiles", name) == 0) {
+         profiles->mCurrentCameraId = getCameraId(atts);
+         profiles->addStartTimeOffset(profiles->mCurrentCameraId, atts);
+     } else if (strcmp("EncoderProfile", name) == 0) {
+-        profiles->mCamcorderProfiles.add(
+-            createCamcorderProfile(profiles->mCurrentCameraId, atts, profiles->mCameraIds));
++      MediaProfiles::CamcorderProfile* profile = createCamcorderProfile(profiles->mCurrentCameraId, atts, profiles->mCameraIds);
++      if (profile != nullptr) {
++        profiles->mCamcorderProfiles.add(profile);
++      }
+     } else if (strcmp("ImageEncoding", name) == 0) {
+         profiles->addImageEncodingQualityLevel(profiles->mCurrentCameraId, atts);
+     }
+-- 
+2.25.1
+

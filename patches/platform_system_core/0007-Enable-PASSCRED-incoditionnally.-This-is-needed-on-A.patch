@@ -1,0 +1,32 @@
+From fd6ee35098bfce9dac20c0f8553decca5d026a73 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 28 Sep 2020 21:41:34 +0200
+Subject: [PATCH 07/12] Enable PASSCRED incoditionnally. This is needed on
+ A-only devices that cant set passcred on socket
+
+Change-Id: I74168aa94d91fd91e1baa321582a2b2893efa3af
+---
+ logd/LogListener.cpp | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/logd/LogListener.cpp b/logd/LogListener.cpp
+index ba610424f..4f1df46fa 100644
+--- a/logd/LogListener.cpp
++++ b/logd/LogListener.cpp
+@@ -121,11 +121,8 @@ int LogListener::getLogSocket() {
+     if (sock < 0) {  // logd started up in init.sh
+         sock = socket_local_server(
+             socketName, ANDROID_SOCKET_NAMESPACE_RESERVED, SOCK_DGRAM);
+-
+-        int on = 1;
+-        if (setsockopt(sock, SOL_SOCKET, SO_PASSCRED, &on, sizeof(on))) {
+-            return -1;
+-        }
+     }
++    int on = 1;
++    setsockopt(sock, SOL_SOCKET, SO_PASSCRED, &on, sizeof(on));
+     return sock;
+ }
+-- 
+2.25.1
+

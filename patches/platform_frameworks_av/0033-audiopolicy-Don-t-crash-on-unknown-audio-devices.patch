@@ -1,0 +1,30 @@
+From 9e7b66abc9c5fc412f7bfe7ebf1ec2e23b625b06 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 23 Mar 2021 00:16:42 +0100
+Subject: [PATCH 33/40] [audiopolicy] Don't crash on unknown audio devices
+
+---
+ .../common/managerdefinitions/src/Serializer.cpp           | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
+index 73e4a3e096..1f200ad850 100644
+--- a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
++++ b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
+@@ -951,7 +951,12 @@ Return<ModuleTraits::Element> ModuleTraits::deserialize(const xmlNode *cur, PtrS
+                         sp<DeviceDescriptor> device = module->getDeclaredDevices().
+                                 getDeviceFromTagName(std::string(reinterpret_cast<const char*>(
+                                                         attachedDevice.get())));
+-                        ctx->addDevice(device);
++                        if(device != nullptr) {
++                            ctx->addDevice(device);
++                        } else {
++                            ALOGE("NULL DEVICE %s: %s %s=%s", __func__, tag, childAttachedDeviceTag,
++                                    reinterpret_cast<const char*>(attachedDevice.get()));
++                        }
+                     }
+                 }
+             }
+-- 
+2.25.1
+

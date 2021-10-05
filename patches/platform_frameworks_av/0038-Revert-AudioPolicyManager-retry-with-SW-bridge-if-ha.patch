@@ -1,0 +1,73 @@
+From 854066444a07f2a4085ed18dcd782d962ffda282 Mon Sep 17 00:00:00 2001
+From: Peter Cai <peter@typeblog.net>
+Date: Wed, 14 Apr 2021 10:20:22 +0800
+Subject: [PATCH 38/40] Revert "AudioPolicyManager: retry with SW bridge if
+ hardware audio patch fails"
+
+This reverts commit 5d869232d42a2fee6b7cb07b6a240aef5838021b.
+---
+ .../managerdefault/AudioPolicyManager.cpp           | 13 +++----------
+ .../audiopolicy/managerdefault/AudioPolicyManager.h |  4 +---
+ 2 files changed, 4 insertions(+), 13 deletions(-)
+
+diff --git a/services/audiopolicy/managerdefault/AudioPolicyManager.cpp b/services/audiopolicy/managerdefault/AudioPolicyManager.cpp
+index 6d2c38811e..63dcd538b1 100644
+--- a/services/audiopolicy/managerdefault/AudioPolicyManager.cpp
++++ b/services/audiopolicy/managerdefault/AudioPolicyManager.cpp
+@@ -3490,8 +3490,7 @@ status_t AudioPolicyManager::getAudioPort(struct audio_port *port)
+ status_t AudioPolicyManager::createAudioPatchInternal(const struct audio_patch *patch,
+                                                       audio_patch_handle_t *handle,
+                                                       uid_t uid, uint32_t delayMs,
+-                                                      const sp<SourceClientDescriptor>& sourceDesc,
+-                                                      bool forceSwBridge)
++                                                      const sp<SourceClientDescriptor>& sourceDesc)
+ {
+     ALOGV("%s", __func__);
+     if (handle == NULL || patch == NULL) {
+@@ -3695,8 +3694,7 @@ status_t AudioPolicyManager::createAudioPatchInternal(const struct audio_patch *
+                 // - audio HAL version is >= 3.0 but no route has been declared between devices
+                 // - called from startAudioSource (aka sourceDesc != nullptr) and source device does
+                 //   not have a gain controller
+-                // - a previous attempt at using HW bridge failed (forceSwBridge)
+-                if (forceSwBridge || !srcDevice->hasSameHwModuleAs(sinkDevice) ||
++                if (!srcDevice->hasSameHwModuleAs(sinkDevice) ||
+                         (srcDevice->getModuleVersionMajor() < 3) ||
+                         !srcDevice->getModule()->supportsPatch(srcDevice, sinkDevice) ||
+                         (sourceDesc != nullptr &&
+@@ -3761,12 +3759,7 @@ status_t AudioPolicyManager::createAudioPatchInternal(const struct audio_patch *
+                         __func__, index, handle, patchBuilder.patch(), delayMs, uid, &patchDesc);
+             if (status != NO_ERROR) {
+                 ALOGW("%s patch panel could not connect device patch, error %d", __func__, status);
+-                if (forceSwBridge || patch->sinks[0].type != AUDIO_PORT_TYPE_DEVICE) {
+-                    return INVALID_OPERATION;
+-                } else {
+-                    ALOGW("Retrying with software bridging.");
+-                    return createAudioPatchInternal(patch, handle, uid, delayMs, sourceDesc, true);
+-                }
++                return INVALID_OPERATION;
+             }
+         } else {
+             return BAD_VALUE;
+diff --git a/services/audiopolicy/managerdefault/AudioPolicyManager.h b/services/audiopolicy/managerdefault/AudioPolicyManager.h
+index 60cbd7175e..b588f898d4 100644
+--- a/services/audiopolicy/managerdefault/AudioPolicyManager.h
++++ b/services/audiopolicy/managerdefault/AudioPolicyManager.h
+@@ -910,14 +910,12 @@ private:
+          * @param[in] delayMs if required
+          * @param[in] sourceDesc [optional] in case of external source, source client to be
+          * configured by the patch, i.e. assigning an Output (HW or SW)
+-         * @param[in] forceSwBridge [optional] force the creation of a SW bridge (internal use only)
+          * @return NO_ERROR if patch installed correctly, error code otherwise.
+          */
+         status_t createAudioPatchInternal(const struct audio_patch *patch,
+                                           audio_patch_handle_t *handle,
+                                           uid_t uid, uint32_t delayMs = 0,
+-                                          const sp<SourceClientDescriptor>& sourceDesc = nullptr,
+-                                          bool forceSwBridge = false);
++                                          const sp<SourceClientDescriptor>& sourceDesc = nullptr);
+         /**
+          * @brief releaseAudioPatchInternal internal function to remove an audio patch
+          * @param[in] handle of the patch to be removed
+-- 
+2.25.1
+

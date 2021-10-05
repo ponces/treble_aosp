@@ -1,0 +1,36 @@
+From 97b6417dab907b0bc1178d257fc26594e9ba698d Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Thu, 12 Sep 2019 12:54:23 +0200
+Subject: [PATCH 1/3] Use vndk_lite ld.config only on same-version vendor
+
+When running Q over P lite, there is currently absolutely no chance the
+device boots, because it will be using Q vndk.
+Thus using ld.config.28.txt when running Q over P lite gives a little more
+chance for the device to boot, than when using vndk_lite ld.config.
+Also, once this patch is applied, the required effort to boot
+Q over P lite is exclusively in vndk, which is manageable.
+
+Change-Id: I55257cd7c738b1d20582e198e1d5621e1c87a03e
+---
+ linker/linker.cpp | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/linker/linker.cpp b/linker/linker.cpp
+index f24167722..a82d7c430 100644
+--- a/linker/linker.cpp
++++ b/linker/linker.cpp
+@@ -3372,7 +3372,10 @@ static std::string get_ld_config_file_apex_path(const char* executable_path) {
+ }
+ 
+ static std::string get_ld_config_file_vndk_path() {
+-  if (android::base::GetBoolProperty("ro.vndk.lite", false)) {
++  bool same_version_system_vendor = false;
++  if(std::to_string(__ANDROID_API__) == Config::get_vndk_version_string('.'))
++    same_version_system_vendor = true;
++  if (android::base::GetBoolProperty("ro.vndk.lite", false) && same_version_system_vendor) {
+     return kLdConfigVndkLiteFilePath;
+   }
+ 
+-- 
+2.25.1
+

@@ -1,0 +1,31 @@
+From f07ca8c7955fd96f34d6b9dc0b33809fcef0c8e5 Mon Sep 17 00:00:00 2001
+From: Alexander Pohl <pohl199885@gmail.com>
+Date: Fri, 15 Jun 2018 19:58:07 +0200
+Subject: [PATCH 01/40] Fix WiFi-Display on Huawei devices (EMUI 8.0)
+
+Huaweis media stack doesn't handle intra-refresh-mode, so skip the error instead.
+
+Thanks to Chris Vandomelen for pointing that out.
+---
+ media/libstagefright/ACodec.cpp | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/media/libstagefright/ACodec.cpp b/media/libstagefright/ACodec.cpp
+index 8e480bff14..25b641d6e3 100644
+--- a/media/libstagefright/ACodec.cpp
++++ b/media/libstagefright/ACodec.cpp
+@@ -4432,9 +4432,8 @@ status_t ACodec::setupAVCEncoderParameters(const sp<AMessage> &msg) {
+     if (msg->findInt32("intra-refresh-mode", &intraRefreshMode)) {
+         err = setCyclicIntraMacroblockRefresh(msg, intraRefreshMode);
+         if (err != OK) {
+-            ALOGE("Setting intra macroblock refresh mode (%d) failed: 0x%x",
+-                    err, intraRefreshMode);
+-            return err;
++            ALOGE("setupAVCEncoderParameters(): set intra-refresh-mode failed, ignoring..");
++            //return err;
+         }
+     }
+ 
+-- 
+2.25.1
+

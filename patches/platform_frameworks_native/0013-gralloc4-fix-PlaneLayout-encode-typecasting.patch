@@ -1,0 +1,68 @@
+From 3e20aa5d72fe44a254d29f9b7d117b6b8f04ab63 Mon Sep 17 00:00:00 2001
+From: SeYeong Byeon <sy.byeon@samsung.com>
+Date: Tue, 15 Sep 2020 15:02:40 +0900
+Subject: [PATCH 13/14] gralloc4: fix PlaneLayout encode typecasting
+
+Fixes a bug where planeLayout members were being downcasted
+to int32_t during the encoding step.
+
+Bug: 168564125
+
+Signed-off-by: SeYeong Byeon <sy.byeon@samsung.com>
+Change-Id: I8d5139dbd253278193775380ca387d45bfe2589d
+(cherry picked from commit 389ee53332904b49c8f9fb35ef4e9e624e1ee3d2)
+---
+ libs/gralloc/types/Gralloc4.cpp | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/libs/gralloc/types/Gralloc4.cpp b/libs/gralloc/types/Gralloc4.cpp
+index 53c68b723..e2f072a7a 100644
+--- a/libs/gralloc/types/Gralloc4.cpp
++++ b/libs/gralloc/types/Gralloc4.cpp
+@@ -706,35 +706,35 @@ status_t encodePlaneLayout(const PlaneLayout& input, OutputHidlVec* output) {
+         return err;
+     }
+ 
+-    err = encodeInteger<int64_t>(static_cast<int32_t>(input.offsetInBytes), output);
++    err = encodeInteger<int64_t>(static_cast<int64_t>(input.offsetInBytes), output);
+     if (err) {
+         return err;
+     }
+-    err = encodeInteger<int64_t>(static_cast<int32_t>(input.sampleIncrementInBits), output);
++    err = encodeInteger<int64_t>(static_cast<int64_t>(input.sampleIncrementInBits), output);
+     if (err) {
+         return err;
+     }
+-    err = encodeInteger<int64_t>(static_cast<int32_t>(input.strideInBytes), output);
++    err = encodeInteger<int64_t>(static_cast<int64_t>(input.strideInBytes), output);
+     if (err) {
+         return err;
+     }
+-    err = encodeInteger<int64_t>(static_cast<int32_t>(input.widthInSamples), output);
++    err = encodeInteger<int64_t>(static_cast<int64_t>(input.widthInSamples), output);
+     if (err) {
+         return err;
+     }
+-    err = encodeInteger<int64_t>(static_cast<int32_t>(input.heightInSamples), output);
++    err = encodeInteger<int64_t>(static_cast<int64_t>(input.heightInSamples), output);
+     if (err) {
+         return err;
+     }
+-    err = encodeInteger<int64_t>(static_cast<int32_t>(input.totalSizeInBytes), output);
++    err = encodeInteger<int64_t>(static_cast<int64_t>(input.totalSizeInBytes), output);
+     if (err) {
+         return err;
+     }
+-    err = encodeInteger<int64_t>(static_cast<int32_t>(input.horizontalSubsampling), output);
++    err = encodeInteger<int64_t>(static_cast<int64_t>(input.horizontalSubsampling), output);
+     if (err) {
+         return err;
+     }
+-    return encodeInteger<int64_t>(static_cast<int32_t>(input.verticalSubsampling), output);
++    return encodeInteger<int64_t>(static_cast<int64_t>(input.verticalSubsampling), output);
+ }
+ 
+ status_t decodePlaneLayout(InputHidlVec* input, PlaneLayout* output) {
+-- 
+2.25.1
+

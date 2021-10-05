@@ -1,0 +1,94 @@
+From 031edbd54d7801ddc9f49c3d951f3fe2e8009145 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 1 Oct 2019 13:35:49 +0200
+Subject: [PATCH 06/40] Add (partial, cam id is hardcoded) support for Asus ZF6
+ motor camera
+
+Change-Id: Iea6e1370780a1d16f728748d1d948d092532d8fe
+---
+ .../camera/libcameraservice/CameraService.cpp | 26 +++++++++++++++++++
+ .../camera/libcameraservice/CameraService.h   |  3 +++
+ 2 files changed, 29 insertions(+)
+
+diff --git a/services/camera/libcameraservice/CameraService.cpp b/services/camera/libcameraservice/CameraService.cpp
+index 883bf24725..e56309b466 100644
+--- a/services/camera/libcameraservice/CameraService.cpp
++++ b/services/camera/libcameraservice/CameraService.cpp
+@@ -25,6 +25,7 @@
+ #include <ctime>
+ #include <string>
+ #include <sys/types.h>
++#include <sys/wait.h>
+ #include <inttypes.h>
+ #include <pthread.h>
+ 
+@@ -139,6 +140,7 @@ Mutex CameraService::sProxyMutex;
+ sp<hardware::ICameraServiceProxy> CameraService::sCameraServiceProxy;
+ 
+ CameraService::CameraService() :
++        mPhysicalFrontCamStatus(false),
+         mEventLog(DEFAULT_EVENT_LOG_LENGTH),
+         mNumberOfCameras(0),
+         mNumberOfCamerasWithoutSystemCamera(0),
+@@ -1797,6 +1799,7 @@ Status CameraService::connectHelper(const sp<CALLBACK>& cameraCb, const String8&
+             mServiceLock.lock();
+         } else {
+             // Otherwise, add client to active clients list
++            physicalFrontCam(cameraId == "1");
+             finishConnectLocked(client, partial);
+         }
+     } // lock is destroyed, allow further connect calls
+@@ -1878,6 +1881,27 @@ status_t CameraService::addOfflineClient(String8 cameraId, sp<BasicClient> offli
+     return OK;
+ }
+ 
++void CameraService::physicalFrontCam(bool on) {
++    if(on == mPhysicalFrontCamStatus) return;
++    mPhysicalFrontCamStatus = on;
++
++    if(access("/dev/asusMotoDrv", F_OK) == 0) {
++        int pid = fork();
++        if(pid == 0) {
++            const char* cmd[] = {
++                "/system/bin/asus-motor",
++                "0",
++                NULL
++            };
++            cmd[1] = on ? "0" : "1";
++            execve("/system/bin/asus-motor", (char**)cmd, environ);
++            _exit(1);
++        } else {
++            waitpid(pid, NULL, 0);
++        }
++    }
++}
++
+ Status CameraService::setTorchMode(const String16& cameraId, bool enabled,
+         const sp<IBinder>& clientBinder) {
+     Mutex::Autolock lock(mServiceLock);
+@@ -2865,6 +2889,8 @@ binder::Status CameraService::BasicClient::disconnect() {
+     }
+     mDisconnected = true;
+ 
++    sCameraService->physicalFrontCam(false);
++
+     sCameraService->removeByClient(this);
+     sCameraService->logDisconnected(mCameraIdStr, mClientPid, String8(mClientPackageName));
+     sCameraService->mCameraProviderManager->removeRef(CameraProviderManager::DeviceMode::CAMERA,
+diff --git a/services/camera/libcameraservice/CameraService.h b/services/camera/libcameraservice/CameraService.h
+index 5c4c96bae7..530fef31e0 100644
+--- a/services/camera/libcameraservice/CameraService.h
++++ b/services/camera/libcameraservice/CameraService.h
+@@ -203,6 +203,9 @@ public:
+     // Register an offline client for a given active camera id
+     status_t addOfflineClient(String8 cameraId, sp<BasicClient> offlineClient);
+ 
++    bool mPhysicalFrontCamStatus;
++    void physicalFrontCam(bool on);
++
+     /////////////////////////////////////////////////////////////////////
+     // Client functionality
+ 
+-- 
+2.25.1
+

@@ -1,0 +1,59 @@
+From 9503ac3202f5647a5553ecc12e93ad47fa261af9 Mon Sep 17 00:00:00 2001
+From: Peter Cai <peter@typeblog.net>
+Date: Thu, 23 Jan 2020 11:13:43 +0800
+Subject: [PATCH 07/40] audiopolicy: try again with trimmed audio port name if
+ not found
+
+* In Spreadtrum BSP, some audio routes may contain ports with extra
+  spaces at the beginning and the end, causing audiopolicy to refuse to
+  load and leading to broken audio.
+
+* Fix this by retrying with trimmed port name when not found. Do not
+  use trimmed name all the time because a white space is a valid
+  character in port name, and we cannot be sure nobody is using it for
+  legitimite purposes.
+
+Change-Id: I993708b28e8404bc8c483d71a850ac69382231bd
+---
+ .../managerdefinitions/src/Serializer.cpp      | 18 ++++++++++++++++--
+ 1 file changed, 16 insertions(+), 2 deletions(-)
+
+diff --git a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
+index d85dbdf113..e25dda07c7 100644
+--- a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
++++ b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
+@@ -539,6 +539,17 @@ Return<DevicePortTraits::Element> DevicePortTraits::deserialize(const xmlNode *c
+     return deviceDesc;
+ }
+ 
++char* trim(char * s) {
++    int l = strlen(s);
++
++    if (l > 0) {
++      while (isspace(s[l - 1])) --l;
++      while (*s && isspace(*s)) ++s, --l;
++    }
++
++    return strndup(s, l);
++}
++
+ Return<RouteTraits::Element> RouteTraits::deserialize(const xmlNode *cur, PtrSerializingCtx ctx)
+ {
+     std::string type = getXmlAttribute(cur, Attributes::type);
+@@ -579,8 +590,11 @@ Return<RouteTraits::Element> RouteTraits::deserialize(const xmlNode *cur, PtrSer
+         if (strlen(devTag) != 0) {
+             sp<PolicyAudioPort> source = ctx->findPortByTagName(devTag);
+             if (source == NULL) {
+-                ALOGE("%s: no source found with name=%s", __func__, devTag);
+-                return Status::fromStatusT(BAD_VALUE);
++                source = ctx->findPortByTagName(trim(devTag));
++                if (source == NULL) {
++                    ALOGE("%s: no source found with name=%s", __func__, devTag);
++                    return Status::fromStatusT(BAD_VALUE);
++                }
+             }
+             sources.add(source);
+         }
+-- 
+2.25.1
+

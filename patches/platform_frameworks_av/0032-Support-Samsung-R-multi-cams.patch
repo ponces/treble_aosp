@@ -1,0 +1,66 @@
+From 6c2b8aa4cf81fd0c52868bf717e7a628f0813ec2 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sat, 13 Mar 2021 14:20:03 -0500
+Subject: [PATCH 32/40] Support Samsung R multi-cams
+
+---
+ services/camera/libcameraservice/Android.bp               | 1 +
+ .../libcameraservice/common/CameraProviderManager.cpp     | 8 +++++++-
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/services/camera/libcameraservice/Android.bp b/services/camera/libcameraservice/Android.bp
+index be275e9346..bede98bfdc 100644
+--- a/services/camera/libcameraservice/Android.bp
++++ b/services/camera/libcameraservice/Android.bp
+@@ -129,6 +129,7 @@ cc_library_shared {
+         "android.hardware.camera.device@3.5",
+         "android.hardware.camera.device@3.6",
+         "vendor.samsung.hardware.camera.provider@3.0",
++        "vendor.samsung.hardware.camera.provider@4.0",
+     ],
+ 
+     static_libs: [
+diff --git a/services/camera/libcameraservice/common/CameraProviderManager.cpp b/services/camera/libcameraservice/common/CameraProviderManager.cpp
+index 3e6ad1ef52..b7d1a57567 100644
+--- a/services/camera/libcameraservice/common/CameraProviderManager.cpp
++++ b/services/camera/libcameraservice/common/CameraProviderManager.cpp
+@@ -22,6 +22,7 @@
+ 
+ #include <android/hardware/camera/device/3.5/ICameraDevice.h>
+ #include <vendor/samsung/hardware/camera/provider/3.0/ISehCameraProvider.h>
++#include <vendor/samsung/hardware/camera/provider/4.0/ISehCameraProvider.h>
+ 
+ #include <algorithm>
+ #include <chrono>
+@@ -1363,7 +1364,9 @@ status_t CameraProviderManager::ProviderInfo::initialize(
+     }
+ 
+     auto samsungCast = vendor::samsung::hardware::camera::provider::V3_0::ISehCameraProvider::castFrom(interface);
++    auto samsung40Cast = vendor::samsung::hardware::camera::provider::V4_0::ISehCameraProvider::castFrom(interface);
+     auto samsungProvider = samsungCast.isOk() ? static_cast<sp<vendor::samsung::hardware::camera::provider::V3_0::ISehCameraProvider>>(samsungCast) : nullptr;
++    auto samsung40Provider = samsung40Cast.isOk() ? static_cast<sp<vendor::samsung::hardware::camera::provider::V4_0::ISehCameraProvider>>(samsung40Cast) : nullptr;
+ 
+     hardware::Return<bool> linked = interface->linkToDeath(this, /*cookie*/ mId);
+     if (!linked.isOk()) {
+@@ -1401,6 +1404,7 @@ status_t CameraProviderManager::ProviderInfo::initialize(
+         status = idStatus;
+         if (status == Status::OK) {
+             for (auto& name : cameraDeviceNames) {
++		    ALOGE("Listing camera ID %s", name.c_str());
+                 uint16_t major, minor;
+                 std::string type, id;
+                 status_t res = parseDeviceName(name, &major, &minor, &type, &id);
+@@ -1414,7 +1418,9 @@ status_t CameraProviderManager::ProviderInfo::initialize(
+             }
+         } };
+     hardware::Return<void> ret;
+-    if(samsungProvider != nullptr && property_get_bool("persist.sys.phh.samsung.camera_ids", false))
++    if(samsung40Provider != nullptr && property_get_bool("persist.sys.phh.samsung.camera_ids", false))
++        ret = samsung40Provider->sehGetCameraIdList(cb);
++    else if(samsungProvider != nullptr && property_get_bool("persist.sys.phh.samsung.camera_ids", false))
+         ret = samsungProvider->sehGetCameraIdList(cb);
+     else
+         ret = interface->getCameraIdList(cb);
+-- 
+2.25.1
+
