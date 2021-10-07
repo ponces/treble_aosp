@@ -11,10 +11,10 @@ diff --git a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp b
 index 73e4a3e096..1f200ad850 100644
 --- a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 +++ b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
-@@ -951,7 +951,12 @@ Return<ModuleTraits::Element> ModuleTraits::deserialize(const xmlNode *cur, PtrS
-                         sp<DeviceDescriptor> device = module->getDeclaredDevices().
-                                 getDeviceFromTagName(std::string(reinterpret_cast<const char*>(
-                                                         attachedDevice.get())));
+@@ -812,7 +812,12 @@ std::variant<status_t, ModuleTraits::Element> PolicySerializer::deserialize<Modu
+                                     reinterpret_cast<const char*>(attachedDevice.get()));
+                             continue;
+                         }
 -                        ctx->addDevice(device);
 +                        if(device != nullptr) {
 +                            ctx->addDevice(device);
