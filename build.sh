@@ -36,7 +36,7 @@ echo "Setting up build environment"
 source build/envsetup.sh &> /dev/null
 echo ""
 
-echo "Applying patches"
+echo "Applying PHH patches"
 cd device/phh/treble
 bash generate.sh
 cd ../../..

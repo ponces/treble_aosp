@@ -14,7 +14,7 @@ diff --git a/services/camera/libcameraservice/CameraService.cpp b/services/camer
 index 883bf24725..e56309b466 100644
 --- a/services/camera/libcameraservice/CameraService.cpp
 +++ b/services/camera/libcameraservice/CameraService.cpp
-@@ -25,6 +25,7 @@
+@@ -26,6 +26,7 @@
  #include <ctime>
  #include <string>
  #include <sys/types.h>
@@ -22,23 +22,23 @@ index 883bf24725..e56309b466 100644
  #include <inttypes.h>
  #include <pthread.h>
  
-@@ -139,6 +140,7 @@ Mutex CameraService::sProxyMutex;
- sp<hardware::ICameraServiceProxy> CameraService::sCameraServiceProxy;
+@@ -142,6 +143,7 @@ const String8 CameraService::kOfflineDevice("offline-");
+ static std::set<String8> sServiceErrorEventSet;
  
  CameraService::CameraService() :
 +        mPhysicalFrontCamStatus(false),
          mEventLog(DEFAULT_EVENT_LOG_LENGTH),
          mNumberOfCameras(0),
          mNumberOfCamerasWithoutSystemCamera(0),
-@@ -1797,6 +1799,7 @@ Status CameraService::connectHelper(const sp<CALLBACK>& cameraCb, const String8&
+@@ -1890,6 +1892,7 @@ Status CameraService::connectHelper(const sp<CALLBACK>& cameraCb, const String8&
              mServiceLock.lock();
          } else {
              // Otherwise, add client to active clients list
 +            physicalFrontCam(cameraId == "1");
-             finishConnectLocked(client, partial);
+             finishConnectLocked(client, partial, oomScoreOffset);
          }
-     } // lock is destroyed, allow further connect calls
-@@ -1878,6 +1881,27 @@ status_t CameraService::addOfflineClient(String8 cameraId, sp<BasicClient> offli
+ 
+@@ -1979,6 +1982,27 @@ status_t CameraService::addOfflineClient(String8 cameraId, sp<BasicClient> offli
      return OK;
  }
  
@@ -66,7 +66,7 @@ index 883bf24725..e56309b466 100644
  Status CameraService::setTorchMode(const String16& cameraId, bool enabled,
          const sp<IBinder>& clientBinder) {
      Mutex::Autolock lock(mServiceLock);
-@@ -2865,6 +2889,8 @@ binder::Status CameraService::BasicClient::disconnect() {
+@@ -3065,6 +3089,8 @@ binder::Status CameraService::BasicClient::disconnect() {
      }
      mDisconnected = true;
  
@@ -79,7 +79,7 @@ diff --git a/services/camera/libcameraservice/CameraService.h b/services/camera/
 index 5c4c96bae7..530fef31e0 100644
 --- a/services/camera/libcameraservice/CameraService.h
 +++ b/services/camera/libcameraservice/CameraService.h
-@@ -203,6 +203,9 @@ public:
+@@ -211,6 +211,9 @@ public:
      // Register an offline client for a given active camera id
      status_t addOfflineClient(String8 cameraId, sp<BasicClient> offlineClient);
  
