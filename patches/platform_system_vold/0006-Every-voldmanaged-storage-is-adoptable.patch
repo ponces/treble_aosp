@@ -11,14 +11,14 @@ diff --git a/main.cpp b/main.cpp
 index ebe5510..113d9b9 100644
 --- a/main.cpp
 +++ b/main.cpp
-@@ -249,7 +249,7 @@ static int process_config(VolumeManager* vm, bool* has_adoptable, bool* has_quot
+@@ -257,7 +257,7 @@ static int process_config(VolumeManager* vm, VoldConfigs* configs) {
              std::string nickname(entry.label);
              int flags = 0;
- 
+
 -            if (entry.is_encryptable()) {
 +            if (entry.is_encryptable() || true) {
                  flags |= android::vold::Disk::Flags::kAdoptable;
-                 *has_adoptable = true;
+                 configs->has_adoptable = true;
              }
 -- 
 2.25.1

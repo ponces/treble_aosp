@@ -17,17 +17,17 @@ index 7f550a142..99e1c2a8f 100644
 --- a/device/src/esco_parameters.cc
 +++ b/device/src/esco_parameters.cc
 @@ -20,7 +20,9 @@
- 
+
  #include "device/include/esco_parameters.h"
- 
+
 -static const enh_esco_params_t default_esco_parameters[ESCO_NUM_CODECS] = {
 +#include <cutils/properties.h>
 +
 +static enh_esco_params_t default_esco_parameters[ESCO_NUM_CODECS] = {
-     // CVSD
-     {.transmit_bandwidth = TXRX_64KBITS_RATE,
-      .receive_bandwidth = TXRX_64KBITS_RATE,
-@@ -143,5 +145,10 @@ enh_esco_params_t esco_parameters_for_codec(esco_codec_t codec) {
+     // CVSD D1
+     {
+         .transmit_bandwidth = TXRX_64KBITS_RATE,
+@@ -213,5 +215,10 @@ enh_esco_params_t esco_parameters_for_codec(esco_codec_t codec) {
    CHECK(codec >= 0) << "codec index " << (int)codec << "< 0";
    CHECK(codec < ESCO_NUM_CODECS) << "codec index " << (int)codec << " > "
                                   << ESCO_NUM_CODECS;
