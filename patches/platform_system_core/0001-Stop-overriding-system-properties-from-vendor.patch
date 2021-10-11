@@ -1,0 +1,27 @@
+From 7c7429920b9dacd1ae19a177bb48eb43335f110d Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Thu, 7 Oct 2021 15:48:11 -0400
+Subject: [PATCH 1/2] Stop overriding system properties from vendor
+
+This is annoying to disable apexes, or force adb
+
+Change-Id: Ifd0072c631349b23945df4ab401ba26eca07131f
+---
+ init/property_service.cpp | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/init/property_service.cpp b/init/property_service.cpp
+index 2d67bf5d7..5974065f5 100644
+--- a/init/property_service.cpp
++++ b/init/property_service.cpp
+@@ -725,7 +725,6 @@ static void LoadProperties(char* data, const char* filter, const char* filename,
+                 } else if (it->second != value) {
+                     LOG(WARNING) << "Overriding previous property '" << key << "':'" << it->second
+                                  << "' with new value '" << value << "'";
+-                    it->second = value;
+                 }
+             } else {
+                 LOG(ERROR) << "Do not have permissions to set '" << key << "' to '" << value
+-- 
+2.25.1
+

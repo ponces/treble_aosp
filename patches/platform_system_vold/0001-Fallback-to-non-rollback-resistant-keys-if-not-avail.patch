@@ -1,0 +1,54 @@
+From 6b37536cb87c83663bea627da417a8d1748490b9 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 5 Oct 2021 16:17:15 -0400
+Subject: [PATCH] Fallback to non-rollback resistant keys if not available
+
+Boot on Mediatek devices was broken with:
+~ Add ROLLBACK_RESISTANCE tag to key usage
+
+Change-Id: I0ab7103c317c70779dee03dce25ba9c9da1629f4
+---
+ KeyStorage.cpp | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/KeyStorage.cpp b/KeyStorage.cpp
+index 93c5c29..ef089ad 100644
+--- a/KeyStorage.cpp
++++ b/KeyStorage.cpp
+@@ -378,12 +378,15 @@ static KeymasterOperation BeginKeymasterOp(Keymaster& keymaster, const std::stri
+ static bool encryptWithKeymasterKey(Keymaster& keymaster, const std::string& dir,
+                                     const km::AuthorizationSet& keyParams,
+                                     const KeyBuffer& message, std::string* ciphertext) {
+-    km::AuthorizationSet opParams =
++    auto opParams =
+             km::AuthorizationSetBuilder()
+-                    .Authorization(km::TAG_ROLLBACK_RESISTANCE)
+                     .Authorization(km::TAG_PURPOSE, km::KeyPurpose::ENCRYPT);
++    auto opParamsWithRollback = opParams;
++    opParamsWithRollback.Authorization(km::TAG_ROLLBACK_RESISTANCE);
++
+     km::AuthorizationSet outParams;
+-    auto opHandle = BeginKeymasterOp(keymaster, dir, keyParams, opParams, &outParams);
++    auto opHandle = BeginKeymasterOp(keymaster, dir, keyParams, opParamsWithRollback, &outParams);
++    if (!opHandle) opHandle = BeginKeymasterOp(keymaster, dir, keyParams, opParams, &outParams);
+     if (!opHandle) return false;
+     auto nonceBlob = outParams.GetTagValue(km::TAG_NONCE);
+     if (!nonceBlob) {
+@@ -410,9 +413,12 @@ static bool decryptWithKeymasterKey(Keymaster& keymaster, const std::string& dir
+     auto bodyAndMac = ciphertext.substr(GCM_NONCE_BYTES);
+     auto opParams = km::AuthorizationSetBuilder()
+                             .Authorization(km::TAG_NONCE, nonce)
+-                            .Authorization(km::TAG_ROLLBACK_RESISTANCE)
+                             .Authorization(km::TAG_PURPOSE, km::KeyPurpose::DECRYPT);
+-    auto opHandle = BeginKeymasterOp(keymaster, dir, keyParams, opParams, nullptr);
++    auto opParamsWithRollback = opParams;
++    opParamsWithRollback.Authorization(km::TAG_ROLLBACK_RESISTANCE);
++
++    auto opHandle = BeginKeymasterOp(keymaster, dir, keyParams, opParamsWithRollback, nullptr);
++    if (!opHandle) opHandle = BeginKeymasterOp(keymaster, dir, keyParams, opParams, nullptr);
+     if (!opHandle) return false;
+     if (!opHandle.updateCompletely(bodyAndMac, message)) return false;
+     if (!opHandle.finish(nullptr)) return false;
+-- 
+2.25.1
+

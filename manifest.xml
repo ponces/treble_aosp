@@ -2,7 +2,7 @@
 <manifest>
   <remote name="phh" fetch="https://github.com/phhusson/" />
   <project path="vendor/hardware_overlay" name="vendor_hardware_overlay" remote="phh" revision="pie" />
-  <project path="device/phh/treble" name="device_phh_treble" remote="phh" revision="android-11.0" />
+  <project path="device/phh/treble" name="device_phh_treble" remote="phh" revision="android-12.0" />
   <project path="vendor/vndk-tests" name="vendor_vndk-tests" remote="phh" revision="master" />
   <project path="vendor/interfaces" name="vendor_interfaces" remote="phh" revision="android-11.0" />
   <project path="vendor/magisk" name="vendor_magisk" remote="phh" revision="android-10.0" />

@@ -1,0 +1,141 @@
+From fbb1688ba372b1370a3b74c43bac1c9945f54fa5 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 11 Oct 2021 17:08:41 +0100
+Subject: [PATCH] A12 fixes
+
+---
+ base.mk                        |  5 ++++-
+ board-base.mk                  |  1 +
+ generate.sh                    |  2 +-
+ phhgsi_a64_ab/BoardConfig.mk   |  2 +-
+ phhgsi_arm64_ab/BoardConfig.mk |  2 +-
+ rw-system.sh                   | 10 +++++++---
+ sepolicy/samsung.te            |  3 +++
+ sepolicy/treble_app.te         |  2 +-
+ 8 files changed, 19 insertions(+), 8 deletions(-)
+
+diff --git a/base.mk b/base.mk
+index 301fee9..e4e72cb 100644
+--- a/base.mk
++++ b/base.mk
+@@ -182,7 +182,7 @@ PRODUCT_COPY_FILES += \
+ 	device/phh/treble/privapp-permissions-me.phh.treble.app.xml:system/etc/permissions/privapp-permissions-me.phh.treble.app.xml
+ 
+ # Remote debugging
+-PRODUCT_COPY_FILES += \
++#PRODUCT_COPY_FILES += \
+ 	device/phh/treble/remote/dbclient:system/bin/dbclient \
+ 	device/phh/treble/remote/phh-remotectl.rc:system/etc/init/phh-remotectl.rc \
+ 	device/phh/treble/remote/phh-remotectl.sh:system/bin/phh-remotectl.sh \
+@@ -198,6 +198,7 @@ PRODUCT_PACKAGES += \
+ 
+ PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
+ 	debug.fdsan=warn_once \
++       ro.apex.updatable=false \
+ 
+ # AOSP overlays
+ PRODUCT_PACKAGES += \
+@@ -205,3 +206,5 @@ PRODUCT_PACKAGES += \
+ 
+ PRODUCT_PACKAGES += \
+ 	oplus-alert-slider
++
++include build/make/target/product/gsi_release.mk
+diff --git a/board-base.mk b/board-base.mk
+index 0da1061..d792c9c 100644
+--- a/board-base.mk
++++ b/board-base.mk
+@@ -4,3 +4,4 @@ TARGET_EXFAT_DRIVER := exfat
+ DEVICE_FRAMEWORK_MANIFEST_FILE := device/phh/treble/framework_manifest.xml
+ 
+ BOARD_ROOT_EXTRA_FOLDERS += bt_firmware sec_storage efs
++BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
+diff --git a/generate.sh b/generate.sh
+index c1494c7..b9647b9 100644
+--- a/generate.sh
++++ b/generate.sh
+@@ -79,7 +79,7 @@ for part in a ab;do
+ 				cat > ${target}.mk << EOF
+ TARGET_GAPPS_ARCH := ${baseArch}
+ \$(call inherit-product, device/phh/treble/base-pre.mk)
+-include build/make/target/product/aosp_${baseArch}_ab.mk
++include build/make/target/product/aosp_${baseArch}.mk
+ \$(call inherit-product, device/phh/treble/base.mk)
+ $optional_base
+ $apps_script
+diff --git a/phhgsi_a64_ab/BoardConfig.mk b/phhgsi_a64_ab/BoardConfig.mk
+index b14acfa..0cb3b97 100644
+--- a/phhgsi_a64_ab/BoardConfig.mk
++++ b/phhgsi_a64_ab/BoardConfig.mk
+@@ -1,4 +1,4 @@
+-include build/make/target/board/generic_arm_ab/BoardConfig.mk
++include build/make/target/board/generic_arm/BoardConfig.mk
+ include device/phh/treble/board-base.mk
+ 
+ ifeq ($(BOARD_SYSTEMIMAGE_PARTITION_RESERVED_SIZE),)
+diff --git a/phhgsi_arm64_ab/BoardConfig.mk b/phhgsi_arm64_ab/BoardConfig.mk
+index d987213..2fddc52 100644
+--- a/phhgsi_arm64_ab/BoardConfig.mk
++++ b/phhgsi_arm64_ab/BoardConfig.mk
+@@ -1,4 +1,4 @@
+-include build/make/target/board/generic_arm64_ab/BoardConfig.mk
++include build/make/target/board/generic_arm64/BoardConfig.mk
+ include device/phh/treble/board-base.mk
+ 
+ ifeq ($(BOARD_SYSTEMIMAGE_PARTITION_RESERVED_SIZE),)
+diff --git a/rw-system.sh b/rw-system.sh
+index 65dd3eb..9f0392d 100644
+--- a/rw-system.sh
++++ b/rw-system.sh
+@@ -73,8 +73,12 @@ fixSPL() {
+     if [ -n "$img" ]; then
+         #Rewrite SPL/Android version if needed
+         Arelease="$(getSPL "$img" android)"
++        spl="$(getSPL "$img" spl)"
+         setprop ro.keymaster.xxx.release "$Arelease"
+-        setprop ro.keymaster.xxx.security_patch "$(getSPL "$img" spl)"
++        setprop ro.keymaster.xxx.security_patch "$spl"
++        if [ -z "$Arelease" ] || [ -z "$spl" ]; then
++            return 0
++        fi
+         setprop ro.keymaster.brn Android
+ 
+         if getprop ro.vendor.build.fingerprint |grep -qiE 'samsung.*star.*lte';then
+@@ -660,8 +664,8 @@ if getprop ro.vendor.build.fingerprint |grep -q -e /ASUS_I006D:;then
+     mount /vendor/etc/audio/ZS590KS/audio_policy_configuration_ZS590KS.xml /vendor/etc/audio/sku_$sku/audio_policy_configuration.xml
+ fi
+ 
+-setprop ctl.stop console
+-dmesg -n 1
++#setprop ctl.stop console
++#dmesg -n 1
+ if [ -f /system/phh/secure ];then
+     copyprop() {
+         p="$(getprop "$2")"
+diff --git a/sepolicy/samsung.te b/sepolicy/samsung.te
+index 63f4edc..21fece0 100644
+--- a/sepolicy/samsung.te
++++ b/sepolicy/samsung.te
+@@ -2,3 +2,6 @@ type boot_prop, property_type;
+ 
+ set_prop(system_server, boot_prop);
+ 
++type hal_keymaster_default, domain;
++
++get_prop(hal_keymaster_default, default_prop);
+diff --git a/sepolicy/treble_app.te b/sepolicy/treble_app.te
+index 6bb46a8..1698334 100644
+--- a/sepolicy/treble_app.te
++++ b/sepolicy/treble_app.te
+@@ -28,7 +28,7 @@ allow system_app hal_tp_default:binder { call };
+ allow system_app vendor_default_prop:property_service { set };
+ 
+ set_prop(system_app, default_prop);
+-set_prop(system_app, exported3_default_prop);
++#set_prop(system_app, exported3_default_prop);
+ 
+ type mtk_hal_rild_hwservice, hwservice_manager_type;
+ allow system_app mtk_hal_rild_hwservice:hwservice_manager { find};
+-- 
+2.25.1
+

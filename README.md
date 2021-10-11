@@ -9,7 +9,7 @@ First, create a new working directory for your AOSP build and navigate to it:
 
 Initialize your AOSP workspace:
 
-    repo init -u https://android.googlesource.com/platform/manifest -b android-12.0.0_r2
+    repo init -u https://android.googlesource.com/platform/manifest -b android-12.0.0_r1
 
 Clone this repo:
 

@@ -1,0 +1,27 @@
+From 8ad70804f1f389335f14d520a3d597e5e25e112e Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Mon, 11 Oct 2021 17:32:42 +0100
+Subject: [PATCH] Fix netd for A40
+
+---
+ server/Controllers.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/server/Controllers.cpp b/server/Controllers.cpp
+index 1f2bac22..02a87a1b 100644
+--- a/server/Controllers.cpp
++++ b/server/Controllers.cpp
+@@ -289,8 +289,8 @@ void Controllers::init() {
+         // The expected reason we get here is a major kernel or other code bug, as such
+         // the probability that things will succeed on restart of netd is pretty small.
+         // So, let's wait a minute to at least try to limit the log spam a little bit.
+-        sleep(60);
+-        exit(1);
++        //sleep(60);
++        //exit(1);
+     }
+     gLog.info("Initializing traffic control: %" PRId64 "us", s.getTimeAndResetUs());
+ 
+-- 
+2.25.1
+

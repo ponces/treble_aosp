@@ -29,9 +29,6 @@ echo "Syncing repos"
 repo sync -c --force-sync --no-clone-bundle --no-tags -j$(nproc --all)
 echo ""
 
-echo "Cloning dependecy repos"
-[ ! -d sas-creator ] && git clone https://github.com/AndyCGYan/sas-creator
-
 echo "Setting up build environment"
 source build/envsetup.sh &> /dev/null
 echo ""
@@ -52,48 +49,14 @@ mkdir -p ~/builds
 
 buildVariant() {
     lunch ${1}-userdebug
-    make installclean
+    #make installclean
     make -j$(nproc --all) systemimage
-    make vndk-test-sepolicy
-    mv $OUT/system.img ~/builds/system-"$1".img
+    #make vndk-test-sepolicy
+    xz -c $OUT/system.img -T0 > ~/builds/system-roar-arm64-ab-vanilla.img.xz
 }
 
-buildSasImages() {
-    cd sas-creator
-    BASE_IMAGE=~/builds/system-treble_arm_bvN.img
-    if [ -f $BASE_IMAGE ]
-    then
-        sudo bash run.sh 32 $BASE_IMAGE
-        xz -c s.img -T0 > ~/builds/AOSP_arm-aonly-12.0-$BUILD_DATE-UNOFFICIAL.img.xz
-        xz -c $BASE_IMAGE -T0 > ~/builds/AOSP_arm-ab-12.0-$BUILD_DATE-UNOFFICIAL.img.xz
-        rm -rf $BASE_IMAGE
-    fi
-    BASE_IMAGE=~/builds/system-treble_a64_bvN.img
-    if [ -f $BASE_IMAGE ]
-    then
-        sudo bash lite-adapter.sh 32 $BASE_IMAGE
-        xz -c s.img -T0 > ~/builds/AOSP_arm32_binder64-ab-vndklite-12.0-$BUILD_DATE-UNOFFICIAL.img.xz
-        xz -c $BASE_IMAGE -T0 > ~/builds/AOSP_arm32_binder64-ab-12.0-$BUILD_DATE-UNOFFICIAL.img.xz
-        rm -rf $BASE_IMAGE
-    fi
-    BASE_IMAGE=~/builds/system-treble_arm64_bvN.img
-    if [ -f $BASE_IMAGE ]
-    then
-        sudo bash run.sh 64 $BASE_IMAGE
-        xz -c s.img -T0 > ~/builds/AOSP_arm64-aonly-12.0-$BUILD_DATE-UNOFFICIAL.img.xz
-        sudo bash lite-adapter.sh 64 $BASE_IMAGE
-        xz -c s.img -T0 > ~/builds/AOSP_arm64-ab-vndklite-12.0-$BUILD_DATE-UNOFFICIAL.img.xz
-        xz -c $BASE_IMAGE -T0 > ~/builds/AOSP_arm64-ab-12.0-$BUILD_DATE-UNOFFICIAL.img.xz
-        rm -rf $BASE_IMAGE
-    fi
-    cd ..
-}
-
-buildVariant treble_arm_bvN
-buildVariant treble_a64_bvN
 buildVariant treble_arm64_bvN
 buildSasImages
-ls ~/builds | grep AOSP
 
 END=`date +%s`
 ELAPSEDM=$(($(($END-$START))/60))
