@@ -34,10 +34,10 @@ source build/envsetup.sh &> /dev/null
 echo ""
 
 echo "Applying PHH patches"
+bash $BL/apply-patches.sh $BL
 cd device/phh/treble
 bash generate.sh
 cd ../../..
-bash $BL/apply-patches.sh $BL
 echo ""
 
 echo "CHECK PATCH STATUS NOW!"
@@ -49,14 +49,12 @@ mkdir -p ~/builds
 
 buildVariant() {
     lunch ${1}-userdebug
-    #make installclean
     make -j$(nproc --all) systemimage
-    #make vndk-test-sepolicy
+    make vndk-test-sepolicy
     xz -c $OUT/system.img -T0 > ~/builds/system-roar-arm64-ab-vanilla.img.xz
 }
 
 buildVariant treble_arm64_bvN
-buildSasImages
 
 END=`date +%s`
 ELAPSEDM=$(($(($END-$START))/60))
