@@ -50,14 +50,14 @@ index 10891819de..c3c82abd4f 100644
                  uint16_t major, minor;
                  std::string type, id;
                  status_t res = parseDeviceName(name, &major, &minor, &type, &id);
-@@ -1462,7 +1466,9 @@ status_t CameraProviderManager::ProviderInfo::initialize(
+@@ -1462,7 +1462,9 @@ status_t CameraProviderManager::ProviderInfo::initialize(
              }
-         } });
+         } };
      hardware::Return<void> ret;
 -    if(samsungProvider != nullptr && property_get_bool("persist.sys.phh.samsung.camera_ids", false))
 +    if(samsung40Provider != nullptr && property_get_bool("persist.sys.phh.samsung.camera_ids", false))
 +        ret = samsung40Provider->sehGetCameraIdList(cb);
-+    else if(samsungProvider != nullptr && property_get_bool("persist.sys.phh.samsung.camera_ids", false)
++    else if(samsungProvider != nullptr && property_get_bool("persist.sys.phh.samsung.camera_ids", false))
          ret = samsungProvider->sehGetCameraIdList(cb);
      else
          ret = interface->getCameraIdList(cb);

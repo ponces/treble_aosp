@@ -11,10 +11,19 @@ is ongoing, this will help the investigation.
  1 file changed, 5 insertions(+)
 
 diff --git a/hci/src/hci_packet_parser.cc b/hci/src/hci_packet_parser.cc
-index 88dc4c6cd..3bd0efe21 100644
+index 6bd6a5233..0f621c47d 100644
 --- a/hci/src/hci_packet_parser.cc
 +++ b/hci/src/hci_packet_parser.cc
-@@ -107,6 +107,11 @@ static void parse_read_local_supported_commands_response(
+@@ -27,6 +27,8 @@
+ #include "hcimsgs.h"
+ #include "osi/include/log.h"
+ 
++#include <cutils/properties.h>
++
+ static const command_opcode_t NO_OPCODE_CHECKING = 0;
+ 
+ static const allocator_t* buffer_allocator;
+@@ -105,6 +107,11 @@ static void parse_read_local_supported_commands_response(
    STREAM_TO_ARRAY(supported_commands_ptr, stream,
                    (int)supported_commands_length);
  

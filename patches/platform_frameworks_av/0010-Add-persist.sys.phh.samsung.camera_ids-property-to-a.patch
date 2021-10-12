@@ -23,7 +23,7 @@ index 26562e0426..330d970567 100644
  
      static_libs: [
 diff --git a/services/camera/libcameraservice/common/CameraProviderManager.cpp b/services/camera/libcameraservice/common/CameraProviderManager.cpp
-index 4f2b878d26..4e14946371 100644
+index 4f2b878d26..adbbebf5dc 100644
 --- a/services/camera/libcameraservice/common/CameraProviderManager.cpp
 +++ b/services/camera/libcameraservice/common/CameraProviderManager.cpp
 @@ -21,6 +21,7 @@
@@ -53,10 +53,12 @@ index 4f2b878d26..4e14946371 100644
              Status idStatus,
              const hardware::hidl_vec<hardware::hidl_string>& cameraDeviceNames) {
          status = idStatus;
-@@ -1455,6 +1459,11 @@ status_t CameraProviderManager::ProviderInfo::initialize(
+@@ -1454,7 +1458,12 @@ status_t CameraProviderManager::ProviderInfo::initialize(
+                     mProviderPublicCameraIds.push_back(id);
                  }
              }
-         } });
+-        } });
++        } };
 +    hardware::Return<void> ret;
 +    if(samsungProvider != nullptr && property_get_bool("persist.sys.phh.samsung.camera_ids", false))
 +        ret = samsungProvider->sehGetCameraIdList(cb);
