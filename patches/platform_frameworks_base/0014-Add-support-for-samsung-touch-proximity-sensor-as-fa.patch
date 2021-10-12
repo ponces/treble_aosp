@@ -1,0 +1,45 @@
+From de4e7f24f2c5961c6eea8eda853c59800a9eef30 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 12 Aug 2019 23:08:26 +0200
+Subject: [PATCH 14/51] Add support for samsung touch proximity sensor as
+ fallback to real proximity sensor
+
+---
+ .../server/display/DisplayPowerController.java     | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/services/core/java/com/android/server/display/DisplayPowerController.java b/services/core/java/com/android/server/display/DisplayPowerController.java
+index 7c0f4197363b..f3cf0938e069 100644
+--- a/services/core/java/com/android/server/display/DisplayPowerController.java
++++ b/services/core/java/com/android/server/display/DisplayPowerController.java
+@@ -533,6 +533,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
+ 
+         if (!DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
+             mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
++            if(mProximitySensor == null) {
++                List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
++                for(Sensor sensor: sensors) {
++                    if("com.samsung.sensor.touch_proximity".equals(sensor.getStringType()))
++                        mProximitySensor = sensor;
++                }
++            }
+             if (mProximitySensor != null) {
+                 mProximityThreshold = Math.min(mProximitySensor.getMaximumRange(),
+                         TYPICAL_PROXIMITY_THRESHOLD);
+@@ -2031,6 +2038,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
+         public void onSensorChanged(SensorEvent event) {
+             if (mProximitySensorEnabled) {
+                 final long time = SystemClock.uptimeMillis();
++                if("com.samsung.sensor.touch_proximity".equals(mProximitySensor.getStringType())) {
++                    int v = (int)event.values[0];
++                    boolean positive = (v <= 4);
++                    android.util.Log.d("PHH", "Samsung sensor changed " + positive + ":" + v);
++                    handleProximitySensorEvent(time, positive);
++                    return;
++                }
+                 final float distance = event.values[0];
+                 boolean positive = distance >= 0.0f && distance < mProximityThreshold;
+                 handleProximitySensorEvent(time, positive);
+-- 
+2.25.1
+

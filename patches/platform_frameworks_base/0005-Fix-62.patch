@@ -1,0 +1,28 @@
+From f96acd51edfa69435f7ffe91bafc14627979e442 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Wed, 30 May 2018 14:05:30 +0200
+Subject: [PATCH 05/51] Fix(?) #62
+
+---
+ .../src/com/android/keyguard/KeyguardUpdateMonitor.java      | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java b/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
+index deaa4255c2f1..9e47f2de9ac0 100644
+--- a/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
++++ b/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
+@@ -1280,7 +1280,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+ 
+         @Override
+         public void onAuthenticationError(int errMsgId, CharSequence errString) {
+-            handleFingerprintError(errMsgId, errString.toString());
++            if(errString != null)
++                 handleFingerprintError(errMsgId, errString.toString());
++            else
++                 handleFingerprintError(errMsgId, "unknown error");
+         }
+ 
+         @Override
+-- 
+2.25.1
+

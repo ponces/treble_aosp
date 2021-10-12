@@ -1,0 +1,31 @@
+From b9ec9f21b66da9a625f3a2671ed36b28a3611485 Mon Sep 17 00:00:00 2001
+From: Wang Han <wanghan1995315@gmail.com>
+Date: Sun, 11 Oct 2020 12:25:17 +0000
+Subject: [PATCH 38/51] SystemUI: Relax AVC level requirement
+
+ * Android only forces AVCLevel 3, and it is common for modern devices
+   to use AVCLevel 4. Considered that there is no checks if this level
+   is supported, downgrade the requirement to get screen recording work
+   on older devices.
+
+Change-Id: I049e72602bdec934470e2313c05f10ca72570c5b
+---
+ .../com/android/systemui/screenrecord/ScreenMediaRecorder.java  | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenMediaRecorder.java b/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenMediaRecorder.java
+index 1a9abb9cf27d..e6f43c1ff1d2 100644
+--- a/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenMediaRecorder.java
++++ b/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenMediaRecorder.java
+@@ -132,7 +132,7 @@ public class ScreenMediaRecorder {
+         mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+         mMediaRecorder.setVideoEncodingProfileLevel(
+                 MediaCodecInfo.CodecProfileLevel.AVCProfileHigh,
+-                MediaCodecInfo.CodecProfileLevel.AVCLevel42);
++                MediaCodecInfo.CodecProfileLevel.AVCLevel3);
+         mMediaRecorder.setVideoSize(screenWidth, screenHeight);
+         mMediaRecorder.setVideoFrameRate(refereshRate);
+         mMediaRecorder.setVideoEncodingBitRate(vidBitRate);
+-- 
+2.25.1
+
