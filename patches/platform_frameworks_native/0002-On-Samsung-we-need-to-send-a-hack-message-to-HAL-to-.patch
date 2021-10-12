@@ -11,10 +11,10 @@ Change-Id: Id6a1fa48340de61c418493668e9abd22c2599376
  2 files changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/opengl/libs/EGL/egl_platform_entries.cpp b/opengl/libs/EGL/egl_platform_entries.cpp
-index 1c6380f6f1..6e810e5923 100644
+index 64bfe6a97e..3638c02ccc 100644
 --- a/opengl/libs/EGL/egl_platform_entries.cpp
 +++ b/opengl/libs/EGL/egl_platform_entries.cpp
-@@ -457,7 +457,7 @@ EGLBoolean eglGetConfigAttribImpl(EGLDisplay dpy, EGLConfig config,
+@@ -407,7 +407,7 @@ EGLBoolean eglGetConfigAttribImpl(EGLDisplay dpy, EGLConfig config, EGLint attri
  static int samsungColorspace = -1;
  static android_dataspace dataSpaceFromEGLColorSpace(EGLint colorspace) {
      if(samsungColorspace == -1) {
@@ -24,23 +24,22 @@ index 1c6380f6f1..6e810e5923 100644
      if (colorspace == EGL_GL_COLORSPACE_LINEAR_KHR) {
          if(samsungColorspace)
 diff --git a/services/sensorservice/SensorDevice.cpp b/services/sensorservice/SensorDevice.cpp
-index e355594176..99b10faf50 100644
+index c233bf06cf..082ceb427e 100644
 --- a/services/sensorservice/SensorDevice.cpp
 +++ b/services/sensorservice/SensorDevice.cpp
-@@ -34,7 +34,9 @@
+@@ -34,6 +34,8 @@
  #include <cinttypes>
  #include <thread>
  
 +#include <android-base/properties.h>
- using namespace android::hardware::sensors;
 +
+ using namespace android::hardware::sensors;
  using namespace android::hardware::sensors::V1_0;
  using namespace android::hardware::sensors::V1_0::implementation;
- using android::hardware::sensors::V2_0::EventQueueFlagBits;
-@@ -134,6 +136,8 @@ SensorDevice::SensorDevice()
- void SensorDevice::initializeSensorList() {
-     float minPowerMa = 0.001; // 1 microAmp
+@@ -132,6 +134,8 @@ SensorDevice::SensorDevice()
+ }
  
+ void SensorDevice::initializeSensorList() {
 +    if(::android::base::GetBoolProperty("persist.sys.phh.samsung_sensors", false))
 +        setMode(5555);
      checkReturn(mSensors->getSensorsList(

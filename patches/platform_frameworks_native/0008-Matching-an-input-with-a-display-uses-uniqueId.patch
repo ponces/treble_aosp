@@ -15,14 +15,13 @@ Change-Id: Ifcbc8329d54386f58e013270d9888316c0f516b6
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/services/inputflinger/reader/InputDevice.cpp b/services/inputflinger/reader/InputDevice.cpp
-index 3347ba6ad7..67a3c565f9 100644
+index 7af014cb34..ea5b7f1985 100644
 --- a/services/inputflinger/reader/InputDevice.cpp
 +++ b/services/inputflinger/reader/InputDevice.cpp
-@@ -279,7 +279,10 @@ void InputDevice::configure(nsecs_t when, const InputReaderConfiguration* config
-             mAssociatedDisplayPort = std::nullopt;
+@@ -304,6 +304,10 @@ void InputDevice::configure(nsecs_t when, const InputReaderConfiguration* config
              mAssociatedViewport = std::nullopt;
              // Find the display port that corresponds to the current input port.
--            const std::string& inputPort = mIdentifier.location;
+             const std::string& inputPort = mIdentifier.location;
 +            std::string inputPort = mIdentifier.location;
 +            if (inputPort.empty()) {
 +                inputPort = mIdentifier.uniqueId;

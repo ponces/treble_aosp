@@ -6,6 +6,8 @@
   <project path="vendor/vndk-tests" name="vendor_vndk-tests" remote="phh" revision="master" />
   <project path="vendor/interfaces" name="vendor_interfaces" remote="phh" revision="android-11.0" />
   <project path="vendor/magisk" name="vendor_magisk" remote="phh" revision="android-10.0" />
-  <remote name="relan" fetch="https://github.com/relan/" />
-  <project path="external/exfat" name="exfat" remote="relan" revision="master" />
+  <remote name="relan" fetch="https://github.com/relan/" revision="master" />
+  <project path="external/exfat" name="exfat" remote="relan" />
+  <remote name="pixel-gitlab" fetch="https://gitlab.com/PixelExperience/" revision="twelve" />
+  <project path="vendor/gapps" name="vendor_gapps" remote="pixel-gitlab" clone-depth="1" />
 </manifest>
