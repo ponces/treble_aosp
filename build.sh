@@ -51,10 +51,10 @@ buildVariant() {
     lunch ${1}-userdebug
     make -j$(nproc --all) systemimage
     make vndk-test-sepolicy
-    xz -c $OUT/system.img -T0 > ~/builds/system-roar-arm64-ab-vanilla.img.xz
+    xz -c $OUT/system.img -T0 > ~/builds/system-s-arm64-ab-gapps.img.xz
 }
 
-buildVariant treble_arm64_bvN
+buildVariant treble_arm64_bgN
 
 END=`date +%s`
 ELAPSEDM=$(($(($END-$START))/60))

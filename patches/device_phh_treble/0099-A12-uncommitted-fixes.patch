@@ -1,7 +1,7 @@
-From fbb1688ba372b1370a3b74c43bac1c9945f54fa5 Mon Sep 17 00:00:00 2001
+From 8ad70804f1f389335f14d520a3d597e5e25e112e Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
-Date: Mon, 11 Oct 2021 17:08:41 +0100
-Subject: [PATCH] A12 fixes
+Date: Mon, 11 Oct 2021 17:32:42 +0100
+Subject: [PATCH] A12 uncommitted fixes
 
 ---
  base.mk                        |  5 ++++-
@@ -15,7 +15,7 @@ Subject: [PATCH] A12 fixes
  8 files changed, 19 insertions(+), 8 deletions(-)
 
 diff --git a/base.mk b/base.mk
-index 301fee9..e4e72cb 100644
+index 301fee9..699901d 100644
 --- a/base.mk
 +++ b/base.mk
 @@ -182,7 +182,7 @@ PRODUCT_COPY_FILES += \
@@ -31,7 +31,7 @@ index 301fee9..e4e72cb 100644
  
  PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
  	debug.fdsan=warn_once \
-+       ro.apex.updatable=false \
++	ro.apex.updatable=false \
  
  # AOSP overlays
  PRODUCT_PACKAGES += \
@@ -42,14 +42,15 @@ index 301fee9..e4e72cb 100644
 +
 +include build/make/target/product/gsi_release.mk
 diff --git a/board-base.mk b/board-base.mk
-index 0da1061..d792c9c 100644
+index 0da1061..3ca68d2 100644
 --- a/board-base.mk
 +++ b/board-base.mk
-@@ -4,3 +4,4 @@ TARGET_EXFAT_DRIVER := exfat
+@@ -4,3 +4,5 @@ TARGET_EXFAT_DRIVER := exfat
  DEVICE_FRAMEWORK_MANIFEST_FILE := device/phh/treble/framework_manifest.xml
  
  BOARD_ROOT_EXTRA_FOLDERS += bt_firmware sec_storage efs
 +BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
++BOARD_EXT4_SHARE_DUP_BLOCKS := false
 diff --git a/generate.sh b/generate.sh
 index c1494c7..b9647b9 100644
 --- a/generate.sh
@@ -64,12 +65,12 @@ index c1494c7..b9647b9 100644
  $optional_base
  $apps_script
 diff --git a/phhgsi_a64_ab/BoardConfig.mk b/phhgsi_a64_ab/BoardConfig.mk
-index b14acfa..0cb3b97 100644
+index b14acfa..619b5d0 100644
 --- a/phhgsi_a64_ab/BoardConfig.mk
 +++ b/phhgsi_a64_ab/BoardConfig.mk
 @@ -1,4 +1,4 @@
 -include build/make/target/board/generic_arm_ab/BoardConfig.mk
-+include build/make/target/board/generic_arm/BoardConfig.mk
++include build/make/target/board/generic/BoardConfig.mk
  include device/phh/treble/board-base.mk
  
  ifeq ($(BOARD_SYSTEMIMAGE_PARTITION_RESERVED_SIZE),)
@@ -113,16 +114,22 @@ index 65dd3eb..9f0392d 100644
      copyprop() {
          p="$(getprop "$2")"
 diff --git a/sepolicy/samsung.te b/sepolicy/samsung.te
-index 63f4edc..21fece0 100644
+index 63f4edc..613ec01 100644
 --- a/sepolicy/samsung.te
 +++ b/sepolicy/samsung.te
-@@ -2,3 +2,6 @@ type boot_prop, property_type;
+@@ -2,3 +2,12 @@ type boot_prop, property_type;
  
  set_prop(system_server, boot_prop);
  
++
++#Access to fake keymaster SPL/Android version props
 +type hal_keymaster_default, domain;
 +
 +get_prop(hal_keymaster_default, default_prop);
++
++type hal_keymaster_qti, domain;
++
++get_prop(hal_keymaster_qti, default_prop);
 diff --git a/sepolicy/treble_app.te b/sepolicy/treble_app.te
 index 6bb46a8..1698334 100644
 --- a/sepolicy/treble_app.te

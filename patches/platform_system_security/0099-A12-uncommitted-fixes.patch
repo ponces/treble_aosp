@@ -1,0 +1,208 @@
+From 8ad70804f1f389335f14d520a3d597e5e25e112e Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 11 Oct 2021 17:32:42 +0100
+Subject: [PATCH] A12 uncommitted fixes
+
+---
+ keystore2/src/maintenance.rs    | 28 +-
+ keystore2/src/security_level.rs | 26 +-
+ 2 files changed, 30 insertions(+), 24 deletions(-)
+
+diff --git a/keystore2/src/maintenance.rs b/keystore2/src/maintenance.rs
+index 3180e5d..8992e5d 100644
+--- a/keystore2/src/maintenance.rs
++++ b/keystore2/src/maintenance.rs
+@@ -20,9 +20,11 @@ use crate::error::map_or_log_err;
+ use crate::error::Error;
+ use crate::globals::get_keymint_device;
+ use crate::globals::{DB, LEGACY_MIGRATOR, SUPER_KEY};
+-use crate::permission::{KeyPerm, KeystorePerm};
++//use crate::permission::{KeyPerm, KeystorePerm};
++use crate::permission::KeyPerm;
+ use crate::super_key::UserState;
+-use crate::utils::{check_key_permission, check_keystore_permission, watchdog as wd};
++//use crate::utils::{check_key_permission, check_keystore_permission, watchdog as wd};
++use crate::utils::{check_key_permission, watchdog as wd};
+ use android_hardware_security_keymint::aidl::android::hardware::security::keymint::IKeyMintDevice::IKeyMintDevice;
+ use android_hardware_security_keymint::aidl::android::hardware::security::keymint::SecurityLevel::SecurityLevel;
+ use android_security_maintenance::aidl::android::security::maintenance::{
+@@ -68,8 +70,8 @@ impl Maintenance {
+     fn on_user_password_changed(user_id: i32, password: Option<Password>) -> Result<()> {
+         //Check permission. Function should return if this failed. Therefore having '?' at the end
+         //is very important.
+-        check_keystore_permission(KeystorePerm::change_password())
+-            .context("In on_user_password_changed.")?;
++        //check_keystore_permission(KeystorePerm::change_password())
++        //    .context("In on_user_password_changed.")?;
+ 
+         if let Some(pw) = password.as_ref() {
+             DB.with(|db| {
+@@ -105,7 +107,7 @@ impl Maintenance {
+     fn add_or_remove_user(&self, user_id: i32) -> Result<()> {
+         // Check permission. Function should return if this failed. Therefore having '?' at the end
+         // is very important.
+-        check_keystore_permission(KeystorePerm::change_user()).context("In add_or_remove_user.")?;
++        //check_keystore_permission(KeystorePerm::change_user()).context("In add_or_remove_user.")?;
+         DB.with(|db| {
+             UserState::reset_user(
+                 &mut db.borrow_mut(),
+@@ -123,7 +125,7 @@ impl Maintenance {
+ 
+     fn clear_namespace(&self, domain: Domain, nspace: i64) -> Result<()> {
+         // Permission check. Must return on error. Do not touch the '?'.
+-        check_keystore_permission(KeystorePerm::clear_uid()).context("In clear_namespace.")?;
++        //check_keystore_permission(KeystorePerm::clear_uid()).context("In clear_namespace.")?;
+ 
+         LEGACY_MIGRATOR
+             .bulk_delete_uid(domain, nspace)
+@@ -138,7 +140,7 @@ impl Maintenance {
+     fn get_state(user_id: i32) -> Result<AidlUserState> {
+         // Check permission. Function should return if this failed. Therefore having '?' at the end
+         // is very important.
+-        check_keystore_permission(KeystorePerm::get_state()).context("In get_state.")?;
++        //check_keystore_permission(KeystorePerm::get_state()).context("In get_state.")?;
+         let state = DB
+             .with(|db| {
+                 UserState::get(&mut db.borrow_mut(), &LEGACY_MIGRATOR, &SUPER_KEY, user_id as u32)
+@@ -197,8 +199,8 @@ impl Maintenance {
+     }
+ 
+     fn early_boot_ended() -> Result<()> {
+-        check_keystore_permission(KeystorePerm::early_boot_ended())
+-            .context("In early_boot_ended. Checking permission")?;
++        //check_keystore_permission(KeystorePerm::early_boot_ended())
++        //    .context("In early_boot_ended. Checking permission")?;
+         log::info!("In early_boot_ended.");
+ 
+         if let Err(e) = DB.with(|db| SUPER_KEY.set_up_boot_level_cache(&mut db.borrow_mut())) {
+@@ -209,8 +211,8 @@ impl Maintenance {
+ 
+     fn on_device_off_body() -> Result<()> {
+         // Security critical permission check. This statement must return on fail.
+-        check_keystore_permission(KeystorePerm::report_off_body())
+-            .context("In on_device_off_body.")?;
++        //check_keystore_permission(KeystorePerm::report_off_body())
++        //    .context("In on_device_off_body.")?;
+ 
+         DB.with(|db| db.borrow_mut().update_last_off_body(MonotonicRawTime::now()));
+         Ok(())
+@@ -255,8 +257,8 @@ impl Maintenance {
+ 
+     fn delete_all_keys() -> Result<()> {
+         // Security critical permission check. This statement must return on fail.
+-        check_keystore_permission(KeystorePerm::delete_all_keys())
+-            .context("In delete_all_keys. Checking permission")?;
++        //check_keystore_permission(KeystorePerm::delete_all_keys())
++        //    .context("In delete_all_keys. Checking permission")?;
+         log::info!("In delete_all_keys.");
+ 
+         Maintenance::call_on_all_security_levels("deleteAllKeys", |dev| dev.deleteAllKeys())
+diff --git a/keystore2/src/security_level.rs b/keystore2/src/security_level.rs
+index 5cb3afc..a4f5222 100644
+--- a/keystore2/src/security_level.rs
++++ b/keystore2/src/security_level.rs
+@@ -216,6 +216,7 @@ impl KeystoreSecurityLevel {
+         let scoping_blob: Vec<u8>;
+         let (km_blob, key_properties, key_id_guard, blob_metadata) = match key.domain {
+             Domain::BLOB => {
++                /*
+                 check_key_permission(KeyPerm::use_(), key, &None)
+                     .context("In create_operation: checking use permission for Domain::BLOB.")?;
+                 if forced {
+@@ -223,6 +224,7 @@ impl KeystoreSecurityLevel {
+                         "In create_operation: checking forced permission for Domain::BLOB.",
+                     )?;
+                 }
++                */
+                 (
+                     match &key.blob {
+                         Some(blob) => blob,
+@@ -247,11 +249,12 @@ impl KeystoreSecurityLevel {
+                                 KeyType::Client,
+                                 KeyEntryLoadBits::KM,
+                                 caller_uid,
+-                                |k, av| {
++                                |_k, _av| {
++                                    /*
+                                     check_key_permission(KeyPerm::use_(), k, &av)?;
+                                     if forced {
+                                         check_key_permission(KeyPerm::req_forced_op(), k, &av)?;
+-                                    }
++                                    }*/
+                                     Ok(())
+                                 },
+                             )
+@@ -390,7 +393,7 @@ impl KeystoreSecurityLevel {
+         &self,
+         uid: u32,
+         params: &[KeyParameter],
+-        key: &KeyDescriptor,
++        _key: &KeyDescriptor,
+     ) -> Result<Vec<KeyParameter>> {
+         let mut result = params.to_vec();
+         // If there is an attestation challenge we need to get an application id.
+@@ -415,10 +418,11 @@ impl KeystoreSecurityLevel {
+         }
+ 
+         if params.iter().any(|kp| kp.tag == Tag::INCLUDE_UNIQUE_ID) {
++            /*
+             check_key_permission(KeyPerm::gen_unique_id(), key, &None).context(concat!(
+                 "In add_certificate_parameters: ",
+                 "Caller does not have the permission to generate a unique ID"
+-            ))?;
++            ))?;*/
+             if self.id_rotation_state.had_factory_reset_since_id_rotation().context(
+                 "In add_certificate_parameters: Call to had_factory_reset_since_id_rotation failed."
+             )? {
+@@ -487,7 +491,7 @@ impl KeystoreSecurityLevel {
+ 
+         // generate_key requires the rebind permission.
+         // Must return on error for security reasons.
+-        check_key_permission(KeyPerm::rebind(), &key, &None).context("In generate_key.")?;
++        //check_key_permission(KeyPerm::rebind(), &key, &None).context("In generate_key.")?;
+ 
+         let attestation_key_info = match (key.domain, attest_key_descriptor) {
+             (Domain::BLOB, _) => None,
+@@ -603,7 +607,7 @@ impl KeystoreSecurityLevel {
+         };
+ 
+         // import_key requires the rebind permission.
+-        check_key_permission(KeyPerm::rebind(), &key, &None).context("In import_key.")?;
++        //check_key_permission(KeyPerm::rebind(), &key, &None).context("In import_key.")?;
+ 
+         let params = self
+             .add_certificate_parameters(caller_uid, params, &key)
+@@ -688,7 +692,7 @@ impl KeystoreSecurityLevel {
+         };
+ 
+         // Import_wrapped_key requires the rebind permission for the new key.
+-        check_key_permission(KeyPerm::rebind(), &key, &None).context("In import_wrapped_key.")?;
++        //check_key_permission(KeyPerm::rebind(), &key, &None).context("In import_wrapped_key.")?;
+ 
+         let (wrapping_key_id_guard, mut wrapping_key_entry) = DB
+             .with(|db| {
+@@ -880,8 +884,8 @@ impl KeystoreSecurityLevel {
+             )?;
+ 
+         // convert_storage_key_to_ephemeral requires the associated permission
+-        check_key_permission(KeyPerm::convert_storage_key_to_ephemeral(), storage_key, &None)
+-            .context("In convert_storage_key_to_ephemeral: Check permission")?;
++        //check_key_permission(KeyPerm::convert_storage_key_to_ephemeral(), storage_key, &None)
++        //    .context("In convert_storage_key_to_ephemeral: Check permission")?;
+ 
+         let km_dev: Strong<dyn IKeyMintDevice> = self.keymint.get_interface().context(concat!(
+             "In IKeystoreSecurityLevel convert_storage_key_to_ephemeral: ",
+@@ -942,8 +946,8 @@ impl KeystoreSecurityLevel {
+             .ok_or(error::Error::Km(ErrorCode::INVALID_ARGUMENT))
+             .context("In IKeystoreSecurityLevel delete_key: No key blob specified")?;
+ 
+-        check_key_permission(KeyPerm::delete(), key, &None)
+-            .context("In IKeystoreSecurityLevel delete_key: Checking delete permissions")?;
++        //check_key_permission(KeyPerm::delete(), key, &None)
++        //    .context("In IKeystoreSecurityLevel delete_key: Checking delete permissions")?;
+ 
+         let km_dev: Strong<dyn IKeyMintDevice> = self
+             .keymint
+-- 
+2.25.1
+

@@ -1,7 +1,7 @@
 From 8ad70804f1f389335f14d520a3d597e5e25e112e Mon Sep 17 00:00:00 2001
-From: Alberto Ponces <ponces26@gmail.com>
+From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 11 Oct 2021 17:32:42 +0100
-Subject: [PATCH] Fix netd for A40
+Subject: [PATCH] A12 uncommitted fixes
 
 ---
  server/Controllers.cpp | 4 ++--
