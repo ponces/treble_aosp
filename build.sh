@@ -54,8 +54,8 @@ buildVariant() {
     xz -c $OUT/system.img -T0 > ~/builds/system-s-arm64-ab-gapps.img.xz
 }
 
-#buildVariant treble_arm64_bgN
-buildVariant treble_arm64_bvN
+buildVariant treble_arm64_bgN
+#buildVariant treble_arm64_bvN
 
 END=`date +%s`
 ELAPSEDM=$(($(($END-$START))/60))
