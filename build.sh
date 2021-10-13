@@ -34,7 +34,8 @@ source build/envsetup.sh &> /dev/null
 echo ""
 
 echo "Applying PHH patches"
-bash $BL/apply-patches.sh $BL
+bash $BL/apply-patches.sh $BL old
+bash $BL/apply-patches.sh $BL new
 cd device/phh/treble
 bash generate.sh
 cd ../../..
