@@ -1,11 +1,12 @@
-From 8ad70804f1f389335f14d520a3d597e5e25e112e Mon Sep 17 00:00:00 2001
+From 1babe124330ea693d4a3d6761b2c78d7a035aa4e Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
-Date: Mon, 11 Oct 2021 17:32:42 +0100
-Subject: [PATCH] A12 uncommitted fixes
+Date: Wed, 13 Oct 2021 10:56:52 -0400
+Subject: [PATCH] Support no-bpf usecase
 
+Change-Id: I75a427a2a41aa4ab1104ad88a891bef0dc2d9c91
 ---
- bpfloader/BpfLoader.cpp | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ bpfloader/BpfLoader.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/bpfloader/BpfLoader.cpp b/bpfloader/BpfLoader.cpp
 index 7a68894..2d491a3 100644
@@ -17,8 +18,8 @@ index 7a68894..2d491a3 100644
              ALOGE("--- DO NOT EXPECT SYSTEM TO BOOT SUCCESSFULLY ---");
 -            sleep(20);
 -            return 2;
-+            android::base::SetProperty("bpf.progs_loaded", "1");
-+            return 0;
++	    android::base::SetProperty("bpf.progs_loaded", "1");
++	    return 0;
          }
      }
  

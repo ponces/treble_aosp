@@ -50,7 +50,6 @@ mkdir -p ~/builds
 buildVariant() {
     lunch ${1}-userdebug
     make -j$(nproc --all) systemimage
-    make vndk-test-sepolicy
     xz -c $OUT/system.img -T0 > ~/builds/system-s-arm64-ab-gapps.img.xz
 }
 
