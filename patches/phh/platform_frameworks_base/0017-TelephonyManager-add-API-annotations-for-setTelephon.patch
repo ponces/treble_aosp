@@ -1,0 +1,41 @@
+From a8196c8a79be3e14b4b708d57db183d8f0e76754 Mon Sep 17 00:00:00 2001
+From: Peter Cai <peter@typeblog.net>
+Date: Wed, 16 Dec 2020 21:26:45 +0800
+Subject: [PATCH 17/21] TelephonyManager: add API annotations for
+ setTelephonyProperty
+
+* This method was added back by reverting commit
+  debb4616ef67f9ed5054eca51ec58592358ff55f, but they do not conform to
+  the new R API requirements.
+
+* R requires such annotations.
+---
+ telephony/java/android/telephony/TelephonyManager.java | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/telephony/java/android/telephony/TelephonyManager.java b/telephony/java/android/telephony/TelephonyManager.java
+index 674d09c3..a7f32cb0 100644
+--- a/telephony/java/android/telephony/TelephonyManager.java
++++ b/telephony/java/android/telephony/TelephonyManager.java
+@@ -7469,7 +7469,7 @@ public class TelephonyManager {
+      * @hide
+      */
+     @UnsupportedAppUsage
+-    public static void setTelephonyProperty(int phoneId, String property, String value) {
++    public static void setTelephonyProperty(int phoneId, @NonNull String property, @Nullable String value) {
+         String propVal = "";
+         String p[] = null;
+         String prop = SystemProperties.get(property);
+@@ -7523,7 +7523,8 @@ public class TelephonyManager {
+      *
+      * @hide
+      */
+-    public static void setTelephonyProperty(String property, String value) {
++    @UnsupportedAppUsage
++    public static void setTelephonyProperty(@NonNull String property, @Nullable String value) {
+         if (value == null) {
+             value = "";
+         }
+-- 
+2.25.1
+

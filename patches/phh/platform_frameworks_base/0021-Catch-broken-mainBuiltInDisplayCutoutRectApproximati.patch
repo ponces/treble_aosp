@@ -1,0 +1,48 @@
+From d5447a50834c48f1f5811858393946d17ed6137c Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 23 Mar 2021 19:43:26 +0100
+Subject: [PATCH 21/21] Catch broken mainBuiltInDisplayCutoutRectApproximation
+
+Some devices (Redmi Note 9T) have:
+mainBuiltInDisplayCutoutRectApproximation = @android:mainBuiltInDisplayCutout
+Since mainBuiltInDisplayCutout is private, its ID is dynamic and can't
+be relied upon.
+This means that we'll get garbage in mainBuiltInDisplayCutoutRectApproximation
+The SVG Path parser will fail, triggering an exception.
+
+Fix it by catching it, and parsing mainBuiltInDisplayCutout instead
+
+Change-Id: I03b6e78bac2cc38f3a623c8add801405ad6ba7ba
+---
+ core/java/android/view/DisplayCutout.java | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/core/java/android/view/DisplayCutout.java b/core/java/android/view/DisplayCutout.java
+index e1a4402d..25282b50 100644
+--- a/core/java/android/view/DisplayCutout.java
++++ b/core/java/android/view/DisplayCutout.java
+@@ -881,10 +881,17 @@ public final class DisplayCutout {
+      */
+     public static DisplayCutout fromResourcesRectApproximation(Resources res, int displayWidth,
+             int displayHeight) {
+-        return pathAndDisplayCutoutFromSpec(res.getString(R.string.config_mainBuiltInDisplayCutout),
+-                res.getString(R.string.config_mainBuiltInDisplayCutoutRectApproximation),
+-                displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
+-                loadWaterfallInset(res)).second;
++        try  {
++            return pathAndDisplayCutoutFromSpec(res.getString(R.string.config_mainBuiltInDisplayCutout),
++                    res.getString(R.string.config_mainBuiltInDisplayCutoutRectApproximation),
++                    displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
++                    loadWaterfallInset(res)).second;
++        } catch(Throwable t) {
++            return pathAndDisplayCutoutFromSpec(res.getString(R.string.config_mainBuiltInDisplayCutout),
++                    null,
++                    displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
++                    loadWaterfallInset(res)).second;
++        }
+     }
+ 
+     /**
+-- 
+2.25.1
+
