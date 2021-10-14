@@ -58,7 +58,6 @@ buildVariant() {
 }
 
 buildVariant treble_arm64_bgN
-#buildVariant treble_arm64_bvN
 
 END=`date +%s`
 ELAPSEDM=$(($(($END-$START))/60))
