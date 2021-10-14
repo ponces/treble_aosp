@@ -1,7 +1,7 @@
 From 6b37536cb87c83663bea627da417a8d1748490b9 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 5 Oct 2021 16:17:15 -0400
-Subject: [PATCH] Fallback to non-rollback resistant keys if not available
+Subject: [PATCH 1/6] Fallback to non-rollback resistant keys if not available
 
 Boot on Mediatek devices was broken with:
 ~ Add ROLLBACK_RESISTANCE tag to key usage

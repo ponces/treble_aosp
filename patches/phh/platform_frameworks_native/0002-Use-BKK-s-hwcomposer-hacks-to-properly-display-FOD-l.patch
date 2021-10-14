@@ -1,0 +1,39 @@
+From fc36785cdafe41d33f504bd084fb767989cb3d11 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 10 Mar 2020 23:26:55 +0100
+Subject: [PATCH 2/6] Use BKK's hwcomposer hacks to properly display FOD layers
+
+Insecure hack: Set FOD layers to magical Z values to trigger
+OPPO/Realme/Oneplus' whole blitter behaviours:
+- reports touch event to fingerprint driver
+- removes dim on touched layer
+
+Change-Id: I1d924b1e5c2389c8df17174c079cee8ef2380112
+---
+ .../CompositionEngine/src/OutputLayer.cpp              | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp b/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp
+index 56e9d27f14..f804383fed 100644
+--- a/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp
++++ b/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp
+@@ -405,6 +405,16 @@ void OutputLayer::writeOutputDependentGeometryStateToHWC(HWC2::Layer* hwcLayer,
+               sourceCrop.bottom, to_string(error).c_str(), static_cast<int32_t>(error));
+     }
+ 
++    if(strstr(getLayerFE().getDebugName(), "Fingerprint on display") != nullptr) {
++        ALOGE("Found fingerprint on display!");
++        z = 0x41000031;
++    }
++
++    if(strstr(getLayerFE().getDebugName(), "Fingerprint on display.touched") != nullptr) {
++        ALOGE("Found fingerprint on display touched!");
++        z = 0x41000033;
++    }
++
+     if (auto error = hwcLayer->setZOrder(z); error != hal::Error::NONE) {
+         ALOGE("[%s] Failed to set Z %u: %s (%d)", getLayerFE().getDebugName(), z,
+               to_string(error).c_str(), static_cast<int32_t>(error));
+-- 
+2.25.1
+
