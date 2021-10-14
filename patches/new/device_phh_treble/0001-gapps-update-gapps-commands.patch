@@ -1,7 +1,7 @@
 From 16d99864d71b606d183b118d28bdeb09304181e9 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Wed, 13 Oct 2021 00:01:50 +0100
-Subject: [PATCH] gapps.mk: update gapps commands
+Subject: [PATCH] gapps: update gapps commands
 
 ---
  gapps.mk | 53 +-
