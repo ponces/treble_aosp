@@ -9,6 +9,7 @@ for project in $(cd $patches/patches/$tree; echo *);do
 	p="$(tr _ / <<<$project |sed -e 's;platform/;;g')"
 	[ "$p" == build ] && p=build/make
 	[ "$p" == vendor/hardware/overlay ] && p=vendor/hardware_overlay
+	[ "$p" == packages/apps/settings ] && p=packages/apps/Settings
 	pushd $p
 	for patch in $patches/patches/$tree/$project/*.patch;do
 		git am $patch || exit
