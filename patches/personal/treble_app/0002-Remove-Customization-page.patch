@@ -1,0 +1,304 @@
+From c3b4f37f80db421a6757b91e8e6aa87096166c41 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Tue, 8 Jun 2021 10:03:50 +0100
+Subject: [PATCH 2/2] Remove Customization page
+
+---
+ app/src/main/java/me/phh/treble/app/Custom.kt | 69 ----------------
+ .../java/me/phh/treble/app/CustomSettings.kt  | 78 -------------------
+ .../java/me/phh/treble/app/EntryService.kt    |  1 -
+ .../me/phh/treble/app/SettingsActivity.kt     |  3 -
+ app/src/main/res/values/pref_custom.xml       | 30 -------
+ app/src/main/res/xml/pref_custom.xml          | 36 ---------
+ app/src/main/res/xml/pref_headers.xml         |  3 -
+ 7 files changed, 220 deletions(-)
+ delete mode 100644 app/src/main/java/me/phh/treble/app/Custom.kt
+ delete mode 100644 app/src/main/java/me/phh/treble/app/CustomSettings.kt
+ delete mode 100644 app/src/main/res/values/pref_custom.xml
+ delete mode 100644 app/src/main/res/xml/pref_custom.xml
+
+diff --git a/app/src/main/java/me/phh/treble/app/Custom.kt b/app/src/main/java/me/phh/treble/app/Custom.kt
+deleted file mode 100644
+index 5e51c0b..0000000
+--- a/app/src/main/java/me/phh/treble/app/Custom.kt
++++ /dev/null
+@@ -1,69 +0,0 @@
+-package me.phh.treble.app
+-
+-import android.annotation.SuppressLint
+-import android.content.Context
+-import android.content.SharedPreferences
+-import android.preference.PreferenceManager
+-import java.lang.ref.WeakReference
+-
+-@SuppressLint("StaticFieldLeak")
+-object Custom: EntryStartup {
+-    lateinit var ctxt: WeakReference<Context>
+-    val spListener = SharedPreferences.OnSharedPreferenceChangeListener { sp, key ->
+-        val c = ctxt.get()
+-        if(c == null) return@OnSharedPreferenceChangeListener
+-        when(key) {
+-            CustomSettings.accentColor -> {
+-                val value = sp.getString(key, "")
+-                val accentColorOverlays = OverlayPicker.getThemeOverlays(OverlayPicker.ThemeOverlay.AccentColor)
+-                accentColorOverlays
+-                        .filter { it.packageName != value }
+-                        .forEach { OverlayPicker.setOverlayEnabled(it.packageName, false) }
+-                if (!value.isNullOrEmpty()) {
+-                    OverlayPicker.setOverlayEnabled(value, true)
+-                }
+-            }
+-            CustomSettings.iconShape -> {
+-                val value = sp.getString(key, "")
+-                val iconShapeOverlays = OverlayPicker.getThemeOverlays(OverlayPicker.ThemeOverlay.IconShape)
+-                iconShapeOverlays
+-                        .filter { it.packageName != value }
+-                        .forEach { OverlayPicker.setOverlayEnabled(it.packageName, false) }
+-                if (!value.isNullOrEmpty()) {
+-                    OverlayPicker.setOverlayEnabled(value, true)
+-                }
+-            }
+-            CustomSettings.fontFamily -> {
+-                val value = sp.getString(key, "")
+-                val fontFamilyOverlays = OverlayPicker.getThemeOverlays(OverlayPicker.ThemeOverlay.FontFamily)
+-                fontFamilyOverlays
+-                        .filter { it.packageName != value }
+-                        .forEach { OverlayPicker.setOverlayEnabled(it.packageName, false) }
+-                if (!value.isNullOrEmpty()) {
+-                    OverlayPicker.setOverlayEnabled(value, true)
+-                }
+-            }
+-            CustomSettings.iconPack -> {
+-                val value = sp.getString(key, "")
+-                val iconPackOverlays = OverlayPicker.getThemeOverlays(OverlayPicker.ThemeOverlay.IconPack)                    
+-                val genericValue = value.toString().substringBeforeLast(".")
+-                for (o in iconPackOverlays) {
+-                    if (!value.isNullOrEmpty() && o.packageName.startsWith(genericValue)) {
+-                        OverlayPicker.setOverlayEnabled(o.packageName, true)
+-                    } else {
+-                        OverlayPicker.setOverlayEnabled(o.packageName, false)
+-                    }
+-                }
+-            }
+-        }
+-    }
+-
+-    override fun startup(ctxt: Context) {
+-        if (!CustomSettings.enabled()) return
+-
+-        val sp = PreferenceManager.getDefaultSharedPreferences(ctxt)
+-        sp.registerOnSharedPreferenceChangeListener(spListener)
+-
+-        this.ctxt = WeakReference(ctxt.applicationContext)
+-    }
+-}
+diff --git a/app/src/main/java/me/phh/treble/app/CustomSettings.kt b/app/src/main/java/me/phh/treble/app/CustomSettings.kt
+deleted file mode 100644
+index 997f8ea..0000000
+--- a/app/src/main/java/me/phh/treble/app/CustomSettings.kt
++++ /dev/null
+@@ -1,78 +0,0 @@
+-package me.phh.treble.app
+-
+-import android.content.pm.PackageInfo
+-import android.os.Bundle
+-import androidx.preference.ListPreference
+-
+-object CustomSettings : Settings {
+-    val accentColor = "key_custom_accent_color"
+-    val iconShape = "key_custom_icon_shape"
+-    val fontFamily = "key_custom_font_family"
+-    val iconPack = "key_custom_icon_pack"
+-
+-    override fun enabled() = true
+-}
+-
+-class CustomSettingsFragment : SettingsFragment() {
+-    override val preferencesResId = R.xml.pref_custom
+-    private var packages = listOf<PackageInfo>();
+-
+-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+-        super.onCreatePreferences(savedInstanceState, rootKey)
+-
+-        packages = activity.packageManager.getInstalledPackages(0)
+-
+-        val accentColorPref = findPreference<ListPreference>(CustomSettings.accentColor)!!
+-        val accentColorOverlays = OverlayPicker.getThemeOverlays(OverlayPicker.ThemeOverlay.AccentColor)
+-        val accentColorEntries = listOf("Default") + accentColorOverlays.map { getTargetName(it.packageName) }
+-        val accentColorValues = listOf("") + accentColorOverlays.map { it.packageName }
+-
+-        accentColorPref.setEntries(accentColorEntries.toTypedArray())
+-        accentColorPref.setEntryValues(accentColorValues.toTypedArray())
+-
+-        val iconShapePref = findPreference<ListPreference>(CustomSettings.iconShape)!!
+-        val iconShapeOverlays = OverlayPicker.getThemeOverlays(OverlayPicker.ThemeOverlay.IconShape)
+-        val iconShapeEntries = listOf("Default") + iconShapeOverlays.map { getTargetName(it.packageName) }
+-        val iconShapeValues = listOf("") + iconShapeOverlays.map { it.packageName }
+-
+-        iconShapePref.setEntries(iconShapeEntries.toTypedArray())
+-        iconShapePref.setEntryValues(iconShapeValues.toTypedArray())
+-
+-        val fontFamilyPref = findPreference<ListPreference>(CustomSettings.fontFamily)!!
+-        val fontFamilyOverlays = OverlayPicker.getThemeOverlays(OverlayPicker.ThemeOverlay.FontFamily)
+-        val fontFamilyEntries = listOf("Default") + fontFamilyOverlays.map { getTargetName(it.packageName) }
+-        val fontFamilyValues = listOf("") + fontFamilyOverlays.map { it.packageName }
+-
+-        fontFamilyPref.setEntries(fontFamilyEntries.toTypedArray())
+-        fontFamilyPref.setEntryValues(fontFamilyValues.toTypedArray())
+-
+-        val iconPackPref = findPreference<ListPreference>(CustomSettings.iconPack)!!
+-        val iconPackOverlays = OverlayPicker.getThemeOverlays(OverlayPicker.ThemeOverlay.IconPack)
+-        var iconPackMap = hashMapOf<String, String>()
+-        iconPackOverlays.forEach() { iconPackMap = addOverlayToMap(iconPackMap, it.packageName) }
+-        val iconPackEntries = listOf("Default") + iconPackMap.values
+-        val iconPackValues = listOf("") + iconPackMap.keys
+-
+-        iconPackPref.setEntries(iconPackEntries.toTypedArray())
+-        iconPackPref.setEntryValues(iconPackValues.toTypedArray())
+-    }
+-
+-    fun getTargetName(p: String): String {
+-        var targetName = p.substringAfterLast(".").capitalize()
+-        val packageInfo = packages.find { it.packageName == p }
+-        if (packageInfo != null) {
+-            targetName = packageInfo.applicationInfo.loadLabel(activity.packageManager).toString()
+-        }
+-        return targetName
+-    }
+-
+-    fun addOverlayToMap(map: HashMap<String, String>, o: String): HashMap<String, String> {
+-        val genericValue = o.substringBeforeLast(".")
+-        val duplicates = map.filterKeys { it.substringBeforeLast(".") == genericValue }
+-        if (duplicates.entries.size == 0)
+-        {
+-            map.put(o, getTargetName(o))
+-        }
+-        return map
+-    }
+-}
+diff --git a/app/src/main/java/me/phh/treble/app/EntryService.kt b/app/src/main/java/me/phh/treble/app/EntryService.kt
+index 97f5343..cacee07 100644
+--- a/app/src/main/java/me/phh/treble/app/EntryService.kt
++++ b/app/src/main/java/me/phh/treble/app/EntryService.kt
+@@ -50,7 +50,6 @@ class EntryService: Service() {
+             tryC { Vsmart.startup(this) }
+             tryC { Nubia.startup(this) }
+             tryC { Ims.startup(this) }
+-            tryC { Custom.startup(this) }
+             tryC { Hct.startup(this) }
+ 
+             tryC { Desktop.startup(this) }
+diff --git a/app/src/main/java/me/phh/treble/app/SettingsActivity.kt b/app/src/main/java/me/phh/treble/app/SettingsActivity.kt
+index f9ae3f5..4b40cab 100644
+--- a/app/src/main/java/me/phh/treble/app/SettingsActivity.kt
++++ b/app/src/main/java/me/phh/treble/app/SettingsActivity.kt
+@@ -67,8 +67,6 @@ class SettingsActivity : PreferenceActivity() {
+             target.removeIf { it.fragment == NubiaSettingsFragment::class.java.name }
+         if (!ImsSettings.enabled())
+             target.removeIf { it.fragment == ImsSettingsFragment::class.java.name }
+-        if (!CustomSettings.enabled())
+-            target.removeIf { it.fragment == CustomSettingsFragment::class.java.name }   
+     }
+ 
+     /**
+@@ -90,7 +88,6 @@ class SettingsActivity : PreferenceActivity() {
+                 || MyDeviceSettingsFragment::class.java.name == fragmentName
+                 || NubiaSettingsFragment::class.java.name == fragmentName
+                 || ImsSettingsFragment::class.java.name == fragmentName
+-                || CustomSettingsFragment::class.java.name == fragmentName
+     }
+ 
+     companion object {
+diff --git a/app/src/main/res/values/pref_custom.xml b/app/src/main/res/values/pref_custom.xml
+deleted file mode 100644
+index ac2a9b8..0000000
+--- a/app/src/main/res/values/pref_custom.xml
++++ /dev/null
+@@ -1,30 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<resources>
+-    <array name="pref_custom_accent_color">
+-	    <item>"Default"</item>
+-    </array>
+-    <array name="pref_custom_accent_color_values">
+-	    <item>""</item>
+-    </array>
+-
+-    <array name="pref_custom_icon_shape">
+-	    <item>"Default"</item>
+-    </array>
+-    <array name="pref_custom_icon_shape_values">
+-	    <item>""</item>
+-    </array>
+-
+-    <array name="pref_custom_icon_pack">
+-	    <item>"Default"</item>
+-    </array>
+-    <array name="pref_custom_icon_pack_values">
+-	    <item>""</item>
+-    </array>
+-
+-    <array name="pref_custom_font_family">
+-	    <item>"Default"</item>
+-    </array>
+-    <array name="pref_custom_font_family_values">
+-	    <item>""</item>
+-    </array>
+-</resources>
+diff --git a/app/src/main/res/xml/pref_custom.xml b/app/src/main/res/xml/pref_custom.xml
+deleted file mode 100644
+index 7c28250..0000000
+--- a/app/src/main/res/xml/pref_custom.xml
++++ /dev/null
+@@ -1,36 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<PreferenceScreen
+-	xmlns:android="http://schemas.android.com/apk/res/android">
+-    <Preference android:title="System UI Tuner">
+-        <intent
+-            android:action="android.intent.action.VIEW"
+-            android:targetPackage="com.android.systemui"
+-            android:targetClass="com.android.systemui.DemoMode" />
+-    </Preference>
+-    <PreferenceCategory android:title="Styles">
+-	<ListPreference
+-		android:defaultValue=""
+-            android:entries="@array/pref_custom_accent_color"
+-            android:entryValues="@array/pref_custom_accent_color_values"
+-            android:key="key_custom_accent_color"
+-		android:title="Accent color" />
+-	<ListPreference
+-		android:defaultValue=""
+-            android:entries="@array/pref_custom_icon_shape"
+-            android:entryValues="@array/pref_custom_icon_shape_values"
+-            android:key="key_custom_icon_shape"
+-		android:title="Icon shape" />
+-	<ListPreference
+-		android:defaultValue=""
+-            android:entries="@array/pref_custom_icon_pack"
+-            android:entryValues="@array/pref_custom_icon_pack_values"
+-            android:key="key_custom_icon_pack"
+-		android:title="Icon pack" />
+-	<ListPreference
+-		android:defaultValue=""
+-            android:entries="@array/pref_custom_font_family"
+-            android:entryValues="@array/pref_custom_font_family_values"
+-            android:key="key_custom_font_family"
+-		android:title="Font family" />
+-    </PreferenceCategory>
+-</PreferenceScreen>
+diff --git a/app/src/main/res/xml/pref_headers.xml b/app/src/main/res/xml/pref_headers.xml
+index cb2b02e..40adfe2 100644
+--- a/app/src/main/res/xml/pref_headers.xml
++++ b/app/src/main/res/xml/pref_headers.xml
+@@ -38,7 +38,4 @@
+     <header
+         android:fragment="me.phh.treble.app.ImsSettingsFragment"
+         android:title="IMS features" />
+-    <header
+-        android:fragment="me.phh.treble.app.CustomSettingsFragment"
+-        android:title="Customization features" />
+ </preference-headers>
+-- 
+2.25.1
+

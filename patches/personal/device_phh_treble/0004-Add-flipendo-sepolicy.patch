@@ -1,0 +1,57 @@
+From 4507f89468db75664dbd7fbdcf8d73b3060b2a07 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Thu, 22 Jul 2021 11:35:11 +0100
+Subject: [PATCH 8/8] Add flipendo sepolicy
+
+Fix Extreme Battery Saver SELinux denials
+---
+ sepolicy/flipendo.te    | 28 ++++++++++++++++++++++++++++
+ sepolicy/seapp_contexts |  1 +
+ 2 files changed, 29 insertions(+)
+ create mode 100644 sepolicy/flipendo.te
+ create mode 100644 sepolicy/seapp_contexts
+
+diff --git a/sepolicy/flipendo.te b/sepolicy/flipendo.te
+new file mode 100644
+index 0000000..206f4ca
+--- /dev/null
++++ b/sepolicy/flipendo.te
+@@ -0,0 +1,28 @@
++type flipendo, domain, coredomain;
++app_domain(flipendo)
++
++# HwBinder IPC from client to flipendo
++binder_call(hal_power_client, flipendo)
++
++# HwBinder IPC from flipendo to statsd
++binder_call(flipendo, statsd)
++
++# HwBinder IPC from flipendo to gpuservice, and callbacks
++binder_call(gpuservice, flipendo)
++binder_call(flipendo, gpuservice)
++
++# HwBinder IPC from stats_service_server to flipendo, and callbacks
++binder_call(stats_service_server, flipendo)
++binder_call(flipendo, stats_service_server)
++
++# Allow flipendo to find app_api_service
++allow flipendo app_api_service:service_manager find;
++
++# Allow flipendo to find fwk_stats_hwservice
++allow flipendo fwk_stats_hwservice:hwservice_manager find;
++
++# Allow flipendo to find color_display_service
++allow flipendo color_display_service:service_manager find;
++
++# Allow flipendo to find hal_power_service
++allow flipendo hal_power_service:service_manager find;
+diff --git a/sepolicy/seapp_contexts b/sepolicy/seapp_contexts
+new file mode 100644
+index 0000000..ebf7fe4
+--- /dev/null
++++ b/sepolicy/seapp_contexts
+@@ -0,0 +1 @@
++user=_app seinfo=platform name=com.google.android.flipendo domain=flipendo type=app_data_file levelFrom=all
+-- 
+2.25.1
+

@@ -29,6 +29,9 @@ echo "Syncing repos"
 repo sync -c --force-sync --no-clone-bundle --no-tags -j$(nproc --all)
 echo ""
 
+echo "Cloning Treble App repo"
+rm -rf treble_app && git clone https://github.com/phhusson/treble_app
+
 echo "Setting up build environment"
 source build/envsetup.sh &> /dev/null
 echo ""
@@ -51,12 +54,21 @@ echo ""
 export WITHOUT_CHECK_API=true
 mkdir -p ~/builds
 
+buildTrebleApp() {
+    cd treble_app
+    bash build.sh
+    cp TrebleApp.apk ../vendor/hardware_overlay/TrebleApp/app.apk
+    cd ..
+}
+
 buildVariant() {
     lunch ${1}-userdebug
+    make installclean
     make -j$(nproc --all) systemimage
     xz -c $OUT/system.img -T0 > ~/builds/system-s-arm64-ab-gapps.img.xz
 }
 
+buildTrebleApp
 buildVariant treble_arm64_bgN
 
 END=`date +%s`

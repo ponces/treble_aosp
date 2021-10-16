@@ -1,0 +1,75 @@
+From 8713857837d82343a9a47a4d0b478f78a0d7dcb1 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Tue, 8 Jun 2021 09:44:26 +0100
+Subject: [PATCH 1/2] Remove securize preference
+
+---
+ .../java/me/phh/treble/app/MiscSettings.kt    | 31 -------------------
+ app/src/main/res/xml/pref_misc.xml            |  2 --
+ 2 files changed, 33 deletions(-)
+
+diff --git a/app/src/main/java/me/phh/treble/app/MiscSettings.kt b/app/src/main/java/me/phh/treble/app/MiscSettings.kt
+index 5d3e9d8..c1dd369 100644
+--- a/app/src/main/java/me/phh/treble/app/MiscSettings.kt
++++ b/app/src/main/java/me/phh/treble/app/MiscSettings.kt
+@@ -22,7 +22,6 @@ object MiscSettings : Settings {
+     val disableButtonsBacklight = "key_misc_disable_buttons_backlight"
+     val forceNavbarOff = "key_misc_force_navbar_off"
+     val bluetooth = "key_misc_bluetooth"
+-    val securize = "key_misc_securize"
+     val removeTelephony = "key_misc_removetelephony"
+     val remotectl = "key_misc_remotectl"
+     val disableAudioEffects = "key_misc_disable_audio_effects"
+@@ -45,36 +44,6 @@ class MiscSettingsFragment : SettingsFragment() {
+     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+         super.onCreatePreferences(savedInstanceState, rootKey)
+ 
+-        val securizePref = findPreference<Preference>(MiscSettings.securize)
+-        securizePref!!.setOnPreferenceClickListener {
+-                val builder = AlertDialog.Builder( this.getActivity() )
+-                builder.setTitle(getString(R.string.remove_root))
+-                builder.setMessage(getString(R.string.continue_question))
+-
+-                builder.setPositiveButton(android.R.string.yes) { dialog, which ->
+-
+-                var cmds = listOf(
+-                        "/sbin/su -c /system/bin/phh-securize.sh",
+-                        "/system/xbin/su -c /system/bin/phh-securize.sh",
+-                        "/system/xbin/phh-su -c /system/bin/phh-securize.sh",
+-                        "/sbin/su 0 /system/bin/phh-securize.sh",
+-                        "/system/xbin/su 0 /system/bin/phh-securize.sh",
+-                        "/system/xbin/phh-su 0 /system/bin/phh-securize.sh"
+-                )
+-                for(cmd in cmds) {
+-                    try {
+-                        Runtime.getRuntime().exec(cmd).waitFor()
+-                    } catch(t: Throwable) {}
+-                }
+-            }
+-
+-            builder.setNegativeButton(android.R.string.no) { dialog, which ->
+-            }
+-
+-            builder.show()
+-            return@setOnPreferenceClickListener true
+-        }
+-
+         val removeTelephonyPref = findPreference<Preference>(MiscSettings.removeTelephony)
+         removeTelephonyPref!!.setOnPreferenceClickListener {
+ 
+diff --git a/app/src/main/res/xml/pref_misc.xml b/app/src/main/res/xml/pref_misc.xml
+index 415c089..08fd209 100644
+--- a/app/src/main/res/xml/pref_misc.xml
++++ b/app/src/main/res/xml/pref_misc.xml
+@@ -135,8 +135,6 @@
+ 				android:key="key_misc_dt2w"
+             android:title="Double tap to wake"
+             android:summary="Unlikely to work for you" />
+-		<Preference android:title="Securize"
+-            android:key="key_misc_securize" />
+ 		<Preference android:title="@string/remove_telephony_subsystem"
+             android:key="key_misc_removetelephony" />
+ 	</PreferenceCategory>
+-- 
+2.25.1
+
