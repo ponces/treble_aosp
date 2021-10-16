@@ -1,0 +1,37 @@
+From 72c485c9224128f03c5f130efe0e16d8ccbeae02 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sat, 6 Mar 2021 19:15:24 -0500
+Subject: [PATCH 12/18] Fix AAC decoder failing to instantiate
+
+This has been caused by I50fcc5ef35cb7e96592c2267652228b5fa074ba9
+Non-Android 11 vendors won't provide those calls, and will thus fail.
+---
+ media/libstagefright/ACodec.cpp | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/media/libstagefright/ACodec.cpp b/media/libstagefright/ACodec.cpp
+index f9365cacc9..52ca1955e8 100644
+--- a/media/libstagefright/ACodec.cpp
++++ b/media/libstagefright/ACodec.cpp
+@@ -5405,9 +5405,7 @@ status_t ACodec::getPortFormat(OMX_U32 portIndex, sp<AMessage> &notify) {
+                             err = mOMXNode->getParameter(
+                                     (OMX_INDEXTYPE)OMX_IndexParamAudioAndroidAacDrcPresentation,
+                                     &presentation, sizeof(presentation));
+-                            if (err != OK) {
+-                                return err;
+-                            }
++                            if (err == OK) {
+                             notify->setInt32("aac-encoded-target-level",
+                                              presentation.nEncodedTargetLevel);
+                             notify->setInt32("aac-drc-cut-level", presentation.nDrcCut);
+@@ -5420,6 +5418,7 @@ status_t ACodec::getPortFormat(OMX_U32 portIndex, sp<AMessage> &notify) {
+                             notify->setInt32("aac-drc-album-mode", presentation.nDrcAlbumMode);
+                             notify->setInt32("aac-drc-output-loudness",
+                                              presentation.nDrcOutputLoudness);
++			    }
+                         }
+                     }
+                     break;
+-- 
+2.25.1
+
