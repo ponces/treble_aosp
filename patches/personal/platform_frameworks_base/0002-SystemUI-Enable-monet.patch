@@ -1,0 +1,26 @@
+From 1783fc049a63f5568722129229f63e446d41505a Mon Sep 17 00:00:00 2001
+From: Danny Lin <danny@kdrag0n.dev>
+Date: Sat, 16 Oct 2021 14:07:36 +0100
+Subject: [PATCH] SystemUI: Enable monet
+
+Change-Id: I19897d107c0bbfa7aa589b0cfa43dba30a3a9772
+---
+ packages/SystemUI/res/values/flags.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/packages/SystemUI/res/values/flags.xml b/packages/SystemUI/res/values/flags.xml
+index efa87548af32..90730ec216c9 100644
+--- a/packages/SystemUI/res/values/flags.xml
++++ b/packages/SystemUI/res/values/flags.xml
+@@ -22,7 +22,7 @@
+     <bool name="flag_notification_pipeline2_rendering">false</bool>
+     <bool name="flag_notif_updates">true</bool>
+ 
+-    <bool name="flag_monet">false</bool>
++    <bool name="flag_monet">true</bool>
+ 
+     <!-- b/171917882 -->
+     <bool name="flag_notification_twocolumn">false</bool>
+-- 
+2.25.1
+

@@ -1,0 +1,22 @@
+From 5214279aed7f78e510a25b60a44822e2745e5fef Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Sat, 16 Oct 2021 14:36:35 +0100
+Subject: [PATCH] base: add bootanimation
+
+---
+ base.mk | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/base.mk b/base.mk
+index c1659ab..339d707 100644
+--- a/base.mk
++++ b/base.mk
+@@ -208,3 +208,5 @@ PRODUCT_PACKAGES += \
+ 	oplus-alert-slider
+ 
+ include build/make/target/product/gsi_release.mk
++
++$(call inherit-product, vendor/aosp/config/bootanimation.mk)
+-- 
+2.25.1
+
