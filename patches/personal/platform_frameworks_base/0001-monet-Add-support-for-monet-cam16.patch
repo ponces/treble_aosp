@@ -9,8 +9,8 @@ Change-Id: Ica9e11192927ef82e257380abdbf13f0e9807900
 ---
  .../com/android/systemui/monet/ColorScheme.kt | 168 ++++++++++++++++++
  .../com/android/systemui/monet/Shades.java    |  19 ++
- .../theme/ThemeOverlayController.java         |  54 ++++--
- 3 files changed, 231 insertions(+), 10 deletions(-)
+ .../theme/ThemeOverlayController.java         |  55 ++++--
+ 3 files changed, 232 insertions(+), 10 deletions(-)
  create mode 100644 packages/SystemUI/src/com/android/systemui/monet/ColorScheme.kt
  create mode 100644 packages/SystemUI/src/com/android/systemui/monet/Shades.java
 
@@ -214,7 +214,7 @@ index 000000000000..5ab00a1afcb4
 +    }
 +}
 diff --git a/packages/SystemUI/src/com/android/systemui/theme/ThemeOverlayController.java b/packages/SystemUI/src/com/android/systemui/theme/ThemeOverlayController.java
-index 81999b534046..2bd495bf16cc 100644
+index 81999b534046..994de85364f7 100644
 --- a/packages/SystemUI/src/com/android/systemui/theme/ThemeOverlayController.java
 +++ b/packages/SystemUI/src/com/android/systemui/theme/ThemeOverlayController.java
 @@ -37,6 +37,7 @@ import android.content.IntentFilter;
@@ -253,7 +253,7 @@ index 81999b534046..2bd495bf16cc 100644
  import java.util.Map;
  import java.util.Set;
  import java.util.concurrent.Executor;
-@@ -403,25 +408,54 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
+@@ -403,25 +408,55 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
       * Return the main theme color from a given {@link WallpaperColors} instance.
       */
      protected int getNeutralColor(@NonNull WallpaperColors wallpaperColors) {
@@ -276,6 +276,7 @@ index 81999b534046..2bd495bf16cc 100644
 +    private final boolean inDarkMode() {
 +        return (mContext.getResources().getConfiguration().uiMode
 +                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
++    }
 +
      /**
       * Given a color candidate, return an overlay definition.
