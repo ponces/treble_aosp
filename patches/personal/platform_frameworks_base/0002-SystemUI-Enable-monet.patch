@@ -1,7 +1,7 @@
 From 1783fc049a63f5568722129229f63e446d41505a Mon Sep 17 00:00:00 2001
 From: Danny Lin <danny@kdrag0n.dev>
 Date: Sat, 16 Oct 2021 14:07:36 +0100
-Subject: [PATCH] SystemUI: Enable monet
+Subject: [PATCH 2/2] SystemUI: Enable monet
 
 Change-Id: I19897d107c0bbfa7aa589b0cfa43dba30a3a9772
 ---

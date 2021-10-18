@@ -1,7 +1,7 @@
 From 648e247224d4f418d4c05ea5e26c9481cb161f37 Mon Sep 17 00:00:00 2001
 From: Danny Lin <danny@kdrag0n.dev>
 Date: Sat, 16 Oct 2021 13:55:42 +0100
-Subject: [PATCH] monet: Add support for monet (cam16)
+Subject: [PATCH 1/2] monet: Add support for monet (cam16)
 
  * reversed from redfin beta 5
 
