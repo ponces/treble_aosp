@@ -1,7 +1,7 @@
 From 3300f6ced1789bf9a5fc2d2807fcdaa09348c944 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 7 Jun 2021 17:09:13 -0400
-Subject: [PATCH 3/4] Add a property to disable eSCO
+Subject: [PATCH 3/5] Add a property to disable eSCO
 
 eSCO is troublesome on some old devices.
 It is unknown whether it applies to any Treble device, but investigation

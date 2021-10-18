@@ -1,0 +1,98 @@
+From fb3d451f1cbd44b7827d1afd599dec7360968067 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sun, 17 Oct 2021 17:17:13 -0400
+Subject: [PATCH 5/5] Don't abort when failing to get real-time priority
+
+On some devices (like OP6), for unknown reason, trying to go to realtime
+fails with EPERM.
+There is no good reason to actually require real-time, so don't fail
+when we don't get it
+This fixes gabeldorsche on OP6
+Not yet legacy bluetooth stack
+
+Change-Id: Id25dac186628e933185bdfd640498004459b375a
+---
+ btif/src/btif_a2dp_sink.cc   |  2 +-
+ btif/src/btif_a2dp_source.cc |  2 +-
+ hci/src/hci_layer.cc         |  1 -
+ osi/src/alarm.cc             | 12 +++++++++++-
+ stack/btu/btu_task.cc        |  2 +-
+ 5 files changed, 14 insertions(+), 5 deletions(-)
+
+diff --git a/btif/src/btif_a2dp_sink.cc b/btif/src/btif_a2dp_sink.cc
+index fa02a8682..9610720db 100644
+--- a/btif/src/btif_a2dp_sink.cc
++++ b/btif/src/btif_a2dp_sink.cc
+@@ -192,7 +192,7 @@ bool btif_a2dp_sink_init() {
+ 
+   /* Schedule the rest of the operations */
+   if (!btif_a2dp_sink_cb.worker_thread.EnableRealTimeScheduling()) {
+-    LOG(FATAL) << __func__
++    LOG(ERROR) << __func__
+                << ": Failed to increase A2DP decoder thread priority";
+   }
+   btif_a2dp_sink_cb.worker_thread.DoInThread(
+diff --git a/btif/src/btif_a2dp_source.cc b/btif/src/btif_a2dp_source.cc
+index 19bf998ab..57b665af7 100644
+--- a/btif/src/btif_a2dp_source.cc
++++ b/btif/src/btif_a2dp_source.cc
+@@ -358,7 +358,7 @@ bool btif_a2dp_source_startup(void) {
+ static void btif_a2dp_source_startup_delayed() {
+   LOG_INFO("%s: state=%s", __func__, btif_a2dp_source_cb.StateStr().c_str());
+   if (!btif_a2dp_source_thread.EnableRealTimeScheduling()) {
+-    LOG(FATAL) << __func__ << ": unable to enable real time scheduling";
++    LOG(ERROR) << __func__ << ": unable to enable real time scheduling";
+   }
+   if (!bluetooth::audio::a2dp::init(&btif_a2dp_source_thread)) {
+     if (btif_av_is_a2dp_offload_enabled()) {
+diff --git a/hci/src/hci_layer.cc b/hci/src/hci_layer.cc
+index 1cd3a49a3..860be0446 100644
+--- a/hci/src/hci_layer.cc
++++ b/hci/src/hci_layer.cc
+@@ -234,7 +234,6 @@ static future_t* hci_module_start_up(void) {
+   }
+   if (!hci_thread.EnableRealTimeScheduling()) {
+     LOG_ERROR("%s unable to make thread RT.", __func__);
+-    goto error;
+   }
+ 
+   commands_pending_response = list_new(NULL);
+diff --git a/osi/src/alarm.cc b/osi/src/alarm.cc
+index 6e5d22f43..6f6c7a424 100644
+--- a/osi/src/alarm.cc
++++ b/osi/src/alarm.cc
+@@ -678,7 +678,17 @@ static bool timer_create_internal(const clockid_t clock_id, timer_t* timer) {
+   sigevent.sigev_notify = SIGEV_THREAD;
+   sigevent.sigev_notify_function = (void (*)(union sigval))timer_callback;
+   sigevent.sigev_notify_attributes = &thread_attr;
+-  if (timer_create(clock_id, &sigevent, timer) == -1) {
++
++  int ret = timer_create(clock_id, &sigevent, timer);
++  if (ret == -1) {
++       LOG_ERROR("%s failed to create timer with RT err %s... Try again without RT", __func__, strerror(errno));
++      // Recreate timer without RT priority
++      memset(&sigevent, 0, sizeof(sigevent));
++      sigevent.sigev_notify = SIGEV_THREAD;
++      sigevent.sigev_notify_function = (void (*)(union sigval))timer_callback;
++      ret = timer_create(clock_id, &sigevent, timer);
++  }
++  if (ret == -1) {
+     LOG_ERROR("%s unable to create timer with clock %d: %s", __func__, clock_id,
+               strerror(errno));
+     if (clock_id == CLOCK_BOOTTIME_ALARM) {
+diff --git a/stack/btu/btu_task.cc b/stack/btu/btu_task.cc
+index 5e83e4d07..33e7264fd 100644
+--- a/stack/btu/btu_task.cc
++++ b/stack/btu/btu_task.cc
+@@ -121,7 +121,7 @@ void main_thread_start_up() {
+     LOG(FATAL) << __func__ << ": unable to start btu message loop thread.";
+   }
+   if (!main_thread.EnableRealTimeScheduling()) {
+-    LOG(FATAL) << __func__ << ": unable to enable real time scheduling";
++    LOG(ERROR) << __func__ << ": unable to enable real time scheduling";
+   }
+ }
+ 
+-- 
+2.25.1
+

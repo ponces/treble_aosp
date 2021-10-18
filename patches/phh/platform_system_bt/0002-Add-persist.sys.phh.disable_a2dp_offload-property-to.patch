@@ -1,7 +1,7 @@
 From cdc595c9a7625f44b13b18bc08b04b34015393b9 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 25 May 2020 21:25:12 +0200
-Subject: [PATCH 2/4] Add persist.sys.phh.disable_a2dp_offload property to
+Subject: [PATCH 2/5] Add persist.sys.phh.disable_a2dp_offload property to
  force a2dp offload
 
 ---
