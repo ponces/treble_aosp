@@ -1,0 +1,24 @@
+From 334d60742ffd8ecc81ade84afb760d606f5d8763 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Mon, 18 Oct 2021 20:49:46 +0100
+Subject: [PATCH 2/2] A40: fix corner radius overlay
+
+---
+ Samsung/A40/res/values/notch.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Samsung/A40/res/values/notch.xml b/Samsung/A40/res/values/notch.xml
+index b23486b..c832de3 100644
+--- a/Samsung/A40/res/values/notch.xml
++++ b/Samsung/A40/res/values/notch.xml
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <resources>
+-    <dimen name="rounded_corner_radius">0px</dimen>
++    <dimen name="rounded_corner_radius">0.01dip</dimen>
+     <dimen name="status_bar_height_landscape">24.0dip</dimen>
+     <dimen name="status_bar_height_portrait">86.0px</dimen>
+     <bool name="config_fillMainBuiltInDisplayCutout">true</bool>
+-- 
+2.25.1
+
