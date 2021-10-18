@@ -1,7 +1,7 @@
 From dfa8778af9c915a538cf5ce6886d87d4d792ce44 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Sat, 16 Oct 2021 16:07:07 +0100
-Subject: [PATCH] base: add PE bootanimation
+Subject: [PATCH 3/3] base: add PE bootanimation
 
 ---
  base.mk                 |   3 +++
