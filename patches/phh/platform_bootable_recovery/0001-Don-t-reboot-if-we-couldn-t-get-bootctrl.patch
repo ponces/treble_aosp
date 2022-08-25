@@ -1,0 +1,26 @@
+From 5b4b66da955b6b329846e6010db79b2ecb344fcf Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Thu, 12 Sep 2019 20:31:07 +0200
+Subject: [PATCH] Don't reboot if we couldn't get bootctrl
+
+Change-Id: Id1793660bd1c97ab369607f58a772ca3512ec1af
+---
+ update_verifier/update_verifier.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/update_verifier/update_verifier.cpp b/update_verifier/update_verifier.cpp
+index a042f900..ea3645af 100644
+--- a/update_verifier/update_verifier.cpp
++++ b/update_verifier/update_verifier.cpp
+@@ -310,7 +310,7 @@ int update_verifier(int argc, char** argv) {
+   sp<IBootControl> module = IBootControl::getService();
+   if (module == nullptr) {
+     LOG(ERROR) << "Error getting bootctrl module.";
+-    return reboot_device();
++    return 0;
+   }
+ 
+   uint32_t current_slot = module->getCurrentSlot();
+-- 
+2.25.1
+

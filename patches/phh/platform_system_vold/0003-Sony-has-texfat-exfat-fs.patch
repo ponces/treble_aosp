@@ -1,0 +1,38 @@
+From b1ab846cfbce956f7ee1d503eaa63d7d3df4cb04 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 28 Jan 2020 00:27:17 +0100
+Subject: [PATCH 3/7] Sony has `texfat` exfat fs
+
+---
+ fs/Exfat.cpp | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/fs/Exfat.cpp b/fs/Exfat.cpp
+index 91a4c50..6c49c10 100644
+--- a/fs/Exfat.cpp
++++ b/fs/Exfat.cpp
+@@ -35,7 +35,11 @@ static const char* kFsckPath = "/system/bin/fsck.exfat";
+ 
+ bool IsSupported() {
+     return access(kMkfsPath, X_OK) == 0 && access(kFsckPath, X_OK) == 0 &&
+-           (IsFilesystemSupported("exfat") || IsFilesystemSupported("sdfat"));
++           (
++            IsFilesystemSupported("exfat") ||
++            IsFilesystemSupported("sdfat") ||
++            IsFilesystemSupported("texfat")
++            );
+ }
+ 
+ status_t Check(const std::string& source) {
+@@ -64,6 +68,8 @@ status_t Mount(const std::string& source, const std::string& target, int ownerUi
+     const char *fs = "exfat";
+     if(IsFilesystemSupported("sdfat"))
+         fs = "sdfat";
++    if(IsFilesystemSupported("texfat"))
++        fs = "texfat";
+     if (mount(source.c_str(), target.c_str(), fs, mountFlags, mountData.c_str()) == 0) {
+         return 0;
+     }
+-- 
+2.25.1
+

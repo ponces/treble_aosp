@@ -1,0 +1,326 @@
+From fdf6c400f79e47fca0f19cd4377b0d0970635379 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 25 May 2020 21:26:54 +0200
+Subject: [PATCH 09/23] Add persist.sys.phh.disable_a2dp_offload property to
+ force a2dp offload
+
+Change-Id: Id474540c33c594cc4010a1a398d82bff8aadaeea
+---
+ media/libstagefright/ACodec.cpp               |  20 +-
+ .../managerdefinitions/src/Serializer.cpp     | 182 +++++++++++++++++-
+ .../audiopolicy/enginedefault/src/Engine.cpp  |   2 +-
+ 3 files changed, 197 insertions(+), 7 deletions(-)
+
+diff --git a/media/libstagefright/ACodec.cpp b/media/libstagefright/ACodec.cpp
+index 2c8d8de226..46cd6e47a0 100644
+--- a/media/libstagefright/ACodec.cpp
++++ b/media/libstagefright/ACodec.cpp
+@@ -1183,6 +1183,9 @@ status_t ACodec::configureOutputBuffersFromNativeWindow(
+         return err;
+     }
+ 
++    ALOGE("Window undequeued buffers is %d\n", *minUndequeuedBuffers);
++    ALOGE("Consumerrequested %d\n", def.nBufferCountMin);
++
+     // FIXME: assume that surface is controlled by app (native window
+     // returns the number for the case when surface is not controlled by app)
+     // FIXME2: This means that minUndeqeueudBufs can be 1 larger than reported
+@@ -1195,22 +1198,29 @@ status_t ACodec::configureOutputBuffersFromNativeWindow(
+     // 2. try to allocate two (2) additional buffers to reduce starvation from
+     //    the consumer
+     //    plus an extra buffer to account for incorrect minUndequeuedBufs
+-    for (OMX_U32 extraBuffers = 2 + 1; /* condition inside loop */; extraBuffers--) {
+-        OMX_U32 newBufferCount =
+-            def.nBufferCountMin + *minUndequeuedBuffers + extraBuffers;
++    for (int extraBuffers = 2 + 1; /* condition inside loop */; extraBuffers--) {
++        int a = def.nBufferCountMin;
++        int b = *minUndequeuedBuffers;
++        int c = extraBuffers;
++        int newBufferCount = a+b+c;
+         def.nBufferCountActual = newBufferCount;
+         err = mOMXNode->setParameter(
+                 OMX_IndexParamPortDefinition, &def, sizeof(def));
+ 
+         if (err == OK) {
+-            *minUndequeuedBuffers += extraBuffers;
++            ALOGE("Managed to allocate %d buffers (%d extra)\n", newBufferCount, extraBuffers);
++            if(extraBuffers > 0) {
++                *minUndequeuedBuffers += extraBuffers;
++            } else {
++                *minUndequeuedBuffers -= -extraBuffers;
++            }
+             break;
+         }
+ 
+         ALOGW("[%s] setting nBufferCountActual to %u failed: %d",
+                 mComponentName.c_str(), newBufferCount, err);
+         /* exit condition */
+-        if (extraBuffers == 0) {
++        if (extraBuffers == -2 || newBufferCount == 1) {
+             return err;
+         }
+     }
+diff --git a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
+index abc54ccc24..c6db471c8c 100644
+--- a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
++++ b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
+@@ -29,6 +29,7 @@
+ #include <utils/StrongPointer.h>
+ #include <utils/Errors.h>
+ #include <utils/RefBase.h>
++#include <cutils/properties.h>
+ #include "Serializer.h"
+ #include "TypeConverter.h"
+ 
+@@ -36,6 +37,8 @@ namespace android {
+ 
+ namespace {
+ 
++static bool forceDisableA2dpOffload = false;
++
+ using utilities::convertTo;
+ 
+ static inline bool maybeVendorExtension(const std::string& s) {
+@@ -335,7 +338,7 @@ status_t PolicySerializer::deserializeCollection(const xmlNode *cur,
+                 } else if (mIgnoreVendorExtensions && std::get<status_t>(maybeElement) == NO_INIT) {
+                     // Skip a vendor extension element.
+                 } else {
+-                    return BAD_VALUE;
++                    ALOGE("Ignoring...");
+                 }
+             }
+         }
+@@ -795,11 +798,33 @@ std::variant<status_t, ModuleTraits::Element> PolicySerializer::deserialize<Modu
+     ModuleTraits::Element module = new HwModule(name.c_str(), versionMajor, versionMinor);
+ 
+     // Deserialize children: Audio Mix Port, Audio Device Ports (Source/Sink), Audio Routes
++    bool isA2dpModule = strcmp(name.c_str(), "a2dp") == 0;
++    bool isPrimaryModule = strcmp(name.c_str(), "primary") == 0;
++
+     MixPortTraits::Collection mixPorts;
+     status_t status = deserializeCollection<MixPortTraits>(cur, &mixPorts, NULL);
+     if (status != NO_ERROR) {
+         return status;
+     }
++    if(forceDisableA2dpOffload && isA2dpModule) {
++        for(const auto& mixPort: mixPorts) {
++            ALOGE("Disable a2dp offload...? %s", mixPort->getTagName().c_str());
++            //"a2dp" sw module already has a2dp out
++            if(mixPort->getTagName() == "a2dp output") {
++                forceDisableA2dpOffload = false;
++                break;
++            }
++        }
++    }
++    if(forceDisableA2dpOffload && isA2dpModule) {
++        //Add
++        //<mixPort name="a2dp output" role="source"/>
++        auto mixPort = new IOProfile("a2dp output", AUDIO_PORT_ROLE_SOURCE);
++        AudioProfileTraits::Collection profiles;
++        profiles.add(AudioProfile::createFullDynamic());
++        mixPort->setAudioProfiles(profiles);
++        mixPorts.push_back(mixPort);
++    }
+     module->setProfiles(mixPorts);
+ 
+     DevicePortTraits::Collection devicePorts;
+@@ -807,6 +832,90 @@ std::variant<status_t, ModuleTraits::Element> PolicySerializer::deserialize<Modu
+     if (status != NO_ERROR) {
+         return status;
+     }
++    Vector<std::string> a2dpOuts;
++    a2dpOuts.push_back("BT A2DP Out");
++    a2dpOuts.push_back("BT A2DP Headphones");
++    a2dpOuts.push_back("BT A2DP Speaker");
++    if(forceDisableA2dpOffload) {
++        if(isA2dpModule) {
++            //<devicePort tagName="BT A2DP Out" type="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP" role="sink" address="lhdc_a2dp">
++            //  <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
++            //      samplingRates="44100,48000,96000"
++            //      channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
++            //</devicePort>
++            if(true) {
++                FormatVector formats;
++                //auto devicePortOut = new DeviceDescriptor(AUDIO_DEVICE_OUT_BLUETOOTH_A2DP, formats, "BT A2DP Out");
++                auto devicePortOut = new DeviceDescriptor(AUDIO_DEVICE_OUT_BLUETOOTH_A2DP, "BT A2DP Out");
++                AudioProfileTraits::Collection profiles;
++                ChannelTraits::Collection channels;
++                channels.insert(AUDIO_CHANNEL_OUT_STEREO);
++                SampleRateSet sampleRates;
++                sampleRates.insert(44100);
++                sampleRates.insert(48000);
++                sampleRates.insert(96000);
++                auto profile = new AudioProfile(AUDIO_FORMAT_PCM_16_BIT, channels, sampleRates);
++                profiles.add(profile);
++                devicePortOut->setAudioProfiles(profiles);
++                devicePortOut->setAddress("lhdc_a2dp");
++                devicePorts.add(devicePortOut);
++            }
++            //<devicePort tagName="BT A2DP Headphones" type="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES" role="sink" address="lhdc_a2dp">
++            //  <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
++            //      samplingRates="44100,48000,96000"
++            //      channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
++            //</devicePort>
++            if(true) {
++                FormatVector formats;
++                auto devicePortOut = new DeviceDescriptor(AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES, "BT A2DP Headphones");
++                AudioProfileTraits::Collection profiles;
++                ChannelTraits::Collection channels;
++                channels.insert(AUDIO_CHANNEL_OUT_STEREO);
++                SampleRateSet sampleRates;
++                sampleRates.insert(44100);
++                sampleRates.insert(48000);
++                sampleRates.insert(96000);
++                auto profile = new AudioProfile(AUDIO_FORMAT_PCM_16_BIT, channels, sampleRates);
++                profiles.add(profile);
++                devicePortOut->setAudioProfiles(profiles);
++                devicePortOut->setAddress("lhdc_a2dp");
++                devicePorts.add(devicePortOut);
++            }
++            //<devicePort tagName="BT A2DP Speaker" type="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER" role="sink" address="lhdc_a2dp">
++            //  <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
++            //      samplingRates="44100,48000,96000"
++            //      channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
++            //</devicePort>
++            if(true) {
++                FormatVector formats;
++                auto devicePortOut = new DeviceDescriptor(AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER, "BT A2DP Speaker");
++                AudioProfileTraits::Collection profiles;
++                ChannelTraits::Collection channels;
++                channels.insert(AUDIO_CHANNEL_OUT_STEREO);
++                SampleRateSet sampleRates;
++                sampleRates.insert(44100);
++                sampleRates.insert(48000);
++                sampleRates.insert(96000);
++                auto profile = new AudioProfile(AUDIO_FORMAT_PCM_16_BIT, channels, sampleRates);
++                profiles.add(profile);
++                devicePortOut->setAudioProfiles(profiles);
++                devicePortOut->setAddress("lhdc_a2dp");
++                devicePorts.add(devicePortOut);
++
++            }
++        } else if(isPrimaryModule) {
++            for(const auto& out: a2dpOuts) {
++                auto iterA = std::find_if(devicePorts.begin(), devicePorts.end(), [out](const auto port) {
++                        if(port->getTagName() == out) return true;
++                        return false;
++                        });
++                if(iterA != devicePorts.end()) {
++                    ALOGE("Erasing device port %s", (*iterA)->getTagName().c_str());
++                    devicePorts.erase(iterA);
++                }
++            }
++        }
++    }
+     module->setDeclaredDevices(devicePorts);
+ 
+     RouteTraits::Collection routes;
+@@ -814,7 +923,76 @@ std::variant<status_t, ModuleTraits::Element> PolicySerializer::deserialize<Modu
+     if (status != NO_ERROR) {
+         return status;
+     }
++    if(forceDisableA2dpOffload) {
++        if(strcmp(name.c_str(), "primary") == 0) {
++            for(const auto& out: a2dpOuts) {
++                auto iterA = std::find_if(routes.begin(), routes.end(), [out](const auto route) {
++                        if(route->getType() != AUDIO_ROUTE_MIX)
++                        return false;
++                        auto sink = route->getSink();
++                        if(sink->getTagName() == out) {
++                            return true;
++                        }
++                        return false;
++                });
++                if(iterA != routes.end()) {
++                    auto sink = (*iterA)->getSink()->getTagName();
++                    ALOGE("Erasing route %s", sink.c_str());
++                    routes.erase(iterA);
++                }
++            }
++        } else if(isA2dpModule) {
++            //<route type="mix" sink="BT A2DP Out"
++            //  sources="a2dp output"/>
++            if(true) {
++                auto newRoute = new AudioRoute(AUDIO_ROUTE_MIX);
++                auto sink = module->findPortByTagName("BT A2DP Out");
++                auto source = module->findPortByTagName("a2dp output");
++                newRoute->setSink(sink);
++                Vector<sp<PolicyAudioPort>> sources;
++                sources.add(source);
++
++                sink->addRoute(newRoute);
++                source->addRoute(newRoute);
++                newRoute->setSources(sources);
++
++                routes.add(newRoute);
++            }
++            //<route type="mix" sink="BT A2DP Headphones"
++            //  sources="a2dp output"/>
++            if(true) {
++                auto newRoute = new AudioRoute(AUDIO_ROUTE_MIX);
++                auto sink = module->findPortByTagName("BT A2DP Headphones");
++                auto source = module->findPortByTagName("a2dp output");
++                newRoute->setSink(sink);
++                Vector<sp<PolicyAudioPort>> sources;
++                sources.add(source);
++
++                sink->addRoute(newRoute);
++                source->addRoute(newRoute);
++                newRoute->setSources(sources);
++                routes.add(newRoute);
++            }
++            //<route type="mix" sink="BT A2DP Speaker"
++            //  sources="a2dp output"/>
++            if(true) {
++                auto newRoute = new AudioRoute(AUDIO_ROUTE_MIX);
++                auto sink = module->findPortByTagName("BT A2DP Speaker");
++                auto source = module->findPortByTagName("a2dp output");
++                newRoute->setSink(sink);
++                Vector<sp<PolicyAudioPort>> sources;
++                sources.add(source);
++
++                sink->addRoute(newRoute);
++                source->addRoute(newRoute);
++                newRoute->setSources(sources);
++                routes.add(newRoute);
++            }
++        }
++    }
++    ALOGE("Good morning");
+     fixupQualcommBtScoRoute(routes, devicePorts, module.get());
++    ALOGE("Good morning2");
+     module->setRoutes(routes);
+ 
+     for (const xmlNode *children = cur->xmlChildrenNode; children != NULL;
+@@ -1019,6 +1197,7 @@ status_t PolicySerializer::deserialize(const char *configFile, AudioPolicyConfig
+ status_t deserializeAudioPolicyFile(const char *fileName, AudioPolicyConfig *config)
+ {
+     PolicySerializer serializer;
++    forceDisableA2dpOffload = property_get_bool("persist.sys.phh.disable_a2dp_offload", false);
+     status_t status = serializer.deserialize(fileName, config);
+     if (status != OK) config->clear();
+     return status;
+@@ -1027,6 +1206,7 @@ status_t deserializeAudioPolicyFile(const char *fileName, AudioPolicyConfig *con
+ status_t deserializeAudioPolicyFileForVts(const char *fileName, AudioPolicyConfig *config)
+ {
+     PolicySerializer serializer;
++    forceDisableA2dpOffload = property_get_bool("persist.sys.phh.disable_a2dp_offload", false);
+     status_t status = serializer.deserialize(fileName, config, true /*ignoreVendorExtensions*/);
+     if (status != OK) config->clear();
+     return status;
+diff --git a/services/audiopolicy/enginedefault/src/Engine.cpp b/services/audiopolicy/enginedefault/src/Engine.cpp
+index c73c17d1e4..314de7889b 100644
+--- a/services/audiopolicy/enginedefault/src/Engine.cpp
++++ b/services/audiopolicy/enginedefault/src/Engine.cpp
+@@ -52,7 +52,7 @@ static const std::vector<legacy_strategy_map>& getLegacyStrategy() {
+         { "STRATEGY_ENFORCED_AUDIBLE", STRATEGY_ENFORCED_AUDIBLE },
+         { "STRATEGY_TRANSMITTED_THROUGH_SPEAKER", STRATEGY_TRANSMITTED_THROUGH_SPEAKER },
+         { "STRATEGY_ACCESSIBILITY", STRATEGY_ACCESSIBILITY },
+-        { "STRATEGY_REROUTING", STRATEGY_REROUTING },
++        //{ "STRATEGY_REROUTING", STRATEGY_REROUTING },
+         { "STRATEGY_PATCH", STRATEGY_REROUTING }, // boiler to manage stream patch volume
+         { "STRATEGY_CALL_ASSISTANT", STRATEGY_CALL_ASSISTANT },
+     };
+-- 
+2.25.1
+

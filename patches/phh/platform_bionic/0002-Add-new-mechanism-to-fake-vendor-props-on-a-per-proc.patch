@@ -1,0 +1,78 @@
+From 80252e3a2495d6e840b678a5540494f3a2e395ba Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sat, 19 Feb 2022 08:20:25 -0500
+Subject: [PATCH 2/2] Add new mechanism to fake vendor props on a per-process
+ basis
+
+This reads debug.phh.props.<process name>. If its value is "vendor",
+then ro.product.device/ro.product.manufacturer is read from vendor
+---
+ libc/system_properties/system_properties.cpp | 38 ++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
+
+diff --git a/libc/system_properties/system_properties.cpp b/libc/system_properties/system_properties.cpp
+index 1cb15c3df..d6e7e3e68 100644
+--- a/libc/system_properties/system_properties.cpp
++++ b/libc/system_properties/system_properties.cpp
+@@ -35,6 +35,7 @@
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <unistd.h>
++#include <fcntl.h>
+ 
+ #include <new>
+ 
+@@ -50,6 +51,32 @@
+ #define SERIAL_DIRTY(serial) ((serial)&1)
+ #define SERIAL_VALUE_LEN(serial) ((serial) >> 24)
+ 
++static char comm[128];
++static bool self_ok = false;
++static char comm_override[PROP_VALUE_MAX];
++
++static void read_self() {
++  //NB: Not atomic, but should be good enough, there is no possible corruption from concurrency
++  if(self_ok) return;
++  self_ok = true;
++
++  int fd = open("/proc/self/comm", O_RDONLY);
++  if(fd<0) return;
++  read(fd, comm, sizeof(comm)-1);
++  for(unsigned i=0; i<sizeof(comm); i++)
++    if(comm[i] == '\n')
++      comm[i] = 0;
++  close(fd);
++
++  //That's calling ourselves but that's fine because we already have self_ok = true
++  char propName[PROP_NAME_MAX];
++  memset(propName, 0, PROP_NAME_MAX);
++  strncpy(propName, "debug.phh.props.", PROP_NAME_MAX - 1);
++  strncat(propName, comm, PROP_NAME_MAX - 1);
++
++  __system_property_get(propName, comm_override);
++}
++
+ static bool is_dir(const char* pathname) {
+   struct stat info;
+   if (stat(pathname, &info) == -1) {
+@@ -216,6 +243,17 @@ void SystemProperties::ReadCallback(const prop_info* pi,
+ }
+ 
+ int SystemProperties::Get(const char* name, char* value) {
++  read_self();
++  if(strcmp(comm_override, "vendor") == 0) {
++    if(strcmp(name, "ro.product.device") == 0) {
++      int r = Get("ro.product.vendor.device", value);
++      if(r>0) return r;
++    }
++    if(strcmp(name, "ro.product.manufacturer") == 0) {
++      int r = Get("ro.product.vendor.manufacturer", value);
++      if(r>0) return r;
++    }
++  }
+   const prop_info* pi = Find(name);
+ 
+   if (pi != nullptr) {
+-- 
+2.25.1
+

@@ -1,0 +1,40 @@
+From 994e93801a24e3864b04d20017b331f4e68606f6 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 2 May 2022 17:44:28 -0400
+Subject: [PATCH 2/2] Ignore cancelled fingerprint events, they are expected,
+ plus add more fingerprint enroll logs
+
+---
+ .../biometrics/fingerprint/FingerprintEnrollEnrolling.java     | 3 +++
+ .../biometrics/fingerprint/FingerprintEnrollFindSensor.java    | 1 +
+ 2 files changed, 4 insertions(+)
+
+diff --git a/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollEnrolling.java b/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollEnrolling.java
+index 84519f8534..0b413d5bf2 100644
+--- a/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollEnrolling.java
++++ b/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollEnrolling.java
+@@ -496,6 +496,9 @@ public class FingerprintEnrollEnrolling extends BiometricsEnrollEnrolling {
+ 
+     @Override
+     public void onEnrollmentError(int errMsgId, CharSequence errString) {
++	android.util.Log.e("PHH-Enroll", "heyo " + errMsgId + ", " + errString , new Exception());
++	if (errMsgId == 5) return;
++
+         FingerprintErrorDialog.showErrorDialog(this, errMsgId);
+         stopIconAnimation();
+         if (!mCanAssumeUdfps) {
+diff --git a/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollFindSensor.java b/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollFindSensor.java
+index 405c090552..f797257261 100644
+--- a/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollFindSensor.java
++++ b/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollFindSensor.java
+@@ -230,6 +230,7 @@ public class FingerprintEnrollFindSensor extends BiometricEnrollBase implements
+ 
+     @Override
+     public void onEnrollmentError(int errMsgId, CharSequence errString) {
++	android.util.Log.e("PHH-Enroll", "heyo " + errMsgId + ", " + errString + ", " + mNextClicked, new Exception());
+         if (mNextClicked && errMsgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED) {
+             mNextClicked = false;
+             proceedToEnrolling(false /* cancelEnrollment */);
+-- 
+2.25.1
+

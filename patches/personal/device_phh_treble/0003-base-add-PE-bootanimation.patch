@@ -10,16 +10,19 @@ Subject: [PATCH 3/3] base: add PE bootanimation
  create mode 100644 files/bootanimation.zip
 
 diff --git a/base.mk b/base.mk
-index c1659ab..4f78e59 100644
+index a7ae798..84d4f8d 100644
 --- a/base.mk
 +++ b/base.mk
-@@ -208,3 +208,6 @@ PRODUCT_PACKAGES += \
- 	oplus-alert-slider
+@@ -46,6 +46,9 @@ PRODUCT_COPY_FILES += \
+ 	frameworks/av/services/audiopolicy/config/usb_audio_policy_configuration.xml:system/etc/usb_audio_policy_configuration.xml \
+ 	device/phh/treble/files/fake_audio_policy_volume.xml:system/etc/fake_audio_policy_volume.xml \
  
- include build/make/target/product/gsi_release.mk
-+
 +PRODUCT_COPY_FILES += \
 +	device/phh/treble/files/bootanimation.zip:$(TARGET_COPY_OUT_PRODUCT)/media/bootanimation.zip
++
+ # NFC:
+ #   Provide default libnfc-nci.conf file for devices that does not have one in
+ #   vendor/etc
 diff --git a/files/bootanimation.zip b/files/bootanimation.zip
 new file mode 100644
 index 0000000000000000000000000000000000000000..6a78301057b1f5d2409f413a925ddb343ce4fd5a

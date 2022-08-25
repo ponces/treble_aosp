@@ -1,0 +1,30 @@
+From 59d3ecc59bf95963dfd88f842de66d9f477f2fa2 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Fri, 25 Mar 2022 05:37:56 -0400
+Subject: [PATCH 16/16] MIUI13 devices hide their vibrator HAL behind
+ non-default name: "vibratorfeature"
+
+---
+ services/vibratorservice/VibratorHalController.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/services/vibratorservice/VibratorHalController.cpp b/services/vibratorservice/VibratorHalController.cpp
+index c1795f5c32..345016efd6 100644
+--- a/services/vibratorservice/VibratorHalController.cpp
++++ b/services/vibratorservice/VibratorHalController.cpp
+@@ -59,6 +59,12 @@ std::shared_ptr<HalWrapper> connectHal(std::shared_ptr<CallbackScheduler> schedu
+         return std::make_shared<AidlHalWrapper>(std::move(scheduler), aidlHal);
+     }
+ 
++    aidlHal = waitForVintfService<Aidl::IVibrator>(String16("vibratorfeature"));
++    if (aidlHal) {
++        ALOGV("Successfully connected to Xiaomi Vibrator HAL AIDL service.");
++        return std::make_shared<AidlHalWrapper>(std::move(scheduler), aidlHal);
++    }
++
+     sp<V1_0::IVibrator> halV1_0 = V1_0::IVibrator::getService();
+     if (halV1_0 == nullptr) {
+         ALOGV("Vibrator HAL service not available.");
+-- 
+2.25.1
+

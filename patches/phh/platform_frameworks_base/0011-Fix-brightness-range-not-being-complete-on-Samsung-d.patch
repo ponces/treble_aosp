@@ -1,7 +1,7 @@
-From ce5ef80c2c1d00748ae14a5ef2ae30812366283f Mon Sep 17 00:00:00 2001
+From a589ed6c82acc507440821766bd1e8c985243af1 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 29 Sep 2020 22:40:10 +0200
-Subject: [PATCH 11/22] Fix brightness range not being complete on Samsung
+Subject: [PATCH 11/35] Fix brightness range not being complete on Samsung
  devices
 
 On some devices, minimum brightness is 0, which totally messes with
@@ -15,10 +15,10 @@ Change-Id: I4d97cbc32490949e83272b81ec6320a5483310b1
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/services/core/java/com/android/server/power/PowerManagerService.java b/services/core/java/com/android/server/power/PowerManagerService.java
-index 2b059549..b3aec36c 100644
+index 8c7d257d271b..10c624eba54d 100644
 --- a/services/core/java/com/android/server/power/PowerManagerService.java
 +++ b/services/core/java/com/android/server/power/PowerManagerService.java
-@@ -988,9 +988,11 @@ public final class PowerManagerService extends SystemService
+@@ -995,9 +995,11 @@ public final class PowerManagerService extends SystemService
  
          if (min == INVALID_BRIGHTNESS_IN_CONFIG || max == INVALID_BRIGHTNESS_IN_CONFIG
                  || def == INVALID_BRIGHTNESS_IN_CONFIG) {

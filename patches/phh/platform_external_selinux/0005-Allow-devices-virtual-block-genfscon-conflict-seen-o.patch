@@ -1,7 +1,7 @@
-From 93173487f52e90e9d042a66af9c3d656f17e9a4b Mon Sep 17 00:00:00 2001
+From ef479c63d4fb9e1e839c968db9f61c0fcf76828c Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 6 Sep 2019 15:07:25 +0200
-Subject: [PATCH 5/7] Allow /devices/virtual/block/ genfscon conflict (seen on
+Subject: [PATCH 5/8] Allow /devices/virtual/block/ genfscon conflict (seen on
  Xiaomi Mi 9)
 
 Change-Id: I06e4e9d5b82d61a8aeab595b47e2589249675895

@@ -1,0 +1,31 @@
+From 89c4c8895587c028dc43eba3be9c4fb0a435d99c Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sun, 19 Dec 2021 17:03:15 -0500
+Subject: [PATCH] Add a vendor800 command, to be able to call vendor-specific
+ hwc functions
+
+Change-Id: Icbef1e9e3a331ae3bd5a05687d545851d94d88a8
+---
+ .../composer-command-buffer/2.1/ComposerCommandBuffer.h     | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/graphics/composer/2.1/utils/command-buffer/include/composer-command-buffer/2.1/ComposerCommandBuffer.h b/graphics/composer/2.1/utils/command-buffer/include/composer-command-buffer/2.1/ComposerCommandBuffer.h
+index 499d3b96e..489578468 100644
+--- a/graphics/composer/2.1/utils/command-buffer/include/composer-command-buffer/2.1/ComposerCommandBuffer.h
++++ b/graphics/composer/2.1/utils/command-buffer/include/composer-command-buffer/2.1/ComposerCommandBuffer.h
+@@ -402,6 +402,12 @@ class CommandWriterBase {
+         endCommand();
+     }
+ 
++    void vendor800_1(uint32_t val) {
++        beginCommand(0x800 << 16, 1);
++        write(val);
++        endCommand();
++    }
++
+    protected:
+      template <typename T>
+      void beginCommand(T command, uint16_t length) {
+-- 
+2.25.1
+

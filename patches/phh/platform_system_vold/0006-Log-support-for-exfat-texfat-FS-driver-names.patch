@@ -1,0 +1,28 @@
+From c8a7e9ff98f64068e0797d554c2a14e089be11a8 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Wed, 24 Nov 2021 15:50:30 -0500
+Subject: [PATCH 6/7] Log support for exfat/texfat FS driver names
+
+Change-Id: I5ae38741374b25b84595a9eae9bdda7afe2cac05
+---
+ main.cpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/main.cpp b/main.cpp
+index 52aa896..86e0aa5 100644
+--- a/main.cpp
++++ b/main.cpp
+@@ -69,7 +69,9 @@ int main(int argc, char** argv) {
+     LOG(DEBUG) << "Detected support for:"
+                << (android::vold::IsFilesystemSupported("ext4") ? " ext4" : "")
+                << (android::vold::IsFilesystemSupported("f2fs") ? " f2fs" : "")
+-               << (android::vold::IsFilesystemSupported("vfat") ? " vfat" : "");
++               << (android::vold::IsFilesystemSupported("vfat") ? " vfat" : "")
++               << (android::vold::IsFilesystemSupported("exfat") ? " exfat" : "")
++               << (android::vold::IsFilesystemSupported("texfat") ? " texfat" : "");
+ 
+     VolumeManager* vm;
+     NetlinkManager* nm;
+-- 
+2.25.1
+
