@@ -1,0 +1,64 @@
+From 01bde0b9e8c3234f40391af17d2625e8a45fb167 Mon Sep 17 00:00:00 2001
+From: ChonDoit <thphantomblog@gmail.com>
+Date: Mon, 31 Oct 2022 19:25:25 -0300
+Subject: [PATCH 3/3] misc: Add sysbta HAL toggle
+
+---
+ app/src/main/java/me/phh/treble/app/Misc.kt         | 5 +++++
+ app/src/main/java/me/phh/treble/app/MiscSettings.kt | 1 +
+ app/src/main/res/xml/pref_misc.xml                  | 4 ++++
+ 3 files changed, 10 insertions(+)
+
+diff --git a/app/src/main/java/me/phh/treble/app/Misc.kt b/app/src/main/java/me/phh/treble/app/Misc.kt
+index 0cdb728..92e7eb9 100644
+--- a/app/src/main/java/me/phh/treble/app/Misc.kt
++++ b/app/src/main/java/me/phh/treble/app/Misc.kt
+@@ -215,6 +215,10 @@ object Misc: EntryStartup {
+                 val value = sp.getBoolean(key, false)
+                 SystemProperties.set("persist.sys.phh.disable_a2dp_offload", if (value) "1" else "0")
+             }
++            MiscSettings.sysbta -> {
++                val value = sp.getBoolean(key, false)
++                SystemProperties.set("persist.bluetooth.system_audio_hal.enabled", if (value) "1" else "0")
++            }
+             MiscSettings.noHwcomposer -> {
+                 val value = sp.getBoolean(key, false)
+                 enableHwcOverlay(!value)
+@@ -280,6 +284,7 @@ object Misc: EntryStartup {
+         spListener.onSharedPreferenceChanged(sp, MiscSettings.headsetFix)
+         spListener.onSharedPreferenceChanged(sp, MiscSettings.bluetooth)
+         spListener.onSharedPreferenceChanged(sp, MiscSettings.displayFps)
++        spListener.onSharedPreferenceChanged(sp, MiscSettings.sysbta)
+         spListener.onSharedPreferenceChanged(sp, MiscSettings.noHwcomposer)
+         spListener.onSharedPreferenceChanged(sp, MiscSettings.storageFUSE)
+         spListener.onSharedPreferenceChanged(sp, MiscSettings.dt2w)
+diff --git a/app/src/main/java/me/phh/treble/app/MiscSettings.kt b/app/src/main/java/me/phh/treble/app/MiscSettings.kt
+index 99593c9..dc8cce4 100644
+--- a/app/src/main/java/me/phh/treble/app/MiscSettings.kt
++++ b/app/src/main/java/me/phh/treble/app/MiscSettings.kt
+@@ -28,6 +28,7 @@ object MiscSettings : Settings {
+     val disableAudioEffects = "key_misc_disable_audio_effects"
+     val cameraTimestampOverride = "key_misc_camera_timestamp"
+     val forceA2dpOffloadDisable = "key_misc_force_a2dp_offload_disable"
++    val sysbta = "key_misc_dynamic_sysbta"
+     val noHwcomposer = "key_misc_no_hwcomposer"
+     val storageFUSE = "key_misc_storage_fuse"
+     val backlightScale = "key_misc_backlight_scale"
+diff --git a/app/src/main/res/xml/pref_misc.xml b/app/src/main/res/xml/pref_misc.xml
+index b90d0f0..9ff572f 100644
+--- a/app/src/main/res/xml/pref_misc.xml
++++ b/app/src/main/res/xml/pref_misc.xml
+@@ -122,6 +122,10 @@
+             android:title="Force-disable A2DP offload" />
+ 		<CheckBoxPreference
+             android:defaultValue="false"
++            android:key="key_misc_dynamic_sysbta"
++            android:title="Use System Wide BT HAL" />
++		<CheckBoxPreference
++            android:defaultValue="false"
+             android:key="key_misc_force_navbar_off"
+             android:title="Force navigation bar disabled"
+             android:summary="Requires a reboot" />
+-- 
+2.34.1
+

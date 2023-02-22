@@ -1,0 +1,26 @@
+From c3b4f37f80db421a6757b91e8e6aa87096166c41 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Tue, 8 Jun 2021 10:03:50 +0100
+Subject: [PATCH 2/3] headers: Remove Customization page
+
+---
+ app/src/main/res/xml/pref_headers.xml |  3 -
+ 1 file changed, 3 deletions(-)
+
+diff --git a/app/src/main/res/xml/pref_headers.xml b/app/src/main/res/xml/pref_headers.xml
+index 1682a3f..9a4fa2a 100644
+--- a/app/src/main/res/xml/pref_headers.xml
++++ b/app/src/main/res/xml/pref_headers.xml
+@@ -38,9 +38,6 @@
+     <header
+         android:fragment="me.phh.treble.app.ImsSettingsFragment"
+         android:title="IMS features" />
+-    <header
+-        android:fragment="me.phh.treble.app.CustomSettingsFragment"
+-        android:title="Customization features" />
+     <header
+         android:id="@+id/updater"
+         android:title="Updater">
+-- 
+2.25.1
+

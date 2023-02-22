@@ -1,0 +1,57 @@
+From 7e9945994e5c83bff75aff95aecac73b17cc0f4f Mon Sep 17 00:00:00 2001
+From: "tzu-hsien.huang" <tzu-hsien.huang@mediatek.com>
+Date: Wed, 20 Jul 2022 15:12:01 +0800
+Subject: [PATCH 1/6] Additionally check le_set_event_mask command resturn
+ status with UNSUPPORTED_LMP_OR_LL_PARAMETER
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+In GD BT stack, stack will check each return status of HCI Commands. E.g.  reset , le_set_event_mask, set_event_mask …etc.
+In BT spec 5.2, SIG add some parameters for le_set_event_mask for le audio, like LE Terminate BIG Complete event: Supported.
+However, some legacy chips do not support LE Audio feature, and controller will return Status: Unsupported LMP Parameter Value when it receives this HCI Command
+When it checks the return value and find the status is not SUCCESS, it will cause FAIL and cannot be compatible with old legacy chip.
+After brushing GSI, Bluetooth will turn off automatically when it is turned on.
+So all CTS test will always fail.
+
+Check le_set_event_mask command return status with SUCCESS or UNSUPPORTED_LMP_OR_LL_PARAMETER
+
+Bug: 239662211
+Test: CtsBluetoothTestCases
+Change-Id: I2b0cede7f47eecd2124a386e958773289eb6f11c
+---
+ system/gd/hci/controller.cc | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/system/gd/hci/controller.cc b/system/gd/hci/controller.cc
+index 3827f83a91..221cd88883 100644
+--- a/system/gd/hci/controller.cc
++++ b/system/gd/hci/controller.cc
+@@ -540,7 +540,7 @@ struct Controller::impl {
+   void le_set_event_mask(uint64_t le_event_mask) {
+     std::unique_ptr<LeSetEventMaskBuilder> packet = LeSetEventMaskBuilder::Create(le_event_mask);
+     hci_->EnqueueCommand(std::move(packet), module_.GetHandler()->BindOnceOn(
+-                                                this, &Controller::impl::check_status<LeSetEventMaskCompleteView>));
++                                                this, &Controller::impl::check_event_mask_status<LeSetEventMaskCompleteView>));
+   }
+ 
+   template <class T>
+@@ -551,6 +551,15 @@ struct Controller::impl {
+     ASSERT(status_view.GetStatus() == ErrorCode::SUCCESS);
+   }
+ 
++  template <class T>
++  void check_event_mask_status(CommandCompleteView view) {
++    ASSERT(view.IsValid());
++    auto status_view = T::Create(view);
++    ASSERT(status_view.IsValid());
++    ASSERT(status_view.GetStatus() == ErrorCode::SUCCESS ||
++           status_view.GetStatus() == ErrorCode::UNSUPPORTED_LMP_OR_LL_PARAMETER);
++  }
++
+ #define OP_CODE_MAPPING(name)                                                  \
+   case OpCode::name: {                                                         \
+     uint16_t index = (uint16_t)OpCodeIndex::name;                              \
+-- 
+2.25.1
+

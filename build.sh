@@ -12,12 +12,11 @@ set -e
 
 BL=$PWD/treble_build_aosp
 BD=$HOME/builds
-BRANCH="android-13.0.0_r3"
 
 initRepos() {
     if [ ! -d .repo ]; then
-        echo "--> Initializing AOSP workspace"
-        repo init -u https://android.googlesource.com/platform/manifest -b $BRANCH
+        echo "--> Initializing workspace"
+        repo init -u https://android.googlesource.com/platform/manifest -b android-13.0.0_r30
         echo
 
         echo "--> Preparing local manifest"
@@ -34,15 +33,19 @@ syncRepos() {
 }
 
 applyPatches() {
-    echo "--> Applying PHH patches"
-    cd device/phh/treble
-    bash generate.sh
-    cd ../../..
-    bash $BL/apply-patches.sh $BL phh
+    echo "--> Applying TrebleDroid patches"
+    bash $BL/apply-patches.sh $BL trebledroid
     echo
 
     echo "--> Applying personal patches"
     bash $BL/apply-patches.sh $BL personal
+    echo
+
+    echo "--> Generating makefiles"
+    cd device/phh/treble
+    cp $BL/aosp.mk .
+    bash generate.sh aosp
+    cd ../../..
     echo
 }
 
@@ -62,12 +65,29 @@ buildTrebleApp() {
     echo
 }
 
-buildVariant() {
+buildVanillaVariant() {
     echo "--> Building treble_arm64_bvN"
     lunch treble_arm64_bvN-userdebug
-    make installclean
+    make -j$(nproc --all) installclean
     make -j$(nproc --all) systemimage
-    xz -c $OUT/system.img -T0 > $BD/system-t-arm64-ab-gapps.img.xz
+    mv $OUT/system.img $BD/system-treble_arm64_bvN.img
+    echo
+}
+
+buildGappsVariant() {
+    echo "--> Building treble_arm64_bgN"
+    lunch treble_arm64_bgN-userdebug
+    make -j$(nproc --all) installclean
+    make -j$(nproc --all) systemimage
+    mv $OUT/system.img $BD/system-treble_arm64_bgN.img
+    echo
+}
+
+generatePackages() {
+    echo "--> Generating packages"
+    xz -cv $BD/system-treble_arm64_bvN.img -T0 > $BD/aosp-arm64-ab-vanilla-13.0-$BUILD_DATE.img.xz
+    xz -cv $BD/system-treble_arm64_bgN.img -T0 > $BD/aosp-arm64-ab-gapps-13.0-$BUILD_DATE.img.xz
+    rm -rf $BD/system-*.img
     echo
 }
 
@@ -79,7 +99,9 @@ syncRepos
 applyPatches
 setupEnv
 buildTrebleApp
-buildVariant
+buildVanillaVariant
+buildGappsVariant
+generatePackages
 
 END=`date +%s`
 ELAPSEDM=$(($(($END-$START))/60))

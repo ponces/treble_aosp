@@ -1,0 +1,46 @@
+From 37704a361175f22df368a7d6fb3fad074532c3a9 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Thu, 12 Sep 2019 13:05:37 +0200
+Subject: [PATCH 02/15] If Vboot2 fails, fall-back to Vboot1
+
+Some devices, for instance Honor View 10, running Pie vendor declares
+vbmeta in their device-tree, but doesn't have a vbmeta partition.
+
+Test: without this fix the device reboots into bootloader
+Test: with this fix, the device boots.
+
+Please note that other fixes are also required to get this device to
+actually boot.
+
+Change-Id: I97a7042fb03f817c41b801d558e438d2c1f6c375
+---
+ init/first_stage_mount.cpp | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/init/first_stage_mount.cpp b/init/first_stage_mount.cpp
+index 042988eff..6dfa275e4 100644
+--- a/init/first_stage_mount.cpp
++++ b/init/first_stage_mount.cpp
+@@ -825,10 +825,17 @@ bool DoFirstStageMount(bool create_devices) {
+     }
+ 
+     if (create_devices) {
+-        if (!(*fsm)->DoCreateDevices()) return false;
++        if (!(*fsm)->DoCreateDevices()) LOG(ERROR) << "Failed to create devices";
+     }
+ 
+-    return (*fsm)->DoFirstStageMount();
++    if(!(*fsm)->DoFirstStageMount()) {
++	    *fsm = nullptr;
++	    auto fstab = ReadFirstStageFstab();
++	    auto v = std::make_unique<FirstStageMountVBootV1>(std::move(*fstab));
++	    v->DoCreateDevices();
++	    return v->DoFirstStageMount();
++    }
++    return true;
+ }
+ 
+ void SetInitAvbVersionInRecovery() {
+-- 
+2.25.1
+

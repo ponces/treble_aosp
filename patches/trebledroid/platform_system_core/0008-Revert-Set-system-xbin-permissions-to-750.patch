@@ -1,0 +1,28 @@
+From a4f466563ec74f46056fefc83112ae04f7c3fee3 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Tue, 1 Feb 2022 13:48:35 +0000
+Subject: [PATCH 08/15] Revert "Set /system/xbin permissions to 750."
+
+This reverts commit 42a1a126e554a8bca31d0afc832848b7b0fa1f4e.
+
+Change-Id: I277def5153616d6f00bc877e6170b7fed7cd799d
+---
+ libcutils/fs_config.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libcutils/fs_config.cpp b/libcutils/fs_config.cpp
+index a6835fc70..f686b469c 100644
+--- a/libcutils/fs_config.cpp
++++ b/libcutils/fs_config.cpp
+@@ -86,7 +86,7 @@ static const struct fs_path_config android_dirs[] = {
+     { 00751, AID_ROOT,         AID_SHELL,        0, "system/bin" },
+     { 00755, AID_ROOT,         AID_ROOT,         0, "system/etc/ppp" },
+     { 00755, AID_ROOT,         AID_SHELL,        0, "system/vendor" },
+-    { 00750, AID_ROOT,         AID_SHELL,        0, "system/xbin" },
++    { 00751, AID_ROOT,         AID_SHELL,        0, "system/xbin" },
+     { 00751, AID_ROOT,         AID_SHELL,        0, "system/apex/*/bin" },
+     { 00751, AID_ROOT,         AID_SHELL,        0, "system_ext/bin" },
+     { 00751, AID_ROOT,         AID_SHELL,        0, "system_ext/apex/*/bin" },
+-- 
+2.25.1
+

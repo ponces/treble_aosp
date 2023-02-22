@@ -1,0 +1,62 @@
+From 3df12991e9f63417985b167d58cbfe9253d4dc1b Mon Sep 17 00:00:00 2001
+From: Peter Cai <peter@typeblog.net>
+Date: Wed, 1 Jun 2022 16:56:46 -0400
+Subject: [PATCH 07/26] camera: Implement property to override default camera
+
+Complement to the frameworks/base patch.
+
+Change-Id: I002bfa974bafc2cc01365eeea31c7a5dcb5a2028
+---
+ .../common/CameraProviderManager.cpp          | 22 +++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/services/camera/libcameraservice/common/CameraProviderManager.cpp b/services/camera/libcameraservice/common/CameraProviderManager.cpp
+index 6ef16b3ca8..3dd15d9fe9 100644
+--- a/services/camera/libcameraservice/common/CameraProviderManager.cpp
++++ b/services/camera/libcameraservice/common/CameraProviderManager.cpp
+@@ -36,6 +36,7 @@
+ #include <functional>
+ #include <camera_metadata_hidden.h>
+ #include <android-base/parseint.h>
++#include <android-base/properties.h>
+ #include <android-base/logging.h>
+ #include <cutils/properties.h>
+ #include <hwbinder/IPCThreadState.h>
+@@ -205,6 +206,15 @@ std::vector<std::string> CameraProviderManager::getCameraDeviceIds() const {
+             deviceIds.push_back(id);
+         }
+     }
++
++    int32_t altPrimaryCamera = property_get_int32("persist.sys.alt_primary_camera", 0);
++
++    if (altPrimaryCamera != 0 && deviceIds.size() > (size_t) altPrimaryCamera) {
++        const std::string origPrimary = deviceIds[0];
++        deviceIds[0] = deviceIds[altPrimaryCamera];
++        deviceIds[altPrimaryCamera] = origPrimary;
++    }
++
+     return deviceIds;
+ }
+ 
+@@ -271,6 +281,18 @@ std::vector<std::string> CameraProviderManager::getAPI1CompatibleCameraDeviceIds
+     std::sort(systemDeviceIds.begin(), systemDeviceIds.end(), sortFunc);
+     deviceIds.insert(deviceIds.end(), publicDeviceIds.begin(), publicDeviceIds.end());
+     deviceIds.insert(deviceIds.end(), systemDeviceIds.begin(), systemDeviceIds.end());
++
++    // Default camera ID hack should match with android.hardware.camera2.CameraManager.sortCameraIds
++    // Note that the alt primary camera may not be available here due to filterLogicalCameraIdsLocked()
++    // in which case we will just ignore it.
++    int altPrimaryCameraId = base::GetIntProperty("persist.sys.alt_primary_camera", -1);
++
++    if (altPrimaryCameraId > 0 && altPrimaryCameraId < (int) deviceIds.size()) {
++        std::string origPrimary = deviceIds[0];
++        deviceIds[0] = deviceIds[altPrimaryCameraId];
++        deviceIds[altPrimaryCameraId] = origPrimary;
++    }
++
+     return deviceIds;
+ }
+ 
+-- 
+2.25.1
+

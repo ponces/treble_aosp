@@ -1,0 +1,65 @@
+From 32b422310c275a8c5da94e5ab26d3e63f80b6a17 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Wed, 20 Oct 2021 09:39:47 -0400
+Subject: [PATCH] Try to fallback mCallingSid to getpidcon
+
+This is needed because old vendors (before April 2019 ~) don't support
+reporting SELinux context of the caller.
+This doesn't work for all processes, because it requires some additional
+SELinux permissions. At the moment, only keystore2 requires this
+
+Change-Id: I3b6c4dac9d0e20a3d66f931b283e3a535ab499cd
+---
+ libs/binder/IPCThreadState.cpp | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/libs/binder/IPCThreadState.cpp b/libs/binder/IPCThreadState.cpp
+index 3c97dcab93..65dc182b03 100644
+--- a/libs/binder/IPCThreadState.cpp
++++ b/libs/binder/IPCThreadState.cpp
+@@ -35,6 +35,7 @@
+ #include <sched.h>
+ #include <signal.h>
+ #include <stdio.h>
++#include <stdlib.h>
+ #include <sys/ioctl.h>
+ #include <sys/resource.h>
+ #include <unistd.h>
+@@ -1269,6 +1270,26 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
+             mCallingUid = tr.sender_euid;
+             mLastTransactionBinderFlags = tr.flags;
+ 
++            // This is recoding libselinux's getpidcon()
++            // We are in a NDK lib, so we need to keep changes to a minimum
++            bool allocatedSid = false;
++            if (mCallingSid == nullptr && mCallingPid != 0) {
++                char buf[4096];
++                char *path = NULL;
++                (void)asprintf(&path, "/proc/%d/attr/current", mCallingPid);
++                int fd = open(path, O_RDONLY | O_CLOEXEC);
++                if (fd != -1) {
++                    int readRet = read(fd, buf, sizeof(buf)-1);
++                    if(readRet != -1) {
++                        buf[readRet] = 0;
++                        mCallingSid = strdup(buf);
++                        allocatedSid = true;
++                    }
++                    close(fd);
++                }
++                free(path);
++            }
++
+             // ALOGI(">>>> TRANSACT from pid %d sid %s uid %d\n", mCallingPid,
+             //    (mCallingSid ? mCallingSid : "<N/A>"), mCallingUid);
+ 
+@@ -1333,6 +1354,7 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
+ 
+             mServingStackPointer = origServingStackPointer;
+             mCallingPid = origPid;
++            if (allocatedSid) free((void*)mCallingSid);
+             mCallingSid = origSid;
+             mCallingUid = origUid;
+             mStrictModePolicy = origStrictModePolicy;
+-- 
+2.34.1
+

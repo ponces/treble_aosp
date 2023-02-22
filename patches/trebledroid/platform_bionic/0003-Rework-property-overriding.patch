@@ -1,0 +1,145 @@
+From 85260da59e5bfa35b84ffba24db4919a3a008069 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Thu, 19 Jan 2023 16:44:01 -0500
+Subject: [PATCH 3/3] Rework property overriding
+
+- Support property read with callback in addition to previous
+  constant-size property_get
+- Add another class of redirect "keymaster", to redirect to AOSP/GSI
+  props + SPL based on boot.img
+---
+ libc/system_properties/system_properties.cpp | 77 +++++++++++++++-----
+ 1 file changed, 58 insertions(+), 19 deletions(-)
+
+diff --git a/libc/system_properties/system_properties.cpp b/libc/system_properties/system_properties.cpp
+index d6e7e3e68..40ff48bad 100644
+--- a/libc/system_properties/system_properties.cpp
++++ b/libc/system_properties/system_properties.cpp
+@@ -35,6 +35,7 @@
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <unistd.h>
++#include <string.h>
+ #include <fcntl.h>
+ 
+ #include <new>
+@@ -60,23 +61,70 @@ static void read_self() {
+   if(self_ok) return;
+   self_ok = true;
+ 
+-  int fd = open("/proc/self/comm", O_RDONLY);
++  char cmdline[128];
++  int fd = open("/proc/self/cmdline", O_RDONLY);
+   if(fd<0) return;
+-  read(fd, comm, sizeof(comm)-1);
+-  for(unsigned i=0; i<sizeof(comm); i++)
+-    if(comm[i] == '\n')
+-      comm[i] = 0;
++  read(fd, cmdline, sizeof(cmdline)-1);
++  for(unsigned i=0; i<sizeof(cmdline); i++)
++    if(cmdline[i] == '\n')
++      cmdline[i] = 0;
+   close(fd);
+ 
++  // Truncate to last /, we don't want `/` in the prop
++  const char *c = strrchr(cmdline, '/');
++  if (c != nullptr) {
++      c = c+1;
++  } else {
++      c = cmdline;
++  }
++  // Take only the last 16 bytes (prop names max is 32)
++  if(strlen(c) < 15) {
++      strcpy(comm, c);
++  } else {
++      strcpy(comm, c + strlen(c) - 15);
++  }
++
++
+   //That's calling ourselves but that's fine because we already have self_ok = true
+   char propName[PROP_NAME_MAX];
+   memset(propName, 0, PROP_NAME_MAX);
+   strncpy(propName, "debug.phh.props.", PROP_NAME_MAX - 1);
+-  strncat(propName, comm, PROP_NAME_MAX - 1);
++  strncat(propName, comm, PROP_NAME_MAX - strlen(propName) - 1);
+ 
++  //async_safe_format_log(ANDROID_LOG_WARN, "libc", "Reading debug prop %s", propName);
+   __system_property_get(propName, comm_override);
+ }
+ 
++static const char* redirectToProp(const char *name) {
++  read_self();
++  /*if(strstr(name, "ro.keymaster") != nullptr || strstr(name, "security_patch") != nullptr || strstr(name, "release") != nullptr) {
++    async_safe_format_log(ANDROID_LOG_WARN, "libc", "Process/comm %s/%s is reading %s", comm, comm_override, name);
++  }*/
++  if(strcmp(comm_override, "vendor") == 0) {
++    if(strcmp(name, "ro.product.device") == 0) {
++      return "ro.product.vendor.device";
++    }
++    if(strcmp(name, "ro.product.manufacturer") == 0) {
++      return "ro.product.vendor.manufacturer";
++    }
++  }
++  if(strcmp(comm_override, "keymaster") == 0) {
++    if(strcmp(name, "ro.product.model") == 0) {
++      return "ro.keymaster.mod";
++    }
++    if(strcmp(name, "ro.product.brand") == 0) {
++      return "ro.keymaster.brn";
++    }
++    if(strcmp(name, "ro.build.version.release") == 0) {
++      return "ro.keymaster.xxx.release";
++    }
++    if(strcmp(name, "ro.build.version.security_patch") == 0) {
++      return "ro.keymaster.xxx.security_patch";
++    }
++  }
++  return name;
++}
++
+ static bool is_dir(const char* pathname) {
+   struct stat info;
+   if (stat(pathname, &info) == -1) {
+@@ -150,17 +198,19 @@ uint32_t SystemProperties::AreaSerial() {
+ }
+ 
+ const prop_info* SystemProperties::Find(const char* name) {
++  const char* newName = redirectToProp(name);
++
+   if (!initialized_) {
+     return nullptr;
+   }
+ 
+-  prop_area* pa = contexts_->GetPropAreaForName(name);
++  prop_area* pa = contexts_->GetPropAreaForName(newName);
+   if (!pa) {
+     async_safe_format_log(ANDROID_LOG_WARN, "libc", "Access denied finding property \"%s\"", name);
+     return nullptr;
+   }
+ 
+-  return pa->find(name);
++  return pa->find(newName);
+ }
+ 
+ static bool is_read_only(const char* name) {
+@@ -243,17 +293,6 @@ void SystemProperties::ReadCallback(const prop_info* pi,
+ }
+ 
+ int SystemProperties::Get(const char* name, char* value) {
+-  read_self();
+-  if(strcmp(comm_override, "vendor") == 0) {
+-    if(strcmp(name, "ro.product.device") == 0) {
+-      int r = Get("ro.product.vendor.device", value);
+-      if(r>0) return r;
+-    }
+-    if(strcmp(name, "ro.product.manufacturer") == 0) {
+-      int r = Get("ro.product.vendor.manufacturer", value);
+-      if(r>0) return r;
+-    }
+-  }
+   const prop_info* pi = Find(name);
+ 
+   if (pi != nullptr) {
+-- 
+2.25.1
+

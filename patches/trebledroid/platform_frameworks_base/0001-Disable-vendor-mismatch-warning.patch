@@ -1,0 +1,40 @@
+From 198e9f9ffb7b24af82985376528dade905f448f2 Mon Sep 17 00:00:00 2001
+From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
+Date: Thu, 5 Apr 2018 10:01:19 +0800
+Subject: [PATCH 01/38] Disable vendor mismatch warning
+
+Change-Id: Ieb8fe91e2f02462f074312ed0f4885d183e9780b
+---
+ .../server/wm/ActivityTaskManagerService.java    | 16 ++--------------
+ 1 file changed, 2 insertions(+), 14 deletions(-)
+
+diff --git a/services/core/java/com/android/server/wm/ActivityTaskManagerService.java b/services/core/java/com/android/server/wm/ActivityTaskManagerService.java
+index 0398cc84f9db..e700dcf8eba8 100644
+--- a/services/core/java/com/android/server/wm/ActivityTaskManagerService.java
++++ b/services/core/java/com/android/server/wm/ActivityTaskManagerService.java
+@@ -5847,20 +5847,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+                 }
+ 
+                 if (!Build.isBuildConsistent()) {
+-                    Slog.e(TAG, "Build fingerprint is not consistent, warning user");
+-                    mUiHandler.post(() -> {
+-                        if (mShowDialogs) {
+-                            AlertDialog d = new BaseErrorDialog(mUiContext);
+-                            d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+-                            d.setCancelable(false);
+-                            d.setTitle(mUiContext.getText(R.string.android_system_label));
+-                            d.setMessage(mUiContext.getText(R.string.system_error_manufacturer));
+-                            d.setButton(DialogInterface.BUTTON_POSITIVE,
+-                                    mUiContext.getText(R.string.ok),
+-                                    mUiHandler.obtainMessage(DISMISS_DIALOG_UI_MSG, d));
+-                            d.show();
+-                        }
+-                    });
++                    Slog.e(TAG, "Build fingerprint is not consistent");
++                    // Do not emit warning about vendor mismatch
+                 }
+             }
+         }
+-- 
+2.25.1
+

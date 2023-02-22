@@ -1,0 +1,39 @@
+From 79ac66afd00ff955aacc253ff45893f2d4baad16 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Thu, 8 Nov 2018 23:04:03 +0100
+Subject: [PATCH 09/38] Re-order services so that it works even without qtaguid
+
+Change-Id: I0c0f527b3ae151d45c68f7ac6c205da3f34e74df
+---
+ .../android/server/net/NetworkPolicyManagerService.java   | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/services/core/java/com/android/server/net/NetworkPolicyManagerService.java b/services/core/java/com/android/server/net/NetworkPolicyManagerService.java
+index 1ea949ede03d..5306b3711095 100644
+--- a/services/core/java/com/android/server/net/NetworkPolicyManagerService.java
++++ b/services/core/java/com/android/server/net/NetworkPolicyManagerService.java
+@@ -922,6 +922,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
+         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "systemReady");
+         final int oldPriority = Process.getThreadPriority(Process.myTid());
+         try {
++            mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
++            mAppStandby = LocalServices.getService(AppStandbyInternal.class);
++            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
++
+             // Boost thread's priority during system server init
+             Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+             if (!isBandwidthControlEnabled()) {
+@@ -929,10 +933,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
+                 return;
+             }
+ 
+-            mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
+-            mAppStandby = LocalServices.getService(AppStandbyInternal.class);
+-            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+-
+             synchronized (mUidRulesFirstLock) {
+                 synchronized (mNetworkPoliciesSecondLock) {
+                     updatePowerSaveWhitelistUL();
+-- 
+2.25.1
+

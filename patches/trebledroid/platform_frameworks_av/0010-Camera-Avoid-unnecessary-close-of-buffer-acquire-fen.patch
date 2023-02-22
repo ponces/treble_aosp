@@ -1,0 +1,43 @@
+From 186babd4908514b2e59dd94ab46823ac92f4dcc1 Mon Sep 17 00:00:00 2001
+From: Emilian Peev <epeev@google.com>
+Date: Fri, 5 Aug 2022 17:28:06 -0700
+Subject: [PATCH 10/26] Camera: Avoid unnecessary close of buffer acquire fence
+ fds
+
+According to the gralloc lock documentation:
+The ownership of acquireFence is always transferred to the callee, even
+on errors.
+
+Bug: 241455881
+Test: Manual using camera application
+Change-Id: Ieec34b54aaa7f0d773eccb593c3daaa3e41bae0b
+Merged-In: Ieec34b54aaa7f0d773eccb593c3daaa3e41bae0b
+---
+ .../camera/libcameraservice/device3/Camera3OutputStream.cpp   | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/services/camera/libcameraservice/device3/Camera3OutputStream.cpp b/services/camera/libcameraservice/device3/Camera3OutputStream.cpp
+index 84b5aa4e38..05b64b96cc 100644
+--- a/services/camera/libcameraservice/device3/Camera3OutputStream.cpp
++++ b/services/camera/libcameraservice/device3/Camera3OutputStream.cpp
+@@ -331,7 +331,7 @@ status_t Camera3OutputStream::fixUpHidlJpegBlobHeader(ANativeWindowBuffer* anwBu
+     status_t res =
+             gbLocker.lockAsync(
+                     GraphicBuffer::USAGE_SW_READ_OFTEN | GraphicBuffer::USAGE_SW_WRITE_RARELY,
+-                    &mapped, fenceFd.get());
++                    &mapped, fenceFd.release());
+     if (res != OK) {
+         ALOGE("%s: Failed to lock the buffer: %s (%d)", __FUNCTION__, strerror(-res), res);
+         return res;
+@@ -1327,7 +1327,7 @@ void Camera3OutputStream::dumpImageToDisk(nsecs_t timestamp,
+     void* mapped = nullptr;
+     base::unique_fd fenceFd(dup(fence));
+     status_t res = graphicBuffer->lockAsync(GraphicBuffer::USAGE_SW_READ_OFTEN, &mapped,
+-            fenceFd.get());
++            fenceFd.release());
+     if (res != OK) {
+         ALOGE("%s: Failed to lock the buffer: %s (%d)", __FUNCTION__, strerror(-res), res);
+         return;
+-- 
+2.25.1
+

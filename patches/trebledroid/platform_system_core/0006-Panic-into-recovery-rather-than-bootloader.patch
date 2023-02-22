@@ -1,0 +1,38 @@
+From 0d138825cafd7a050e724b410da3f2e67af24f16 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Wed, 4 Sep 2019 21:11:48 +0200
+Subject: [PATCH 06/15] Panic into recovery rather than bootloader
+
+Getting last_kmsg/pstore from bootloader isn't possible for other people
+than the OEM, but we have TWRP to access last_kmsg/pstore
+
+Change-Id: If04bb6572dc66677d7b44f7d302b2d69ce526200
+---
+ init/reboot_utils.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/init/reboot_utils.cpp b/init/reboot_utils.cpp
+index b3fa9fd3b..03b5a6f0e 100644
+--- a/init/reboot_utils.cpp
++++ b/init/reboot_utils.cpp
+@@ -36,7 +36,7 @@
+ namespace android {
+ namespace init {
+ 
+-static std::string init_fatal_reboot_target = "bootloader";
++static std::string init_fatal_reboot_target = "recovery";
+ static bool init_fatal_panic = false;
+ 
+ // this needs to read the /proc/* files directly because it is called before
+@@ -73,7 +73,7 @@ void SetFatalRebootTarget(const std::optional<std::string>& reboot_target) {
+                 init_fatal_reboot_target = value;
+             }
+         });
+-        // We already default to bootloader if no setting is provided.
++        // We already default to recovery if no setting is provided.
+     } else {
+         const std::string kRebootTargetStringPattern = kRebootTargetString + "=";
+         start_pos += sizeof(kRebootTargetStringPattern) - 1;
+-- 
+2.25.1
+

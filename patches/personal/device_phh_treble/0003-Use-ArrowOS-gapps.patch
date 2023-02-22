@@ -1,0 +1,25 @@
+From 35e411820e4af4b2695e0e492b447855b703c162 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Tue, 21 Feb 2023 22:51:12 +0000
+Subject: [PATCH 3/4] Use ArrowOS gapps
+
+---
+ generate.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/generate.sh b/generate.sh
+index 9c20eb5..8fbb16b 100644
+--- a/generate.sh
++++ b/generate.sh
+@@ -26,7 +26,7 @@ for part in a ab;do
+ 		optional_base=""
+ 				if [ "$apps" == "gapps" ];then
+ 					apps_suffix="g"
+-					apps_script='$(call inherit-product, device/phh/treble/gapps.mk)'
++					apps_script='$(call inherit-product, vendor/gapps/common/common-vendor.mk)'
+ 					apps_name="with GApps"
+ 				fi
+ 				if [ "$apps" == "gapps-go" ];then
+-- 
+2.34.1
+

@@ -1,0 +1,68 @@
+From 10a44b558f67f6a1622bcef5d0bffa0d95c08cd1 Mon Sep 17 00:00:00 2001
+From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
+Date: Wed, 7 Oct 2020 14:00:35 +0000
+Subject: [PATCH] UI: Always render windows into cutouts
+
+Eliminates black/white letterboxing
+Quick and dirty way to do the latter - wait for proper fix from Google
+
+Change-Id: I4661c7979bfa7de453329fcddbaeefc2009e2da3
+---
+ .../com/android/server/wm/DisplayFrames.java  | 19 ++++---------------
+ .../com/android/server/wm/DisplayPolicy.java  |  1 +
+ 2 files changed, 5 insertions(+), 15 deletions(-)
+
+diff --git a/services/core/java/com/android/server/wm/DisplayFrames.java b/services/core/java/com/android/server/wm/DisplayFrames.java
+index 33641f72b2ff..6e201970ac03 100644
+--- a/services/core/java/com/android/server/wm/DisplayFrames.java
++++ b/services/core/java/com/android/server/wm/DisplayFrames.java
+@@ -92,30 +92,10 @@ public class DisplayFrames {
+         state.setRoundedCorners(roundedCorners);
+         state.setPrivacyIndicatorBounds(indicatorBounds);
+         state.getDisplayCutoutSafe(safe);
+-        if (safe.left > unrestricted.left) {
+-            state.getSource(ITYPE_LEFT_DISPLAY_CUTOUT).setFrame(
+-                    unrestricted.left, unrestricted.top, safe.left, unrestricted.bottom);
+-        } else {
+-            state.removeSource(ITYPE_LEFT_DISPLAY_CUTOUT);
+-        }
+-        if (safe.top > unrestricted.top) {
+-            state.getSource(ITYPE_TOP_DISPLAY_CUTOUT).setFrame(
+-                    unrestricted.left, unrestricted.top, unrestricted.right, safe.top);
+-        } else {
+-            state.removeSource(ITYPE_TOP_DISPLAY_CUTOUT);
+-        }
+-        if (safe.right < unrestricted.right) {
+-            state.getSource(ITYPE_RIGHT_DISPLAY_CUTOUT).setFrame(
+-                    safe.right, unrestricted.top, unrestricted.right, unrestricted.bottom);
+-        } else {
+-            state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
+-        }
+-        if (safe.bottom < unrestricted.bottom) {
+-            state.getSource(ITYPE_BOTTOM_DISPLAY_CUTOUT).setFrame(
+-                    unrestricted.left, safe.bottom, unrestricted.right, unrestricted.bottom);
+-        } else {
+-            state.removeSource(ITYPE_BOTTOM_DISPLAY_CUTOUT);
+-        }
++        state.removeSource(ITYPE_LEFT_DISPLAY_CUTOUT);
++        state.removeSource(ITYPE_TOP_DISPLAY_CUTOUT);
++        state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
++        state.removeSource(ITYPE_BOTTOM_DISPLAY_CUTOUT);
+         return true;
+     }
+ 
+diff --git a/services/core/java/com/android/server/wm/DisplayPolicy.java b/services/core/java/com/android/server/wm/DisplayPolicy.java
+index 7e91989a9105..a42f8c12c792 100644
+--- a/services/core/java/com/android/server/wm/DisplayPolicy.java
++++ b/services/core/java/com/android/server/wm/DisplayPolicy.java
+@@ -1558,6 +1558,7 @@ public class DisplayPolicy {
+         displayFrames = win.getDisplayFrames(displayFrames);
+ 
+         final WindowManager.LayoutParams attrs = win.mAttrs.forRotation(displayFrames.mRotation);
++        attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+         sTmpClientFrames.attachedFrame = attached != null ? attached.getFrame() : null;
+ 
+         // If this window has different LayoutParams for rotations, we cannot trust its requested
+-- 
+2.25.1
+

@@ -1,0 +1,34 @@
+From febe45a600f6ae9c4412ea0b325c87f65239ca0f Mon Sep 17 00:00:00 2001
+From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
+Date: Wed, 19 Oct 2022 02:20:05 +0000
+Subject: [PATCH 2/2] Revert "detect inability to write to index != 0 of bpf
+ map array"
+
+This reverts commit ead9d83423877458023056f6ccf9390950d6726f.
+---
+ bpfloader/BpfLoader.cpp | 9 ---------
+ 1 file changed, 9 deletions(-)
+
+diff --git a/bpfloader/BpfLoader.cpp b/bpfloader/BpfLoader.cpp
+index bbfa7a8..9ace0fa 100644
+--- a/bpfloader/BpfLoader.cpp
++++ b/bpfloader/BpfLoader.cpp
+@@ -199,15 +199,6 @@ int main(int argc, char** argv) {
+         }
+     }
+ 
+-    int key = 1;
+-    int value = 123;
+-    android::base::unique_fd map(
+-            android::bpf::createMap(BPF_MAP_TYPE_ARRAY, sizeof(key), sizeof(value), 2, 0));
+-    if (android::bpf::writeToMapEntry(map, &key, &value, BPF_ANY)) {
+-        ALOGE("Critical kernel bug - failure to write into index 1 of 2 element bpf map array.");
+-        return 1;
+-    }
+-
+     if (android::base::SetProperty("bpf.progs_loaded", "1") == false) {
+         ALOGE("Failed to set bpf.progs_loaded property");
+         return 1;
+-- 
+2.25.1
+

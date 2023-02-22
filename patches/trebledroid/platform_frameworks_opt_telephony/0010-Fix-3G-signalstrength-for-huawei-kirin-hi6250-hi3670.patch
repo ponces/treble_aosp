@@ -1,0 +1,236 @@
+From 3cb1c86c87a3c4fca45de64c21c960892862539c Mon Sep 17 00:00:00 2001
+From: Raphael Mounier <mounierr07@gmail.com>
+Date: Tue, 22 Nov 2022 06:54:35 +0100
+Subject: [PATCH 10/10] Fix 3G signalstrength for huawei kirin (hi6250, hi3670)
+
+The RILUtils.convertHalSignalStrength function does not work correctly under Huawei hi6250 and hi3660 platform. We have therefore replaced this function with a new one specifically for this Kirin platform.
+
+23/11/2021 : Initial release for Android 11
+
+06/10/2022 : Android 13 release
+
+21/11/2022 : Fix 3G signal strength under android 13
+---
+ .../com/android/internal/telephony/RIL.java   | 191 +++++++++---------
+ 1 file changed, 98 insertions(+), 93 deletions(-)
+
+diff --git a/src/java/com/android/internal/telephony/RIL.java b/src/java/com/android/internal/telephony/RIL.java
+index f30bee5846..6b27f9dacd 100644
+--- a/src/java/com/android/internal/telephony/RIL.java
++++ b/src/java/com/android/internal/telephony/RIL.java
+@@ -5940,114 +5940,119 @@ public class RIL extends BaseCommands implements CommandsInterface {
+         int gsmSignalStrength = signalStrength.gw.signalStrength;
+         int gsmBitErrorRate = signalStrength.gw.bitErrorRate;
+         int gsmTimingAdvance = signalStrength.gw.timingAdvance;
+-        int mWcdmaRscp = 0;
+-        int mWcdmaEcio = 0;
++        int mWcdmaRscp = CellInfo.UNAVAILABLE;
++        int mWcdmaEcio = CellInfo.UNAVAILABLE;
++        int mWcdmaRssi = CellInfo.UNAVAILABLE;
++        int mWcdmabErrorRate = CellInfo.UNAVAILABLE;
+         int cdmaDbm = signalStrength.cdma.dbm;
+         int cdmaEcio = signalStrength.cdma.ecio;
+         int evdoDbm = signalStrength.evdo.dbm;
+         int evdoEcio = signalStrength.evdo.ecio;
+         int evdoSnr = signalStrength.evdo.signalNoiseRatio;
+         int lteSignalStrength = signalStrength.lte.signalStrength;
+-        int lteRsrp = signalStrength.lte.rsrp;
++        int lteRsrp = signalStrength.lte.rsrp; //4G signal
+         int lteRsrq = signalStrength.lte.rsrq;
+         int lteRssnr = signalStrength.lte.rssnr;
+         int lteCqi = signalStrength.lte.cqi;
+         int lteTimingAdvance = signalStrength.lte.timingAdvance;
+         int mGsm = 0;
+         int mRat = 0;
++        //int tdScdmaDbm = signalStrength.tdScdma.dbm; // TD-SCDMA is the 3G standard developed for and used by China Mobile
+ 
+ 
+ 
+-	//Calcul level with Rssnr, Rsrq, Rsrp value - so specify KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT (parameters_used_for_lte_signal_bar_int) to use this 3 values
+-	//RSRP = 1 << 0
+-	//RSRQ = 1 << 1
+-	//RSSNR = 1 << 2
+-	//
+-        if (lteRsrp != 0) { // LTE
+-            // Nothing to DO
+-        } else if (gsmSignalStrength == 0 && lteRsrp == 0) { // 3G
+-            lteRsrp = (mWcdmaRscp & 0xFF) - 256;
+-            lteRsrq = (mWcdmaEcio & 0xFF) - 256;
+-            if (lteRsrp > -20) { // None or Unknown
+-                lteRssnr = -200;
+-            } else if (lteRsrp >= -85) { // Great
+-                lteRssnr = 300;
+-            } else if (lteRsrp >= -95) { // Good
+-                lteRssnr = 129;
+-            } else if (lteRsrp >= -105) { // Moderate
+-                lteRssnr = 44;
+-            } else if (lteRsrp >= -115) { // Poor
+-                lteRssnr = 9;
+-            } else if (lteRsrp >= -140) { // None or Unknown
+-                lteRssnr = -200;
+-            }
+-        } else if (mWcdmaRscp == 0 && lteRsrp == 0) { // 2G
+-            lteRsrp = (gsmSignalStrength & 0xFF) - 256;
+-            if (lteRsrp > -20) { // None or Unknown
+-                lteRsrq = -21;
+-                lteRssnr = -200;
+-            } else if (lteRsrp >= -85) { // Great
+-                lteRsrq = -3;
+-                lteRssnr = 300;
+-            } else if (lteRsrp >= -95) { // Good
+-                lteRsrq = -7;
+-                lteRssnr = 129;
+-            } else if (lteRsrp >= -105) { // Moderate
+-                lteRsrq = -12;
+-                lteRssnr = 44;
+-            } else if (lteRsrp >= -115) { // Poor
+-                lteRsrq = -17;
+-                lteRssnr = 9;
+-            } else if (lteRsrp >= -140) { // None or Unknown
+-                lteRsrq = -21;
+-                lteRssnr = -200;
+-            }
+-        }
+-
+-
+-	// 4G - LTE
+-	// .lte = {.signalStrength = 99, .rsrp = -104, .rsrq = -16, .rssnr = -4, .cqi = 2147483647, .timingAdvance = -1},
+-	// public CellSignalStrengthLte(int rssi, int rsrp, int rsrq, int rssnr, int cqi, int timingAdvance) {
+-	CellSignalStrengthLte lteStrength = new CellSignalStrengthLte(SignalStrength.INVALID,
+-						lteRsrp,
+-						lteRsrq,
+-						lteRssnr,
+-						lteCqi,
+-						lteTimingAdvance);
+-
+-	// GSM
+-	// .gw = {.signalStrength = -91, .bitErrorRate = -1, .timingAdvance = 0}
+-	// public CellSignalStrengthGsm(int rssi, int ber, int ta) {
+-	// rssi in dBm [-113, -51] or UNAVAILABLE
+-	// bit error rate (0-7, 99) TS 27.007 8.5 or UNAVAILABLE
+-	CellSignalStrengthGsm gsmStrength = new CellSignalStrengthGsm(gsmSignalStrength,
+-						gsmBitErrorRate,
+-						gsmTimingAdvance);
+-
+-	if (RILJ_LOGD) {
+-		riljLog("Huawei signal : LTE dbm : " + String.valueOf(lteStrength.getDbm()) +
+-				", level : " + String.valueOf(lteStrength.getLevel()) +
+-				", Rsrp  : " + String.valueOf(lteStrength.getRsrp()) +
+-				", Rsrq  : " + String.valueOf(lteStrength.getRsrq()) +
+-				", Rssi  : " + String.valueOf(lteStrength.getRssi()) +
+-				", Rssnr  : " + String.valueOf(lteStrength.getRssnr()));
+-		riljLog("Huawei signal : GSM dbm : " + String.valueOf(gsmStrength.getDbm()) +
+-			", errorrate : " + String.valueOf(gsmStrength.getBitErrorRate()) +
+-			", timingadvance  : " + String.valueOf(gsmStrength.getTimingAdvance()));
+-	}
+-
+-
+-
+-	// Perhaps add also gsm signalStrength
+-	return new SignalStrength(
+-			new CellSignalStrengthCdma(),
+-			gsmStrength,
+-			new CellSignalStrengthWcdma(),
+-			new CellSignalStrengthTdscdma(),
+-			lteStrength,
+-			new CellSignalStrengthNr());
+-
+-	}
++        // 3G (UMTS) have a lot of protocol (WCDMA, TDSCDMA, CDMA, EVDO, CDMA-EVDO) - only WCDMA, TDSCDMA, CDMA on Android
++        // [UNSL]< UNSOL_SIGNAL_STRENGTH {
++        //.gw = {.signalStrength = -100, .bitErrorRate = -1, .timingAdvance = 0},
++        //.cdma = {.dbm = 0, .ecio = 0},
++        //.evdo = {.dbm = 32767, .ecio = -1, .signalNoiseRatio = 32767},
++        //.lte = {.signalStrength = 99, .rsrp = 2147483647, .rsrq = 0, .rssnr = 0, .cqi = 2147483647, .timingAdvance = -1},
++        //.tdScdma = {.rscp = 2147483647}} [PHONE0]
++        //public CellSignalStrengthWcdma(int rssi, int ber, int rscp, int ecno) {
++
++        CellSignalStrengthWcdma wcdmaStrength=null;         // Europe use WCDMA norme
++        if ((lteSignalStrength!=SignalStrength.INVALID) && (lteRsrq==0) && (gsmSignalStrength!=0))
++        {
++           // 3G UMTS found - wcdma
++           mWcdmaRscp = CellInfo.UNAVAILABLE;
++           mWcdmaEcio = CellInfo.UNAVAILABLE;
++           mWcdmaRssi = gsmSignalStrength; // Just copy level gw to CDMA
++           mWcdmabErrorRate=gsmBitErrorRate;
++
++           // use rssi calcul method
++           wcdmaStrength = new CellSignalStrengthWcdma(mWcdmaRssi, mWcdmabErrorRate, mWcdmaRscp, mWcdmaEcio);
++        }
++        else
++        {
++           // 3G not present
++           wcdmaStrength = new CellSignalStrengthWcdma();
++        }
++
++
++        // 4G - LTE
++        // [UNSL]< UNSOL_SIGNAL_STRENGTH {
++        //.gw = {.signalStrength = 0, .bitErrorRate = -1, .timingAdvance = 0}, .cdma = {.dbm = 0, .ecio = 0},
++        //.evdo = {.dbm = 32767, .ecio = -1, .signalNoiseRatio = 32767},
++        //.lte = {.signalStrength = 99, .rsrp = -105, .rsrq = -12, .rssnr = -10, .cqi = 2147483647, .timingAdvance = -1},
++        //.tdScdma = {.rscp = 2147483647}} [PHONE0]
++        // public CellSignalStrengthLte(int rssi, int rsrp, int rsrq, int rssnr, int cqi, int timingAdvance) {
++
++        CellSignalStrengthLte lteStrength=null;
++        if ((lteSignalStrength!=SignalStrength.INVALID) && ( lteRsrp!=0) && (lteRsrq!=0) && (lteRssnr!=0))
++        {
++           lteStrength = new CellSignalStrengthLte(SignalStrength.INVALID,
++                                      lteRsrp,
++                                      lteRsrq,
++                                      lteRssnr,
++                                      lteCqi,
++                                      lteTimingAdvance);
++        }
++        else
++        {
++           // 4G-LTE not present
++           lteStrength = new CellSignalStrengthLte();
++        }
++
++
++        // GSM
++        // .gw = {.signalStrength = -91, .bitErrorRate = -1, .timingAdvance = 0}
++        // public CellSignalStrengthGsm(int rssi, int ber, int ta) {
++        // rssi in dBm [-113, -51] or UNAVAILABLE
++        // bit error rate (0-7, 99) TS 27.007 8.5 or UNAVAILABLE
++        CellSignalStrengthGsm gsmStrength = new CellSignalStrengthGsm(gsmSignalStrength,
++                                                    gsmBitErrorRate,
++                                                    gsmTimingAdvance);
++
++
++        if (RILJ_LOGD) {
++           riljLog("Huawei signal : LTE dbm : " + String.valueOf(lteStrength.getDbm()) +
++                               ", level : " + String.valueOf(lteStrength.getLevel()) +
++                               ", rsrp  : " + String.valueOf(lteStrength.getRsrp()) +
++                               ", rsrq  : " + String.valueOf(lteStrength.getRsrq()) +
++                               ", rssi  : " + String.valueOf(lteStrength.getRssi()) +
++                               ", rssnr  : " + String.valueOf(lteStrength.getRssnr()));
++
++           riljLog("Huawei signal : WCDMA dbm : " + String.valueOf(wcdmaStrength.getDbm()) +
++                               ", asulevel : " + String.valueOf(wcdmaStrength.getAsuLevel()) +
++                               ", rssi  : " + String.valueOf(wcdmaStrength.getRssi()) +
++                               ", errorrate  : " + String.valueOf(wcdmaStrength.getBitErrorRate()) +
++                               ", rscp  : " + String.valueOf(wcdmaStrength.getRscp()) +
++                               ", ecno  : " + String.valueOf(wcdmaStrength.getEcNo()));
++
++           riljLog("Huawei signal : GSM dbm : " + String.valueOf(gsmStrength.getDbm()) +
++                               ", errorrate : " + String.valueOf(gsmStrength.getBitErrorRate()) +
++                               ", timingadvance  : " + String.valueOf(gsmStrength.getTimingAdvance()));
++        }
++
++        // Perhaps add also gsm signalStrength
++        return new SignalStrength(
++                       new CellSignalStrengthCdma(),
++                       gsmStrength,
++                       wcdmaStrength,
++                       new CellSignalStrengthTdscdma(),
++                       lteStrength,
++                       new CellSignalStrengthNr());
++    }
+ 
+ 
+     /**
+-- 
+2.25.1
+

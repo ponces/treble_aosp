@@ -1,0 +1,47 @@
+From 63fd8aed36b89197cce37a70b2c8769a14d8e0f4 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 18 Oct 2022 16:08:09 -0400
+Subject: [PATCH 4/5] Exfat can be mounted with "exfat" kernel fs driver, or
+ "sdfat" or "texfat" (Samsung and Sony variants)
+
+---
+ fs/Exfat.cpp | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/fs/Exfat.cpp b/fs/Exfat.cpp
+index c8b19e0..9e34347 100644
+--- a/fs/Exfat.cpp
++++ b/fs/Exfat.cpp
+@@ -35,7 +35,9 @@ static const char* kFsckPath = "/system/bin/fsck.exfat";
+ 
+ bool IsSupported() {
+     return access(kMkfsPath, X_OK) == 0 && access(kFsckPath, X_OK) == 0 &&
+-           IsFilesystemSupported("exfat");
++           (IsFilesystemSupported("exfat") ||
++            IsFilesystemSupported("texfat") ||
++            IsFilesystemSupported("sdfat"));
+ }
+ 
+ status_t Check(const std::string& source) {
+@@ -61,13 +63,16 @@ status_t Mount(const std::string& source, const std::string& target, int ownerUi
+     auto mountData = android::base::StringPrintf("uid=%d,gid=%d,fmask=%o,dmask=%o", ownerUid,
+                                                  ownerGid, permMask, permMask);
+ 
+-    if (mount(source.c_str(), target.c_str(), "exfat", mountFlags, mountData.c_str()) == 0) {
++    const char* fs = "exfat";
++    if (IsFilesystemSupported("sdfat")) fs = "sdfat";
++    if (IsFilesystemSupported("texfat")) fs = "texfat";
++    if (mount(source.c_str(), target.c_str(), fs, mountFlags, mountData.c_str()) == 0) {
+         return 0;
+     }
+ 
+     PLOG(ERROR) << "Mount failed; attempting read-only";
+     mountFlags |= MS_RDONLY;
+-    if (mount(source.c_str(), target.c_str(), "exfat", mountFlags, mountData.c_str()) == 0) {
++    if (mount(source.c_str(), target.c_str(), fs, mountFlags, mountData.c_str()) == 0) {
+         return 0;
+     }
+ 
+-- 
+2.25.1
+

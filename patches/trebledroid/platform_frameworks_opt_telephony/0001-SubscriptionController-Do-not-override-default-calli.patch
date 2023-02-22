@@ -1,0 +1,42 @@
+From d3f8c658e9bc79d3eac38fdac6d6043084904b63 Mon Sep 17 00:00:00 2001
+From: Peter Cai <peter@typeblog.net>
+Date: Mon, 5 Sep 2022 14:02:37 -0400
+Subject: [PATCH 01/10] SubscriptionController: Do not override default calling
+ account from third-party apps
+
+When the user has selected a calling account from a third-party app as
+default, it should not be overridden by the rest of the telephony
+subsystem (e.g. SIM subcription updates, or default SIM slot selection).
+
+Otherwise, it creates a somewhat annoying situation where the user has
+to keep re-selecting the desired calling account after every reboot.
+
+Test: manual
+Change-Id: Iccab64e9b3b3ab4773bd8944d47c2006f229d472
+---
+ .../internal/telephony/SubscriptionController.java       | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/src/java/com/android/internal/telephony/SubscriptionController.java b/src/java/com/android/internal/telephony/SubscriptionController.java
+index ff34cbe2cc..a879a66f34 100644
+--- a/src/java/com/android/internal/telephony/SubscriptionController.java
++++ b/src/java/com/android/internal/telephony/SubscriptionController.java
+@@ -2858,7 +2858,14 @@ public class SubscriptionController extends ISub.Stub {
+         PhoneAccountHandle currentHandle = telecomManager.getUserSelectedOutgoingPhoneAccount();
+         logd("[setDefaultVoiceSubId] current phoneAccountHandle=" + currentHandle);
+ 
+-        if (!Objects.equals(currentHandle, newHandle)) {
++        String currentPackageName =
++            currentHandle == null ? null : currentHandle.getComponentName().getPackageName();
++        boolean currentIsSim = "com.android.phone".equals(currentPackageName);
++        // Do not override user selected outgoing calling account
++        // if the user has selected a third-party app as default
++        boolean shouldKeepOutgoingAccount = currentHandle != null && !currentIsSim;
++
++        if (!Objects.equals(currentHandle, newHandle) && !shouldKeepOutgoingAccount) {
+             telecomManager.setUserSelectedOutgoingPhoneAccount(newHandle);
+             logd("[setDefaultVoiceSubId] change to phoneAccountHandle=" + newHandle);
+         } else {
+-- 
+2.25.1
+
