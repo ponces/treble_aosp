@@ -1,7 +1,7 @@
 From 482ade0977e04863f6aca871e94ba006a2b7318d Mon Sep 17 00:00:00 2001
 From: ChonDoit <thphantomblog@gmail.com>
 Date: Sat, 12 Nov 2022 02:39:23 +0000
-Subject: [PATCH 2/4] Remove force disable A2DP offload and introduce sysbta HAL
+Subject: [PATCH 2/5] Remove force disable A2DP offload and introduce sysbta HAL
 
 ---
  phh-prop-handler.sh | 18 ++++++++++++++++++

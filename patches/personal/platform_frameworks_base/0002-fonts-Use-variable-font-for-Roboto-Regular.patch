@@ -1,0 +1,43 @@
+From 56986ccad0d8d504f426321b94bef674fcfd29bc Mon Sep 17 00:00:00 2001
+From: Danny Lin <danny@kdrag0n.dev>
+Date: Wed, 6 Oct 2021 18:40:12 -0700
+Subject: [PATCH 2/4] fonts: Use variable font for Roboto Regular
+
+I'm not sure why Google decided to revert to a static variant of *only*
+the regular non-italic and non-condensed weight, but using the default
+"Roboto" font for the lock screen clock (i.e. AOSP default) is broken
+with the change:
+    - Clock is too bold when notifications are present (because SystemUI
+      loads the regular font but can't change the weight to be less
+      bold)
+    - Weight animation between lock screen and AOD is broken (because
+      weight can't be animated without the variable font)
+    - AOD clock font is too bold (could cause burn-in)
+
+Switch back to the variable font in order to fix the clock issues.
+
+Change-Id: Ia2e5ef52e4edb5d4275f6d5faf8c74266b784762
+---
+ data/fonts/fonts.xml | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/data/fonts/fonts.xml b/data/fonts/fonts.xml
+index f8c015f28a50..8e2a59cd848a 100644
+--- a/data/fonts/fonts.xml
++++ b/data/fonts/fonts.xml
+@@ -39,7 +39,11 @@
+           <axis tag="wdth" stylevalue="100" />
+           <axis tag="wght" stylevalue="300" />
+         </font>
+-        <font weight="400" style="normal">RobotoStatic-Regular.ttf</font>
++        <font weight="400" style="normal">Roboto-Regular.ttf
++          <axis tag="ital" stylevalue="0" />
++          <axis tag="wdth" stylevalue="100" />
++          <axis tag="wght" stylevalue="400" />
++        </font>
+         <font weight="500" style="normal">Roboto-Regular.ttf
+           <axis tag="ital" stylevalue="0" />
+           <axis tag="wdth" stylevalue="100" />
+-- 
+2.34.1
+
