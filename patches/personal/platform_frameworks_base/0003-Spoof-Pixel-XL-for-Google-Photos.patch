@@ -1,7 +1,7 @@
 From f2c0eff0e85aa73a08ecc446ac66b39377c5b34c Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Wed, 22 Feb 2023 21:23:56 +0000
-Subject: [PATCH 3/3] Spoof Pixel XL for Google Photos
+Subject: [PATCH 3/4] Spoof Pixel XL for Google Photos
 
 Change-Id: Iec080942c21b93a5b98df91e34ac253cb1a5205c
 ---
