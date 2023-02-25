@@ -1,0 +1,25 @@
+From 87796f142b8f5aa17808427f3b19ceead659f7ac Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Sat, 25 Feb 2023 02:32:40 +0000
+Subject: [PATCH 3/3] Exclude Camera2 in favor of Aperture
+
+Change-Id: I8da937f41d9485a052f2f38da70a01f80501ab39
+---
+ target/product/handheld_product.mk | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/target/product/handheld_product.mk b/target/product/handheld_product.mk
+index 2199c570a..7742e4c8a 100644
+--- a/target/product/handheld_product.mk
++++ b/target/product/handheld_product.mk
+@@ -24,7 +24,6 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/media_product.mk)
+ PRODUCT_PACKAGES += \
+     Browser2 \
+     Calendar \
+-    Camera2 \
+     Contacts \
+     DeskClock \
+     Gallery2 \
+-- 
+2.34.1
+
