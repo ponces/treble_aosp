@@ -1,27 +1,27 @@
-From 565a27256e0776ccc40c86238342980953c6c565 Mon Sep 17 00:00:00 2001
+From 0e6c3ead4c3805f5e2617fafa88acfb8f25757c5 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Wed, 22 Feb 2023 14:43:58 +0000
 Subject: [PATCH 5/5] fonts: Add fonts for customization and set Google Sans as
  default font
 
 ---
- fonts/Android.mk                              |  44 ++++
- fonts/GoogleSans-Italic.ttf       | Bin 0 -> 647768 bytes
- fonts/GoogleSans-Regular.ttf      | Bin 0 -> 624904 bytes
- fonts/GoogleSansClock-Regular.ttf | Bin 0 -> 131700 bytes
- fonts/PixelConfigOverlayCommon/Android.bp     |   6 +
+ fonts/Android.mk                              |  44 ++++++
+ fonts/GoogleSans-Italic.ttf                   | Bin 0 -> 647768 bytes
+ fonts/GoogleSans-Regular.ttf                  | Bin 0 -> 624904 bytes
+ fonts/GoogleSansClock-Regular.ttf             | Bin 0 -> 131700 bytes
+ fonts/GoogleSansConfigOverlay/Android.bp      |   6 +
  .../AndroidManifest.xml                       |   5 +
- .../res/values/strings.xml                    |   9 +
- fonts/fonts.mk                                |  60 +++++
- fonts/fonts_customization.xml                 | 216 ++++++++++++++++++
- 9 files changed, 340 insertions(+)
+ .../res/values/strings.xml                    |   9 ++
+ fonts/fonts.mk                                |  10 ++
+ fonts/fonts_customization.xml                 | 147 ++++++++++++++++++
+ 9 files changed, 221 insertions(+)
  create mode 100644 fonts/Android.mk
  create mode 100644 fonts/GoogleSans-Italic.ttf
  create mode 100644 fonts/GoogleSans-Regular.ttf
  create mode 100644 fonts/GoogleSansClock-Regular.ttf
- create mode 100644 fonts/PixelConfigOverlayCommon/Android.bp
- create mode 100644 fonts/PixelConfigOverlayCommon/AndroidManifest.xml
- create mode 100644 fonts/PixelConfigOverlayCommon/res/values/strings.xml
+ create mode 100644 fonts/GoogleSansConfigOverlay/Android.bp
+ create mode 100644 fonts/GoogleSansConfigOverlay/AndroidManifest.xml
+ create mode 100644 fonts/GoogleSansConfigOverlay/res/values/strings.xml
  create mode 100644 fonts/fonts.mk
  create mode 100644 fonts/fonts_customization.xml
 
@@ -13072,35 +13072,34 @@ sX-8Lyj8UHqv6Qr>tAkJ7wuZE&tCS~b%e*@Z7;>O3sff)6{a8@{10o9dWdHyG
 literal 0
 HcmV?d00001
 
-diff --git a/fonts/PixelConfigOverlayCommon/Android.bp b/fonts/PixelConfigOverlayCommon/Android.bp
+diff --git a/fonts/GoogleSansConfigOverlay/Android.bp b/fonts/GoogleSansConfigOverlay/Android.bp
 new file mode 100644
-index 0000000..ea295b1
+index 0000000..fd32884
 --- /dev/null
-+++ b/fonts/PixelConfigOverlayCommon/Android.bp
++++ b/fonts/GoogleSansConfigOverlay/Android.bp
 @@ -0,0 +1,6 @@
 +runtime_resource_overlay {
-+    name: "PixelConfigOverlayCommon",
++    name: "GoogleSansConfigOverlay",
 +    certificate: "platform",
 +    sdk_version: "current",
 +    product_specific: true
 +}
-\ No newline at end of file
-diff --git a/fonts/PixelConfigOverlayCommon/AndroidManifest.xml b/fonts/PixelConfigOverlayCommon/AndroidManifest.xml
+diff --git a/fonts/GoogleSansConfigOverlay/AndroidManifest.xml b/fonts/GoogleSansConfigOverlay/AndroidManifest.xml
 new file mode 100644
-index 0000000..6935182
+index 0000000..dda5b41
 --- /dev/null
-+++ b/fonts/PixelConfigOverlayCommon/AndroidManifest.xml
++++ b/fonts/GoogleSansConfigOverlay/AndroidManifest.xml
 @@ -0,0 +1,5 @@
 +<?xml version="1.0" encoding="utf-8"?>
-+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.google.android.overlay.pixelconfigcommon">
-+    <application android:label="PixelConfigOverlayCommon" android:hasCode="false"/>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.google.android.overlay.googlesansconfig">
++    <application android:label="GoogleSansConfigOverlay" android:hasCode="false"/>
 +    <overlay android:priority="1" android:targetPackage="android" android:isStatic="true"/>
 +</manifest>
-diff --git a/fonts/PixelConfigOverlayCommon/res/values/strings.xml b/fonts/PixelConfigOverlayCommon/res/values/strings.xml
+diff --git a/fonts/GoogleSansConfigOverlay/res/values/strings.xml b/fonts/GoogleSansConfigOverlay/res/values/strings.xml
 new file mode 100644
-index 0000000..5a6b8b1
+index 0000000..51d172c
 --- /dev/null
-+++ b/fonts/PixelConfigOverlayCommon/res/values/strings.xml
++++ b/fonts/GoogleSansConfigOverlay/res/values/strings.xml
 @@ -0,0 +1,9 @@
 +<?xml version="1.0" encoding="utf-8"?>
 +<resources>
@@ -13113,76 +13112,26 @@ index 0000000..5a6b8b1
 +</resources>
 diff --git a/fonts/fonts.mk b/fonts/fonts.mk
 new file mode 100644
-index 0000000..7c8cedf
+index 0000000..8c4a7ff
 --- /dev/null
 +++ b/fonts/fonts.mk
-@@ -0,0 +1,60 @@
-+# arbutus-slab family
+@@ -0,0 +1,10 @@
 +PRODUCT_PACKAGES += \
-+    ArbutusSlab-Regular.ttf
++    GoogleSansConfigOverlay
 +
-+# google-sans family
 +PRODUCT_PACKAGES += \
 +    GoogleSans-Italic.ttf \
 +    GoogleSans-Regular.ttf \
 +    GoogleSansClock-Regular.ttf
 +
-+# Lustria family
-+PRODUCT_PACKAGES += \
-+    Lustria-Regular.ttf
-+
-+# lato family
-+PRODUCT_PACKAGES += \
-+    Lato-BoldItalic.ttf \
-+    Lato-Bold.ttf \
-+    Lato-Italic.ttf \
-+    Lato-MediumItalic.ttf \
-+    Lato-Medium.ttf \
-+    Lato-Regular.ttf
-+
-+# rubik family
-+PRODUCT_PACKAGES += \
-+    Rubik-BoldItalic.ttf \
-+    Rubik-Bold.ttf \
-+    Rubik-Italic.ttf \
-+    Rubik-MediumItalic.ttf \
-+    Rubik-Medium.ttf \
-+    Rubik-Regular.ttf
-+
-+# zilla-slab family
-+PRODUCT_PACKAGES += \
-+    ZillaSlab-MediumItalic.ttf \
-+    ZillaSlab-Medium.ttf \
-+    ZillaSlab-SemiBoldItalic.ttf \
-+    ZillaSlab-SemiBold.ttf
-+
-+# Karla family
-+PRODUCT_PACKAGES += \
-+    Karla-Regular.ttf
-+
-+# Fraunces family
-+PRODUCT_PACKAGES += \
-+    Fraunces-Regular.ttf \
-+    Fraunces-SemiBold.ttf
-+
-+# BigShouldersText family
-+PRODUCT_PACKAGES += \
-+    BigShouldersText-Bold.ttf \
-+    BigShouldersText-ExtraBold.ttf
-+
-+# Barlow family
-+PRODUCT_PACKAGES += \
-+    Barlow-Bold.ttf \
-+    Barlow-Medium.ttf
-+
 +PRODUCT_COPY_FILES += \
 +    device/phh/treble/fonts/fonts_customization.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/fonts_customization.xml
 diff --git a/fonts/fonts_customization.xml b/fonts/fonts_customization.xml
 new file mode 100644
-index 0000000..548a182
+index 0000000..6679c7f
 --- /dev/null
 +++ b/fonts/fonts_customization.xml
-@@ -0,0 +1,216 @@
+@@ -0,0 +1,147 @@
 +<fonts-modification version="1">
 +  <family customizationType="new-named-family" name="google-sans">
 +    <font weight="400" style="normal">GoogleSans-Regular.ttf
@@ -13329,75 +13278,6 @@ index 0000000..548a182
 +      <axis tag="wght" stylevalue="700"/>
 +    </font>
 +  </family>
-+
-+  <family customizationType="new-named-family" name="arbutus-slab">
-+    <font weight="400" style="normal">ArbutusSlab-Regular.ttf</font>
-+  </family>
-+
-+  <family customizationType="new-named-family" name="lato">
-+    <font weight="400" style="normal">Lato-Regular.ttf</font>
-+    <font weight="400" style="italic">Lato-Italic.ttf</font>
-+    <font weight="700" style="normal">Lato-Bold.ttf</font>
-+    <font weight="700" style="italic">Lato-BoldItalic.ttf</font>
-+  </family>
-+  <alias name="lato-bold" to="lato" weight="700" />
-+
-+  <family customizationType="new-named-family" name="rubik">
-+    <font weight="400" style="normal">Rubik-Regular.ttf</font>
-+    <font weight="400" style="italic">Rubik-Italic.ttf</font>
-+    <font weight="500" style="normal">Rubik-Medium.ttf</font>
-+    <font weight="500" style="italic">Rubik-MediumItalic.ttf</font>
-+    <font weight="700" style="normal">Rubik-Bold.ttf</font>
-+    <font weight="700" style="italic">Rubik-BoldItalic.ttf</font>
-+  </family>
-+  <alias name="rubik-medium" to="rubik" weight="500" />
-+
-+  <family customizationType="new-named-family" name="zilla-slab-medium">
-+    <font weight="500" style="normal">ZillaSlab-Medium.ttf</font>
-+    <font weight="500" style="italic">ZillaSlab-MediumItalic.ttf</font>
-+    <font weight="600" style="normal">ZillaSlab-SemiBold.ttf</font>
-+    <font weight="600" style="italic">ZillaSlab-SemiBoldItalic.ttf</font>
-+  </family>
-+  <alias name="zilla-slab-semi-bold" to="zilla-slab-medium" weight="600" />
-+
-+  <family customizationType="new-named-family" name="lustria">-->
-+    <font weight="400" style="normal">Lustria-Regular.ttf</font>
-+  </family>
-+  <alias name="lustria" to="lustria" weight="400"/>
-+
-+  <family customizationType="new-named-family" name="karla">
-+    <font weight="400" style="normal">Karla-Regular.ttf</font>
-+  </family>
-+  <alias name="karla" to="karla" weight="400"/>
-+
-+  <family customizationType="new-named-family" name="fraunces">
-+    <font
-+      weight="400"
-+      style="normal"
-+      postScriptName="Fraunces144ptS100Black-OpticalSize9Weight347soften100wonk0"
-+      >Fraunces-Regular.ttf</font>
-+    <font
-+      weight="600"
-+      style="normal"
-+      postScriptName="Fraunces144ptS100Black-OpticalSize9Weight640soften100wonk0"
-+      >Fraunces-SemiBold.ttf</font>
-+  </family>
-+  <alias name="fraunces" to="fraunces" weight="400"/>
-+  <alias name="fraunces-semi-bold" to="fraunces" weight="600"/>
-+
-+  <family customizationType="new-named-family" name="big-shoulders-text">
-+    <font weight="700" style="normal">BigShouldersText-Bold.ttf</font>
-+    <font weight="800" style="normal">BigShouldersText-ExtraBold.ttf</font>
-+  </family>
-+  <alias name="big-shoulders-text-bold" to="big-shoulders-text" weight="700"/>
-+  <alias name="big-shoulders-text-extra-bold" to="big-shoulders-text" weight="800"/>
-+
-+  <family customizationType="new-named-family" name="barlow">
-+    <font weight="700" style="normal">Barlow-Bold.ttf</font>
-+    <font weight="500" style="normal">Barlow-Medium.ttf</font>
-+  </family>
-+  <alias name="barlow-bold" to="barlow" weight="700"/>
-+  <alias name="barlow-medium" to="barlow" weight="500"/>
 +</fonts-modification>
 -- 
 2.34.1
