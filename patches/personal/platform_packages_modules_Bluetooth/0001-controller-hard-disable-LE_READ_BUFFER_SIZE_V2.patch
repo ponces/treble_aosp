@@ -1,0 +1,42 @@
+From 2a4b42ab737e116540f449eb0fb016d41b431986 Mon Sep 17 00:00:00 2001
+From: SGCMarkus <markusornik@gmail.com>
+Date: Sun, 2 Oct 2022 14:47:31 +0200
+Subject: [PATCH] controller: hard disable LE_READ_BUFFER_SIZE_V2
+
+yupik/shimas bluetooth firmware seems to report this to be working (it
+should work, as these chipsets support Bluetooth 5.2 according to Qcom),
+but something about their implementation seems to be broken.
+
+Disable it for now, till Android 13 firmware becomes available.
+
+Change-Id: Ifa84349d5829995283e19806e1c664365323f9ba
+---
+ system/gd/hci/controller.cc | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/system/gd/hci/controller.cc b/system/gd/hci/controller.cc
+index cd6fa1f838..fa873b3975 100644
+--- a/system/gd/hci/controller.cc
++++ b/system/gd/hci/controller.cc
+@@ -787,7 +787,6 @@ struct Controller::impl {
+       OP_CODE_MAPPING(LE_SET_DEFAULT_PERIODIC_ADVERTISING_SYNC_TRANSFER_PARAMETERS)
+       OP_CODE_MAPPING(LE_GENERATE_DHKEY_COMMAND)
+       OP_CODE_MAPPING(LE_MODIFY_SLEEP_CLOCK_ACCURACY)
+-      OP_CODE_MAPPING(LE_READ_BUFFER_SIZE_V2)
+       OP_CODE_MAPPING(LE_READ_ISO_TX_SYNC)
+       OP_CODE_MAPPING(LE_SET_CIG_PARAMETERS)
+       OP_CODE_MAPPING(LE_SET_CIG_PARAMETERS_TEST)
+@@ -816,6 +815,10 @@ struct Controller::impl {
+       OP_CODE_MAPPING(CONFIGURE_DATA_PATH)
+       OP_CODE_MAPPING(ENHANCED_FLUSH)
+ 
++      case OpCode::LE_READ_BUFFER_SIZE_V2:
++        LOG_DEBUG("unsupported command opcode: 0x%04x", (uint16_t)OpCode::LE_READ_BUFFER_SIZE_V2);
++        return false;
++
+       // deprecated
+       case OpCode::ADD_SCO_CONNECTION:
+         return false;
+-- 
+2.34.1
+
