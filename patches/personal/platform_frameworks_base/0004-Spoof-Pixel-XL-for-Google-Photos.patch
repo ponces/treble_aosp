@@ -1,0 +1,52 @@
+From 23b3c2654be75091059d6537f33f1b74f141dcbf Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Sat, 25 Feb 2023 18:27:13 +0000
+Subject: [PATCH 4/5] Spoof Pixel XL for Google Photos
+
+Change-Id: I905e40625b07ebf500cbb3ce1deadedee2e624c5
+---
+ .../internal/gmscompat/AttestationHooks.java       | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
+index 991e3967d79c..91f0dbb7621b 100644
+--- a/core/java/com/android/internal/gmscompat/AttestationHooks.java
++++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
+@@ -31,6 +31,7 @@ public final class AttestationHooks {
+ 
+     private static final String PACKAGE_GMS = "com.google.android.gms";
+     private static final String PACKAGE_FINSKY = "com.android.vending";
++    private static final String PACKAGE_PHOTOS = "com.google.android.apps.photos";
+     private static final String PROCESS_UNSTABLE = "com.google.android.gms.unstable";
+ 
+     private static volatile boolean sIsGms = false;
+@@ -79,6 +80,15 @@ public final class AttestationHooks {
+         setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N_MR1);
+     }
+ 
++    private static void spoofGooglePhotos() {
++        setBuildField("BRAND", "google");
++        setBuildField("MANUFACTURER", "Google");
++        setBuildField("DEVICE", "marlin");
++        setBuildField("PRODUCT", "marlin");
++        setBuildField("MODEL", "Pixel XL");
++        setBuildField("FINGERPRINT", "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys");
++    }
++
+     public static void initApplicationBeforeOnCreate(Application app) {
+         if (PACKAGE_GMS.equals(app.getPackageName()) &&
+                 PROCESS_UNSTABLE.equals(Application.getProcessName())) {
+@@ -89,6 +99,10 @@ public final class AttestationHooks {
+         if (PACKAGE_FINSKY.equals(app.getPackageName())) {
+             sIsFinsky = true;
+         }
++
++        if (PACKAGE_PHOTOS.equals(app.getPackageName())) {
++            spoofGooglePhotos();
++        }
+     }
+ 
+     private static boolean isCallerSafetyNet() {
+-- 
+2.34.1
+
