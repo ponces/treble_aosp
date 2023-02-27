@@ -1,4 +1,4 @@
-From 0e6c3ead4c3805f5e2617fafa88acfb8f25757c5 Mon Sep 17 00:00:00 2001
+From e92322790c9cc820e0f7985a85abf0ee375b8032 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Wed, 22 Feb 2023 14:43:58 +0000
 Subject: [PATCH 5/5] fonts: Add fonts for customization and set Google Sans as
@@ -11,16 +11,18 @@ Subject: [PATCH 5/5] fonts: Add fonts for customization and set Google Sans as
  fonts/GoogleSansClock-Regular.ttf             | Bin 0 -> 131700 bytes
  fonts/GoogleSansConfigOverlay/Android.bp      |   6 +
  .../AndroidManifest.xml                       |   5 +
+ .../res/values/bools.xml                      |   4 +
  .../res/values/strings.xml                    |   9 ++
  fonts/fonts.mk                                |  10 ++
  fonts/fonts_customization.xml                 | 147 ++++++++++++++++++
- 9 files changed, 221 insertions(+)
+ 10 files changed, 225 insertions(+)
  create mode 100644 fonts/Android.mk
  create mode 100644 fonts/GoogleSans-Italic.ttf
  create mode 100644 fonts/GoogleSans-Regular.ttf
  create mode 100644 fonts/GoogleSansClock-Regular.ttf
  create mode 100644 fonts/GoogleSansConfigOverlay/Android.bp
  create mode 100644 fonts/GoogleSansConfigOverlay/AndroidManifest.xml
+ create mode 100644 fonts/GoogleSansConfigOverlay/res/values/bools.xml
  create mode 100644 fonts/GoogleSansConfigOverlay/res/values/strings.xml
  create mode 100644 fonts/fonts.mk
  create mode 100644 fonts/fonts_customization.xml
@@ -13095,6 +13097,16 @@ index 0000000..dda5b41
 +    <application android:label="GoogleSansConfigOverlay" android:hasCode="false"/>
 +    <overlay android:priority="1" android:targetPackage="android" android:isStatic="true"/>
 +</manifest>
+diff --git a/fonts/GoogleSansConfigOverlay/res/values/bools.xml b/fonts/GoogleSansConfigOverlay/res/values/bools.xml
+new file mode 100644
+index 0000000..dfd1a72
+--- /dev/null
++++ b/fonts/GoogleSansConfigOverlay/res/values/bools.xml
+@@ -0,0 +1,4 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <bool name="config_buttonTextAllCaps">false</bool>
++</resources>
 diff --git a/fonts/GoogleSansConfigOverlay/res/values/strings.xml b/fonts/GoogleSansConfigOverlay/res/values/strings.xml
 new file mode 100644
 index 0000000..51d172c
