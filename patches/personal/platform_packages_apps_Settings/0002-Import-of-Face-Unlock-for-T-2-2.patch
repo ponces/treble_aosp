@@ -1,7 +1,7 @@
 From b26741a5b3488aefa4762bd45d108ecebfdf753a Mon Sep 17 00:00:00 2001
 From: jhenrique09 <jhsv09@gmail.com>
 Date: Thu, 10 Feb 2022 22:27:30 -0300
-Subject: [PATCH] Import of Face Unlock for T (2/2)
+Subject: [PATCH 2/2] Import of Face Unlock for T (2/2)
 
 Change-Id: I178b63d73f14742cf890cb05386ad4e82fd8c2be
 ---
