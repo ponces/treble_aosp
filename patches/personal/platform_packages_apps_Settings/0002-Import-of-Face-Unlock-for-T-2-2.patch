@@ -1,4 +1,4 @@
-From b26741a5b3488aefa4762bd45d108ecebfdf753a Mon Sep 17 00:00:00 2001
+From 180083be9bab8b3baa06809ac0c82f57ad45fc83 Mon Sep 17 00:00:00 2001
 From: jhenrique09 <jhsv09@gmail.com>
 Date: Thu, 10 Feb 2022 22:27:30 -0300
 Subject: [PATCH 2/2] Import of Face Unlock for T (2/2)
@@ -35,16 +35,22 @@ Change-Id: I178b63d73f14742cf890cb05386ad4e82fd8c2be
  .../face/FaceStatusPreferenceController.java  |   6 +
  .../biometrics/face/FaceStatusUtils.java      |   5 +
  ...aceUnlockCategoryPreferenceController.java |   4 +-
+ .../settings/custom/ListPreference.java       |  55 ++++++
+ .../custom/SecureSettingListPreference.java   |  49 ++++++
+ .../settings/custom/SecureSettingsStore.java  |  74 ++++++++
  .../settings/custom/biometrics/FaceUtils.java |  31 ++++
  .../biometrics/face/FaceEnrollActivity.java   |  34 ++++
  .../FaceSettingsRedoPreferenceController.java | 138 +++++++++++++++
  .../contextualcards/FaceReEnrollDialog.java   |   7 +-
- 34 files changed, 736 insertions(+), 153 deletions(-)
+ 37 files changed, 914 insertions(+), 153 deletions(-)
  delete mode 100644 res/layout/face_enroll_button.xml
  create mode 100644 res/layout/face_enroll_introduction_invisible.xml
  delete mode 100644 res/layout/face_remove_button.xml
  create mode 100644 src/com/android/settings/biometrics/combination/BiometricWaysToUsePreferenceController.java
  create mode 100644 src/com/android/settings/biometrics/face/FaceSettingsLockscreenUnlockMethodPreferenceController.java
+ create mode 100644 src/com/android/settings/custom/ListPreference.java
+ create mode 100644 src/com/android/settings/custom/SecureSettingListPreference.java
+ create mode 100644 src/com/android/settings/custom/SecureSettingsStore.java
  create mode 100644 src/com/android/settings/custom/biometrics/FaceUtils.java
  create mode 100644 src/com/android/settings/custom/biometrics/face/FaceEnrollActivity.java
  create mode 100644 src/com/android/settings/custom/biometrics/face/FaceSettingsRedoPreferenceController.java
@@ -365,10 +371,10 @@ index 0632f72eb0..60f63258a4 100644
 +    </string-array>
  </resources>
 diff --git a/res/values/strings.xml b/res/values/strings.xml
-index b8a5202f13..7e4ea99d03 100644
+index 33db37ee40..a9a03712c1 100644
 --- a/res/values/strings.xml
 +++ b/res/values/strings.xml
-@@ -14404,4 +14404,12 @@
+@@ -14406,4 +14406,12 @@
      <!-- [CHAR LIMIT=NONE] Hint for QR code process failure -->
      <string name="bt_le_audio_qr_code_is_not_valid_format">QR code isn\u0027t a valid format</string>
  
@@ -382,14 +388,14 @@ index b8a5202f13..7e4ea99d03 100644
 +    <string name="face_unlock_method_swipe">When swiping on lock screen</string>
  </resources>
 diff --git a/res/xml/configure_notification_settings.xml b/res/xml/configure_notification_settings.xml
-index 96a3f85a46..123b103952 100644
+index 96a3f85a46..25a56f8af1 100644
 --- a/res/xml/configure_notification_settings.xml
 +++ b/res/xml/configure_notification_settings.xml
 @@ -98,9 +98,21 @@
              android:summary="@string/lock_screen_notifs_redact_work_summary"
              settings:controller="com.android.settings.notification.RedactNotificationPreferenceController" />
  
-+        <com.android.settings.custom.preference.SecureSettingListPreference
++        <com.android.settings.custom.SecureSettingListPreference
 +            android:key="face_unlock_method"
 +            android:order="16"
 +            android:title="@string/face_unlock_method_title"
@@ -409,14 +415,14 @@ index 96a3f85a46..123b103952 100644
              android:summary="@string/lockscreen_bypass_summary"
              settings:searchable="false"
 diff --git a/res/xml/security_lockscreen_settings.xml b/res/xml/security_lockscreen_settings.xml
-index 3bd84f81ae..b9946e209a 100644
+index 3bd84f81ae..08f57acdd6 100644
 --- a/res/xml/security_lockscreen_settings.xml
 +++ b/res/xml/security_lockscreen_settings.xml
 @@ -28,6 +28,17 @@
              android:summary="@string/summary_placeholder"
              settings:keywords="@string/keywords_lock_screen_notif"/>
  
-+        <com.android.settings.custom.preference.SecureSettingListPreference
++        <com.android.settings.custom.SecureSettingListPreference
 +            android:key="face_unlock_method"
 +            android:title="@string/face_unlock_method_title"
 +            android:summary="%s"
@@ -446,7 +452,7 @@ index ef3a3fd1ff..f7d732bbb4 100644
              android:key="biometric_settings_biometric_keyguard"
              android:title="@string/biometric_settings_use_biometric_unlock_phone"
 diff --git a/res/xml/security_settings_face.xml b/res/xml/security_settings_face.xml
-index f0d03507aa..8044ed7694 100644
+index f0d03507aa..d1f972eb1c 100644
 --- a/res/xml/security_settings_face.xml
 +++ b/res/xml/security_settings_face.xml
 @@ -33,12 +33,6 @@
@@ -466,7 +472,7 @@ index f0d03507aa..8044ed7694 100644
              settings:keywords="@string/keywords_face_unlock"
              settings:controller="com.android.settings.biometrics.face.FaceSettingsConfirmPreferenceController"/>
  
-+        <com.android.settings.custom.preference.SecureSettingListPreference
++        <com.android.settings.custom.SecureSettingListPreference
 +            android:key="face_unlock_method"
 +            android:title="@string/face_unlock_method_title"
 +            android:summary="%s"
@@ -1357,6 +1363,202 @@ index d0debdfe59..870756ef29 100644
 +        return Utils.isMultipleBiometricsSupported(mContext) && !FaceUtils.isFaceUnlockSupported() ? UNSUPPORTED_ON_DEVICE : AVAILABLE;
      }
  }
+diff --git a/src/com/android/settings/custom/ListPreference.java b/src/com/android/settings/custom/ListPreference.java
+new file mode 100644
+index 0000000000..74c38aa260
+--- /dev/null
++++ b/src/com/android/settings/custom/ListPreference.java
+@@ -0,0 +1,55 @@
++/*
++ * Copyright (C) 2017-2018 AICP
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package com.android.settings.custom;
++
++import android.content.Context;
++import android.text.TextUtils;
++import android.util.AttributeSet;
++
++public class ListPreference extends androidx.preference.ListPreference {
++    private boolean mAutoSummary = false;
++
++    public ListPreference(Context context, AttributeSet attrs, int defStyle) {
++        super(context, attrs, defStyle);
++    }
++
++    public ListPreference(Context context, AttributeSet attrs) {
++        super(context, attrs);
++    }
++
++    public ListPreference(Context context) {
++        super(context);
++    }
++
++    @Override
++    public void setValue(String value) {
++        super.setValue(value);
++        if (mAutoSummary || TextUtils.isEmpty(getSummary())) {
++            setSummary(getEntry(), true);
++        }
++    }
++
++    @Override
++    public void setSummary(CharSequence summary) {
++        setSummary(summary, false);
++    }
++
++    private void setSummary(CharSequence summary, boolean autoSummary) {
++        mAutoSummary = autoSummary;
++        super.setSummary(summary);
++    }
++}
+diff --git a/src/com/android/settings/custom/SecureSettingListPreference.java b/src/com/android/settings/custom/SecureSettingListPreference.java
+new file mode 100644
+index 0000000000..100e3eaa54
+--- /dev/null
++++ b/src/com/android/settings/custom/SecureSettingListPreference.java
+@@ -0,0 +1,49 @@
++/*
++ * Copyright (C) 2017-2018 AICP
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package com.android.settings.custom;
++
++import android.content.Context;
++import android.text.TextUtils;
++import android.util.AttributeSet;
++
++public class SecureSettingListPreference extends ListPreference {
++
++    public SecureSettingListPreference(Context context, AttributeSet attrs, int defStyle) {
++        super(context, attrs, defStyle);
++        setPreferenceDataStore(new SecureSettingsStore(context.getContentResolver()));
++    }
++
++    public SecureSettingListPreference(Context context, AttributeSet attrs) {
++        super(context, attrs);
++        setPreferenceDataStore(new SecureSettingsStore(context.getContentResolver()));
++    }
++
++    public SecureSettingListPreference(Context context) {
++        super(context);
++        setPreferenceDataStore(new SecureSettingsStore(context.getContentResolver()));
++    }
++
++    @Override
++    protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
++        // This is what default ListPreference implementation is doing without respecting
++        // real default value:
++        //setValue(restoreValue ? getPersistedString(mValue) : (String) defaultValue);
++        // Instead, we better do
++        setValue(restoreValue ? getPersistedString((String) defaultValue) : (String) defaultValue);
++    }
++
++}
+diff --git a/src/com/android/settings/custom/SecureSettingsStore.java b/src/com/android/settings/custom/SecureSettingsStore.java
+new file mode 100644
+index 0000000000..85a25ec00a
+--- /dev/null
++++ b/src/com/android/settings/custom/SecureSettingsStore.java
+@@ -0,0 +1,74 @@
++/*
++ * Copyright (C) 2017 AICP
++ * Copyright (C) 2018 CarbonROM
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package com.android.settings.custom;
++
++import android.content.ContentResolver;
++import android.preference.PreferenceDataStore;
++import android.provider.Settings;
++
++public class SecureSettingsStore extends androidx.preference.PreferenceDataStore
++        implements PreferenceDataStore {
++
++    private ContentResolver mContentResolver;
++
++    public SecureSettingsStore(ContentResolver contentResolver) {
++        mContentResolver = contentResolver;
++    }
++
++    public boolean getBoolean(String key, boolean defValue) {
++        return getInt(key, defValue ? 1 : 0) != 0;
++    }
++
++    public float getFloat(String key, float defValue) {
++        return Settings.Secure.getFloat(mContentResolver, key, defValue);
++    }
++
++    public int getInt(String key, int defValue) {
++        return Settings.Secure.getInt(mContentResolver, key, defValue);
++    }
++
++    public long getLong(String key, long defValue) {
++        return Settings.Secure.getLong(mContentResolver, key, defValue);
++    }
++
++    public String getString(String key, String defValue) {
++        String result = Settings.Secure.getString(mContentResolver, key);
++        return result == null ? defValue : result;
++    }
++
++    public void putBoolean(String key, boolean value) {
++        putInt(key, value ? 1 : 0);
++    }
++
++    public void putFloat(String key, float value) {
++        Settings.Secure.putFloat(mContentResolver, key, value);
++    }
++
++    public void putInt(String key, int value) {
++        Settings.Secure.putInt(mContentResolver, key, value);
++    }
++
++    public void putLong(String key, long value) {
++        Settings.Secure.putLong(mContentResolver, key, value);
++    }
++
++    public void putString(String key, String value) {
++        Settings.Secure.putString(mContentResolver, key, value);
++    }
++
++}
 diff --git a/src/com/android/settings/custom/biometrics/FaceUtils.java b/src/com/android/settings/custom/biometrics/FaceUtils.java
 new file mode 100644
 index 0000000000..b83aec83a9
