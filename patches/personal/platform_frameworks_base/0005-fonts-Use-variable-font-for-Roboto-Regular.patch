@@ -1,7 +1,7 @@
 From 56986ccad0d8d504f426321b94bef674fcfd29bc Mon Sep 17 00:00:00 2001
 From: Danny Lin <danny@kdrag0n.dev>
 Date: Wed, 6 Oct 2021 18:40:12 -0700
-Subject: [PATCH 5/7] fonts: Use variable font for Roboto Regular
+Subject: [PATCH 5/8] fonts: Use variable font for Roboto Regular
 
 I'm not sure why Google decided to revert to a static variant of *only*
 the regular non-italic and non-condensed weight, but using the default
