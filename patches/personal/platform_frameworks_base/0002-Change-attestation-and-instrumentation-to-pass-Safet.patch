@@ -1,7 +1,7 @@
 From c682852eb401d513ecc3295c68a9015abcb1c386 Mon Sep 17 00:00:00 2001
 From: Raphael Mounier <mounierr07@gmail.com>
 Date: Wed, 22 Feb 2023 17:52:12 +0100
-Subject: [PATCH 2/6] Change attestation and instrumentation to pass SafetyNet
+Subject: [PATCH 2/7] Change attestation and instrumentation to pass SafetyNet
 
 Original Author : Danny Lin <danny@kdrag0n.dev>
 
