@@ -1,7 +1,7 @@
 From c3b4f37f80db421a6757b91e8e6aa87096166c41 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Tue, 8 Jun 2021 10:03:50 +0100
-Subject: [PATCH 2/3] headers: Remove Customization page
+Subject: [PATCH 2/2] headers: Remove Customization page
 
 ---
  app/src/main/res/xml/pref_headers.xml |  3 -
