@@ -1,4 +1,4 @@
-From 180083be9bab8b3baa06809ac0c82f57ad45fc83 Mon Sep 17 00:00:00 2001
+From aca4f23ff4f2d5efbb03dee5bd07b8fe9b2f49c1 Mon Sep 17 00:00:00 2001
 From: jhenrique09 <jhsv09@gmail.com>
 Date: Thu, 10 Feb 2022 22:27:30 -0300
 Subject: [PATCH 2/2] Import of Face Unlock for T (2/2)
@@ -21,7 +21,7 @@ Change-Id: I178b63d73f14742cf890cb05386ad4e82fd8c2be
  ...metricSettingsAppPreferenceController.java |   4 +-
  ...cSettingsKeyguardPreferenceController.java |   4 +-
  ...iometricWaysToUsePreferenceController.java |  35 ++++
- .../face/FaceEnrollIntroduction.java          |  92 +++++++++-
+ .../face/FaceEnrollIntroduction.java          |  91 +++++++++-
  ...FaceProfileStatusPreferenceController.java |   5 +
  .../biometrics/face/FaceSettings.java         |  27 ++-
  .../FaceSettingsAppPreferenceController.java  |   3 +-
@@ -42,7 +42,7 @@ Change-Id: I178b63d73f14742cf890cb05386ad4e82fd8c2be
  .../biometrics/face/FaceEnrollActivity.java   |  34 ++++
  .../FaceSettingsRedoPreferenceController.java | 138 +++++++++++++++
  .../contextualcards/FaceReEnrollDialog.java   |   7 +-
- 37 files changed, 914 insertions(+), 153 deletions(-)
+ 37 files changed, 913 insertions(+), 153 deletions(-)
  delete mode 100644 res/layout/face_enroll_button.xml
  create mode 100644 res/layout/face_enroll_introduction_invisible.xml
  delete mode 100644 res/layout/face_remove_button.xml
@@ -56,25 +56,25 @@ Change-Id: I178b63d73f14742cf890cb05386ad4e82fd8c2be
  create mode 100644 src/com/android/settings/custom/biometrics/face/FaceSettingsRedoPreferenceController.java
 
 diff --git a/Android.bp b/Android.bp
-index 11a0d18b7d..6bcf2637ff 100644
+index f56ca95f9b..f601380b89 100644
 --- a/Android.bp
 +++ b/Android.bp
-@@ -88,6 +88,7 @@ android_library {
-         "WifiTrackerLib",
+@@ -89,6 +89,7 @@ android_library {
          "SettingsLibActivityEmbedding",
          "Settings-change-ids",
+         "SystemUIUnfoldLib",
 +        "faceunlock_framework",
      ],
- 
+
      libs: [
 diff --git a/AndroidManifest.xml b/AndroidManifest.xml
-index f51719b4dd..c013ac0f7b 100644
+index 6d2c636ccf..a0a3840773 100644
 --- a/AndroidManifest.xml
 +++ b/AndroidManifest.xml
-@@ -119,6 +119,10 @@
-     <uses-permission android:name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
+@@ -120,6 +120,10 @@
      <uses-permission android:name="android.permission.START_VIEW_APP_FEATURES" />
- 
+     <uses-permission android:name="android.permission.CUSTOMIZE_SYSTEM_UI" />
+
 +    <!-- Face Unlock -->
 +    <uses-permission android:name="com.android.settings.FACE_UNLOCK"/>
 +    <permission android:name="com.android.settings.FACE_UNLOCK" android:protectionLevel="signatureOrSystem"/>
@@ -82,10 +82,10 @@ index f51719b4dd..c013ac0f7b 100644
      <application
              android:name=".SettingsApplication"
              android:label="@string/settings_label"
-@@ -4504,6 +4508,17 @@
+@@ -4542,6 +4546,17 @@
              </intent-filter>
          </activity>
- 
+
 +        <!-- Face unlock -->
 +        <activity android:name="com.android.settings.custom.biometrics.face.FaceEnrollActivity"
 +            android:permission="com.android.settings.FACE_UNLOCK"
@@ -352,10 +352,10 @@ index 2c2497ab1c..0000000000
 -</LinearLayout>
 \ No newline at end of file
 diff --git a/res/values/arrays.xml b/res/values/arrays.xml
-index 0632f72eb0..60f63258a4 100644
+index 42d60eee98..0eacda0e17 100644
 --- a/res/values/arrays.xml
 +++ b/res/values/arrays.xml
-@@ -1650,4 +1650,14 @@
+@@ -1664,4 +1664,14 @@
           [CHAR LIMIT=NONE] -->
      <string-array name="allowlist_hide_summary_in_battery_usage" translatable="false">
      </string-array>
@@ -371,10 +371,10 @@ index 0632f72eb0..60f63258a4 100644
 +    </string-array>
  </resources>
 diff --git a/res/values/strings.xml b/res/values/strings.xml
-index 33db37ee40..a9a03712c1 100644
+index 390600df3e..e5519015a3 100644
 --- a/res/values/strings.xml
 +++ b/res/values/strings.xml
-@@ -14406,4 +14406,12 @@
+@@ -14459,4 +14459,12 @@
      <!-- [CHAR LIMIT=NONE] Hint for QR code process failure -->
      <string name="bt_le_audio_qr_code_is_not_valid_format">QR code isn\u0027t a valid format</string>
  
@@ -415,7 +415,7 @@ index 96a3f85a46..25a56f8af1 100644
              android:summary="@string/lockscreen_bypass_summary"
              settings:searchable="false"
 diff --git a/res/xml/security_lockscreen_settings.xml b/res/xml/security_lockscreen_settings.xml
-index 3bd84f81ae..08f57acdd6 100644
+index 80e8fe69d2..f45d462fed 100644
 --- a/res/xml/security_lockscreen_settings.xml
 +++ b/res/xml/security_lockscreen_settings.xml
 @@ -28,6 +28,17 @@
@@ -642,7 +642,7 @@ index 0000000000..99105be43f
 +    }
 +}
 diff --git a/src/com/android/settings/biometrics/face/FaceEnrollIntroduction.java b/src/com/android/settings/biometrics/face/FaceEnrollIntroduction.java
-index 259829643e..376ef2e268 100644
+index ed74d2a550..d10a2f3bc7 100644
 --- a/src/com/android/settings/biometrics/face/FaceEnrollIntroduction.java
 +++ b/src/com/android/settings/biometrics/face/FaceEnrollIntroduction.java
 @@ -20,6 +20,7 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.FACE_UNLO
@@ -653,16 +653,15 @@ index 259829643e..376ef2e268 100644
  import android.content.Intent;
  import android.hardware.SensorPrivacyManager;
  import android.hardware.biometrics.BiometricAuthenticator;
-@@ -56,6 +57,8 @@ import com.google.android.setupdesign.span.LinkSpan;
- 
- import java.util.List;
- 
+@@ -43,6 +44,7 @@ import com.android.settings.biometrics.BiometricEnrollActivity;
+ import com.android.settings.biometrics.BiometricEnrollIntroduction;
+ import com.android.settings.biometrics.BiometricUtils;
+ import com.android.settings.biometrics.MultiBiometricEnrollHelper;
 +import com.android.settings.custom.biometrics.FaceUtils;
-+
- /**
-  * Provides introductory info about face unlock and prompts the user to agree before starting face
-  * enrollment.
-@@ -69,6 +72,8 @@ public class FaceEnrollIntroduction extends BiometricEnrollIntroduction {
+ import com.android.settings.overlay.FeatureFactory;
+ import com.android.settings.password.ChooseLockSettingsHelper;
+ import com.android.settings.password.SetupSkipDialog;
+@@ -66,6 +68,8 @@ public class FaceEnrollIntroduction extends BiometricEnrollIntroduction {
      @Nullable private FooterButton mSecondaryFooterButton;
      @Nullable private SensorPrivacyManager mSensorPrivacyManager;
  
@@ -671,7 +670,7 @@ index 259829643e..376ef2e268 100644
      @Override
      protected void onCancelButtonClick(View view) {
          if (!BiometricUtils.tryStartingNextBiometricEnroll(this, ENROLL_NEXT_BIOMETRIC_REQUEST,
-@@ -101,10 +106,7 @@ public class FaceEnrollIntroduction extends BiometricEnrollIntroduction {
+@@ -98,10 +102,7 @@ public class FaceEnrollIntroduction extends BiometricEnrollIntroduction {
          }
      }
  
@@ -683,7 +682,7 @@ index 259829643e..376ef2e268 100644
          // Apply extracted theme color to icons.
          final ImageView iconGlasses = findViewById(R.id.icon_glasses);
          final ImageView iconLooking = findViewById(R.id.icon_looking);
-@@ -144,7 +146,17 @@ public class FaceEnrollIntroduction extends BiometricEnrollIntroduction {
+@@ -141,7 +142,17 @@ public class FaceEnrollIntroduction extends BiometricEnrollIntroduction {
              iconRequireEyes.getBackground().setColorFilter(getIconColorFilter());
              infoMessageRequireEyes.setText(getInfoMessageRequireEyes());
          }
@@ -701,7 +700,7 @@ index 259829643e..376ef2e268 100644
          mFaceManager = Utils.getFaceManagerOrNull(this);
          mFaceFeatureProvider = FeatureFactory.getFactory(getApplicationContext())
                  .getFaceFeatureProvider();
-@@ -173,10 +185,19 @@ public class FaceEnrollIntroduction extends BiometricEnrollIntroduction {
+@@ -170,10 +181,19 @@ public class FaceEnrollIntroduction extends BiometricEnrollIntroduction {
          final boolean cameraPrivacyEnabled = helper
                  .isSensorBlocked(SensorPrivacyManager.Sensors.CAMERA, mUserId);
          Log.v(TAG, "cameraPrivacyEnabled : " + cameraPrivacyEnabled);
@@ -721,7 +720,7 @@ index 259829643e..376ef2e268 100644
          // If user has skipped or finished enrolling, don't restart enrollment.
          final boolean isEnrollRequest = requestCode == BIOMETRIC_FIND_SENSOR_REQUEST
                  || requestCode == ENROLL_NEXT_BIOMETRIC_REQUEST;
-@@ -199,6 +220,66 @@ public class FaceEnrollIntroduction extends BiometricEnrollIntroduction {
+@@ -196,6 +216,66 @@ public class FaceEnrollIntroduction extends BiometricEnrollIntroduction {
          super.onActivityResult(requestCode, resultCode, data);
      }
  
@@ -788,7 +787,7 @@ index 259829643e..376ef2e268 100644
      protected boolean generateChallengeOnCreate() {
          return true;
      }
-@@ -246,6 +327,9 @@ public class FaceEnrollIntroduction extends BiometricEnrollIntroduction {
+@@ -243,6 +323,9 @@ public class FaceEnrollIntroduction extends BiometricEnrollIntroduction {
  
      @Override
      protected int getLayoutResource() {
@@ -1426,7 +1425,7 @@ index 0000000000..74c38aa260
 +}
 diff --git a/src/com/android/settings/custom/SecureSettingListPreference.java b/src/com/android/settings/custom/SecureSettingListPreference.java
 new file mode 100644
-index 0000000000..100e3eaa54
+index 0000000000..f9b909671e
 --- /dev/null
 +++ b/src/com/android/settings/custom/SecureSettingListPreference.java
 @@ -0,0 +1,49 @@

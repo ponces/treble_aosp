@@ -1,4 +1,4 @@
-From 58eaa2850e30986b35b5fcd8afe0d494eb569427 Mon Sep 17 00:00:00 2001
+From a8ed6c897b34e8b90451f4db3ee6689206a73139 Mon Sep 17 00:00:00 2001
 From: jhenrique09 <jhsv09@gmail.com>
 Date: Wed, 9 Feb 2022 22:16:43 -0300
 Subject: [PATCH 10/10] Import of Face Unlock for T (1/2)
@@ -13,7 +13,7 @@ Change-Id: I0f8ab8ee816466e64f54dccd80de1a09e6c09d01
  packages/SystemUI/Android.bp                  |   1 +
  .../SystemUI/res/values-pt-rBR/strings.xml    |   2 +-
  packages/SystemUI/res/values/strings.xml      |   3 +
- .../keyguard/KeyguardUpdateMonitor.java       |  92 +-
+ .../keyguard/KeyguardUpdateMonitor.java       |  93 +-
  .../privacy/AppOpsPrivacyItemMonitor.kt       |  10 +-
  .../KeyguardIndicationController.java         |  75 +-
  .../phone/BiometricUnlockController.java      |   2 +-
@@ -46,7 +46,7 @@ Change-Id: I0f8ab8ee816466e64f54dccd80de1a09e6c09d01
  .../fingerprint/hidl/Fingerprint21.java       |   2 +-
  .../hidl/Fingerprint21UdfpsMock.java          |   6 +-
  .../policy/PermissionPolicyService.java       |   8 +
- 41 files changed, 2391 insertions(+), 62 deletions(-)
+ 41 files changed, 2391 insertions(+), 63 deletions(-)
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/custom/ArrayUtils.java
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/custom/BiometricTestSessionImpl.java
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/custom/CustomFaceProvider.java
@@ -64,10 +64,10 @@ Change-Id: I0f8ab8ee816466e64f54dccd80de1a09e6c09d01
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/custom/TestHal.java
 
 diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
-index c9fd1295a6e1..131291c898e9 100644
+index 94a6382227f3..c4eada00e89c 100644
 --- a/core/java/android/provider/Settings.java
 +++ b/core/java/android/provider/Settings.java
-@@ -10983,6 +10983,12 @@ public final class Settings {
+@@ -11016,6 +11016,12 @@ public final class Settings {
          public static final String EXTRA_AUTOMATIC_POWER_SAVE_MODE =
                  "extra_automatic_power_save_mode";
 
@@ -81,13 +81,13 @@ index c9fd1295a6e1..131291c898e9 100644
           * These entries are considered common between the personal and the managed profile,
           * since the managed profile doesn't get to change them.
 diff --git a/core/res/res/values/config.xml b/core/res/res/values/config.xml
-index 0330de797d98..7de97254673b 100644
+index 8f3cd2822d4f..27ca62145c60 100644
 --- a/core/res/res/values/config.xml
 +++ b/core/res/res/values/config.xml
-@@ -5934,4 +5934,15 @@
-          TODO(b/236022708) Move rear display state to device state config file
-     -->
-     <integer name="config_deviceStateRearDisplay">-1</integer>
+@@ -6049,4 +6049,15 @@
+     <!-- Whether the lock screen is allowed to run its own live wallpaper,
+          different from the home screen wallpaper. -->
+     <bool name="config_independentLockscreenLiveWallpaper">false</bool>
 +
 +    <!-- Array containing custom error messages from vendor. -->
 +    <string-array name="face_error_vendor" translatable="false">
@@ -101,10 +101,10 @@ index 0330de797d98..7de97254673b 100644
 +    <bool name="config_fpCancelIfNotIdle">false</bool>
  </resources>
 diff --git a/core/res/res/values/strings.xml b/core/res/res/values/strings.xml
-index 8ffdbdd6f15b..27baac6b592a 100644
+index 7ed7a03f1b61..e89102f70a70 100644
 --- a/core/res/res/values/strings.xml
 +++ b/core/res/res/values/strings.xml
-@@ -1906,9 +1906,6 @@
+@@ -1909,9 +1909,6 @@
      <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their face or screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=90] -->
      <string name="face_or_screen_lock_dialog_default_subtitle">Use your face or screen lock to continue</string>
  
@@ -114,7 +114,7 @@ index 8ffdbdd6f15b..27baac6b592a 100644
      <!-- Default error message to use when face_error_vendor does not contain a message. [CHAR LIMIT=NONE] -->
      <string name="face_error_vendor_unknown">Something went wrong. Try again.</string>
  
-@@ -6355,4 +6352,7 @@ ul.</string>
+@@ -6358,4 +6355,7 @@ ul.</string>
  
      <!-- Title for preference of the system default locale. [CHAR LIMIT=50]-->
      <string name="system_locale_title">System default</string>
@@ -123,13 +123,13 @@ index 8ffdbdd6f15b..27baac6b592a 100644
 +    <string name="face_unlock_disabled_idle">Face unlock disabled due to inactivity</string>
  </resources>
 diff --git a/core/res/res/values/symbols.xml b/core/res/res/values/symbols.xml
-index 6e574bd788a9..953944b00081 100644
+index cdf625c03abd..83eb6b592e68 100644
 --- a/core/res/res/values/symbols.xml
 +++ b/core/res/res/values/symbols.xml
-@@ -4854,4 +4854,10 @@
-   <java-symbol type="dimen" name="status_bar_height_default" />
+@@ -4881,4 +4881,10 @@
+   <java-symbol type="id" name="language_picker_header" />
  
-   <java-symbol type="bool" name="system_server_plays_face_haptics" />
+   <java-symbol type="dimen" name="status_bar_height_default" />
 +
 +  <!-- Enable face auth only when swiping security view -->
 +  <java-symbol type="bool" name="config_faceAuthOnlyOnSecurityView" />
@@ -138,10 +138,10 @@ index 6e574bd788a9..953944b00081 100644
 +  <java-symbol type="bool" name="config_fpCancelIfNotIdle" />
  </resources>
 diff --git a/packages/SettingsProvider/src/android/provider/settings/validators/SecureSettingsValidators.java b/packages/SettingsProvider/src/android/provider/settings/validators/SecureSettingsValidators.java
-index a39735ffe2c7..4684451066bd 100644
+index 4fa490ffaed5..33ad1f4727e5 100644
 --- a/packages/SettingsProvider/src/android/provider/settings/validators/SecureSettingsValidators.java
 +++ b/packages/SettingsProvider/src/android/provider/settings/validators/SecureSettingsValidators.java
-@@ -347,5 +347,6 @@ public class SecureSettingsValidators {
+@@ -350,5 +350,6 @@ public class SecureSettingsValidators {
          VALIDATORS.put(Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO, ANY_STRING_VALIDATOR);
          VALIDATORS.put(Secure.BLUETOOTH_LE_BROADCAST_CODE, ANY_STRING_VALIDATOR);
          VALIDATORS.put(Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME, ANY_STRING_VALIDATOR);
@@ -149,22 +149,22 @@ index a39735ffe2c7..4684451066bd 100644
      }
  }
 diff --git a/packages/SystemUI/Android.bp b/packages/SystemUI/Android.bp
-index 740127888c4b..01b71ff2bfad 100644
+index 1e5148888cb2..ef774f105889 100644
 --- a/packages/SystemUI/Android.bp
 +++ b/packages/SystemUI/Android.bp
-@@ -126,6 +126,7 @@ android_library {
-         "lottie",
+@@ -178,6 +178,7 @@ android_library {
          "LowLightDreamLib",
+         "motion_tool_lib",
          "vendor.goodix.hardware.biometrics.fingerprint-V2.1-java",
 +        "faceunlock_framework",
      ],
      manifest: "AndroidManifest.xml",
  
 diff --git a/packages/SystemUI/res/values-pt-rBR/strings.xml b/packages/SystemUI/res/values-pt-rBR/strings.xml
-index f85ab52b11b4..e64bc5ca8dbd 100644
+index 41925480b3ad..88722a093c96 100644
 --- a/packages/SystemUI/res/values-pt-rBR/strings.xml
 +++ b/packages/SystemUI/res/values-pt-rBR/strings.xml
-@@ -158,7 +158,7 @@
+@@ -165,7 +165,7 @@
      <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Se você informar uma senha incorreta na próxima tentativa, seu perfil de trabalho e os dados dele serão excluídos."</string>
      <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toque no sensor de impressão digital"</string>
      <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ícone de impressão digital"</string>
@@ -174,22 +174,22 @@ index f85ab52b11b4..e64bc5ca8dbd 100644
      <skip />
      <string name="keyguard_face_failed" msgid="9044619102286917151">"Rosto não reconhecido"</string>
 diff --git a/packages/SystemUI/res/values/strings.xml b/packages/SystemUI/res/values/strings.xml
-index 53f1227383b7..646c882d7832 100644
+index 977adde635aa..e6e59e9676ff 100644
 --- a/packages/SystemUI/res/values/strings.xml
 +++ b/packages/SystemUI/res/values/strings.xml
-@@ -2607,4 +2607,7 @@
+@@ -2768,4 +2768,7 @@
  
-     <!-- Time format for the Dream Time Complication for 24-hour time format [CHAR LIMIT=NONE] -->
-     <string name="dream_time_complication_24_hr_time_format">kk:mm</string>
+     <!-- Title for notification of low stylus battery. [CHAR_LIMIT=NONE] -->
+     <string name="stylus_battery_low">Stylus battery low</string>
 +
 +    <!-- Face Unlock -->
 +    <string name="face_unlock_recognizing">Recognizing face...</string>
  </resources>
 diff --git a/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java b/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
-index 6eef3b33cf8f..bdc3d34741b7 100644
+index e7aa176e5d68..f97294d9d51b 100644
 --- a/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
 +++ b/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
-@@ -81,6 +81,7 @@ import android.app.trust.TrustManager;
+@@ -82,6 +82,7 @@ import android.app.trust.TrustManager;
  import android.content.BroadcastReceiver;
  import android.content.ComponentName;
  import android.content.Context;
@@ -197,7 +197,7 @@ index 6eef3b33cf8f..bdc3d34741b7 100644
  import android.content.Intent;
  import android.content.IntentFilter;
  import android.content.pm.IPackageManager;
-@@ -449,6 +450,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+@@ -476,6 +477,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
  
      private static int sCurrentUser;
  
@@ -211,7 +211,15 @@ index 6eef3b33cf8f..bdc3d34741b7 100644
      public synchronized static void setCurrentUser(int currentUser) {
          sCurrentUser = currentUser;
      }
-@@ -828,6 +836,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+@@ -729,6 +737,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+         final boolean wasKeyguardVisible = isKeyguardVisible();
+         mKeyguardShowing = showing;
+         mKeyguardOccluded = occluded;
++        mPrimaryBouncerFullyShown = false;
+         final boolean isKeyguardVisible = isKeyguardVisible();
+         mLogger.logKeyguardShowingChanged(showing, occluded, isKeyguardVisible);
+ 
+@@ -897,6 +906,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
  
      private void handleFingerprintAuthenticated(int authUserId, boolean isStrongBiometric) {
          Trace.beginSection("KeyGuardUpdateMonitor#handlerFingerPrintAuthenticated");
@@ -221,7 +229,7 @@ index 6eef3b33cf8f..bdc3d34741b7 100644
          if (mHandler.hasCallbacks(mFpCancelNotReceived)) {
              mLogger.d("handleFingerprintAuthenticated()"
                      + " triggered while waiting for cancellation, removing watchdog");
-@@ -1052,6 +1063,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+@@ -1127,6 +1139,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
  
      private void handleFaceAuthenticated(int authUserId, boolean isStrongBiometric) {
          Trace.beginSection("KeyGuardUpdateMonitor#handlerFaceAuthenticated");
@@ -231,57 +239,58 @@ index 6eef3b33cf8f..bdc3d34741b7 100644
          try {
              if (mGoingToSleep) {
                  mLogger.d("Aborted successful auth because device is going to sleep.");
-@@ -1235,9 +1249,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
-         final DevicePolicyManager dpm =
-                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+@@ -1293,10 +1308,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+ 
+     private boolean isFaceDisabled(int userId) {
          // TODO(b/140035044)
--        return whitelistIpcs(() -> dpm != null && (dpm.getKeyguardDisabledFeatures(null, userId)
-+        return dpm != null && (dpm.getKeyguardDisabledFeatures(null, userId)
-                 & DevicePolicyManager.KEYGUARD_DISABLE_FACE) != 0
+-        return whitelistIpcs(() ->
+-                (mDevicePolicyManager.getKeyguardDisabledFeatures(null, userId)
++        return (mDevicePolicyManager.getKeyguardDisabledFeatures(null, userId)
+                         & DevicePolicyManager.KEYGUARD_DISABLE_FACE) != 0
 -                || isSimPinSecure());
 +                || isSimPinSecure();
      }
  
      /**
-@@ -1919,6 +1933,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+@@ -2055,6 +2069,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
          mTelephonyListenerManager = telephonyListenerManager;
          mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
-         mStrongAuthTracker = new StrongAuthTracker(context, this::notifyStrongAuthStateChanged);
+         mStrongAuthTracker = new StrongAuthTracker(context);
 +        mFaceAuthOnlyOnSecurityView = mContext.getResources().getBoolean(
 +                com.android.internal.R.bool.config_faceAuthOnlyOnSecurityView);
          mBackgroundExecutor = backgroundExecutor;
          mBroadcastDispatcher = broadcastDispatcher;
          mInteractionJankMonitor = interactionJankMonitor;
-@@ -2191,6 +2207,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+@@ -2310,6 +2326,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
          mContext.getContentResolver().registerContentObserver(
                  Settings.System.getUriFor(Settings.System.TIME_12_24),
                  false, mTimeFormatChangeObserver, UserHandle.USER_ALL);
 +        mSettingsObserver = new SettingsObserver(mHandler);
 +        mSettingsObserver.observe();
-     }
  
-     private void updateFaceEnrolled(int userId) {
-@@ -2638,7 +2656,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+         updateSfpsRequireScreenOnToAuthPref();
+         mSfpsRequireScreenOnToAuthPrefObserver = new ContentObserver(mHandler) {
+@@ -2806,7 +2824,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
  
          // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
          // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
 -        final boolean shouldListen =
 +        boolean shouldListen =
-                 (mBouncerFullyShown && !mGoingToSleep
+                 (mPrimaryBouncerFullyShown
                          || mAuthInterruptActive
                          || mOccludingAppRequestingFace
-@@ -2653,6 +2671,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
-                 && !faceAuthenticated
-                 && !fpOrFaceIsLockedOut;
+@@ -2821,6 +2839,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+                 && faceAndFpNotAuthenticated
+                 && !mGoingToSleep;
  
-+        if (shouldListen && mFaceUnlockBehavior == FACE_UNLOCK_BEHAVIOR_SWIPE && !mBouncerFullyShown){
++        if (shouldListen && mFaceUnlockBehavior == FACE_UNLOCK_BEHAVIOR_SWIPE && !mPrimaryBouncerFullyShown){
 +            shouldListen = false;
 +        }
 +
          // Aggregate relevant fields for debug logging.
-         maybeLogListenerModelData(
+         logListenerModelData(
                  new KeyguardFaceListenModel(
-@@ -2681,6 +2703,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+@@ -2850,6 +2872,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
          return shouldListen;
      }
  
@@ -289,10 +298,10 @@ index 6eef3b33cf8f..bdc3d34741b7 100644
 +        return mFaceUnlockBehavior;
 +    }
 +
-     private void maybeLogListenerModelData(KeyguardListenModel model) {
+     private void logListenerModelData(@NonNull KeyguardListenModel model) {
          mLogger.logKeyguardListenerModel(model);
- 
-@@ -2810,7 +2836,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+         if (model instanceof KeyguardFingerprintListenModel) {
+@@ -2981,7 +3007,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
          return mIsUnlockWithFingerprintPossible.getOrDefault(userId, false);
      }
  
@@ -301,29 +310,21 @@ index 6eef3b33cf8f..bdc3d34741b7 100644
          return isFaceAuthEnabledForUser(userId) && !isFaceDisabled(userId);
      }
  
-@@ -3160,6 +3186,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
-         Assert.isMainThread();
-         mLogger.logKeyguardVisibilityChanged(showing);
-         mKeyguardIsVisible = showing;
-+        mBouncerFullyShown = false;
- 
-         if (showing) {
-             mSecureCameraLaunched = false;
-@@ -3182,6 +3209,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+@@ -3337,6 +3363,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
          mLogger.d("handleKeyguardReset");
          updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
                  FACE_AUTH_UPDATED_KEYGUARD_RESET);
-+        mBouncerFullyShown = false;
++        mPrimaryBouncerFullyShown = false;
          mNeedsSlowUnlockTransition = resolveNeedsSlowUnlockTransition();
      }
  
-@@ -3252,6 +3280,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+@@ -3409,6 +3436,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
          }
      }
  
 +    public void updateFaceListeningStateForBehavior(boolean fullyShow) {
-+        if (mBouncerFullyShown != fullyShow){
-+            mBouncerFullyShown = fullyShow;
++        if (mPrimaryBouncerFullyShown != fullyShow){
++            mPrimaryBouncerFullyShown = fullyShow;
 +            if (mFaceUnlockBehavior == FACE_UNLOCK_BEHAVIOR_SWIPE){
 +                updateFaceListeningState(BIOMETRIC_ACTION_UPDATE, FACE_AUTH_UPDATED_ON_FACE_AUTHENTICATED);
 +            }
@@ -333,15 +334,15 @@ index 6eef3b33cf8f..bdc3d34741b7 100644
      /**
       * Handle {@link #MSG_REQUIRE_NFC_UNLOCK}
       */
-@@ -3282,6 +3319,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+@@ -3439,6 +3475,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
       * Handle {@link #MSG_REPORT_EMERGENCY_CALL_ACTION}
       */
      private void handleReportEmergencyCallAction() {
-+        mBouncerFullyShown = false;
++        mPrimaryBouncerFullyShown = false;
          Assert.isMainThread();
          for (int i = 0; i < mCallbacks.size(); i++) {
              KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-@@ -3676,6 +3714,48 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+@@ -3830,6 +3867,48 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
          return BIOMETRIC_LOCKOUT_RESET_DELAY_MS;
      }
  
@@ -390,8 +391,8 @@ index 6eef3b33cf8f..bdc3d34741b7 100644
      /**
       * Unregister all listeners.
       */
-@@ -3697,6 +3777,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
-             mContext.getContentResolver().unregisterContentObserver(mTimeFormatChangeObserver);
+@@ -3851,6 +3930,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
+                     mSfpsRequireScreenOnToAuthPrefObserver);
          }
  
 +        if (mSettingsObserver != null) {
@@ -437,10 +438,10 @@ index de34cd6b23ca..5b7f832afbaa 100644
          return PrivacyItem(type, app, appOpItem.timeStartedElapsed, appOpItem.isDisabled)
      }
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/KeyguardIndicationController.java b/packages/SystemUI/src/com/android/systemui/statusbar/KeyguardIndicationController.java
-index 073ab8b16864..3dc26fe78a4e 100644
+index 6a658b6ee047..7b1b1154a3f9 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/KeyguardIndicationController.java
 +++ b/packages/SystemUI/src/com/android/systemui/statusbar/KeyguardIndicationController.java
-@@ -40,6 +40,7 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
+@@ -41,6 +41,7 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
  import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_USER_LOCKED;
  import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
  import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
@@ -457,7 +458,7 @@ index 073ab8b16864..3dc26fe78a4e 100644
      private static final long TRANSIENT_BIOMETRIC_ERROR_TIMEOUT = 1300;
      public static final long DEFAULT_HIDE_DELAY_MS =
              3500 + KeyguardIndicationTextView.Y_IN_DURATION;
-@@ -184,6 +187,7 @@ public class KeyguardIndicationController {
+@@ -187,6 +190,7 @@ public class KeyguardIndicationController {
      private final Set<Integer> mCoExFaceAcquisitionMsgIdsToShow;
      private final FaceHelpMessageDeferral mFaceAcquiredMessageDeferral;
      private boolean mInited;
@@ -465,7 +466,7 @@ index 073ab8b16864..3dc26fe78a4e 100644
  
      private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
  
-@@ -208,6 +212,15 @@ public class KeyguardIndicationController {
+@@ -206,6 +210,15 @@ public class KeyguardIndicationController {
                  mBiometricErrorMessageToShowOnScreenOn = null;
              }
          }
@@ -479,9 +480,9 @@ index 073ab8b16864..3dc26fe78a4e 100644
 +            }
 +        }
      };
+     private boolean mFaceLockedOutThisAuthSession;
  
-     /**
-@@ -273,6 +286,11 @@ public class KeyguardIndicationController {
+@@ -276,6 +289,11 @@ public class KeyguardIndicationController {
                      hideBiometricMessage();
                  } else if (msg.what == MSG_RESET_ERROR_MESSAGE_ON_SCREEN_ON) {
                      mBiometricErrorMessageToShowOnScreenOn = null;
@@ -493,7 +494,7 @@ index 073ab8b16864..3dc26fe78a4e 100644
                  }
              }
          };
-@@ -792,6 +810,47 @@ public class KeyguardIndicationController {
+@@ -791,6 +809,47 @@ public class KeyguardIndicationController {
          }
      }
  
@@ -541,7 +542,7 @@ index 073ab8b16864..3dc26fe78a4e 100644
      /**
       * Hides transient indication.
       */
-@@ -1237,11 +1296,17 @@ public class KeyguardIndicationController {
+@@ -1211,11 +1270,17 @@ public class KeyguardIndicationController {
          @Override
          public void onBiometricRunningStateChanged(boolean running,
                  BiometricSourceType biometricSourceType) {
@@ -565,23 +566,23 @@ index 073ab8b16864..3dc26fe78a4e 100644
          }
  
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/BiometricUnlockController.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/BiometricUnlockController.java
-index fe431377f854..0415ad9d3786 100644
+index 895a2934ec1b..b597e2624c79 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/BiometricUnlockController.java
 +++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/BiometricUnlockController.java
-@@ -585,7 +585,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
-         boolean unlockingAllowed =
+@@ -584,7 +584,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
+         final boolean unlockingAllowed =
                  mUpdateMonitor.isUnlockingWithBiometricAllowed(isStrongBiometric);
-         boolean deviceDreaming = mUpdateMonitor.isDreaming();
--        boolean bypass = mKeyguardBypassController.getBypassEnabled()
-+        boolean bypass = mKeyguardBypassController.getBypassEnabledBiometric()
+         final boolean deviceDreaming = mUpdateMonitor.isDreaming();
+-        final boolean bypass = mKeyguardBypassController.getBypassEnabled()
++        final boolean bypass = mKeyguardBypassController.getBypassEnabledBiometric()
                  || mAuthController.isUdfpsFingerDown();
-         if (!mUpdateMonitor.isDeviceInteractive()) {
-             if (!mKeyguardViewController.isShowing()) {
+ 
+         logCalculateModeForPassiveAuth(unlockingAllowed, deviceInteractive, isKeyguardShowing,
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBouncer.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBouncer.java
-index d61c51e76e86..6129eba1c69e 100644
+index 000fe140882c..b82e9ead24a8 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBouncer.java
 +++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBouncer.java
-@@ -218,17 +218,7 @@ public class KeyguardBouncer {
+@@ -236,17 +236,7 @@ public class KeyguardBouncer {
  
              // Split up the work over multiple frames.
              DejankUtils.removeCallbacks(mResetRunnable);
@@ -589,8 +590,8 @@ index d61c51e76e86..6129eba1c69e 100644
 -                    && !mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
 -                            KeyguardUpdateMonitor.getCurrentUser())
 -                    && !needsFullscreenBouncer()
--                    && !mKeyguardUpdateMonitor.isFaceLockedOut()
--                    && !mKeyguardUpdateMonitor.userNeedsStrongAuth()
+-                    && mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+-                            BiometricSourceType.FACE)
 -                    && !mKeyguardBypassController.getBypassEnabled()) {
 -                mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);
 -            } else {
@@ -601,10 +602,10 @@ index d61c51e76e86..6129eba1c69e 100644
              mKeyguardStateController.notifyBouncerShowing(true /* showing */);
              dispatchStartingToShow();
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBypassController.kt b/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBypassController.kt
-index b987f6815000..cc6cd1b59ce4 100644
+index b965ac97cc1c..c318ca471af2 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBypassController.kt
 +++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBypassController.kt
-@@ -92,6 +92,10 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
+@@ -93,6 +93,10 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
              notifyListeners()
          }
  
@@ -615,9 +616,9 @@ index b987f6815000..cc6cd1b59ce4 100644
      var bouncerShowing: Boolean = false
      var altBouncerShowing: Boolean = false
      var launchingAffordance: Boolean = false
-@@ -132,13 +136,24 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
+@@ -135,13 +139,24 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
              }
-         })
+         }
  
 -        val dismissByDefault = if (context.resources.getBoolean(
 -                        com.android.internal.R.bool.config_faceAuthDismissesKeyguard)) 1 else 0
@@ -647,7 +648,7 @@ index b987f6815000..cc6cd1b59ce4 100644
          lockscreenUserManager.addUserChangedListener(
                  object : NotificationLockscreenUserManager.UserChangedListener {
                      override fun onUserChanged(userId: Int) {
-@@ -158,8 +173,8 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
+@@ -161,8 +176,8 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
          biometricSourceType: BiometricSourceType,
          isStrongBiometric: Boolean
      ): Boolean {
@@ -655,10 +656,10 @@ index b987f6815000..cc6cd1b59ce4 100644
 -            val can = canBypass()
 +        if (bypassEnabledBiometric) {
 +            val can = biometricSourceType != BiometricSourceType.FACE || canBypass()
-             if (!can && (isPulseExpanding || qSExpanded)) {
+             if (!can && (isPulseExpanding || qsExpanded)) {
                  pendingUnlock = PendingUnlock(biometricSourceType, isStrongBiometric)
              }
-@@ -183,7 +198,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
+@@ -186,7 +201,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
       * If keyguard can be dismissed because of bypass.
       */
      fun canBypass(): Boolean {
@@ -667,7 +668,7 @@ index b987f6815000..cc6cd1b59ce4 100644
              return when {
                  bouncerShowing -> true
                  altBouncerShowing -> true
-@@ -209,6 +224,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
+@@ -212,6 +227,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
              pw.println("  mPendingUnlock: $pendingUnlock")
          }
          pw.println("  bypassEnabled: $bypassEnabled")
@@ -676,18 +677,18 @@ index b987f6815000..cc6cd1b59ce4 100644
          pw.println("  bouncerShowing: $bouncerShowing")
          pw.println("  altBouncerShowing: $altBouncerShowing")
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarKeyguardViewManager.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarKeyguardViewManager.java
-index ec7b8204b864..c26c341111fb 100644
+index d480fabe75b1..0851cda00eba 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarKeyguardViewManager.java
 +++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarKeyguardViewManager.java
-@@ -29,6 +29,7 @@ import android.content.Context;
+@@ -27,6 +27,7 @@ import android.content.Context;
  import android.content.res.ColorStateList;
  import android.hardware.biometrics.BiometricSourceType;
  import android.os.Bundle;
 +import android.os.Handler;
  import android.os.SystemClock;
  import android.os.Trace;
- import android.view.KeyEvent;
-@@ -52,6 +53,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
+ import android.util.Log;
+@@ -53,6 +54,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
  import com.android.keyguard.KeyguardViewController;
  import com.android.keyguard.ViewMediatorCallback;
  import com.android.systemui.dagger.SysUISingleton;
@@ -695,7 +696,7 @@ index ec7b8204b864..c26c341111fb 100644
  import com.android.systemui.dock.DockManager;
  import com.android.systemui.dreams.DreamOverlayStateController;
  import com.android.systemui.flags.FeatureFlags;
-@@ -81,6 +83,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
+@@ -80,6 +82,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
  import com.android.systemui.statusbar.policy.KeyguardStateController;
  import com.android.systemui.unfold.FoldAodAnimationController;
  import com.android.systemui.unfold.SysUIUnfoldComponent;
@@ -703,33 +704,33 @@ index ec7b8204b864..c26c341111fb 100644
  
  import java.io.PrintWriter;
  import java.util.ArrayList;
-@@ -135,6 +138,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
-     private final BouncerViewDelegate mBouncerViewDelegate;
-     private final Lazy<com.android.systemui.shade.ShadeController> mShadeController;
+@@ -141,6 +144,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
+     private float mFraction = -1f;
+     private boolean mTracking = false;
  
 +    private boolean mBouncerVisible = false;
-     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
-         private boolean mBouncerAnimating;
- 
-@@ -142,6 +146,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
-         public void onFullyShown() {
-             mBouncerAnimating = false;
-             updateStates();
-+            showFaceRecognizingMessage();
-         }
- 
-         @Override
-@@ -178,6 +183,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
-                     .setBouncerShowingOverDream(
-                             isVisible && mDreamOverlayStateController.isOverlayActive());
- 
-+            mBouncerVisible = isVisible;
-             if (!isVisible) {
-                 mCentralSurfaces.setBouncerHiddenFraction(KeyguardBouncer.EXPANSION_HIDDEN);
+     private final PrimaryBouncerExpansionCallback mExpansionCallback =
+             new PrimaryBouncerExpansionCallback() {
+             private boolean mPrimaryBouncerAnimating;
+@@ -149,6 +153,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
+             public void onFullyShown() {
+                 mPrimaryBouncerAnimating = false;
+                 updateStates();
++                showFaceRecognizingMessage();
              }
-@@ -252,6 +258,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
-     private KeyguardBypassController mBypassController;
-     @Nullable private AlternateAuthInterceptor mAlternateAuthInterceptor;
+ 
+             @Override
+@@ -181,6 +186,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
+                 mCentralSurfaces.setBouncerShowingOverDream(
+                         isVisible && mDreamOverlayStateController.isOverlayActive());
+ 
++                mBouncerVisible = isVisible;
+                 if (!isVisible) {
+                     mCentralSurfaces.setPrimaryBouncerHiddenFraction(
+                             KeyguardBouncer.EXPANSION_HIDDEN);
+@@ -271,6 +277,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
+     @Nullable private KeyguardBypassController mBypassController;
+     @Nullable private AlternateBouncer mAlternateBouncer;
  
 +    private Handler mHandler;
 +    private Handler mFaceRecognizingHandler;
@@ -738,7 +739,7 @@ index ec7b8204b864..c26c341111fb 100644
      private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
              new KeyguardUpdateMonitorCallback() {
          @Override
-@@ -263,6 +273,28 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
+@@ -281,6 +291,28 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                  reset(true /* hideBouncerWhenShowing */);
              }
          }
@@ -767,27 +768,27 @@ index ec7b8204b864..c26c341111fb 100644
      };
  
      @Inject
-@@ -288,7 +320,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
+@@ -306,7 +338,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
              FeatureFlags featureFlags,
-             BouncerCallbackInteractor bouncerCallbackInteractor,
-             BouncerInteractor bouncerInteractor,
--            BouncerView bouncerView) {
-+            BouncerView bouncerView,
+             PrimaryBouncerCallbackInteractor primaryBouncerCallbackInteractor,
+             PrimaryBouncerInteractor primaryBouncerInteractor,
+-            BouncerView primaryBouncerView) {
++            BouncerView primaryBouncerView,
 +            @Main Handler handler,
 +            @Main Handler faceRecognizingHandler) {
          mContext = context;
          mViewMediatorCallback = callback;
          mLockPatternUtils = lockPatternUtils;
-@@ -312,6 +346,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
-         mFoldAodAnimationController = sysUIUnfoldComponent
+@@ -331,6 +365,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                  .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
          mIsModernBouncerEnabled = featureFlags.isEnabled(Flags.MODERN_BOUNCER);
+         mIsUnoccludeTransitionFlagEnabled = featureFlags.isEnabled(Flags.UNOCCLUSION_TRANSITION);
 +        mHandler = handler;
 +        mFaceRecognizingHandler = faceRecognizingHandler;
      }
  
      @Override
-@@ -637,6 +673,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
+@@ -688,6 +724,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
              }
          }
          updateStates();
@@ -799,7 +800,7 @@ index ec7b8204b864..c26c341111fb 100644
      }
  
      private boolean isWakeAndUnlocking() {
-@@ -1301,6 +1342,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
+@@ -1345,6 +1386,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
          }
      }
  
@@ -816,7 +817,7 @@ index ec7b8204b864..c26c341111fb 100644
 +
      /** Display security message to relevant KeyguardMessageArea. */
      public void setKeyguardMessage(String message, ColorStateList colorState) {
-         if (isShowingAlternateAuth()) {
+         if (isShowingAlternateBouncer()) {
 diff --git a/packages/SystemUI/src/com/android/systemui/wallet/ui/WalletActivity.java b/packages/SystemUI/src/com/android/systemui/wallet/ui/WalletActivity.java
 index d03148cee335..83def7645c13 100644
 --- a/packages/SystemUI/src/com/android/systemui/wallet/ui/WalletActivity.java
@@ -1017,7 +1018,7 @@ index 63609f77dc75..eca8937489ce 100644
          if (mPendingOperations.isEmpty()) {
              Slog.d(getTag(), "No operations, returning to idle");
 diff --git a/services/core/java/com/android/server/biometrics/sensors/face/FaceService.java b/services/core/java/com/android/server/biometrics/sensors/face/FaceService.java
-index 2e820574b435..ccbd10c8e8e3 100644
+index 5491379b39ac..804daf1abc70 100644
 --- a/services/core/java/com/android/server/biometrics/sensors/face/FaceService.java
 +++ b/services/core/java/com/android/server/biometrics/sensors/face/FaceService.java
 @@ -25,6 +25,7 @@ import android.annotation.NonNull;
@@ -1036,7 +1037,7 @@ index 2e820574b435..ccbd10c8e8e3 100644
  import com.android.server.biometrics.sensors.face.hidl.Face10;
  
  import java.io.FileDescriptor;
-@@ -654,6 +656,12 @@ public class FaceService extends SystemService {
+@@ -647,6 +649,12 @@ public class FaceService extends SystemService {
              }
          }
  
@@ -1049,7 +1050,7 @@ index 2e820574b435..ccbd10c8e8e3 100644
          @Override // Binder call
          public void registerAuthenticators(
                  @NonNull List<FaceSensorPropertiesInternal> hidlSensors) {
-@@ -671,6 +679,7 @@ public class FaceService extends SystemService {
+@@ -664,6 +672,7 @@ public class FaceService extends SystemService {
              handler.post(() -> {
                  addHidlProviders(hidlSensors);
                  addAidlProviders();
@@ -3231,7 +3232,7 @@ index 47f130b95267..f93b350054ef 100644
                          gestureAvailabilityDispatcher);
          final HalResultController controller = new HalResultController(sensorProps.sensorId,
 diff --git a/services/core/java/com/android/server/biometrics/sensors/fingerprint/hidl/Fingerprint21UdfpsMock.java b/services/core/java/com/android/server/biometrics/sensors/fingerprint/hidl/Fingerprint21UdfpsMock.java
-index bea0f4ffd45d..9726ae3d5764 100644
+index 846c2d9f3df7..1e2dde2a2704 100644
 --- a/services/core/java/com/android/server/biometrics/sensors/fingerprint/hidl/Fingerprint21UdfpsMock.java
 +++ b/services/core/java/com/android/server/biometrics/sensors/fingerprint/hidl/Fingerprint21UdfpsMock.java
 @@ -137,9 +137,9 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
