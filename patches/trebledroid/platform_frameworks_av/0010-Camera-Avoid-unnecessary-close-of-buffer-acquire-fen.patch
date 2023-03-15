@@ -1,4 +1,4 @@
-From 186babd4908514b2e59dd94ab46823ac92f4dcc1 Mon Sep 17 00:00:00 2001
+From c7deb59d446f8f0b439d4de5001da35180f94c53 Mon Sep 17 00:00:00 2001
 From: Emilian Peev <epeev@google.com>
 Date: Fri, 5 Aug 2022 17:28:06 -0700
 Subject: [PATCH 10/26] Camera: Avoid unnecessary close of buffer acquire fence
@@ -17,7 +17,7 @@ Merged-In: Ieec34b54aaa7f0d773eccb593c3daaa3e41bae0b
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/services/camera/libcameraservice/device3/Camera3OutputStream.cpp b/services/camera/libcameraservice/device3/Camera3OutputStream.cpp
-index 84b5aa4e38..05b64b96cc 100644
+index 396104c4fd..c725aadb79 100644
 --- a/services/camera/libcameraservice/device3/Camera3OutputStream.cpp
 +++ b/services/camera/libcameraservice/device3/Camera3OutputStream.cpp
 @@ -331,7 +331,7 @@ status_t Camera3OutputStream::fixUpHidlJpegBlobHeader(ANativeWindowBuffer* anwBu

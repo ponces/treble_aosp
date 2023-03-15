@@ -1,4 +1,4 @@
-From 99f02c40ce1a24e242e1f471c9024760f1e545e1 Mon Sep 17 00:00:00 2001
+From f99060fad53cfd87178aaf50e3bc834410eff9a6 Mon Sep 17 00:00:00 2001
 From: Artem Borisov <dedsa2002@gmail.com>
 Date: Sat, 10 Nov 2018 17:19:17 +0000
 Subject: [PATCH 02/10] Telephony: Don not call onUssdRelease for Huawei RIL
@@ -13,7 +13,7 @@ Change-Id: I69faed1c51d4582834879975d6ab13daf7f48ad4
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/src/java/com/android/internal/telephony/GsmCdmaPhone.java b/src/java/com/android/internal/telephony/GsmCdmaPhone.java
-index ff8412f1a5..6dc1312790 100644
+index 76a8d57246..6094483229 100644
 --- a/src/java/com/android/internal/telephony/GsmCdmaPhone.java
 +++ b/src/java/com/android/internal/telephony/GsmCdmaPhone.java
 @@ -2834,7 +2834,11 @@ public class GsmCdmaPhone extends Phone {

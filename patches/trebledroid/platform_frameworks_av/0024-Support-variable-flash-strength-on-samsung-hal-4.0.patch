@@ -1,4 +1,4 @@
-From 329d8ba368d344fffa97d81f08bf1028666b793f Mon Sep 17 00:00:00 2001
+From f29afc61334a8038dfb1c0314eb55be32c6b5aac Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 2 May 2022 17:37:09 -0400
 Subject: [PATCH 24/26] Support variable flash strength on samsung hal 4.0
@@ -21,7 +21,7 @@ index 8c588065cf..769862aaa2 100644
      ],
  
 diff --git a/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp b/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp
-index fd7615a446..2fa7dcef7f 100644
+index 41830f2c82..a84b58201c 100644
 --- a/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp
 +++ b/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp
 @@ -30,6 +30,7 @@

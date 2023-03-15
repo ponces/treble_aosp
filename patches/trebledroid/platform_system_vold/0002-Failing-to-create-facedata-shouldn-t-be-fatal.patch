@@ -1,4 +1,4 @@
-From f9b4af8af7c9ed892106c41f5fd7658217f11776 Mon Sep 17 00:00:00 2001
+From f5be053e1ca169ebc65c87ed70c41f6d9929bc51 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sat, 7 Mar 2020 14:49:09 +0100
 Subject: [PATCH 2/5] Failing to create facedata shouldn't be fatal
@@ -12,7 +12,7 @@ See https://github.com/phhusson/treble_experimentations/issues/1119
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/vold_prepare_subdirs.cpp b/vold_prepare_subdirs.cpp
-index 94d7f15..671ae6f 100644
+index 94d7f151..671ae6fb 100644
 --- a/vold_prepare_subdirs.cpp
 +++ b/vold_prepare_subdirs.cpp
 @@ -198,7 +198,7 @@ static bool prepare_subdirs(const std::string& volume_uuid, int user_id, int fla

@@ -1,4 +1,4 @@
-From 22084ec41f7411258a956727dc755a52ff3e5c8d Mon Sep 17 00:00:00 2001
+From c8b8396e3b2200e8ba3e06945a428096d28343a0 Mon Sep 17 00:00:00 2001
 From: Danny Lin <danny@kdrag0n.dev>
 Date: Sat, 16 Oct 2021 05:27:57 -0700
 Subject: [PATCH 05/38] Add support for app signature spoofing
@@ -38,7 +38,7 @@ Change-Id: Ied7d6ce0b83a2d2345c3abba0429998d86494a88
  4 files changed, 56 insertions(+), 3 deletions(-)
 
 diff --git a/core/api/current.txt b/core/api/current.txt
-index c8a43db2f9c2..277183036c60 100644
+index 487e57d114c9..04e69741b9fd 100644
 --- a/core/api/current.txt
 +++ b/core/api/current.txt
 @@ -87,6 +87,7 @@ package android {
@@ -58,10 +58,10 @@ index c8a43db2f9c2..277183036c60 100644
      field public static final String MICROPHONE = "android.permission-group.MICROPHONE";
      field public static final String NEARBY_DEVICES = "android.permission-group.NEARBY_DEVICES";
 diff --git a/core/res/AndroidManifest.xml b/core/res/AndroidManifest.xml
-index 5ae133bbe6e6..47787215ebfe 100644
+index 6a80d1cb62a7..189c5c223cd0 100644
 --- a/core/res/AndroidManifest.xml
 +++ b/core/res/AndroidManifest.xml
-@@ -3534,6 +3534,21 @@
+@@ -3564,6 +3564,21 @@
          android:description="@string/permdesc_getPackageSize"
          android:protectionLevel="normal" />
  
@@ -84,10 +84,10 @@ index 5ae133bbe6e6..47787215ebfe 100644
           {@link android.content.pm.PackageManager#addPackageToPreferred}
           for details. -->
 diff --git a/core/res/res/values/strings.xml b/core/res/res/values/strings.xml
-index 5763345aba4d..8ffdbdd6f15b 100644
+index 9410e0682106..7ed7a03f1b61 100644
 --- a/core/res/res/values/strings.xml
 +++ b/core/res/res/values/strings.xml
-@@ -974,6 +974,18 @@
+@@ -977,6 +977,18 @@
  
      <!--  Permissions -->
  

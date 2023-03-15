@@ -1,4 +1,4 @@
-From 8edb640ec41faabcf5a10e09d9943a5ddff519c7 Mon Sep 17 00:00:00 2001
+From e069d2236f4854e1983c6634b0b3a8489002d0cd Mon Sep 17 00:00:00 2001
 From: ChonDoit <thphantomblog@gmail.com>
 Date: Sat, 6 Aug 2022 15:20:41 +0000
 Subject: [PATCH 12/15] Add offline Charge Service
@@ -15,7 +15,7 @@ Additions
  1 file changed, 15 insertions(+)
 
 diff --git a/rootdir/init.rc b/rootdir/init.rc
-index a21d433ed..e188e9b9a 100644
+index ab45bb032..a26e6679e 100644
 --- a/rootdir/init.rc
 +++ b/rootdir/init.rc
 @@ -11,6 +11,17 @@ import /vendor/etc/init/hw/init.${ro.hardware}.rc
@@ -36,7 +36,7 @@ index a21d433ed..e188e9b9a 100644
  # Cgroups are mounted right before early-init using list from /etc/cgroups.json
  on early-init
      # Disable sysrq from keyboard
-@@ -1181,6 +1192,10 @@ on nonencrypted
+@@ -1187,6 +1198,10 @@ on nonencrypted
  on property:sys.init_log_level=*
      loglevel ${sys.init_log_level}
  

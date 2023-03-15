@@ -1,4 +1,4 @@
-From cb6bb4f55d322e2f3261c6473b515a639a64cde1 Mon Sep 17 00:00:00 2001
+From 8d8af3c4c48b54a8f4eca959b254d835fef337aa Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@cryptomilk.org>
 Date: Sat, 12 Nov 2022 00:35:46 +0000
 Subject: [PATCH 6/6] On Samsung devices, we need to tell Audio HAL if we're
@@ -12,18 +12,18 @@ Change-Id: I7802b7a29c017a2cd7018e82772183df1dfa0b89
  1 file changed, 8 insertions(+)
 
 diff --git a/android/app/src/com/android/bluetooth/hfp/HeadsetStateMachine.java b/android/app/src/com/android/bluetooth/hfp/HeadsetStateMachine.java
-index e431c43bde..82aa7c89e3 100644
+index b237e7d6cc..73579cba50 100644
 --- a/android/app/src/com/android/bluetooth/hfp/HeadsetStateMachine.java
 +++ b/android/app/src/com/android/bluetooth/hfp/HeadsetStateMachine.java
-@@ -145,6 +145,7 @@ public class HeadsetStateMachine extends StateMachine {
+@@ -147,6 +147,7 @@ public class HeadsetStateMachine extends StateMachine {
      // Audio Parameters
      private boolean mHasNrecEnabled = false;
      private boolean mHasWbsEnabled = false;
 +    private int mReportScoSampleRate = 0;
      // AT Phone book keeps a group of states used by AT+CPBR commands
-     private final AtPhonebook mPhonebook;
-     // HSP specific
-@@ -225,6 +226,7 @@ public class HeadsetStateMachine extends StateMachine {
+     @VisibleForTesting
+     final AtPhonebook mPhonebook;
+@@ -228,6 +229,7 @@ public class HeadsetStateMachine extends StateMachine {
          }
          mHasWbsEnabled = false;
          mHasNrecEnabled = false;
@@ -31,7 +31,7 @@ index e431c43bde..82aa7c89e3 100644
      }
  
      public void dump(StringBuilder sb) {
-@@ -454,6 +456,7 @@ public class HeadsetStateMachine extends StateMachine {
+@@ -457,6 +459,7 @@ public class HeadsetStateMachine extends StateMachine {
              mNeedDialingOutReply = false;
              mHasWbsEnabled = false;
              mHasNrecEnabled = false;
@@ -39,7 +39,7 @@ index e431c43bde..82aa7c89e3 100644
              broadcastStateTransitions();
              // Remove the state machine for unbonded devices
              if (mPrevState != null
-@@ -1538,6 +1541,9 @@ public class HeadsetStateMachine extends StateMachine {
+@@ -1542,6 +1545,9 @@ public class HeadsetStateMachine extends StateMachine {
                  + " hasNrecEnabled=" + mHasNrecEnabled
                  + " hasWbsEnabled=" + mHasWbsEnabled);
          am.setBluetoothHeadsetProperties(getCurrentDeviceName(), mHasNrecEnabled, mHasWbsEnabled);
@@ -48,8 +48,8 @@ index e431c43bde..82aa7c89e3 100644
 +        }
      }
  
-     private String parseUnknownAt(String atString) {
-@@ -1678,10 +1684,12 @@ public class HeadsetStateMachine extends StateMachine {
+     @VisibleForTesting
+@@ -1685,10 +1691,12 @@ public class HeadsetStateMachine extends StateMachine {
          switch (wbsConfig) {
              case HeadsetHalConstants.BTHF_WBS_YES:
                  mHasWbsEnabled = true;

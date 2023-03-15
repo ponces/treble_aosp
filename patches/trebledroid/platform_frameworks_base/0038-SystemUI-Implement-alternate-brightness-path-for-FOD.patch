@@ -1,4 +1,4 @@
-From a8f020fd7270c0e946cc16da71e4cd7566a24d6a Mon Sep 17 00:00:00 2001
+From e272f21114b9b727f146e40903ad2000efe06063 Mon Sep 17 00:00:00 2001
 From: ItsLynix <71310187+ItsLynix@users.noreply.github.com>
 Date: Sat, 28 Jan 2023 10:25:16 +0100
 Subject: [PATCH 38/38] SystemUI: Implement alternate brightness path for FOD
@@ -8,10 +8,10 @@ Subject: [PATCH 38/38] SystemUI: Implement alternate brightness path for FOD
  1 file changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
-index d591cc809129..d2e98c181260 100644
+index c8c17b56cd92..b3df894fe625 100644
 --- a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
 +++ b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
-@@ -222,8 +222,19 @@ Log.d("PHH", "Surface destroyed!")
+@@ -232,8 +232,19 @@ Log.d("PHH", "Surface destroyed!")
          mySurfaceView.setVisibility(VISIBLE)
          Log.d("PHH", "setting surface visible!")
  

@@ -1,4 +1,4 @@
-From 1f866dbd3a8df01956df51189f52818a773954db Mon Sep 17 00:00:00 2001
+From a1590ae08f3faed4887a7bb5b8fb797f91adb72a Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 17 Dec 2021 17:16:14 -0500
 Subject: [PATCH 29/38] Reduce the size of udfps enroll progress bar. Some
@@ -11,10 +11,10 @@ Change-Id: I1609ad9ca316293dcaaf07f7e681d11aadfcd29c
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/packages/SystemUI/res/values/config.xml b/packages/SystemUI/res/values/config.xml
-index 37549c927a90..92b132a8f32e 100644
+index 7d72598c34cf..e0da8b44de6d 100644
 --- a/packages/SystemUI/res/values/config.xml
 +++ b/packages/SystemUI/res/values/config.xml
-@@ -577,7 +577,7 @@
+@@ -580,7 +580,7 @@
  
      <!-- The radius of the enrollment progress bar, in dp -->
      <integer name="config_udfpsEnrollProgressBar" translatable="false">

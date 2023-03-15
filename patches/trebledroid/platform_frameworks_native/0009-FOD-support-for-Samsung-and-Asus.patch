@@ -1,4 +1,4 @@
-From 6b5f820ad33a8127698f65e36fd8ad34d0d73b0b Mon Sep 17 00:00:00 2001
+From 10f34c78b890327e1c1d70293ae403c1fbec2ba0 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 18 Dec 2022 18:17:30 -0500
 Subject: [PATCH 9/9] FOD support for Samsung and Asus
@@ -20,7 +20,7 @@ Subject: [PATCH 9/9] FOD support for Samsung and Asus
  13 files changed, 77 insertions(+), 5 deletions(-)
 
 diff --git a/libs/gui/BLASTBufferQueue.cpp b/libs/gui/BLASTBufferQueue.cpp
-index a51bbb1553..81f2de0025 100644
+index 24a5295112..de01525001 100644
 --- a/libs/gui/BLASTBufferQueue.cpp
 +++ b/libs/gui/BLASTBufferQueue.cpp
 @@ -33,11 +33,20 @@

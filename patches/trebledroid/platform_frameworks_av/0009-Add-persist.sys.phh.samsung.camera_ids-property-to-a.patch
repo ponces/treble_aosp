@@ -1,4 +1,4 @@
-From 1a6d3ef60121136d59d148f8c258e9b9fcf1eb05 Mon Sep 17 00:00:00 2001
+From ed9bc5fed03823b90eb5eed44e36a0cc35c7f82d Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Thu, 14 May 2020 19:54:55 +0200
 Subject: [PATCH 09/26] Add persist.sys.phh.samsung.camera_ids property to
@@ -23,7 +23,7 @@ index 981c56942c..7c4e4d9bcd 100644
      ],
  
 diff --git a/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp b/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp
-index d60565fb68..b02cf26445 100644
+index 1df6ec4449..ac579b4f7d 100644
 --- a/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp
 +++ b/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp
 @@ -27,6 +27,7 @@

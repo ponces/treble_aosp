@@ -1,4 +1,4 @@
-From 7e9945994e5c83bff75aff95aecac73b17cc0f4f Mon Sep 17 00:00:00 2001
+From f8a00c89f484a12b2bbfb6f93c5e77aadd85ccd9 Mon Sep 17 00:00:00 2001
 From: "tzu-hsien.huang" <tzu-hsien.huang@mediatek.com>
 Date: Wed, 20 Jul 2022 15:12:01 +0800
 Subject: [PATCH 1/6] Additionally check le_set_event_mask command resturn
@@ -24,10 +24,10 @@ Change-Id: I2b0cede7f47eecd2124a386e958773289eb6f11c
  1 file changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/system/gd/hci/controller.cc b/system/gd/hci/controller.cc
-index 3827f83a91..221cd88883 100644
+index 3c8b69ddc7..f02e887567 100644
 --- a/system/gd/hci/controller.cc
 +++ b/system/gd/hci/controller.cc
-@@ -540,7 +540,7 @@ struct Controller::impl {
+@@ -548,7 +548,7 @@ struct Controller::impl {
    void le_set_event_mask(uint64_t le_event_mask) {
      std::unique_ptr<LeSetEventMaskBuilder> packet = LeSetEventMaskBuilder::Create(le_event_mask);
      hci_->EnqueueCommand(std::move(packet), module_.GetHandler()->BindOnceOn(
@@ -36,7 +36,7 @@ index 3827f83a91..221cd88883 100644
    }
  
    template <class T>
-@@ -551,6 +551,15 @@ struct Controller::impl {
+@@ -559,6 +559,15 @@ struct Controller::impl {
      ASSERT(status_view.GetStatus() == ErrorCode::SUCCESS);
    }
  

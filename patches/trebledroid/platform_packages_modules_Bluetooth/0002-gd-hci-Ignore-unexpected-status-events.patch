@@ -1,4 +1,4 @@
-From 3d1d67a89b082db7522f1bf4a3d3d92cd061fa0c Mon Sep 17 00:00:00 2001
+From cd7d1acaaefa63b35c836be3a619f9f9ee2f8086 Mon Sep 17 00:00:00 2001
 From: Peter Cai <peter@typeblog.net>
 Date: Wed, 24 Aug 2022 10:41:29 -0400
 Subject: [PATCH 2/6] gd: hci: Ignore unexpected status events
@@ -13,7 +13,7 @@ Change-Id: Ifb9a65fd77f21d15a8dc1ced9240194d38218ef6
  1 file changed, 7 insertions(+), 8 deletions(-)
 
 diff --git a/system/gd/hci/hci_layer.cc b/system/gd/hci/hci_layer.cc
-index bc7f8979ba..4090cfb36e 100644
+index 5def729ac8..9c235294bb 100644
 --- a/system/gd/hci/hci_layer.cc
 +++ b/system/gd/hci/hci_layer.cc
 @@ -195,14 +195,13 @@ struct HciLayer::impl {

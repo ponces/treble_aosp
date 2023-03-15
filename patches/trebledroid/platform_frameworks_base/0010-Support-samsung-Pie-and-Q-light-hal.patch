@@ -1,4 +1,4 @@
-From 1c7fb5438ac2099586b0a887b816c2f65d1d134b Mon Sep 17 00:00:00 2001
+From fe0d9fba8498c29748af9ac1317acf67ec5e4042 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 24 Mar 2019 23:05:14 +0100
 Subject: [PATCH 10/38] Support samsung Pie and Q light hal

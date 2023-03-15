@@ -1,4 +1,4 @@
-From 91ead253f5eb80ad9fef5a87b31c402835329ccd Mon Sep 17 00:00:00 2001
+From b2da35f99e8003b04f49c773ae2475a7f9738327 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 28 Nov 2017 18:28:04 +0100
 Subject: [PATCH 04/38] Relax requirement for visible flag to sdcards
@@ -13,7 +13,7 @@ Change-Id: Ia616671c03562d1eadaff5531a5c708a62d7ad3a
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/services/core/java/com/android/server/StorageManagerService.java b/services/core/java/com/android/server/StorageManagerService.java
-index dcb7a300b6e9..391b4c46f829 100644
+index c4333d96f92e..2913a094be6a 100644
 --- a/services/core/java/com/android/server/StorageManagerService.java
 +++ b/services/core/java/com/android/server/StorageManagerService.java
 @@ -1616,7 +1616,8 @@ class StorageManagerService extends IStorageManager.Stub
