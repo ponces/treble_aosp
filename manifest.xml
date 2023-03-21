@@ -10,7 +10,6 @@
   <project name="phhusson/vendor_magisk" path="vendor/magisk" remote="github" revision="android-10.0" />
   <project name="phhusson/treble_app" path="treble_app" remote="github" revision="master" />
   <project name="ponces/sas-creator" path="sas-creator" remote="github" revision="master" />
-  <project name="notmyst33d/libaptX" path="external/aptx" remote="github" revision="main" />
   <project name="arrowos-project/android_vendor_gapps" path="vendor/gapps" remote="arrow-gitlab" revision="arrow-13.0" clone-depth="1" />
   <project name="android/external_faceunlock" path="external/faceunlock" remote="pixel-gitlab" revision="thirteen" />
   <project name="PixelExperience/packages_apps_FaceUnlockService" path="packages/apps/FaceUnlockService" remote="github" revision="thirteen" />

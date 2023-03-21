@@ -7,10 +7,6 @@ PRODUCT_PACKAGES += \
     Aperture
 
 PRODUCT_PACKAGES += \
-    libaptX_encoder \
-    libaptXHD_encoder
-
-PRODUCT_PACKAGES += \
     FaceUnlockService
 
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
