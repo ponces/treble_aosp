@@ -1,7 +1,7 @@
 From f33fca4b8603c3b9bb933193037ed0e8bb39a3ee Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 19 May 2020 14:01:14 +0200
-Subject: [PATCH 11/26] Add a property to force camera timestamp source
+Subject: [PATCH 11/27] Add a property to force camera timestamp source
 
 Some devices wrongly report their timesource
 Camera's timesource can either be CLOCK_MONOTONIC, or CLOCK_BOOTTIME
