@@ -21,7 +21,7 @@ initRepos() {
 
         echo "--> Preparing local manifest"
         mkdir -p .repo/local_manifests
-        cp $BL/manifest.xml .repo/local_manifests/manifest.xml
+        cp $BL/manifest.xml .repo/local_manifests/aosp.xml
         echo
     fi
 }
