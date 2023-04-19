@@ -9,7 +9,7 @@
   <project name="TrebleDroid/treble_app" path="treble_app" remote="github" revision="master" />
   <project name="phhusson/vendor_magisk" path="vendor/magisk" remote="github" revision="android-10.0" />
   <project name="AndyCGYan/android_packages_apps_QcRilAm" path="packages/apps/QcRilAm" remote="github" revision="master" />
-  <project name="arrowos-project/android_vendor_gapps" path="vendor/gapps" remote="gitlab" revision="arrow-13.0" clone-depth="1" />
+  <project name="ponces/vendor_gapps" path="vendor/gapps" remote="gitlab" revision="android-13.0" clone-depth="1" />
   <project name="android/external_faceunlock" path="external/faceunlock" remote="pixel" revision="thirteen" />
   <project name="PixelExperience/packages_apps_FaceUnlockService" path="packages/apps/FaceUnlockService" remote="github" revision="thirteen" />
   <project name="LineageOS/android_packages_apps_Aperture" path="packages/apps/Aperture" remote="github" revision="lineage-20.0" />
