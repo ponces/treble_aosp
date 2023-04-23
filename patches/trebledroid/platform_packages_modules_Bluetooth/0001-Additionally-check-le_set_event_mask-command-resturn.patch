@@ -1,4 +1,4 @@
-From f8a00c89f484a12b2bbfb6f93c5e77aadd85ccd9 Mon Sep 17 00:00:00 2001
+From e748a7e19cf7fe23def19c301cc1e0fcf541f2df Mon Sep 17 00:00:00 2001
 From: "tzu-hsien.huang" <tzu-hsien.huang@mediatek.com>
 Date: Wed, 20 Jul 2022 15:12:01 +0800
 Subject: [PATCH 1/6] Additionally check le_set_event_mask command resturn

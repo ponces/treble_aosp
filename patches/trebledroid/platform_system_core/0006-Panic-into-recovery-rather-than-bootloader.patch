@@ -1,4 +1,4 @@
-From 9a98eaf83dd93af443027dfa85e70d92f24fd39a Mon Sep 17 00:00:00 2001
+From bb7dd67a4dff5f575bcac5886fc2f26914505fc8 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 4 Sep 2019 21:11:48 +0200
 Subject: [PATCH 06/15] Panic into recovery rather than bootloader

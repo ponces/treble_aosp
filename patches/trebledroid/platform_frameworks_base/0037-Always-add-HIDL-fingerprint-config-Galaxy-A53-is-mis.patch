@@ -1,4 +1,4 @@
-From 63a6fc23b412c3cd8c3035e6c51a032ff55f1c3f Mon Sep 17 00:00:00 2001
+From ea73a2df3890d58d6c26cdf225fb42150531e0e4 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 3 Jan 2023 17:59:00 -0500
 Subject: [PATCH 37/38] Always add HIDL fingerprint config (Galaxy A53 is

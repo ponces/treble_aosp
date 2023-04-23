@@ -1,4 +1,4 @@
-From 24fd78d04ea282e43034608f53c514040b675ef9 Mon Sep 17 00:00:00 2001
+From 53f1d10bbab3d7d5a70456be39851538118ee122 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Thu, 12 Sep 2019 20:37:04 +0200
 Subject: [PATCH 5/9] if service is "rcs", accept conflict. Seen on Moto E5

@@ -1,4 +1,4 @@
-From a23d93c5fce0bafefb298a94a6ec90898f302d2f Mon Sep 17 00:00:00 2001
+From 5d2b2966b8bd4537ec695272ce84e7e52e5d751b Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Wed, 19 Oct 2022 02:20:05 +0000
 Subject: [PATCH 2/2] Revert "detect inability to write to index != 0 of bpf
