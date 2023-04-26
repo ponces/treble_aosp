@@ -1,7 +1,7 @@
 From 740ab33d399471e4a18d226d7cb48e2b29361ee8 Mon Sep 17 00:00:00 2001
 From: Iceows <mounierr07@gmail.com>
 Date: Tue, 12 Jul 2022 10:40:14 +0200
-Subject: [PATCH 2/3] Build with release keys
+Subject: [PATCH 2/2] Build with release keys
 
 Build with release keys instead of test-keys
 ---
