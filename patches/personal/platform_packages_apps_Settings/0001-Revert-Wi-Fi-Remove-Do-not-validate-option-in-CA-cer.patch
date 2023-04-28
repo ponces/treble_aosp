@@ -1,7 +1,7 @@
 From 739d6df05e4a1dc18ea744765d54139095995334 Mon Sep 17 00:00:00 2001
 From: TogoFire <italomellopereira@gmail.com>
 Date: Fri, 6 Aug 2021 08:54:07 -0300
-Subject: [PATCH 1/2] Revert "[Wi-Fi] Remove 'Do not validate' option in CA
+Subject: [PATCH] Revert "[Wi-Fi] Remove 'Do not validate' option in CA
  certificate spinner"
 
 This is not a definitive fix, so revert it. WPA2-Enterprise (802.1X) or
