@@ -1,0 +1,41 @@
+From efba62e8b66f6a2f766eda5e2cdcc7aec93b8125 Mon Sep 17 00:00:00 2001
+From: zhangbo_a <zhangbo_a@pinecone.net>
+Date: Thu, 11 May 2017 11:50:57 +0800
+Subject: [PATCH 05/10] stagefright: Fix SurfaceMediaSource getting handle from
+ wrong position issue
+
+In function passMetadataBuffer_l, the bufferHandle(ANativeWindowBuffer) is
+saved to data (VideoNativeMetadata) but in function getMediaBufferHandle it
+gets the bufferHandle from (MediaBuffer*)buffer->data() + 4, which is a wrong
+position. To solve this problem, we should get handle from ANativeWindowBuffer,
+not from buffer->data() + 4. (If get bufferHandle from buffer->data() + 4, the
+function signalBufferReturned will print "returned buffer was not found in the
+current list" error.
+
+Test: Running wifi display, we can see the handle could be found in buffer list.
+
+Change-Id: I71ecf9e2bca1db67d8d6e862ac16b07e939bf521
+Signed-off-by: zhangbo_a <zhangbo_a@pinecone.net>
+Signed-off-by: DennySPb <dennyspb@gmail.com>
+---
+ media/libstagefright/SurfaceMediaSource.cpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/media/libstagefright/SurfaceMediaSource.cpp b/media/libstagefright/SurfaceMediaSource.cpp
+index 333c618fbd..3ba18b6631 100644
+--- a/media/libstagefright/SurfaceMediaSource.cpp
++++ b/media/libstagefright/SurfaceMediaSource.cpp
+@@ -375,7 +375,9 @@ static buffer_handle_t getMediaBufferHandle(MediaBufferBase *buffer) {
+     // need to convert to char* for pointer arithmetic and then
+     // copy the byte stream into our handle
+     buffer_handle_t bufferHandle;
+-    memcpy(&bufferHandle, (char*)(buffer->data()) + 4, sizeof(buffer_handle_t));
++    VideoNativeMetadata *data = (VideoNativeMetadata *)buffer->data();
++    ANativeWindowBuffer *anwbuffer = (ANativeWindowBuffer *)data->pBuffer;
++    bufferHandle = anwbuffer->handle;
+     return bufferHandle;
+ }
+ 
+-- 
+2.34.1
+

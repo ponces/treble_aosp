@@ -1,0 +1,34 @@
+From ed3b0bfc7289703eb37a19be646136e2e0251f40 Mon Sep 17 00:00:00 2001
+From: Chenyang Zhong <zhongcy95@gmail.com>
+Date: Sat, 13 Nov 2021 09:00:18 -0500
+Subject: [PATCH 10/10] WifiDisplaySource: raise supported resolution to
+ 1920x1080p60
+
+Signed-off-by: Chenyang Zhong <zhongcy95@gmail.com>
+Change-Id: I5ab5e594c030be032353344600c67f6d0d36e7f2
+---
+ .../wifi-display/source/WifiDisplaySource.cpp               | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/media/libstagefright/wifi-display/source/WifiDisplaySource.cpp b/media/libstagefright/wifi-display/source/WifiDisplaySource.cpp
+index 721e5a0f9a..b2b325f63c 100644
+--- a/media/libstagefright/wifi-display/source/WifiDisplaySource.cpp
++++ b/media/libstagefright/wifi-display/source/WifiDisplaySource.cpp
+@@ -79,11 +79,11 @@ WifiDisplaySource::WifiDisplaySource(
+     mSupportedSourceVideoFormats.disableAll();
+ 
+     mSupportedSourceVideoFormats.setNativeResolution(
+-            VideoFormats::RESOLUTION_CEA, 5);  // 1280x720 p30
++            VideoFormats::RESOLUTION_CEA, 8);  // 1920x1080p60
+ 
+-    // Enable all resolutions up to 1280x720p30
++    // Enable all resolutions up to 1920x1080p60
+     mSupportedSourceVideoFormats.enableResolutionUpto(
+-            VideoFormats::RESOLUTION_CEA, 5,
++            VideoFormats::RESOLUTION_CEA, 8,
+             VideoFormats::PROFILE_CHP,  // Constrained High Profile
+             VideoFormats::LEVEL_32);    // Level 3.2
+ }
+-- 
+2.34.1
+

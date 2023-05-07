@@ -1,0 +1,53 @@
+From 4fa9d9d905bec22f55c1659e0b0e432cc3d9716d Mon Sep 17 00:00:00 2001
+From: Raphael Mounier <mounierr07@gmail.com>
+Date: Sat, 11 Feb 2023 18:03:32 +0100
+Subject: [PATCH 08/10] audioflinger: Fix audio for WifiDisplay
+
+AudioFlinger is not able to determine the correct
+pid/tid for WifiDisplay and thus we do not pass checks
+for CAPTURE_AUDIO_OUTPUT and RECORD_AUDIO permissions.
+
+To fix audio for WifiDisplay, it should be safe to
+always allow a trusted calling uid (AID_MEDIA which
+has the same perms as AID_AUDIOSERVER).
+---
+ .../audiopolicy/service/AudioPolicyInterfaceImpl.cpp     | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp b/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+index 49224c5bb0..ca1482dda0 100644
+--- a/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
++++ b/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+@@ -614,7 +614,7 @@ Status AudioPolicyService::getInputForAttr(const media::AudioAttributesInternal&
+     // type is API_INPUT_MIX_EXT_POLICY_REROUTE and by AudioService if a media projection
+     // is used and input type is API_INPUT_MIX_PUBLIC_CAPTURE_PLAYBACK
+     // - ECHO_REFERENCE source is controlled by captureAudioOutputAllowed()
+-    if (!(recordingAllowed(attributionSource, inputSource)
++    if (!isAudioServerOrMediaServerUid(attributionSource.uid) && !(recordingAllowed(attributionSource, inputSource)
+             || inputSource == AUDIO_SOURCE_FM_TUNER
+             || inputSource == AUDIO_SOURCE_REMOTE_SUBMIX
+             || inputSource == AUDIO_SOURCE_ECHO_REFERENCE)) {
+@@ -695,7 +695,7 @@ Status AudioPolicyService::getInputForAttr(const media::AudioAttributesInternal&
+                 // FIXME: use the same permission as for remote submix for now.
+                 FALLTHROUGH_INTENDED;
+             case AudioPolicyInterface::API_INPUT_MIX_CAPTURE:
+-                if (!canCaptureOutput) {
++                if (!isAudioServerOrMediaServerUid(attributionSource.uid) && !canCaptureOutput) {
+                     ALOGE("%s permission denied: capture not allowed", __func__);
+                     status = PERMISSION_DENIED;
+                 }
+@@ -779,8 +779,9 @@ Status AudioPolicyService::startInput(int32_t portIdAidl)
+     std::stringstream msg;
+     msg << "Audio recording on session " << client->session;
+ 
+-    // check calling permissions
+-    if (!(startRecording(client->attributionSource, String16(msg.str().c_str()),
++
++     // check calling permissions
++    if (!isAudioServerOrMediaServerUid(client->attributionSource.uid) && !(startRecording(client->attributionSource, String16(msg.str().c_str()),
+                          client->attributes.source)
+             || client->attributes.source == AUDIO_SOURCE_FM_TUNER
+             || client->attributes.source == AUDIO_SOURCE_REMOTE_SUBMIX
+-- 
+2.34.1
+

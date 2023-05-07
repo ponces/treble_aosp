@@ -1,0 +1,53 @@
+From 0ab2b62bada2ecf7f2d19d3ca43f4ae40eac5142 Mon Sep 17 00:00:00 2001
+From: "Angelo G. Del Regno" <kholk11@gmail.com>
+Date: Sun, 30 Apr 2017 20:19:08 +0200
+Subject: [PATCH 06/10] stagefright: Fix buffer handle retrieval in
+ signalBufferReturned
+
+In commit 3e32878 the stagefright code was restructured to fix
+the logic for native handle source, but the change in the
+function SurfaceMediaSource::signalBufferReturned was probably
+missed.
+
+Try to compare the media buffer handle also to the current native
+buffer handle in this function when searching for correspondance.
+
+Change-Id: I352293e525f75dde500ac8e71ee49209710030c3
+Signed-off-by: DennySPb <dennyspb@gmail.com>
+---
+ media/libstagefright/SurfaceMediaSource.cpp | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/media/libstagefright/SurfaceMediaSource.cpp b/media/libstagefright/SurfaceMediaSource.cpp
+index 3ba18b6631..d7370551e0 100644
+--- a/media/libstagefright/SurfaceMediaSource.cpp
++++ b/media/libstagefright/SurfaceMediaSource.cpp
+@@ -389,9 +389,12 @@ void SurfaceMediaSource::signalBufferReturned(MediaBufferBase *buffer) {
+     Mutex::Autolock lock(mMutex);
+ 
+     buffer_handle_t bufferHandle = getMediaBufferHandle(buffer);
++    ANativeWindowBuffer* curNativeHandle = NULL;
+ 
+     for (size_t i = 0; i < mCurrentBuffers.size(); i++) {
+-        if (mCurrentBuffers[i]->handle == bufferHandle) {
++        curNativeHandle = mCurrentBuffers[i]->getNativeBuffer();
++        if ((mCurrentBuffers[i]->handle == bufferHandle) ||
++            ((buffer_handle_t)curNativeHandle == bufferHandle)) {
+             mCurrentBuffers.removeAt(i);
+             foundBuffer = true;
+             break;
+@@ -407,7 +410,10 @@ void SurfaceMediaSource::signalBufferReturned(MediaBufferBase *buffer) {
+             continue;
+         }
+ 
+-        if (bufferHandle == mSlots[id].mGraphicBuffer->handle) {
++        curNativeHandle = mSlots[id].mGraphicBuffer->getNativeBuffer();
++
++        if ((bufferHandle == mSlots[id].mGraphicBuffer->handle) ||
++            (bufferHandle == (buffer_handle_t)curNativeHandle)) {
+             ALOGV("Slot %d returned, matches handle = %p", id,
+                     mSlots[id].mGraphicBuffer->handle);
+ 
+-- 
+2.34.1
+
