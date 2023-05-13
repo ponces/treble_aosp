@@ -1,7 +1,7 @@
 From 753df0e9ae9afcb6d393611048636b8ac35ab7a5 Mon Sep 17 00:00:00 2001
 From: Emilian Peev <epeev@google.com>
 Date: Fri, 5 Aug 2022 17:28:06 -0700
-Subject: [PATCH 10/27] Camera: Avoid unnecessary close of buffer acquire fence
+Subject: [PATCH 10/28] Camera: Avoid unnecessary close of buffer acquire fence
  fds
 
 According to the gralloc lock documentation:
