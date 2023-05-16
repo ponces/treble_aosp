@@ -85,14 +85,14 @@ buildGappsVariant() {
 
 generatePackages() {
     echo "--> Generating packages"
-    xz -cv $BD/system-treble_arm64_bvN.img -T0 > $BD/aosp-arm64-ab-vanilla-13.0-$BUILD_DATE.img.xz
-    xz -cv $BD/system-treble_arm64_bgN.img -T0 > $BD/aosp-arm64-ab-gapps-13.0-$BUILD_DATE.img.xz
+    buildDate="$(date +%Y%m%d)"
+    xz -cv $BD/system-treble_arm64_bvN.img -T0 > $BD/aosp-arm64-ab-vanilla-13.0-$buildDate.img.xz
+    xz -cv $BD/system-treble_arm64_bgN.img -T0 > $BD/aosp-arm64-ab-gapps-13.0-$buildDate.img.xz
     rm -rf $BD/system-*.img
     echo
 }
 
 START=`date +%s`
-BUILD_DATE="$(date +%Y%m%d)"
 
 initRepos
 syncRepos
