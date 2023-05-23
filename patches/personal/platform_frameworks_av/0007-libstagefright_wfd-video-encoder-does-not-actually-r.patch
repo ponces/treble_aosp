@@ -1,7 +1,7 @@
 From 3c8247ff6b5479b833d7628852bb9d06cddd27ad Mon Sep 17 00:00:00 2001
 From: Vladimir Oltean <olteanv@gmail.com>
 Date: Sun, 20 Jan 2019 22:10:41 +0200
-Subject: [PATCH 07/10] libstagefright_wfd: video encoder does not actually
+Subject: [PATCH 07/11] libstagefright_wfd: video encoder does not actually
  release MediaBufferBase when done
 
 * This fixes buffer flow SurfaceMediaSource -> MediaPuller -> Converted

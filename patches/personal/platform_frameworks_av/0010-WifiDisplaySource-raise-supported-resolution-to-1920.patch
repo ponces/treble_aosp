@@ -1,7 +1,7 @@
 From ed3b0bfc7289703eb37a19be646136e2e0251f40 Mon Sep 17 00:00:00 2001
 From: Chenyang Zhong <zhongcy95@gmail.com>
 Date: Sat, 13 Nov 2021 09:00:18 -0500
-Subject: [PATCH 10/10] WifiDisplaySource: raise supported resolution to
+Subject: [PATCH 10/11] WifiDisplaySource: raise supported resolution to
  1920x1080p60
 
 Signed-off-by: Chenyang Zhong <zhongcy95@gmail.com>

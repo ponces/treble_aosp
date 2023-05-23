@@ -1,7 +1,7 @@
 From ce436642bccc37ab01000b66cbea2fdade96f201 Mon Sep 17 00:00:00 2001
 From: Nico <nicorg2529@gmail.com>
 Date: Fri, 1 Nov 2019 15:41:51 +0000
-Subject: [PATCH 09/10] Partial revert "Move unused classes out of stagefright
+Subject: [PATCH 09/11] Partial revert "Move unused classes out of stagefright
  foundataion"
 
 This imports the old foundation code in the standard platform stagefright.

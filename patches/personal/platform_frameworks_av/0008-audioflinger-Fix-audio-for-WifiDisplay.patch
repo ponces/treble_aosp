@@ -1,7 +1,7 @@
 From 4fa9d9d905bec22f55c1659e0b0e432cc3d9716d Mon Sep 17 00:00:00 2001
 From: Raphael Mounier <mounierr07@gmail.com>
 Date: Sat, 11 Feb 2023 18:03:32 +0100
-Subject: [PATCH 08/10] audioflinger: Fix audio for WifiDisplay
+Subject: [PATCH 08/11] audioflinger: Fix audio for WifiDisplay
 
 AudioFlinger is not able to determine the correct
 pid/tid for WifiDisplay and thus we do not pass checks

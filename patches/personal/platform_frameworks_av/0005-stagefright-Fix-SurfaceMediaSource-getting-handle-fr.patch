@@ -1,7 +1,7 @@
 From efba62e8b66f6a2f766eda5e2cdcc7aec93b8125 Mon Sep 17 00:00:00 2001
 From: zhangbo_a <zhangbo_a@pinecone.net>
 Date: Thu, 11 May 2017 11:50:57 +0800
-Subject: [PATCH 05/10] stagefright: Fix SurfaceMediaSource getting handle from
+Subject: [PATCH 05/11] stagefright: Fix SurfaceMediaSource getting handle from
  wrong position issue
 
 In function passMetadataBuffer_l, the bufferHandle(ANativeWindowBuffer) is

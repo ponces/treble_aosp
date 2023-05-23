@@ -1,7 +1,7 @@
 From 35ede1809d634840194c8c6ed0d11d4c29c21106 Mon Sep 17 00:00:00 2001
 From: Vladimir Oltean <olteanv@gmail.com>
 Date: Wed, 9 Jan 2019 01:13:10 +0200
-Subject: [PATCH 01/10] Revert "stagefright: remove Miracast sender code"
+Subject: [PATCH 01/11] Revert "stagefright: remove Miracast sender code"
 
 This reverts commit d0a98fa05f0f6719b93d000c4638230af06e0b99.
 
