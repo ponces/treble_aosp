@@ -1,7 +1,7 @@
-From e717a2ffebbc44056cb3cff2a3331e043cb3472b Mon Sep 17 00:00:00 2001
+From 9e1f1045e20b90b006171ebc91e5e89f70c8707c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@cryptomilk.org>
 Date: Sat, 12 Nov 2022 00:35:46 +0000
-Subject: [PATCH 6/6] On Samsung devices, we need to tell Audio HAL if we're
+Subject: [PATCH 6/7] On Samsung devices, we need to tell Audio HAL if we're
  running narrow band or wide band
 
 Ported to Android 13.

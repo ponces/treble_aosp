@@ -1,4 +1,4 @@
-From 1a4a531bc366dcba9f07920e52bacf68549cda97 Mon Sep 17 00:00:00 2001
+From 1580a2ed2806767443351992128515528c539d07 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 10 May 2023 11:28:27 -0400
 Subject: [PATCH 39/39] bootanimation: Fix bootanimation when using mask+shine
