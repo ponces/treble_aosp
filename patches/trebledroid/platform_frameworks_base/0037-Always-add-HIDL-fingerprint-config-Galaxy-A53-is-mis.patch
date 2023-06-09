@@ -1,7 +1,7 @@
 From 67abd8fa907459e2f9649ca450285f29cb3c61ad Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 3 Jan 2023 17:59:00 -0500
-Subject: [PATCH 37/39] Always add HIDL fingerprint config (Galaxy A53 is
+Subject: [PATCH 37/40] Always add HIDL fingerprint config (Galaxy A53 is
  missing it on A12 vendor) -- but first enumerate AIDL
 
 ---
