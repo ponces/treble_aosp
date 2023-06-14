@@ -1,4 +1,4 @@
-From 1c09fb6732343bfe22d5b1b31d517ae388ebdaee Mon Sep 17 00:00:00 2001
+From ebcfc01a541a9a600a70ebb549ab62d6edbc1f62 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 30 May 2023 17:34:03 -0400
 Subject: [PATCH 8/8] Add a property to cap declared le vendor version. Found
@@ -9,7 +9,7 @@ Subject: [PATCH 8/8] Add a property to cap declared le vendor version. Found
  1 file changed, 11 insertions(+)
 
 diff --git a/system/gd/hci/controller.cc b/system/gd/hci/controller.cc
-index 88ecaccea6..5f81220af2 100644
+index f57ed588d4..e6eca91aa1 100644
 --- a/system/gd/hci/controller.cc
 +++ b/system/gd/hci/controller.cc
 @@ -503,6 +503,13 @@ struct Controller::impl {

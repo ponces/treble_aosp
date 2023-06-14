@@ -1,7 +1,7 @@
-From 4f3235c450a7a1fb814f1a28a942089899cdcf3b Mon Sep 17 00:00:00 2001
+From 3397ca06046b3b73757b94da8519987b6ca01ec8 Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Tue, 18 Apr 2023 23:48:15 +0000
-Subject: [PATCH 11/11] Fix light sensor crash on Xiaomi 13
+Subject: [PATCH 10/10] Fix light sensor crash on Xiaomi 13
 
 SensorService expects a scalar, but Xiaomi HAL returns a pose6DOF vector encapsulation
 Thanks @phhusson for the analysis

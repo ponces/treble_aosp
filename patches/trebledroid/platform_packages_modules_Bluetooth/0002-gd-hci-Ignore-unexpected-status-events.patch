@@ -1,4 +1,4 @@
-From 9c8457a42c8b1d85514e432584180240aba8165f Mon Sep 17 00:00:00 2001
+From a03a7855d5be8285a4ed62b9a22c61c8262f6da7 Mon Sep 17 00:00:00 2001
 From: Peter Cai <peter@typeblog.net>
 Date: Wed, 24 Aug 2022 10:41:29 -0400
 Subject: [PATCH 2/8] gd: hci: Ignore unexpected status events

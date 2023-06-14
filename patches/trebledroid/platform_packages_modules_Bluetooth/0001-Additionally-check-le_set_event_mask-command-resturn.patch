@@ -1,4 +1,4 @@
-From eb9ad915215547a9326a079325e077cb18106f24 Mon Sep 17 00:00:00 2001
+From 7cfe2f9b5d19f2a0b0bd14b0c94482448ae33817 Mon Sep 17 00:00:00 2001
 From: "tzu-hsien.huang" <tzu-hsien.huang@mediatek.com>
 Date: Wed, 20 Jul 2022 15:12:01 +0800
 Subject: [PATCH 1/8] Additionally check le_set_event_mask command resturn
@@ -24,7 +24,7 @@ Change-Id: I2b0cede7f47eecd2124a386e958773289eb6f11c
  1 file changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/system/gd/hci/controller.cc b/system/gd/hci/controller.cc
-index 3c8b69ddc7..f02e887567 100644
+index 9dac2b6a84..50342d639e 100644
 --- a/system/gd/hci/controller.cc
 +++ b/system/gd/hci/controller.cc
 @@ -548,7 +548,7 @@ struct Controller::impl {

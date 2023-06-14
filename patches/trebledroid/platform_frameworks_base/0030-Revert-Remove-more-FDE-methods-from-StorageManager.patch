@@ -1,7 +1,7 @@
-From 59951dfb626b63955f6deb4c7c9198402b9f45c5 Mon Sep 17 00:00:00 2001
+From 2f473a0dbaf576423c5f00f6c6f87257f23a7210 Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Sat, 15 Oct 2022 09:33:56 +0000
-Subject: [PATCH 31/40] Revert "Remove more FDE methods from StorageManager"
+Subject: [PATCH 31/39] Revert "Remove more FDE methods from StorageManager"
 
 This reverts commit bd13f84152449a3ead6fa8604fd31f48c0224676.
 ---
@@ -10,7 +10,7 @@ This reverts commit bd13f84152449a3ead6fa8604fd31f48c0224676.
  2 files changed, 65 insertions(+), 8 deletions(-)
 
 diff --git a/core/java/android/os/storage/StorageManager.java b/core/java/android/os/storage/StorageManager.java
-index 497bfa6380bc..646a7095c1b3 100644
+index d9604b3f0145..603612e82007 100644
 --- a/core/java/android/os/storage/StorageManager.java
 +++ b/core/java/android/os/storage/StorageManager.java
 @@ -1681,13 +1681,18 @@ public class StorageManager {
@@ -104,10 +104,10 @@ index 497bfa6380bc..646a7095c1b3 100644
      public static boolean isFileEncryptedEmulatedOnly() {
          return SystemProperties.getBoolean(StorageManager.PROP_EMULATE_FBE, false);
 diff --git a/core/java/com/android/internal/os/RoSystemProperties.java b/core/java/com/android/internal/os/RoSystemProperties.java
-index 98d81c9598b8..8b659f927633 100644
+index cccd80e82420..adb5c107bc62 100644
 --- a/core/java/com/android/internal/os/RoSystemProperties.java
 +++ b/core/java/com/android/internal/os/RoSystemProperties.java
-@@ -60,10 +60,14 @@ public class RoSystemProperties {
+@@ -62,10 +62,14 @@ public class RoSystemProperties {
      public static final CryptoProperties.type_values CRYPTO_TYPE =
              CryptoProperties.type().orElse(CryptoProperties.type_values.NONE);
      // These are pseudo-properties

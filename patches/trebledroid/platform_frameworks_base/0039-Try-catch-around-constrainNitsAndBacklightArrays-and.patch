@@ -1,7 +1,7 @@
-From 226600e4f97127d4a46930540499af6a338e02ab Mon Sep 17 00:00:00 2001
+From f29b6ed94af7fbacd4dcc714c5e2e19525f0a5a8 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 2 Jun 2023 19:19:31 -0400
-Subject: [PATCH 40/40] Try catch around constrainNitsAndBacklightArrays, and
+Subject: [PATCH 40/39] Try catch around constrainNitsAndBacklightArrays, and
  falls back to dumb curve. It crashes on Xperia 1 IV.
 
 ---
@@ -9,10 +9,10 @@ Subject: [PATCH 40/40] Try catch around constrainNitsAndBacklightArrays, and
  1 file changed, 32 insertions(+), 26 deletions(-)
 
 diff --git a/services/core/java/com/android/server/display/DisplayDeviceConfig.java b/services/core/java/com/android/server/display/DisplayDeviceConfig.java
-index a5cc8cb12b79..eea5df540daa 100644
+index 44150f8f68d0..d9ec994e58de 100644
 --- a/services/core/java/com/android/server/display/DisplayDeviceConfig.java
 +++ b/services/core/java/com/android/server/display/DisplayDeviceConfig.java
-@@ -1650,37 +1650,43 @@ public class DisplayDeviceConfig {
+@@ -1709,37 +1709,43 @@ public class DisplayDeviceConfig {
              return;
          }
  

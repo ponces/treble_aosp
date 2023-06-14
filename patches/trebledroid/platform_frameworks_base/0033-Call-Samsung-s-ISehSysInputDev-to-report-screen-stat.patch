@@ -1,14 +1,14 @@
-From 0a5b0d7828dbb32dc43b2d0c29db6f82c0a36874 Mon Sep 17 00:00:00 2001
+From a12289de95ffd7669962c00fff8a64cf4d365888 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 14 Dec 2022 17:21:00 -0500
-Subject: [PATCH 34/40] Call Samsung's ISehSysInputDev to report screen state
+Subject: [PATCH 34/39] Call Samsung's ISehSysInputDev to report screen state
  to touchscreen driver
 
 This fixes touchscreen not waking up on Galaxy F23
 ---
  services/core/Android.bp                      |  1 +
- .../server/display/LocalDisplayAdapter.java   | 31 +++++++++++++++++++
- 2 files changed, 32 insertions(+)
+ .../server/display/LocalDisplayAdapter.java   | 32 +++++++++++++++++++
+ 2 files changed, 33 insertions(+)
 
 diff --git a/services/core/Android.bp b/services/core/Android.bp
 index 89c8ca567dd9..34a4579855ef 100644
@@ -23,7 +23,7 @@ index 89c8ca567dd9..34a4579855ef 100644
      javac_shard_size: 50,
  }
 diff --git a/services/core/java/com/android/server/display/LocalDisplayAdapter.java b/services/core/java/com/android/server/display/LocalDisplayAdapter.java
-index efb2cb7a3283..2807f3e7fbf4 100644
+index 58a182a61e44..84c3982458ff 100644
 --- a/services/core/java/com/android/server/display/LocalDisplayAdapter.java
 +++ b/services/core/java/com/android/server/display/LocalDisplayAdapter.java
 @@ -33,6 +33,7 @@ import android.os.Trace;
@@ -43,7 +43,7 @@ index efb2cb7a3283..2807f3e7fbf4 100644
  import java.io.PrintWriter;
  import java.util.ArrayList;
  import java.util.Arrays;
-@@ -226,6 +229,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
+@@ -228,6 +231,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
  
          private DisplayEventReceiver.FrameRateOverride[] mFrameRateOverrides =
                  new DisplayEventReceiver.FrameRateOverride[0];
@@ -52,7 +52,7 @@ index efb2cb7a3283..2807f3e7fbf4 100644
  
          LocalDisplayDevice(IBinder displayToken, long physicalDisplayId,
                  SurfaceControl.StaticDisplayInfo staticDisplayInfo,
-@@ -812,16 +817,42 @@ final class LocalDisplayAdapter extends DisplayAdapter {
+@@ -815,17 +820,44 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                              }
                              mSidekickActive = false;
                          }
@@ -91,6 +91,8 @@ index efb2cb7a3283..2807f3e7fbf4 100644
 +                                Log.d("PHH", "Failed settings tsp enable", t);
 +                            }
 +                        }
++
+                         setCommittedState(state);
 +
                          // If we're entering a suspended (but not OFF) power state and we
                          // have a sidekick available, tell it now that it can take control.

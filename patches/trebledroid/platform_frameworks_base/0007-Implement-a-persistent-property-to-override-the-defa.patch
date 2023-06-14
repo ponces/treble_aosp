@@ -1,20 +1,28 @@
-From 63513b0500f55936c1bb3c7e0456d9a71497cfdf Mon Sep 17 00:00:00 2001
+From eee0279ecd1cb9920a4ca258b6b8cd3efd030ffb Mon Sep 17 00:00:00 2001
 From: Peter Cai <peter@typeblog.net>
 Date: Wed, 1 Jun 2022 16:56:20 -0400
-Subject: [PATCH 07/40] Implement a persistent property to override the default
+Subject: [PATCH 07/39] Implement a persistent property to override the default
  primary camera (0)
 
 Change-Id: I49b45d00bf71d7932591b3516d49a680e1b6568b
 ---
- core/java/android/hardware/Camera.java                | 5 +++++
+ core/java/android/hardware/Camera.java                | 6 ++++++
  core/java/android/hardware/camera2/CameraManager.java | 9 +++++++++
- 2 files changed, 14 insertions(+)
+ 2 files changed, 15 insertions(+)
 
 diff --git a/core/java/android/hardware/Camera.java b/core/java/android/hardware/Camera.java
-index 5291d2b73891..9231533a3cd5 100644
+index ccc39b6080d7..a21bfdce6f05 100644
 --- a/core/java/android/hardware/Camera.java
 +++ b/core/java/android/hardware/Camera.java
-@@ -422,6 +422,11 @@ public class Camera {
+@@ -41,6 +41,7 @@ import android.os.Message;
+ import android.os.Process;
+ import android.os.RemoteException;
+ import android.os.ServiceManager;
++import android.os.SystemProperties;
+ import android.renderscript.Allocation;
+ import android.renderscript.Element;
+ import android.renderscript.RSIllegalArgumentException;
+@@ -409,6 +410,11 @@ public class Camera {
       * @see #open(int)
       */
      public static Camera open() {
@@ -27,10 +35,10 @@ index 5291d2b73891..9231533a3cd5 100644
          CameraInfo cameraInfo = new CameraInfo();
          for (int i = 0; i < numberOfCameras; i++) {
 diff --git a/core/java/android/hardware/camera2/CameraManager.java b/core/java/android/hardware/camera2/CameraManager.java
-index be99f0fefee7..7177dfe74182 100644
+index 56592ab43143..26b14d374d65 100644
 --- a/core/java/android/hardware/camera2/CameraManager.java
 +++ b/core/java/android/hardware/camera2/CameraManager.java
-@@ -1785,6 +1785,15 @@ public final class CameraManager {
+@@ -1825,6 +1825,15 @@ public final class CameraManager {
                          }
                      }});
  
