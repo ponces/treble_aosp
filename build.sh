@@ -16,7 +16,7 @@ BD=$HOME/builds
 initRepos() {
     if [ ! -d .repo ]; then
         echo "--> Initializing workspace"
-        repo init -u https://android.googlesource.com/platform/manifest -b android-13.0.0_r63
+        repo init -u https://android.googlesource.com/platform/manifest -b android-13.0.0_r66
         echo
 
         echo "--> Preparing local manifest"
@@ -92,7 +92,7 @@ generatePackages() {
     echo
 }
 
-START=`date +%s`
+START=$(date +%s)
 
 initRepos
 syncRepos
@@ -103,7 +103,7 @@ buildVanillaVariant
 buildGappsVariant
 generatePackages
 
-END=`date +%s`
+END=$(date +%s)
 ELAPSEDM=$(($(($END-$START))/60))
 ELAPSEDS=$(($(($END-$START))-$ELAPSEDM*60))
 
