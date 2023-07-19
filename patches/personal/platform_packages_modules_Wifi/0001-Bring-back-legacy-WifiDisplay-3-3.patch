@@ -1,0 +1,131 @@
+From d666b257280960d0e516a0db172f3dc91e37f00b Mon Sep 17 00:00:00 2001
+From: Xin Deng <deng@codeaurora.org>
+Date: Fri, 23 Jul 2021 15:37:39 +0800
+Subject: [PATCH] Bring back legacy WifiDisplay (3/3)
+
+Squash of:
+- Wifi: Ingore miracast scan from connectivity manager
+
+Change-Id: I5759ec7fc05b162824c00550fa46c95ea232a1b0
+---
+ .../android/server/wifi/ClientModeImpl.java   | 11 ++++++
+ .../server/wifi/WifiConnectivityManager.java  | 34 +++++++++++++++++++
+ .../server/wifi/p2p/WifiP2pServiceImpl.java   |  5 +++
+ 3 files changed, 50 insertions(+)
+
+diff --git a/service/java/com/android/server/wifi/ClientModeImpl.java b/service/java/com/android/server/wifi/ClientModeImpl.java
+index 987bb93564..9ea75285d8 100644
+--- a/service/java/com/android/server/wifi/ClientModeImpl.java
++++ b/service/java/com/android/server/wifi/ClientModeImpl.java
+@@ -4246,7 +4246,18 @@ public class ClientModeImpl extends StateMachine implements ClientMode {
+                             WifiDiagnostics.CONNECTION_EVENT_TIMEOUT, mClientModeManager);
+                     break;
+                 }
++                case WifiP2pServiceImpl.SET_MIRACAST_MODE:
++                    if (mVerboseLoggingEnabled) logd("SET_MIRACAST_MODE: " + (int)message.arg1);
++                    mWifiConnectivityManager.saveMiracastMode((int)message.arg1);
++                    break;
+                 case WifiP2pServiceImpl.P2P_CONNECTION_CHANGED:
++                    NetworkInfo info = (NetworkInfo) message.obj;
++                    if (info != null) {
++                        NetworkInfo.DetailedState detailedState = info.getDetailedState();
++                        mWifiConnectivityManager.saveP2pGroupStarted(
++                                detailedState == NetworkInfo.DetailedState.CONNECTED);
++                    }
++                    break;
+                 case CMD_RESET_SIM_NETWORKS:
+                 case WifiMonitor.NETWORK_CONNECTION_EVENT:
+                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
+diff --git a/service/java/com/android/server/wifi/WifiConnectivityManager.java b/service/java/com/android/server/wifi/WifiConnectivityManager.java
+index 39df9f9591..c1ee633e05 100644
+--- a/service/java/com/android/server/wifi/WifiConnectivityManager.java
++++ b/service/java/com/android/server/wifi/WifiConnectivityManager.java
+@@ -42,6 +42,7 @@ import android.net.wifi.WifiManager;
+ import android.net.wifi.WifiManager.DeviceMobilityState;
+ import android.net.wifi.WifiNetworkSuggestion;
+ import android.net.wifi.WifiScanner;
++import android.net.wifi.p2p.WifiP2pManager;
+ import android.net.wifi.WifiScanner.PnoSettings;
+ import android.net.wifi.WifiScanner.ScanSettings;
+ import android.net.wifi.WifiSsid;
+@@ -182,6 +183,8 @@ public class WifiConnectivityManager {
+     private boolean mAutoJoinEnabled = false; // disabled by default, enabled by external triggers
+     private boolean mRunning = false;
+     private boolean mScreenOn = false;
++    private int mMiracastMode = WifiP2pManager.MIRACAST_DISABLED;
++    private boolean mP2pGroupStarted = false;
+     private int mWifiState = WIFI_STATE_UNKNOWN;
+     private int mInitialScanState = INITIAL_SCAN_STATE_COMPLETE;
+     private boolean mAutoJoinEnabledExternal = true; // enabled by default
+@@ -2002,6 +2005,17 @@ public class WifiConnectivityManager {
+     // Start a single scan
+     private void startForcedSingleScan(boolean isFullBandScan, WorkSource workSource,
+             int scanType) {
++        // Any scans will impact wifi performance including WFD performance,
++        // So at least ignore scans triggered internally by ConnectivityManager
++        // when WFD session is active. We still allow connectivity scans initiated
++        // by other work source.
++        if (WIFI_WORK_SOURCE.equals(workSource) && mP2pGroupStarted &&
++            (mMiracastMode == WifiP2pManager.MIRACAST_SOURCE ||
++            mMiracastMode == WifiP2pManager.MIRACAST_SINK)) {
++            Log.d(TAG, "ignore connectivity scan, MiracastMode: " + mMiracastMode);
++            return;
++        }
++
+         mPnoScanListener.resetLowRssiNetworkRetryDelay();
+ 
+         ScanSettings settings = new ScanSettings();
+@@ -2455,6 +2469,23 @@ public class WifiConnectivityManager {
+         startConnectivityScan(SCAN_ON_SCHEDULE);
+     }
+ 
++    /**
++     * Save current miracast mode, it will be used to ignore
++     * connectivity scan during the time when miracast is enabled.
++     */
++    public void saveMiracastMode(int mode) {
++        Log.d(TAG, "saveMiracastMode: mode=" + mode);
++        mMiracastMode = mode;
++    }
++
++    /**
++     * Save current p2p group started or not.
++     */
++    public void saveP2pGroupStarted(boolean started) {
++        Log.d(TAG, "saveP2pGroupStarted: started=" + started);
++        mP2pGroupStarted = started;
++    }
++
+     /**
+      * Helper function that converts the WIFI_STATE_XXX constants to string
+      */
+@@ -2996,7 +3027,10 @@ public class WifiConnectivityManager {
+             if (mWifiGlobals.flushAnqpCacheOnWifiToggleOffEvent()) {
+                 mPasspointManager.clearAnqpRequestsAndFlushCache();
+             }
++            saveMiracastMode(WifiP2pManager.MIRACAST_DISABLED);
++            saveP2pGroupStarted(false);
+         }
++
+         mWifiEnabled = enable;
+         updateRunningState();
+     }
+diff --git a/service/java/com/android/server/wifi/p2p/WifiP2pServiceImpl.java b/service/java/com/android/server/wifi/p2p/WifiP2pServiceImpl.java
+index e3e4c302de..3fea30c4f8 100644
+--- a/service/java/com/android/server/wifi/p2p/WifiP2pServiceImpl.java
++++ b/service/java/com/android/server/wifi/p2p/WifiP2pServiceImpl.java
+@@ -909,6 +909,11 @@ public class WifiP2pServiceImpl extends IWifiP2pManager.Stub {
+     public void setMiracastMode(int mode) {
+         checkConfigureWifiDisplayPermission();
+         mP2pStateMachine.sendMessage(SET_MIRACAST_MODE, mode);
++        if (mWifiChannel != null) {
++            mWifiChannel.sendMessage(WifiP2pServiceImpl.SET_MIRACAST_MODE, mode);
++        } else {
++            Log.e(TAG, "setMiracastMode(): WifiChannel is null");
++        }
+     }
+ 
+     @Override
+-- 
+2.34.1
+

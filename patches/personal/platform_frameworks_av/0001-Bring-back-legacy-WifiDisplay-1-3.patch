@@ -1,16 +1,23 @@
-From 35ede1809d634840194c8c6ed0d11d4c29c21106 Mon Sep 17 00:00:00 2001
+From 2543139211610172462865325a6f4b4aafc7b996 Mon Sep 17 00:00:00 2001
 From: Vladimir Oltean <olteanv@gmail.com>
 Date: Wed, 9 Jan 2019 01:13:10 +0200
-Subject: [PATCH 01/11] Revert "stagefright: remove Miracast sender code"
+Subject: [PATCH] Bring back legacy WifiDisplay (1/3)
 
-This reverts commit d0a98fa05f0f6719b93d000c4638230af06e0b99.
-
-Change-Id: I0554b92c290c1ebbd1a40fc2edb43573a97d4f6a
-Signed-off-by: DennySPb <dennyspb@gmail.com>
-Signed-off-by: Kujou Yuko <i@779.moe>
+Squash of:
+- Revert "stagefright: remove Miracast sender code"
+- Revert "Removed unused class and its test"
+- libstagefright: Remove libmediaextractor dependency
+- libstagefright_wfd: compilation fixes
+- stagefright: Fix SurfaceMediaSource getting handle from wrong position issue
+- stagefright: Fix buffer handle retrieval in signalBufferReturned
+- libstagefright_wfd: video encoder does not actually release MediaBufferBase when done
+- audioflinger: Fix audio for WifiDisplay
+- Partial revert "Move unused classes out of stagefright foundataion"
+- WifiDisplaySource: raise supported resolution to 1920x1080p60
+- audiopolicy: Disable sonification on WFD sink
 ---
  include/media/IHDCP.h                         |    1 +
- media/libmedia/Android.bp                     |    1 +
+ media/libmedia/Android.bp                     |    2 +
  media/libmedia/IHDCP.cpp                      |  359 ++++
  media/libmedia/IMediaPlayerService.cpp        |   17 +
  media/libmedia/include/media/IHDCP.h          |  118 ++
@@ -22,7 +29,18 @@ Signed-off-by: Kujou Yuko <i@779.moe>
  .../MediaPlayerService.h                      |    1 +
  media/libmediaplayerservice/RemoteDisplay.cpp |   66 +
  media/libmediaplayerservice/RemoteDisplay.h   |   58 +
- media/libstagefright/wifi-display/Android.bp  |   51 +
+ media/libstagefright/ANetworkSession.cpp      | 1400 +++++++++++++
+ media/libstagefright/Android.bp               |    3 +
+ media/libstagefright/ParsedMessage.cpp        |  300 +++
+ media/libstagefright/SurfaceMediaSource.cpp   |  485 +++++
+ .../media/stagefright/ANetworkSession.h       |  135 ++
+ .../include/media/stagefright/ParsedMessage.h |   60 +
+ .../media/stagefright/SurfaceMediaSource.h    |  248 +++
+ media/libstagefright/tests/Android.bp         |   39 +
+ media/libstagefright/tests/DummyRecorder.cpp  |   91 +
+ media/libstagefright/tests/DummyRecorder.h    |   56 +
+ .../tests/SurfaceMediaSource_test.cpp         |  944 +++++++++
+ media/libstagefright/wifi-display/Android.bp  |   57 +
  .../wifi-display/MediaSender.cpp              |  518 +++++
  .../libstagefright/wifi-display/MediaSender.h |  131 ++
  .../wifi-display/Parameters.cpp               |   92 +
@@ -32,19 +50,21 @@ Signed-off-by: Kujou Yuko <i@779.moe>
  .../libstagefright/wifi-display/rtp/RTPBase.h |   47 +
  .../wifi-display/rtp/RTPSender.cpp            |  807 ++++++++
  .../wifi-display/rtp/RTPSender.h              |  119 ++
- .../wifi-display/source/Converter.cpp         |  821 ++++++++
+ .../wifi-display/source/Converter.cpp         |  826 ++++++++
  .../wifi-display/source/Converter.h           |  157 ++
- .../wifi-display/source/MediaPuller.cpp       |  223 +++
+ .../wifi-display/source/MediaPuller.cpp       |  226 +++
  .../wifi-display/source/MediaPuller.h         |   68 +
- .../wifi-display/source/PlaybackSession.cpp   | 1111 +++++++++++
+ .../wifi-display/source/PlaybackSession.cpp   | 1115 +++++++++++
  .../wifi-display/source/PlaybackSession.h     |  175 ++
  .../wifi-display/source/RepeaterSource.cpp    |  219 +++
  .../wifi-display/source/RepeaterSource.h      |   67 +
  .../wifi-display/source/TSPacketizer.cpp      | 1054 ++++++++++
  .../wifi-display/source/TSPacketizer.h        |   93 +
- .../wifi-display/source/WifiDisplaySource.cpp | 1736 +++++++++++++++++
+ .../wifi-display/source/WifiDisplaySource.cpp | 1737 +++++++++++++++++
  .../wifi-display/source/WifiDisplaySource.h   |  278 +++
- 35 files changed, 9362 insertions(+), 5 deletions(-)
+ .../audiopolicy/enginedefault/src/Engine.cpp  |    4 +
+ .../service/AudioPolicyInterfaceImpl.cpp      |    9 +-
+ 48 files changed, 13152 insertions(+), 9 deletions(-)
  create mode 120000 include/media/IHDCP.h
  create mode 100644 media/libmedia/IHDCP.cpp
  create mode 100644 media/libmedia/include/media/IHDCP.h
@@ -52,6 +72,15 @@ Signed-off-by: Kujou Yuko <i@779.moe>
  create mode 100644 media/libmediaplayerservice/HDCP.h
  create mode 100644 media/libmediaplayerservice/RemoteDisplay.cpp
  create mode 100644 media/libmediaplayerservice/RemoteDisplay.h
+ create mode 100644 media/libstagefright/ANetworkSession.cpp
+ create mode 100644 media/libstagefright/ParsedMessage.cpp
+ create mode 100644 media/libstagefright/SurfaceMediaSource.cpp
+ create mode 100644 media/libstagefright/include/media/stagefright/ANetworkSession.h
+ create mode 100644 media/libstagefright/include/media/stagefright/ParsedMessage.h
+ create mode 100644 media/libstagefright/include/media/stagefright/SurfaceMediaSource.h
+ create mode 100644 media/libstagefright/tests/DummyRecorder.cpp
+ create mode 100644 media/libstagefright/tests/DummyRecorder.h
+ create mode 100644 media/libstagefright/tests/SurfaceMediaSource_test.cpp
  create mode 100644 media/libstagefright/wifi-display/Android.bp
  create mode 100644 media/libstagefright/wifi-display/MediaSender.cpp
  create mode 100644 media/libstagefright/wifi-display/MediaSender.h
@@ -84,7 +113,7 @@ index 0000000000..9d4568eafd
 +../../media/libmedia/include/media/IHDCP.h
 \ No newline at end of file
 diff --git a/media/libmedia/Android.bp b/media/libmedia/Android.bp
-index 2dd5784c3f..11b6d56aa4 100644
+index 2dd5784c3f..5c90e0216e 100644
 --- a/media/libmedia/Android.bp
 +++ b/media/libmedia/Android.bp
 @@ -307,6 +307,7 @@ cc_library {
@@ -95,9 +124,17 @@ index 2dd5784c3f..11b6d56aa4 100644
          "BufferingSettings.cpp",
          "mediaplayer.cpp",
          "IMediaHTTPConnection.cpp",
+@@ -371,6 +372,7 @@ cc_library {
+         "libcamera_client",
+         "libstagefright_foundation",
+         "libgui",
++        "libui",
+         "libdl",
+         "libaudioclient",
+         "libmedia_codeclist",
 diff --git a/media/libmedia/IHDCP.cpp b/media/libmedia/IHDCP.cpp
 new file mode 100644
-index 0000000000..a46017ff9d
+index 0000000000..31e37535c2
 --- /dev/null
 +++ b/media/libmedia/IHDCP.cpp
 @@ -0,0 +1,359 @@
@@ -158,7 +195,7 @@ index 0000000000..a46017ff9d
 +    }
 +};
 +
-+IMPLEMENT_META_INTERFACE(HDCPObserver, "android.hardware.IHDCPObserver");
++DO_NOT_DIRECTLY_USE_ME_IMPLEMENT_META_INTERFACE(HDCPObserver, "android.hardware.IHDCPObserver");
 +
 +struct BpHDCP : public BpInterface<IHDCP> {
 +    explicit BpHDCP(const sp<IBinder> &impl)
@@ -269,7 +306,7 @@ index 0000000000..a46017ff9d
 +    }
 +};
 +
-+IMPLEMENT_META_INTERFACE(HDCP, "android.hardware.IHDCP");
++DO_NOT_DIRECTLY_USE_ME_IMPLEMENT_META_INTERFACE(HDCP, "android.hardware.IHDCP");
 +
 +status_t BnHDCPObserver::onTransact(
 +        uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags) {
@@ -942,7 +979,7 @@ index 0000000000..0768e52504
 +
 +#endif  // HDCP_H_
 diff --git a/media/libmediaplayerservice/MediaPlayerService.cpp b/media/libmediaplayerservice/MediaPlayerService.cpp
-index 8e19d02d2f..95d358d069 100644
+index e654bce2e7..df0f1e8a1c 100644
 --- a/media/libmediaplayerservice/MediaPlayerService.cpp
 +++ b/media/libmediaplayerservice/MediaPlayerService.cpp
 @@ -84,6 +84,8 @@
@@ -992,7 +1029,7 @@ index 86be3fe10c..9fbe6b18bf 100644
              const sp<IRemoteDisplayClient>& client, const String8& iface);
 diff --git a/media/libmediaplayerservice/RemoteDisplay.cpp b/media/libmediaplayerservice/RemoteDisplay.cpp
 new file mode 100644
-index 0000000000..0eb4b5dad0
+index 0000000000..80cca265f3
 --- /dev/null
 +++ b/media/libmediaplayerservice/RemoteDisplay.cpp
 @@ -0,0 +1,66 @@
@@ -1019,7 +1056,7 @@ index 0000000000..0eb4b5dad0
 +#include <media/IRemoteDisplayClient.h>
 +#include <media/stagefright/foundation/ADebug.h>
 +#include <media/stagefright/foundation/AMessage.h>
-+#include <media/stagefright/foundation/ANetworkSession.h>
++#include <media/stagefright/ANetworkSession.h>
 +
 +namespace android {
 +
@@ -1126,12 +1163,3860 @@ index 0000000000..775d971332
 +}  // namespace android
 +
 +#endif  // REMOTE_DISPLAY_H_
+diff --git a/media/libstagefright/ANetworkSession.cpp b/media/libstagefright/ANetworkSession.cpp
+new file mode 100644
+index 0000000000..e3b77ec99a
+--- /dev/null
++++ b/media/libstagefright/ANetworkSession.cpp
+@@ -0,0 +1,1400 @@
++/*
++ * Copyright 2012, The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++//#define LOG_NDEBUG 0
++#define LOG_TAG "NetworkSession"
++#include <utils/Log.h>
++
++#include <arpa/inet.h>
++#include <fcntl.h>
++#include <linux/tcp.h>
++#include <net/if.h>
++#include <netdb.h>
++#include <netinet/in.h>
++#include <sys/ioctl.h>
++#include <sys/socket.h>
++
++#include <media/stagefright/ANetworkSession.h>
++#include <media/stagefright/ParsedMessage.h>
++#include <media/stagefright/foundation/ABuffer.h>
++#include <media/stagefright/foundation/ADebug.h>
++#include <media/stagefright/foundation/AMessage.h>
++#include <media/stagefright/foundation/ByteUtils.h>
++#include <media/stagefright/foundation/hexdump.h>
++
++namespace android {
++
++static const size_t kMaxUDPSize = 1500;
++static const int32_t kMaxUDPRetries = 200;
++
++struct ANetworkSession::NetworkThread : public Thread {
++    explicit NetworkThread(ANetworkSession *session);
++
++protected:
++    virtual ~NetworkThread();
++
++private:
++    ANetworkSession *mSession;
++
++    virtual bool threadLoop();
++
++    DISALLOW_EVIL_CONSTRUCTORS(NetworkThread);
++};
++
++struct ANetworkSession::Session : public RefBase {
++    enum Mode {
++        MODE_RTSP,
++        MODE_DATAGRAM,
++        MODE_WEBSOCKET,
++    };
++
++    enum State {
++        CONNECTING,
++        CONNECTED,
++        LISTENING_RTSP,
++        LISTENING_TCP_DGRAMS,
++        DATAGRAM,
++    };
++
++    Session(int32_t sessionID,
++            State state,
++            int s,
++            const sp<AMessage> &notify);
++
++    int32_t sessionID() const;
++    int socket() const;
++    sp<AMessage> getNotificationMessage() const;
++
++    bool isRTSPServer() const;
++    bool isTCPDatagramServer() const;
++
++    bool wantsToRead();
++    bool wantsToWrite();
++
++    status_t readMore();
++    status_t writeMore();
++
++    status_t sendRequest(
++            const void *data, ssize_t size, bool timeValid, int64_t timeUs);
++
++    void setMode(Mode mode);
++
++    status_t switchToWebSocketMode();
++
++protected:
++    virtual ~Session();
++
++private:
++    enum {
++        FRAGMENT_FLAG_TIME_VALID = 1,
++    };
++    struct Fragment {
++        uint32_t mFlags;
++        int64_t mTimeUs;
++        sp<ABuffer> mBuffer;
++    };
++
++    int32_t mSessionID;
++    State mState;
++    Mode mMode;
++    int mSocket;
++    sp<AMessage> mNotify;
++    bool mSawReceiveFailure, mSawSendFailure;
++    int32_t mUDPRetries;
++
++    List<Fragment> mOutFragments;
++
++    AString mInBuffer;
++
++    int64_t mLastStallReportUs;
++
++    void notifyError(bool send, status_t err, const char *detail);
++    void notify(NotificationReason reason);
++
++    void dumpFragmentStats(const Fragment &frag);
++
++    DISALLOW_EVIL_CONSTRUCTORS(Session);
++};
++////////////////////////////////////////////////////////////////////////////////
++
++ANetworkSession::NetworkThread::NetworkThread(ANetworkSession *session)
++    : mSession(session) {
++}
++
++ANetworkSession::NetworkThread::~NetworkThread() {
++}
++
++bool ANetworkSession::NetworkThread::threadLoop() {
++    mSession->threadLoop();
++
++    return true;
++}
++
++////////////////////////////////////////////////////////////////////////////////
++
++ANetworkSession::Session::Session(
++        int32_t sessionID,
++        State state,
++        int s,
++        const sp<AMessage> &notify)
++    : mSessionID(sessionID),
++      mState(state),
++      mMode(MODE_DATAGRAM),
++      mSocket(s),
++      mNotify(notify),
++      mSawReceiveFailure(false),
++      mSawSendFailure(false),
++      mUDPRetries(kMaxUDPRetries),
++      mLastStallReportUs(-1ll) {
++    if (mState == CONNECTED) {
++        struct sockaddr_in localAddr;
++        socklen_t localAddrLen = sizeof(localAddr);
++
++        int res = getsockname(
++                mSocket, (struct sockaddr *)&localAddr, &localAddrLen);
++        CHECK_GE(res, 0);
++
++        struct sockaddr_in remoteAddr;
++        socklen_t remoteAddrLen = sizeof(remoteAddr);
++
++        res = getpeername(
++                mSocket, (struct sockaddr *)&remoteAddr, &remoteAddrLen);
++        CHECK_GE(res, 0);
++
++        in_addr_t addr = ntohl(localAddr.sin_addr.s_addr);
++        AString localAddrString = AStringPrintf(
++                "%d.%d.%d.%d",
++                (addr >> 24),
++                (addr >> 16) & 0xff,
++                (addr >> 8) & 0xff,
++                addr & 0xff);
++
++        addr = ntohl(remoteAddr.sin_addr.s_addr);
++        AString remoteAddrString = AStringPrintf(
++                "%d.%d.%d.%d",
++                (addr >> 24),
++                (addr >> 16) & 0xff,
++                (addr >> 8) & 0xff,
++                addr & 0xff);
++
++        sp<AMessage> msg = mNotify->dup();
++        msg->setInt32("sessionID", mSessionID);
++        msg->setInt32("reason", kWhatClientConnected);
++        msg->setString("server-ip", localAddrString.c_str());
++        msg->setInt32("server-port", ntohs(localAddr.sin_port));
++        msg->setString("client-ip", remoteAddrString.c_str());
++        msg->setInt32("client-port", ntohs(remoteAddr.sin_port));
++        msg->post();
++    }
++}
++
++ANetworkSession::Session::~Session() {
++    ALOGV("Session %d gone", mSessionID);
++
++    close(mSocket);
++    mSocket = -1;
++}
++
++int32_t ANetworkSession::Session::sessionID() const {
++    return mSessionID;
++}
++
++int ANetworkSession::Session::socket() const {
++    return mSocket;
++}
++
++void ANetworkSession::Session::setMode(Mode mode) {
++    mMode = mode;
++}
++
++status_t ANetworkSession::Session::switchToWebSocketMode() {
++    if (mState != CONNECTED || mMode != MODE_RTSP) {
++        return INVALID_OPERATION;
++    }
++
++    mMode = MODE_WEBSOCKET;
++
++    return OK;
++}
++
++sp<AMessage> ANetworkSession::Session::getNotificationMessage() const {
++    return mNotify;
++}
++
++bool ANetworkSession::Session::isRTSPServer() const {
++    return mState == LISTENING_RTSP;
++}
++
++bool ANetworkSession::Session::isTCPDatagramServer() const {
++    return mState == LISTENING_TCP_DGRAMS;
++}
++
++bool ANetworkSession::Session::wantsToRead() {
++    return !mSawReceiveFailure && mState != CONNECTING;
++}
++
++bool ANetworkSession::Session::wantsToWrite() {
++    return !mSawSendFailure
++        && (mState == CONNECTING
++            || (mState == CONNECTED && !mOutFragments.empty())
++            || (mState == DATAGRAM && !mOutFragments.empty()));
++}
++
++status_t ANetworkSession::Session::readMore() {
++    if (mState == DATAGRAM) {
++        CHECK_EQ(mMode, MODE_DATAGRAM);
++
++        status_t err;
++        do {
++            sp<ABuffer> buf = new ABuffer(kMaxUDPSize);
++
++            struct sockaddr_in remoteAddr;
++            socklen_t remoteAddrLen = sizeof(remoteAddr);
++
++            ssize_t n;
++            do {
++                n = recvfrom(
++                        mSocket, buf->data(), buf->capacity(), 0,
++                        (struct sockaddr *)&remoteAddr, &remoteAddrLen);
++            } while (n < 0 && errno == EINTR);
++
++            err = OK;
++            if (n < 0) {
++                err = -errno;
++            } else if (n == 0) {
++                err = -ECONNRESET;
++            } else {
++                buf->setRange(0, n);
++
++                int64_t nowUs = ALooper::GetNowUs();
++                buf->meta()->setInt64("arrivalTimeUs", nowUs);
++
++                sp<AMessage> notify = mNotify->dup();
++                notify->setInt32("sessionID", mSessionID);
++                notify->setInt32("reason", kWhatDatagram);
++
++                uint32_t ip = ntohl(remoteAddr.sin_addr.s_addr);
++                notify->setString(
++                        "fromAddr",
++                        AStringPrintf(
++                            "%u.%u.%u.%u",
++                            ip >> 24,
++                            (ip >> 16) & 0xff,
++                            (ip >> 8) & 0xff,
++                            ip & 0xff).c_str());
++
++                notify->setInt32("fromPort", ntohs(remoteAddr.sin_port));
++
++                notify->setBuffer("data", buf);
++                notify->post();
++            }
++        } while (err == OK);
++
++        if (err == -EAGAIN) {
++            err = OK;
++        }
++
++        if (err != OK) {
++            if (!mUDPRetries) {
++                notifyError(false /* send */, err, "Recvfrom failed.");
++                mSawReceiveFailure = true;
++            } else {
++                mUDPRetries--;
++                ALOGE("Recvfrom failed, %d/%d retries left",
++                        mUDPRetries, kMaxUDPRetries);
++                err = OK;
++            }
++        } else {
++            mUDPRetries = kMaxUDPRetries;
++        }
++
++        return err;
++    }
++
++    char tmp[512];
++    ssize_t n;
++    do {
++        n = recv(mSocket, tmp, sizeof(tmp), 0);
++    } while (n < 0 && errno == EINTR);
++
++    status_t err = OK;
++
++    if (n > 0) {
++        mInBuffer.append(tmp, n);
++
++#if 0
++        ALOGI("in:");
++        hexdump(tmp, n);
++#endif
++    } else if (n < 0) {
++        err = -errno;
++    } else {
++        err = -ECONNRESET;
++    }
++
++    if (mMode == MODE_DATAGRAM) {
++        // TCP stream carrying 16-bit length-prefixed datagrams.
++
++        while (mInBuffer.size() >= 2) {
++            size_t packetSize = U16_AT((const uint8_t *)mInBuffer.c_str());
++
++            if (mInBuffer.size() < packetSize + 2) {
++                break;
++            }
++
++            sp<ABuffer> packet = new ABuffer(packetSize);
++            memcpy(packet->data(), mInBuffer.c_str() + 2, packetSize);
++
++            int64_t nowUs = ALooper::GetNowUs();
++            packet->meta()->setInt64("arrivalTimeUs", nowUs);
++
++            sp<AMessage> notify = mNotify->dup();
++            notify->setInt32("sessionID", mSessionID);
++            notify->setInt32("reason", kWhatDatagram);
++            notify->setBuffer("data", packet);
++            notify->post();
++
++            mInBuffer.erase(0, packetSize + 2);
++        }
++    } else if (mMode == MODE_RTSP) {
++        for (;;) {
++            size_t length;
++
++            if (mInBuffer.size() > 0 && mInBuffer.c_str()[0] == '$') {
++                if (mInBuffer.size() < 4) {
++                    break;
++                }
++
++                length = U16_AT((const uint8_t *)mInBuffer.c_str() + 2);
++
++                if (mInBuffer.size() < 4 + length) {
++                    break;
++                }
++
++                sp<AMessage> notify = mNotify->dup();
++                notify->setInt32("sessionID", mSessionID);
++                notify->setInt32("reason", kWhatBinaryData);
++                notify->setInt32("channel", mInBuffer.c_str()[1]);
++
++                sp<ABuffer> data = new ABuffer(length);
++                memcpy(data->data(), mInBuffer.c_str() + 4, length);
++
++                int64_t nowUs = ALooper::GetNowUs();
++                data->meta()->setInt64("arrivalTimeUs", nowUs);
++
++                notify->setBuffer("data", data);
++                notify->post();
++
++                mInBuffer.erase(0, 4 + length);
++                continue;
++            }
++
++            sp<ParsedMessage> msg =
++                ParsedMessage::Parse(
++                        mInBuffer.c_str(), mInBuffer.size(), err != OK, &length);
++
++            if (msg == NULL) {
++                break;
++            }
++
++            sp<AMessage> notify = mNotify->dup();
++            notify->setInt32("sessionID", mSessionID);
++            notify->setInt32("reason", kWhatData);
++            notify->setObject("data", msg);
++            notify->post();
++
++#if 1
++            // XXX The (old) dongle sends the wrong content length header on a
++            // SET_PARAMETER request that signals a "wfd_idr_request".
++            // (17 instead of 19).
++            const char *content = msg->getContent();
++            if (content
++                    && !memcmp(content, "wfd_idr_request\r\n", 17)
++                    && length >= 19
++                    && mInBuffer.c_str()[length] == '\r'
++                    && mInBuffer.c_str()[length + 1] == '\n') {
++                length += 2;
++            }
++#endif
++
++            mInBuffer.erase(0, length);
++
++            if (err != OK) {
++                break;
++            }
++        }
++    } else {
++        CHECK_EQ(mMode, MODE_WEBSOCKET);
++
++        const uint8_t *data = (const uint8_t *)mInBuffer.c_str();
++        // hexdump(data, mInBuffer.size());
++
++        while (mInBuffer.size() >= 2) {
++            size_t offset = 2;
++
++            uint64_t payloadLen = data[1] & 0x7f;
++            if (payloadLen == 126) {
++                if (offset + 2 > mInBuffer.size()) {
++                    break;
++                }
++
++                payloadLen = U16_AT(&data[offset]);
++                offset += 2;
++            } else if (payloadLen == 127) {
++                if (offset + 8 > mInBuffer.size()) {
++                    break;
++                }
++
++                payloadLen = U64_AT(&data[offset]);
++                offset += 8;
++            }
++
++            uint32_t mask = 0;
++            if (data[1] & 0x80) {
++                // MASK==1
++                if (offset + 4 > mInBuffer.size()) {
++                    break;
++                }
++
++                mask = U32_AT(&data[offset]);
++                offset += 4;
++            }
++
++            if (payloadLen > mInBuffer.size() || offset > mInBuffer.size() - payloadLen) {
++                break;
++            }
++
++            // We have the full message.
++
++            sp<ABuffer> packet = new ABuffer(payloadLen);
++            memcpy(packet->data(), &data[offset], payloadLen);
++
++            if (mask != 0) {
++                for (size_t i = 0; i < payloadLen; ++i) {
++                    packet->data()[i] =
++                        data[offset + i]
++                            ^ ((mask >> (8 * (3 - (i % 4)))) & 0xff);
++                }
++            }
++
++            sp<AMessage> notify = mNotify->dup();
++            notify->setInt32("sessionID", mSessionID);
++            notify->setInt32("reason", kWhatWebSocketMessage);
++            notify->setBuffer("data", packet);
++            notify->setInt32("headerByte", data[0]);
++            notify->post();
++
++            mInBuffer.erase(0, offset + payloadLen);
++        }
++    }
++
++    if (err != OK) {
++        notifyError(false /* send */, err, "Recv failed.");
++        mSawReceiveFailure = true;
++    }
++
++    return err;
++}
++
++void ANetworkSession::Session::dumpFragmentStats(const Fragment & /* frag */) {
++#if 0
++    int64_t nowUs = ALooper::GetNowUs();
++    int64_t delayMs = (nowUs - frag.mTimeUs) / 1000ll;
++
++    static const int64_t kMinDelayMs = 0;
++    static const int64_t kMaxDelayMs = 300;
++
++    const char *kPattern = "########################################";
++    size_t kPatternSize = strlen(kPattern);
++
++    int n = (kPatternSize * (delayMs - kMinDelayMs))
++                / (kMaxDelayMs - kMinDelayMs);
++
++    if (n < 0) {
++        n = 0;
++    } else if ((size_t)n > kPatternSize) {
++        n = kPatternSize;
++    }
++
++    ALOGI("[%lld]: (%4lld ms) %s\n",
++          frag.mTimeUs / 1000,
++          delayMs,
++          kPattern + kPatternSize - n);
++#endif
++}
++
++status_t ANetworkSession::Session::writeMore() {
++    if (mState == DATAGRAM) {
++        CHECK(!mOutFragments.empty());
++
++        status_t err;
++        do {
++            const Fragment &frag = *mOutFragments.begin();
++            const sp<ABuffer> &datagram = frag.mBuffer;
++
++            int n;
++            do {
++                n = send(mSocket, datagram->data(), datagram->size(), 0);
++            } while (n < 0 && errno == EINTR);
++
++            err = OK;
++
++            if (n > 0) {
++                if (frag.mFlags & FRAGMENT_FLAG_TIME_VALID) {
++                    dumpFragmentStats(frag);
++                }
++
++                mOutFragments.erase(mOutFragments.begin());
++            } else if (n < 0) {
++                err = -errno;
++            } else if (n == 0) {
++                err = -ECONNRESET;
++            }
++        } while (err == OK && !mOutFragments.empty());
++
++        if (err == -EAGAIN) {
++            if (!mOutFragments.empty()) {
++                ALOGI("%zu datagrams remain queued.", mOutFragments.size());
++            }
++            err = OK;
++        }
++
++        if (err != OK) {
++            if (!mUDPRetries) {
++                notifyError(true /* send */, err, "Send datagram failed.");
++                mSawSendFailure = true;
++            } else {
++                mUDPRetries--;
++                ALOGE("Send datagram failed, %d/%d retries left",
++                        mUDPRetries, kMaxUDPRetries);
++                err = OK;
++            }
++        } else {
++            mUDPRetries = kMaxUDPRetries;
++        }
++
++        return err;
++    }
++
++    if (mState == CONNECTING) {
++        int err;
++        socklen_t optionLen = sizeof(err);
++        CHECK_EQ(getsockopt(mSocket, SOL_SOCKET, SO_ERROR, &err, &optionLen), 0);
++        CHECK_EQ(optionLen, (socklen_t)sizeof(err));
++
++        if (err != 0) {
++            notifyError(kWhatError, -err, "Connection failed");
++            mSawSendFailure = true;
++
++            return -err;
++        }
++
++        mState = CONNECTED;
++        notify(kWhatConnected);
++
++        return OK;
++    }
++
++    CHECK_EQ(mState, CONNECTED);
++    CHECK(!mOutFragments.empty());
++
++    ssize_t n = -1;
++    while (!mOutFragments.empty()) {
++        const Fragment &frag = *mOutFragments.begin();
++
++        do {
++            n = send(mSocket, frag.mBuffer->data(), frag.mBuffer->size(), 0);
++        } while (n < 0 && errno == EINTR);
++
++        if (n <= 0) {
++            break;
++        }
++
++        frag.mBuffer->setRange(
++                frag.mBuffer->offset() + n, frag.mBuffer->size() - n);
++
++        if (frag.mBuffer->size() > 0) {
++            break;
++        }
++
++        if (frag.mFlags & FRAGMENT_FLAG_TIME_VALID) {
++            dumpFragmentStats(frag);
++        }
++
++        mOutFragments.erase(mOutFragments.begin());
++    }
++
++    status_t err = OK;
++
++    if (n < 0) {
++        err = -errno;
++    } else if (n == 0) {
++        err = -ECONNRESET;
++    }
++
++    if (err != OK) {
++        notifyError(true /* send */, err, "Send failed.");
++        mSawSendFailure = true;
++    }
++
++#if 0
++    int numBytesQueued;
++    int res = ioctl(mSocket, SIOCOUTQ, &numBytesQueued);
++    if (res == 0 && numBytesQueued > 50 * 1024) {
++        if (numBytesQueued > 409600) {
++            ALOGW("!!! numBytesQueued = %d", numBytesQueued);
++        }
++
++        int64_t nowUs = ALooper::GetNowUs();
++
++        if (mLastStallReportUs < 0ll
++                || nowUs > mLastStallReportUs + 100000ll) {
++            sp<AMessage> msg = mNotify->dup();
++            msg->setInt32("sessionID", mSessionID);
++            msg->setInt32("reason", kWhatNetworkStall);
++            msg->setSize("numBytesQueued", numBytesQueued);
++            msg->post();
++
++            mLastStallReportUs = nowUs;
++        }
++    }
++#endif
++
++    return err;
++}
++
++status_t ANetworkSession::Session::sendRequest(
++        const void *data, ssize_t size, bool timeValid, int64_t timeUs) {
++    CHECK(mState == CONNECTED || mState == DATAGRAM);
++
++    if (size < 0) {
++        size = strlen((const char *)data);
++    }
++
++    if (size == 0) {
++        return OK;
++    }
++
++    sp<ABuffer> buffer;
++
++    if (mState == CONNECTED && mMode == MODE_DATAGRAM) {
++        CHECK_LE(size, 65535);
++
++        buffer = new ABuffer(size + 2);
++        buffer->data()[0] = size >> 8;
++        buffer->data()[1] = size & 0xff;
++        memcpy(buffer->data() + 2, data, size);
++    } else if (mState == CONNECTED && mMode == MODE_WEBSOCKET) {
++        static const bool kUseMask = false;  // Chromium doesn't like it.
++
++        size_t numHeaderBytes = 2 + (kUseMask ? 4 : 0);
++        if (size > 65535) {
++            numHeaderBytes += 8;
++        } else if (size > 125) {
++            numHeaderBytes += 2;
++        }
++
++        buffer = new ABuffer(numHeaderBytes + size);
++        buffer->data()[0] = 0x81;  // FIN==1 | opcode=1 (text)
++        buffer->data()[1] = kUseMask ? 0x80 : 0x00;
++
++        if (size > 65535) {
++            buffer->data()[1] |= 127;
++            buffer->data()[2] = 0x00;
++            buffer->data()[3] = 0x00;
++            buffer->data()[4] = 0x00;
++            buffer->data()[5] = 0x00;
++            buffer->data()[6] = (size >> 24) & 0xff;
++            buffer->data()[7] = (size >> 16) & 0xff;
++            buffer->data()[8] = (size >> 8) & 0xff;
++            buffer->data()[9] = size & 0xff;
++        } else if (size > 125) {
++            buffer->data()[1] |= 126;
++            buffer->data()[2] = (size >> 8) & 0xff;
++            buffer->data()[3] = size & 0xff;
++        } else {
++            buffer->data()[1] |= size;
++        }
++
++        if (kUseMask) {
++            uint32_t mask = rand();
++
++            buffer->data()[numHeaderBytes - 4] = (mask >> 24) & 0xff;
++            buffer->data()[numHeaderBytes - 3] = (mask >> 16) & 0xff;
++            buffer->data()[numHeaderBytes - 2] = (mask >> 8) & 0xff;
++            buffer->data()[numHeaderBytes - 1] = mask & 0xff;
++
++            for (size_t i = 0; i < (size_t)size; ++i) {
++                buffer->data()[numHeaderBytes + i] =
++                    ((const uint8_t *)data)[i]
++                        ^ ((mask >> (8 * (3 - (i % 4)))) & 0xff);
++            }
++        } else {
++            memcpy(buffer->data() + numHeaderBytes, data, size);
++        }
++    } else {
++        buffer = new ABuffer(size);
++        memcpy(buffer->data(), data, size);
++    }
++
++    Fragment frag;
++
++    frag.mFlags = 0;
++    if (timeValid) {
++        frag.mFlags = FRAGMENT_FLAG_TIME_VALID;
++        frag.mTimeUs = timeUs;
++    }
++
++    frag.mBuffer = buffer;
++
++    mOutFragments.push_back(frag);
++
++    return OK;
++}
++
++void ANetworkSession::Session::notifyError(
++        bool send, status_t err, const char *detail) {
++    sp<AMessage> msg = mNotify->dup();
++    msg->setInt32("sessionID", mSessionID);
++    msg->setInt32("reason", kWhatError);
++    msg->setInt32("send", send);
++    msg->setInt32("err", err);
++    msg->setString("detail", detail);
++    msg->post();
++}
++
++void ANetworkSession::Session::notify(NotificationReason reason) {
++    sp<AMessage> msg = mNotify->dup();
++    msg->setInt32("sessionID", mSessionID);
++    msg->setInt32("reason", reason);
++    msg->post();
++}
++
++////////////////////////////////////////////////////////////////////////////////
++
++ANetworkSession::ANetworkSession()
++    : mNextSessionID(1) {
++    mPipeFd[0] = mPipeFd[1] = -1;
++}
++
++ANetworkSession::~ANetworkSession() {
++    stop();
++}
++
++status_t ANetworkSession::start() {
++    if (mThread != NULL) {
++        return INVALID_OPERATION;
++    }
++
++    int res = pipe(mPipeFd);
++    if (res != 0) {
++        mPipeFd[0] = mPipeFd[1] = -1;
++        return -errno;
++    }
++
++    mThread = new NetworkThread(this);
++
++    status_t err = mThread->run("ANetworkSession", ANDROID_PRIORITY_AUDIO);
++
++    if (err != OK) {
++        mThread.clear();
++
++        close(mPipeFd[0]);
++        close(mPipeFd[1]);
++        mPipeFd[0] = mPipeFd[1] = -1;
++
++        return err;
++    }
++
++    return OK;
++}
++
++status_t ANetworkSession::stop() {
++    if (mThread == NULL) {
++        return INVALID_OPERATION;
++    }
++
++    mThread->requestExit();
++    interrupt();
++    mThread->requestExitAndWait();
++
++    mThread.clear();
++
++    close(mPipeFd[0]);
++    close(mPipeFd[1]);
++    mPipeFd[0] = mPipeFd[1] = -1;
++
++    return OK;
++}
++
++status_t ANetworkSession::createRTSPClient(
++        const char *host, unsigned port, const sp<AMessage> &notify,
++        int32_t *sessionID) {
++    return createClientOrServer(
++            kModeCreateRTSPClient,
++            NULL /* addr */,
++            0 /* port */,
++            host,
++            port,
++            notify,
++            sessionID);
++}
++
++status_t ANetworkSession::createRTSPServer(
++        const struct in_addr &addr, unsigned port,
++        const sp<AMessage> &notify, int32_t *sessionID) {
++    return createClientOrServer(
++            kModeCreateRTSPServer,
++            &addr,
++            port,
++            NULL /* remoteHost */,
++            0 /* remotePort */,
++            notify,
++            sessionID);
++}
++
++status_t ANetworkSession::createUDPSession(
++        unsigned localPort, const sp<AMessage> &notify, int32_t *sessionID) {
++    return createUDPSession(localPort, NULL, 0, notify, sessionID);
++}
++
++status_t ANetworkSession::createUDPSession(
++        unsigned localPort,
++        const char *remoteHost,
++        unsigned remotePort,
++        const sp<AMessage> &notify,
++        int32_t *sessionID) {
++    return createClientOrServer(
++            kModeCreateUDPSession,
++            NULL /* addr */,
++            localPort,
++            remoteHost,
++            remotePort,
++            notify,
++            sessionID);
++}
++
++status_t ANetworkSession::createTCPDatagramSession(
++        const struct in_addr &addr, unsigned port,
++        const sp<AMessage> &notify, int32_t *sessionID) {
++    return createClientOrServer(
++            kModeCreateTCPDatagramSessionPassive,
++            &addr,
++            port,
++            NULL /* remoteHost */,
++            0 /* remotePort */,
++            notify,
++            sessionID);
++}
++
++status_t ANetworkSession::createTCPDatagramSession(
++        unsigned localPort,
++        const char *remoteHost,
++        unsigned remotePort,
++        const sp<AMessage> &notify,
++        int32_t *sessionID) {
++    return createClientOrServer(
++            kModeCreateTCPDatagramSessionActive,
++            NULL /* addr */,
++            localPort,
++            remoteHost,
++            remotePort,
++            notify,
++            sessionID);
++}
++
++status_t ANetworkSession::destroySession(int32_t sessionID) {
++    Mutex::Autolock autoLock(mLock);
++
++    ssize_t index = mSessions.indexOfKey(sessionID);
++
++    if (index < 0) {
++        return -ENOENT;
++    }
++
++    mSessions.removeItemsAt(index);
++
++    interrupt();
++
++    return OK;
++}
++
++// static
++status_t ANetworkSession::MakeSocketNonBlocking(int s) {
++    int flags = fcntl(s, F_GETFL, 0);
++    if (flags < 0) {
++        flags = 0;
++    }
++
++    int res = fcntl(s, F_SETFL, flags | O_NONBLOCK);
++    if (res < 0) {
++        return -errno;
++    }
++
++    return OK;
++}
++
++status_t ANetworkSession::createClientOrServer(
++        Mode mode,
++        const struct in_addr *localAddr,
++        unsigned port,
++        const char *remoteHost,
++        unsigned remotePort,
++        const sp<AMessage> &notify,
++        int32_t *sessionID) {
++    Mutex::Autolock autoLock(mLock);
++
++    *sessionID = 0;
++    status_t err = OK;
++    int s, res;
++    sp<Session> session;
++
++    s = socket(
++            AF_INET,
++            (mode == kModeCreateUDPSession) ? SOCK_DGRAM : SOCK_STREAM,
++            0);
++
++    if (s < 0) {
++        err = -errno;
++        goto bail;
++    }
++
++    if (mode == kModeCreateRTSPServer
++            || mode == kModeCreateTCPDatagramSessionPassive) {
++        const int yes = 1;
++        res = setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
++
++        if (res < 0) {
++            err = -errno;
++            goto bail2;
++        }
++    }
++
++    if (mode == kModeCreateUDPSession) {
++        int size = 256 * 1024;
++
++        res = setsockopt(s, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
++
++        if (res < 0) {
++            err = -errno;
++            goto bail2;
++        }
++
++        res = setsockopt(s, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
++
++        if (res < 0) {
++            err = -errno;
++            goto bail2;
++        }
++    } else if (mode == kModeCreateTCPDatagramSessionActive) {
++        int flag = 1;
++        res = setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
++
++        if (res < 0) {
++            err = -errno;
++            goto bail2;
++        }
++
++        int tos = 224;  // VOICE
++        res = setsockopt(s, IPPROTO_IP, IP_TOS, &tos, sizeof(tos));
++
++        if (res < 0) {
++            err = -errno;
++            goto bail2;
++        }
++    }
++
++    err = MakeSocketNonBlocking(s);
++
++    if (err != OK) {
++        goto bail2;
++    }
++
++    struct sockaddr_in addr;
++    memset(addr.sin_zero, 0, sizeof(addr.sin_zero));
++    addr.sin_family = AF_INET;
++
++    if (mode == kModeCreateRTSPClient
++            || mode == kModeCreateTCPDatagramSessionActive) {
++        struct hostent *ent= gethostbyname(remoteHost);
++        if (ent == NULL) {
++            err = -h_errno;
++            goto bail2;
++        }
++
++        addr.sin_addr.s_addr = *(in_addr_t *)ent->h_addr;
++        addr.sin_port = htons(remotePort);
++    } else if (localAddr != NULL) {
++        addr.sin_addr = *localAddr;
++        addr.sin_port = htons(port);
++    } else {
++        addr.sin_addr.s_addr = htonl(INADDR_ANY);
++        addr.sin_port = htons(port);
++    }
++
++    if (mode == kModeCreateRTSPClient
++            || mode == kModeCreateTCPDatagramSessionActive) {
++        in_addr_t x = ntohl(addr.sin_addr.s_addr);
++        ALOGI("connecting socket %d to %d.%d.%d.%d:%d",
++              s,
++              (x >> 24),
++              (x >> 16) & 0xff,
++              (x >> 8) & 0xff,
++              x & 0xff,
++              ntohs(addr.sin_port));
++
++        res = connect(s, (const struct sockaddr *)&addr, sizeof(addr));
++
++        CHECK_LT(res, 0);
++        if (errno == EINPROGRESS) {
++            res = 0;
++        }
++    } else {
++        res = bind(s, (const struct sockaddr *)&addr, sizeof(addr));
++
++        if (res == 0) {
++            if (mode == kModeCreateRTSPServer
++                    || mode == kModeCreateTCPDatagramSessionPassive) {
++                res = listen(s, 4);
++            } else {
++                CHECK_EQ(mode, kModeCreateUDPSession);
++
++                if (remoteHost != NULL) {
++                    struct sockaddr_in remoteAddr;
++                    memset(remoteAddr.sin_zero, 0, sizeof(remoteAddr.sin_zero));
++                    remoteAddr.sin_family = AF_INET;
++                    remoteAddr.sin_port = htons(remotePort);
++
++                    struct hostent *ent= gethostbyname(remoteHost);
++                    if (ent == NULL) {
++                        err = -h_errno;
++                        goto bail2;
++                    }
++
++                    remoteAddr.sin_addr.s_addr = *(in_addr_t *)ent->h_addr;
++
++                    res = connect(
++                            s,
++                            (const struct sockaddr *)&remoteAddr,
++                            sizeof(remoteAddr));
++                }
++            }
++        }
++    }
++
++    if (res < 0) {
++        err = -errno;
++        goto bail2;
++    }
++
++    Session::State state;
++    switch (mode) {
++        case kModeCreateRTSPClient:
++            state = Session::CONNECTING;
++            break;
++
++        case kModeCreateTCPDatagramSessionActive:
++            state = Session::CONNECTING;
++            break;
++
++        case kModeCreateTCPDatagramSessionPassive:
++            state = Session::LISTENING_TCP_DGRAMS;
++            break;
++
++        case kModeCreateRTSPServer:
++            state = Session::LISTENING_RTSP;
++            break;
++
++        default:
++            CHECK_EQ(mode, kModeCreateUDPSession);
++            state = Session::DATAGRAM;
++            break;
++    }
++
++    session = new Session(
++            mNextSessionID++,
++            state,
++            s,
++            notify);
++
++    if (mode == kModeCreateTCPDatagramSessionActive) {
++        session->setMode(Session::MODE_DATAGRAM);
++    } else if (mode == kModeCreateRTSPClient) {
++        session->setMode(Session::MODE_RTSP);
++    }
++
++    mSessions.add(session->sessionID(), session);
++
++    interrupt();
++
++    *sessionID = session->sessionID();
++
++    goto bail;
++
++bail2:
++    close(s);
++    s = -1;
++
++bail:
++    return err;
++}
++
++status_t ANetworkSession::connectUDPSession(
++        int32_t sessionID, const char *remoteHost, unsigned remotePort) {
++    Mutex::Autolock autoLock(mLock);
++
++    ssize_t index = mSessions.indexOfKey(sessionID);
++
++    if (index < 0) {
++        return -ENOENT;
++    }
++
++    const sp<Session> session = mSessions.valueAt(index);
++    int s = session->socket();
++
++    struct sockaddr_in remoteAddr;
++    memset(remoteAddr.sin_zero, 0, sizeof(remoteAddr.sin_zero));
++    remoteAddr.sin_family = AF_INET;
++    remoteAddr.sin_port = htons(remotePort);
++
++    status_t err = OK;
++    struct hostent *ent = gethostbyname(remoteHost);
++    if (ent == NULL) {
++        err = -h_errno;
++    } else {
++        remoteAddr.sin_addr.s_addr = *(in_addr_t *)ent->h_addr;
++
++        int res = connect(
++                s,
++                (const struct sockaddr *)&remoteAddr,
++                sizeof(remoteAddr));
++
++        if (res < 0) {
++            err = -errno;
++        }
++    }
++
++    return err;
++}
++
++status_t ANetworkSession::sendRequest(
++        int32_t sessionID, const void *data, ssize_t size,
++        bool timeValid, int64_t timeUs) {
++    Mutex::Autolock autoLock(mLock);
++
++    ssize_t index = mSessions.indexOfKey(sessionID);
++
++    if (index < 0) {
++        return -ENOENT;
++    }
++
++    const sp<Session> session = mSessions.valueAt(index);
++
++    status_t err = session->sendRequest(data, size, timeValid, timeUs);
++
++    interrupt();
++
++    return err;
++}
++
++status_t ANetworkSession::switchToWebSocketMode(int32_t sessionID) {
++    Mutex::Autolock autoLock(mLock);
++
++    ssize_t index = mSessions.indexOfKey(sessionID);
++
++    if (index < 0) {
++        return -ENOENT;
++    }
++
++    const sp<Session> session = mSessions.valueAt(index);
++    return session->switchToWebSocketMode();
++}
++
++void ANetworkSession::interrupt() {
++    static const char dummy = 0;
++
++    ssize_t n;
++    do {
++        n = write(mPipeFd[1], &dummy, 1);
++    } while (n < 0 && errno == EINTR);
++
++    if (n < 0) {
++        ALOGW("Error writing to pipe (%s)", strerror(errno));
++    }
++}
++
++void ANetworkSession::threadLoop() {
++    fd_set rs, ws;
++    FD_ZERO(&rs);
++    FD_ZERO(&ws);
++
++    FD_SET(mPipeFd[0], &rs);
++    int maxFd = mPipeFd[0];
++
++    {
++        Mutex::Autolock autoLock(mLock);
++
++        for (size_t i = 0; i < mSessions.size(); ++i) {
++            const sp<Session> &session = mSessions.valueAt(i);
++
++            int s = session->socket();
++
++            if (s < 0) {
++                continue;
++            }
++
++            if (session->wantsToRead()) {
++                FD_SET(s, &rs);
++                if (s > maxFd) {
++                    maxFd = s;
++                }
++            }
++
++            if (session->wantsToWrite()) {
++                FD_SET(s, &ws);
++                if (s > maxFd) {
++                    maxFd = s;
++                }
++            }
++        }
++    }
++
++    int res = select(maxFd + 1, &rs, &ws, NULL, NULL /* tv */);
++
++    if (res == 0) {
++        return;
++    }
++
++    if (res < 0) {
++        if (errno == EINTR) {
++            return;
++        }
++
++        ALOGE("select failed w/ error %d (%s)", errno, strerror(errno));
++        return;
++    }
++
++    if (FD_ISSET(mPipeFd[0], &rs)) {
++        char c;
++        ssize_t n;
++        do {
++            n = read(mPipeFd[0], &c, 1);
++        } while (n < 0 && errno == EINTR);
++
++        if (n < 0) {
++            ALOGW("Error reading from pipe (%s)", strerror(errno));
++        }
++
++        --res;
++    }
++
++    {
++        Mutex::Autolock autoLock(mLock);
++
++        List<sp<Session> > sessionsToAdd;
++
++        for (size_t i = mSessions.size(); res > 0 && i > 0;) {
++            i--;
++            const sp<Session> &session = mSessions.valueAt(i);
++
++            int s = session->socket();
++
++            if (s < 0) {
++                continue;
++            }
++
++            if (FD_ISSET(s, &rs) || FD_ISSET(s, &ws)) {
++                --res;
++            }
++
++            if (FD_ISSET(s, &rs)) {
++                if (session->isRTSPServer() || session->isTCPDatagramServer()) {
++                    struct sockaddr_in remoteAddr;
++                    socklen_t remoteAddrLen = sizeof(remoteAddr);
++
++                    int clientSocket = accept(
++                            s, (struct sockaddr *)&remoteAddr, &remoteAddrLen);
++
++                    if (clientSocket >= 0) {
++                        status_t err = MakeSocketNonBlocking(clientSocket);
++
++                        if (err != OK) {
++                            ALOGE("Unable to make client socket non blocking, "
++                                  "failed w/ error %d (%s)",
++                                  err, strerror(-err));
++
++                            close(clientSocket);
++                            clientSocket = -1;
++                        } else {
++                            in_addr_t addr = ntohl(remoteAddr.sin_addr.s_addr);
++
++                            ALOGI("incoming connection from %d.%d.%d.%d:%d "
++                                  "(socket %d)",
++                                  (addr >> 24),
++                                  (addr >> 16) & 0xff,
++                                  (addr >> 8) & 0xff,
++                                  addr & 0xff,
++                                  ntohs(remoteAddr.sin_port),
++                                  clientSocket);
++
++                            sp<Session> clientSession =
++                                new Session(
++                                        mNextSessionID++,
++                                        Session::CONNECTED,
++                                        clientSocket,
++                                        session->getNotificationMessage());
++
++                            clientSession->setMode(
++                                    session->isRTSPServer()
++                                        ? Session::MODE_RTSP
++                                        : Session::MODE_DATAGRAM);
++
++                            sessionsToAdd.push_back(clientSession);
++                        }
++                    } else {
++                        ALOGE("accept returned error %d (%s)",
++                              errno, strerror(errno));
++                    }
++                } else {
++                    status_t err = session->readMore();
++                    if (err != OK) {
++                        ALOGE("readMore on socket %d failed w/ error %d (%s)",
++                              s, err, strerror(-err));
++                    }
++                }
++            }
++
++            if (FD_ISSET(s, &ws)) {
++                status_t err = session->writeMore();
++                if (err != OK) {
++                    ALOGE("writeMore on socket %d failed w/ error %d (%s)",
++                          s, err, strerror(-err));
++                }
++            }
++        }
++
++        while (!sessionsToAdd.empty()) {
++            sp<Session> session = *sessionsToAdd.begin();
++            sessionsToAdd.erase(sessionsToAdd.begin());
++
++            mSessions.add(session->sessionID(), session);
++
++            ALOGI("added clientSession %d", session->sessionID());
++        }
++    }
++}
++
++}  // namespace android
+diff --git a/media/libstagefright/Android.bp b/media/libstagefright/Android.bp
+index 10baec47f9..e71f3b5d29 100644
+--- a/media/libstagefright/Android.bp
++++ b/media/libstagefright/Android.bp
+@@ -296,6 +296,7 @@ cc_library {
+         "ACodecBufferChannel.cpp",
+         "AHierarchicalStateMachine.cpp",
+         "AMRWriter.cpp",
++        "ANetworkSession.cpp",
+         "AudioSource.cpp",
+         "BufferImpl.cpp",
+         "CallbackDataSource.cpp",
+@@ -325,10 +326,12 @@ cc_library {
+         "OggWriter.cpp",
+         "OMXClient.cpp",
+         "OmxInfoBuilder.cpp",
++        "ParsedMessage.cpp",
+         "RemoteMediaExtractor.cpp",
+         "RemoteMediaSource.cpp",
+         "SimpleDecodingSource.cpp",
+         "StagefrightMediaScanner.cpp",
++        "SurfaceMediaSource.cpp",
+         "SurfaceUtils.cpp",
+         "ThrottledSource.cpp",
+         "Utils.cpp",
+diff --git a/media/libstagefright/ParsedMessage.cpp b/media/libstagefright/ParsedMessage.cpp
+new file mode 100644
+index 0000000000..f6e83c25f7
+--- /dev/null
++++ b/media/libstagefright/ParsedMessage.cpp
+@@ -0,0 +1,300 @@
++/*
++ * Copyright 2012, The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#include <ctype.h>
++#include <media/stagefright/ParsedMessage.h>
++#include <media/stagefright/foundation/ABuffer.h>
++#include <media/stagefright/foundation/ADebug.h>
++#include <media/stagefright/foundation/hexdump.h>
++
++namespace android {
++
++// static
++sp<ParsedMessage> ParsedMessage::Parse(
++        const char *data, size_t size, bool noMoreData, size_t *length) {
++    sp<ParsedMessage> msg = new ParsedMessage;
++    ssize_t res = msg->parse(data, size, noMoreData);
++
++    if (res < 0) {
++        *length = 0;
++        return NULL;
++    }
++
++    *length = res;
++    return msg;
++}
++
++ParsedMessage::ParsedMessage() {
++}
++
++ParsedMessage::~ParsedMessage() {
++}
++
++bool ParsedMessage::findString(const char *name, AString *value) const {
++    AString key = name;
++    key.tolower();
++
++    ssize_t index = mDict.indexOfKey(key);
++
++    if (index < 0) {
++        value->clear();
++
++        return false;
++    }
++
++    *value = mDict.valueAt(index);
++    return true;
++}
++
++bool ParsedMessage::findInt32(const char *name, int32_t *value) const {
++    AString stringValue;
++
++    if (!findString(name, &stringValue)) {
++        return false;
++    }
++
++    char *end;
++    *value = strtol(stringValue.c_str(), &end, 10);
++
++    if (end == stringValue.c_str() || *end != '\0') {
++        *value = 0;
++        return false;
++    }
++
++    return true;
++}
++
++const char *ParsedMessage::getContent() const {
++    return mContent.c_str();
++}
++
++ssize_t ParsedMessage::parse(const char *data, size_t size, bool noMoreData) {
++    if (size == 0) {
++        return -1;
++    }
++
++    ssize_t lastDictIndex = -1;
++
++    size_t offset = 0;
++    bool headersComplete = false;
++    while (offset < size) {
++        size_t lineEndOffset = offset;
++        while (lineEndOffset + 1 < size
++                && (data[lineEndOffset] != '\r'
++                        || data[lineEndOffset + 1] != '\n')) {
++            ++lineEndOffset;
++        }
++
++        if (lineEndOffset + 1 >= size) {
++            return -1;
++        }
++
++        AString line(&data[offset], lineEndOffset - offset);
++
++        if (offset == 0) {
++            // Special handling for the request/status line.
++
++            mDict.add(AString("_"), line);
++            offset = lineEndOffset + 2;
++
++            continue;
++        }
++
++        if (lineEndOffset == offset) {
++            // An empty line separates headers from body.
++            headersComplete = true;
++            offset += 2;
++            break;
++        }
++
++        if (line.c_str()[0] == ' ' || line.c_str()[0] == '\t') {
++            // Support for folded header values.
++
++            if (lastDictIndex >= 0) {
++                // Otherwise it's malformed since the first header line
++                // cannot continue anything...
++
++                AString &value = mDict.editValueAt(lastDictIndex);
++                value.append(line);
++            }
++
++            offset = lineEndOffset + 2;
++            continue;
++        }
++
++        ssize_t colonPos = line.find(":");
++        if (colonPos >= 0) {
++            AString key(line, 0, colonPos);
++            key.trim();
++            key.tolower();
++
++            line.erase(0, colonPos + 1);
++
++            lastDictIndex = mDict.add(key, line);
++        }
++
++        offset = lineEndOffset + 2;
++    }
++
++    if (!headersComplete && (!noMoreData || offset == 0)) {
++        // We either saw the empty line separating headers from body
++        // or we saw at least the status line and know that no more data
++        // is going to follow.
++        return -1;
++    }
++
++    for (size_t i = 0; i < mDict.size(); ++i) {
++        mDict.editValueAt(i).trim();
++    }
++
++    int32_t contentLength;
++    if (!findInt32("content-length", &contentLength) || contentLength < 0) {
++        contentLength = 0;
++    }
++
++    size_t totalLength = offset + contentLength;
++
++    if (size < totalLength) {
++        return -1;
++    }
++
++    mContent.setTo(&data[offset], contentLength);
++
++    return totalLength;
++}
++
++bool ParsedMessage::getRequestField(size_t index, AString *field) const {
++    AString line;
++    CHECK(findString("_", &line));
++
++    size_t prevOffset = 0;
++    size_t offset = 0;
++    for (size_t i = 0; i <= index; ++i) {
++        if (offset >= line.size()) {
++            return false;
++        }
++
++        ssize_t spacePos = line.find(" ", offset);
++
++        if (spacePos < 0) {
++            spacePos = line.size();
++        }
++
++        prevOffset = offset;
++        offset = spacePos + 1;
++    }
++
++    field->setTo(line, prevOffset, offset - prevOffset - 1);
++
++    return true;
++}
++
++bool ParsedMessage::getStatusCode(int32_t *statusCode) const {
++    AString statusCodeString;
++    if (!getRequestField(1, &statusCodeString)) {
++        *statusCode = 0;
++        return false;
++    }
++
++    char *end;
++    *statusCode = strtol(statusCodeString.c_str(), &end, 10);
++
++    if (*end != '\0' || end == statusCodeString.c_str()
++            || (*statusCode) < 100 || (*statusCode) > 999) {
++        *statusCode = 0;
++        return false;
++    }
++
++    return true;
++}
++
++AString ParsedMessage::debugString() const {
++    AString line;
++    CHECK(findString("_", &line));
++
++    line.append("\n");
++
++    for (size_t i = 0; i < mDict.size(); ++i) {
++        const AString &key = mDict.keyAt(i);
++        const AString &value = mDict.valueAt(i);
++
++        if (key == AString("_")) {
++            continue;
++        }
++
++        line.append(key);
++        line.append(": ");
++        line.append(value);
++        line.append("\n");
++    }
++
++    line.append("\n");
++    line.append(mContent);
++
++    return line;
++}
++
++// static
++bool ParsedMessage::GetAttribute(
++        const char *s, const char *key, AString *value) {
++    value->clear();
++
++    size_t keyLen = strlen(key);
++
++    for (;;) {
++        while (isspace(*s)) {
++            ++s;
++        }
++
++        const char *colonPos = strchr(s, ';');
++
++        size_t len =
++            (colonPos == NULL) ? strlen(s) : colonPos - s;
++
++        if (len >= keyLen + 1 && s[keyLen] == '=' && !strncmp(s, key, keyLen)) {
++            value->setTo(&s[keyLen + 1], len - keyLen - 1);
++            return true;
++        }
++
++        if (colonPos == NULL) {
++            return false;
++        }
++
++        s = colonPos + 1;
++    }
++}
++
++// static
++bool ParsedMessage::GetInt32Attribute(
++        const char *s, const char *key, int32_t *value) {
++    AString stringValue;
++    if (!GetAttribute(s, key, &stringValue)) {
++        *value = 0;
++        return false;
++    }
++
++    char *end;
++    *value = strtol(stringValue.c_str(), &end, 10);
++
++    if (end == stringValue.c_str() || *end != '\0') {
++        *value = 0;
++        return false;
++    }
++
++    return true;
++}
++
++}  // namespace android
+diff --git a/media/libstagefright/SurfaceMediaSource.cpp b/media/libstagefright/SurfaceMediaSource.cpp
+new file mode 100644
+index 0000000000..d7370551e0
+--- /dev/null
++++ b/media/libstagefright/SurfaceMediaSource.cpp
+@@ -0,0 +1,485 @@
++/*
++ * Copyright (C) 2011 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++//#define LOG_NDEBUG 0
++#define LOG_TAG "SurfaceMediaSource"
++
++#include <inttypes.h>
++
++#include <media/stagefright/foundation/ADebug.h>
++#include <media/stagefright/SurfaceMediaSource.h>
++#include <media/stagefright/MediaDefs.h>
++#include <media/stagefright/MetaData.h>
++#include <OMX_IVCommon.h>
++#include <media/hardware/HardwareAPI.h>
++#include <media/hardware/MetadataBufferType.h>
++
++#include <ui/GraphicBuffer.h>
++#include <gui/BufferItem.h>
++#include <gui/ISurfaceComposer.h>
++#include <OMX_Component.h>
++
++#include <utils/Log.h>
++#include <utils/String8.h>
++
++#include <private/gui/ComposerService.h>
++
++namespace android {
++
++SurfaceMediaSource::SurfaceMediaSource(uint32_t bufferWidth, uint32_t bufferHeight) :
++    mWidth(bufferWidth),
++    mHeight(bufferHeight),
++    mCurrentSlot(BufferQueue::INVALID_BUFFER_SLOT),
++    mNumPendingBuffers(0),
++    mCurrentTimestamp(0),
++    mFrameRate(30),
++    mStarted(false),
++    mNumFramesReceived(0),
++    mNumFramesEncoded(0),
++    mFirstFrameTimestamp(0),
++    mMaxAcquiredBufferCount(4),  // XXX double-check the default
++    mUseAbsoluteTimestamps(false) {
++    ALOGV("SurfaceMediaSource");
++
++    if (bufferWidth == 0 || bufferHeight == 0) {
++        ALOGE("Invalid dimensions %dx%d", bufferWidth, bufferHeight);
++    }
++
++    BufferQueue::createBufferQueue(&mProducer, &mConsumer);
++    mConsumer->setDefaultBufferSize(bufferWidth, bufferHeight);
++    mConsumer->setConsumerUsageBits(GRALLOC_USAGE_HW_VIDEO_ENCODER |
++            GRALLOC_USAGE_HW_TEXTURE);
++
++    sp<ISurfaceComposer> composer(ComposerService::getComposerService());
++
++    // Note that we can't create an sp<...>(this) in a ctor that will not keep a
++    // reference once the ctor ends, as that would cause the refcount of 'this'
++    // dropping to 0 at the end of the ctor.  Since all we need is a wp<...>
++    // that's what we create.
++    wp<ConsumerListener> listener = static_cast<ConsumerListener*>(this);
++    sp<BufferQueue::ProxyConsumerListener> proxy = new BufferQueue::ProxyConsumerListener(listener);
++
++    status_t err = mConsumer->consumerConnect(proxy, false);
++    if (err != NO_ERROR) {
++        ALOGE("SurfaceMediaSource: error connecting to BufferQueue: %s (%d)",
++                strerror(-err), err);
++    }
++}
++
++SurfaceMediaSource::~SurfaceMediaSource() {
++    ALOGV("~SurfaceMediaSource");
++    CHECK(!mStarted);
++}
++
++nsecs_t SurfaceMediaSource::getTimestamp() {
++    ALOGV("getTimestamp");
++    Mutex::Autolock lock(mMutex);
++    return mCurrentTimestamp;
++}
++
++void SurfaceMediaSource::setFrameAvailableListener(
++        const sp<FrameAvailableListener>& listener) {
++    ALOGV("setFrameAvailableListener");
++    Mutex::Autolock lock(mMutex);
++    mFrameAvailableListener = listener;
++}
++
++void SurfaceMediaSource::dumpState(String8& result) const
++{
++    char buffer[1024];
++    dumpState(result, "", buffer, 1024);
++}
++
++void SurfaceMediaSource::dumpState(
++        String8& result,
++        const char* /* prefix */,
++        char* buffer,
++        size_t /* SIZE */) const
++{
++    Mutex::Autolock lock(mMutex);
++
++    result.append(buffer);
++    mConsumer->dumpState(result, "");
++}
++
++status_t SurfaceMediaSource::setFrameRate(int32_t fps)
++{
++    ALOGV("setFrameRate");
++    Mutex::Autolock lock(mMutex);
++    const int MAX_FRAME_RATE = 60;
++    if (fps < 0 || fps > MAX_FRAME_RATE) {
++        return BAD_VALUE;
++    }
++    mFrameRate = fps;
++    return OK;
++}
++
++MetadataBufferType SurfaceMediaSource::metaDataStoredInVideoBuffers() const {
++    ALOGV("isMetaDataStoredInVideoBuffers");
++    return kMetadataBufferTypeANWBuffer;
++}
++
++int32_t SurfaceMediaSource::getFrameRate( ) const {
++    ALOGV("getFrameRate");
++    Mutex::Autolock lock(mMutex);
++    return mFrameRate;
++}
++
++status_t SurfaceMediaSource::start(MetaData *params)
++{
++    ALOGV("start");
++
++    Mutex::Autolock lock(mMutex);
++
++    CHECK(!mStarted);
++
++    mStartTimeNs = 0;
++    int64_t startTimeUs;
++    int32_t bufferCount = 0;
++    if (params) {
++        if (params->findInt64(kKeyTime, &startTimeUs)) {
++            mStartTimeNs = startTimeUs * 1000;
++        }
++
++        if (!params->findInt32(kKeyNumBuffers, &bufferCount)) {
++            ALOGE("Failed to find the advertised buffer count");
++            return UNKNOWN_ERROR;
++        }
++
++        if (bufferCount <= 1) {
++            ALOGE("bufferCount %d is too small", bufferCount);
++            return BAD_VALUE;
++        }
++
++        mMaxAcquiredBufferCount = bufferCount;
++    }
++
++    CHECK_GT(mMaxAcquiredBufferCount, 1u);
++
++    status_t err =
++        mConsumer->setMaxAcquiredBufferCount(mMaxAcquiredBufferCount);
++
++    if (err != OK) {
++        return err;
++    }
++
++    mNumPendingBuffers = 0;
++    mStarted = true;
++
++    return OK;
++}
++
++status_t SurfaceMediaSource::setMaxAcquiredBufferCount(size_t count) {
++    ALOGV("setMaxAcquiredBufferCount(%zu)", count);
++    Mutex::Autolock lock(mMutex);
++
++    CHECK_GT(count, 1u);
++    mMaxAcquiredBufferCount = count;
++
++    return OK;
++}
++
++status_t SurfaceMediaSource::setUseAbsoluteTimestamps() {
++    ALOGV("setUseAbsoluteTimestamps");
++    Mutex::Autolock lock(mMutex);
++    mUseAbsoluteTimestamps = true;
++
++    return OK;
++}
++
++status_t SurfaceMediaSource::stop()
++{
++    ALOGV("stop");
++    Mutex::Autolock lock(mMutex);
++
++    if (!mStarted) {
++        return OK;
++    }
++
++    mStarted = false;
++    mFrameAvailableCondition.signal();
++
++    while (mNumPendingBuffers > 0) {
++        ALOGI("Still waiting for %zu buffers to be returned.",
++                mNumPendingBuffers);
++
++#if DEBUG_PENDING_BUFFERS
++        for (size_t i = 0; i < mPendingBuffers.size(); ++i) {
++            ALOGI("%zu: %p", i, mPendingBuffers.itemAt(i));
++        }
++#endif
++
++        mMediaBuffersAvailableCondition.wait(mMutex);
++    }
++
++    mMediaBuffersAvailableCondition.signal();
++
++    return mConsumer->consumerDisconnect();
++}
++
++sp<MetaData> SurfaceMediaSource::getFormat()
++{
++    ALOGV("getFormat");
++
++    Mutex::Autolock lock(mMutex);
++    sp<MetaData> meta = new MetaData;
++
++    meta->setInt32(kKeyWidth, mWidth);
++    meta->setInt32(kKeyHeight, mHeight);
++    // The encoder format is set as an opaque colorformat
++    // The encoder will later find out the actual colorformat
++    // from the GL Frames itself.
++    meta->setInt32(kKeyColorFormat, OMX_COLOR_FormatAndroidOpaque);
++    meta->setInt32(kKeyStride, mWidth);
++    meta->setInt32(kKeySliceHeight, mHeight);
++    meta->setInt32(kKeyFrameRate, mFrameRate);
++    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_RAW);
++    return meta;
++}
++
++// Pass the data to the MediaBuffer. Pass in only the metadata
++// Note: Call only when you have the lock
++void SurfaceMediaSource::passMetadataBuffer_l(MediaBufferBase **buffer,
++        ANativeWindowBuffer *bufferHandle) const {
++    *buffer = new MediaBuffer(sizeof(VideoNativeMetadata));
++    VideoNativeMetadata *data = (VideoNativeMetadata *)(*buffer)->data();
++    if (data == NULL) {
++        ALOGE("Cannot allocate memory for metadata buffer!");
++        return;
++    }
++    data->eType = metaDataStoredInVideoBuffers();
++    data->pBuffer = bufferHandle;
++    data->nFenceFd = -1;
++    ALOGV("handle = %p, offset = %zu, length = %zu",
++            bufferHandle, (*buffer)->range_length(), (*buffer)->range_offset());
++}
++
++status_t SurfaceMediaSource::read(
++        MediaBufferBase **buffer, const ReadOptions * /* options */) {
++    ALOGV("read");
++    Mutex::Autolock lock(mMutex);
++
++    *buffer = NULL;
++
++    while (mStarted && mNumPendingBuffers == mMaxAcquiredBufferCount) {
++        mMediaBuffersAvailableCondition.wait(mMutex);
++    }
++
++    // Update the current buffer info
++    // TODO: mCurrentSlot can be made a bufferstate since there
++    // can be more than one "current" slots.
++
++    BufferItem item;
++    // If the recording has started and the queue is empty, then just
++    // wait here till the frames come in from the client side
++    while (mStarted) {
++
++        status_t err = mConsumer->acquireBuffer(&item, 0);
++        if (err == BufferQueue::NO_BUFFER_AVAILABLE) {
++            // wait for a buffer to be queued
++            mFrameAvailableCondition.wait(mMutex);
++        } else if (err == OK) {
++            err = item.mFence->waitForever("SurfaceMediaSource::read");
++            if (err) {
++                ALOGW("read: failed to wait for buffer fence: %d", err);
++            }
++
++            // First time seeing the buffer?  Added it to the SMS slot
++            if (item.mGraphicBuffer != NULL) {
++                mSlots[item.mSlot].mGraphicBuffer = item.mGraphicBuffer;
++            }
++            mSlots[item.mSlot].mFrameNumber = item.mFrameNumber;
++
++            // check for the timing of this buffer
++            if (mNumFramesReceived == 0 && !mUseAbsoluteTimestamps) {
++                mFirstFrameTimestamp = item.mTimestamp;
++                // Initial delay
++                if (mStartTimeNs > 0) {
++                    if (item.mTimestamp < mStartTimeNs) {
++                        // This frame predates start of record, discard
++                        mConsumer->releaseBuffer(
++                                item.mSlot, item.mFrameNumber, EGL_NO_DISPLAY,
++                                EGL_NO_SYNC_KHR, Fence::NO_FENCE);
++                        continue;
++                    }
++                    mStartTimeNs = item.mTimestamp - mStartTimeNs;
++                }
++            }
++            item.mTimestamp = mStartTimeNs + (item.mTimestamp - mFirstFrameTimestamp);
++
++            mNumFramesReceived++;
++
++            break;
++        } else {
++            ALOGE("read: acquire failed with error code %d", err);
++            return ERROR_END_OF_STREAM;
++        }
++
++    }
++
++    // If the loop was exited as a result of stopping the recording,
++    // it is OK
++    if (!mStarted) {
++        ALOGV("Read: SurfaceMediaSource is stopped. Returning ERROR_END_OF_STREAM.");
++        return ERROR_END_OF_STREAM;
++    }
++
++    mCurrentSlot = item.mSlot;
++
++    // First time seeing the buffer?  Added it to the SMS slot
++    if (item.mGraphicBuffer != NULL) {
++        mSlots[item.mSlot].mGraphicBuffer = item.mGraphicBuffer;
++    }
++    mSlots[item.mSlot].mFrameNumber = item.mFrameNumber;
++
++    mCurrentBuffers.push_back(mSlots[mCurrentSlot].mGraphicBuffer);
++    int64_t prevTimeStamp = mCurrentTimestamp;
++    mCurrentTimestamp = item.mTimestamp;
++
++    mNumFramesEncoded++;
++    // Pass the data to the MediaBuffer. Pass in only the metadata
++
++    passMetadataBuffer_l(buffer, mSlots[mCurrentSlot].mGraphicBuffer->getNativeBuffer());
++
++    (*buffer)->setObserver(this);
++    (*buffer)->add_ref();
++    (*buffer)->meta_data().setInt64(kKeyTime, mCurrentTimestamp / 1000);
++    ALOGV("Frames encoded = %d, timestamp = %" PRId64 ", time diff = %" PRId64,
++            mNumFramesEncoded, mCurrentTimestamp / 1000,
++            mCurrentTimestamp / 1000 - prevTimeStamp / 1000);
++
++    ++mNumPendingBuffers;
++
++#if DEBUG_PENDING_BUFFERS
++    mPendingBuffers.push_back(*buffer);
++#endif
++
++    ALOGV("returning mbuf %p", *buffer);
++
++    return OK;
++}
++
++static buffer_handle_t getMediaBufferHandle(MediaBufferBase *buffer) {
++    // need to convert to char* for pointer arithmetic and then
++    // copy the byte stream into our handle
++    buffer_handle_t bufferHandle;
++    VideoNativeMetadata *data = (VideoNativeMetadata *)buffer->data();
++    ANativeWindowBuffer *anwbuffer = (ANativeWindowBuffer *)data->pBuffer;
++    bufferHandle = anwbuffer->handle;
++    return bufferHandle;
++}
++
++void SurfaceMediaSource::signalBufferReturned(MediaBufferBase *buffer) {
++    ALOGV("signalBufferReturned");
++
++    bool foundBuffer = false;
++
++    Mutex::Autolock lock(mMutex);
++
++    buffer_handle_t bufferHandle = getMediaBufferHandle(buffer);
++    ANativeWindowBuffer* curNativeHandle = NULL;
++
++    for (size_t i = 0; i < mCurrentBuffers.size(); i++) {
++        curNativeHandle = mCurrentBuffers[i]->getNativeBuffer();
++        if ((mCurrentBuffers[i]->handle == bufferHandle) ||
++            ((buffer_handle_t)curNativeHandle == bufferHandle)) {
++            mCurrentBuffers.removeAt(i);
++            foundBuffer = true;
++            break;
++        }
++    }
++
++    if (!foundBuffer) {
++        ALOGW("returned buffer was not found in the current buffer list");
++    }
++
++    for (int id = 0; id < BufferQueue::NUM_BUFFER_SLOTS; id++) {
++        if (mSlots[id].mGraphicBuffer == NULL) {
++            continue;
++        }
++
++        curNativeHandle = mSlots[id].mGraphicBuffer->getNativeBuffer();
++
++        if ((bufferHandle == mSlots[id].mGraphicBuffer->handle) ||
++            (bufferHandle == (buffer_handle_t)curNativeHandle)) {
++            ALOGV("Slot %d returned, matches handle = %p", id,
++                    mSlots[id].mGraphicBuffer->handle);
++
++            mConsumer->releaseBuffer(id, mSlots[id].mFrameNumber,
++                                        EGL_NO_DISPLAY, EGL_NO_SYNC_KHR,
++                    Fence::NO_FENCE);
++
++            buffer->setObserver(0);
++            buffer->release();
++
++            foundBuffer = true;
++            break;
++        }
++    }
++
++    if (!foundBuffer) {
++        CHECK(!"signalBufferReturned: bogus buffer");
++    }
++
++#if DEBUG_PENDING_BUFFERS
++    for (size_t i = 0; i < mPendingBuffers.size(); ++i) {
++        if (mPendingBuffers.itemAt(i) == buffer) {
++            mPendingBuffers.removeAt(i);
++            break;
++        }
++    }
++#endif
++
++    --mNumPendingBuffers;
++    mMediaBuffersAvailableCondition.broadcast();
++}
++
++// Part of the BufferQueue::ConsumerListener
++void SurfaceMediaSource::onFrameAvailable(const BufferItem& /* item */) {
++    ALOGV("onFrameAvailable");
++
++    sp<FrameAvailableListener> listener;
++    { // scope for the lock
++        Mutex::Autolock lock(mMutex);
++        mFrameAvailableCondition.broadcast();
++        listener = mFrameAvailableListener;
++    }
++
++    if (listener != NULL) {
++        ALOGV("actually calling onFrameAvailable");
++        listener->onFrameAvailable();
++    }
++}
++
++// SurfaceMediaSource hijacks this event to assume
++// the prodcuer is disconnecting from the BufferQueue
++// and that it should stop the recording
++void SurfaceMediaSource::onBuffersReleased() {
++    ALOGV("onBuffersReleased");
++
++    Mutex::Autolock lock(mMutex);
++
++    mFrameAvailableCondition.signal();
++
++    for (int i = 0; i < BufferQueue::NUM_BUFFER_SLOTS; i++) {
++       mSlots[i].mGraphicBuffer = 0;
++    }
++}
++
++void SurfaceMediaSource::onSidebandStreamChanged() {
++    ALOG_ASSERT(false, "SurfaceMediaSource can't consume sideband streams");
++}
++
++} // end of namespace android
+diff --git a/media/libstagefright/include/media/stagefright/ANetworkSession.h b/media/libstagefright/include/media/stagefright/ANetworkSession.h
+new file mode 100644
+index 0000000000..fd3ebaaa28
+--- /dev/null
++++ b/media/libstagefright/include/media/stagefright/ANetworkSession.h
+@@ -0,0 +1,135 @@
++/*
++ * Copyright 2012, The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#ifndef A_NETWORK_SESSION_H_
++
++#define A_NETWORK_SESSION_H_
++
++#include <media/stagefright/foundation/ABase.h>
++#include <utils/KeyedVector.h>
++#include <utils/RefBase.h>
++#include <utils/Thread.h>
++
++#include <netinet/in.h>
++
++namespace android {
++
++struct AMessage;
++
++// Helper class to manage a number of live sockets (datagram and stream-based)
++// on a single thread. Clients are notified about activity through AMessages.
++struct ANetworkSession : public RefBase {
++    ANetworkSession();
++
++    status_t start();
++    status_t stop();
++
++    status_t createRTSPClient(
++            const char *host, unsigned port, const sp<AMessage> &notify,
++            int32_t *sessionID);
++
++    status_t createRTSPServer(
++            const struct in_addr &addr, unsigned port,
++            const sp<AMessage> &notify, int32_t *sessionID);
++
++    status_t createUDPSession(
++            unsigned localPort, const sp<AMessage> &notify, int32_t *sessionID);
++
++    status_t createUDPSession(
++            unsigned localPort,
++            const char *remoteHost,
++            unsigned remotePort,
++            const sp<AMessage> &notify,
++            int32_t *sessionID);
++
++    status_t connectUDPSession(
++            int32_t sessionID, const char *remoteHost, unsigned remotePort);
++
++    // passive
++    status_t createTCPDatagramSession(
++            const struct in_addr &addr, unsigned port,
++            const sp<AMessage> &notify, int32_t *sessionID);
++
++    // active
++    status_t createTCPDatagramSession(
++            unsigned localPort,
++            const char *remoteHost,
++            unsigned remotePort,
++            const sp<AMessage> &notify,
++            int32_t *sessionID);
++
++    status_t destroySession(int32_t sessionID);
++
++    status_t sendRequest(
++            int32_t sessionID, const void *data, ssize_t size = -1,
++            bool timeValid = false, int64_t timeUs = -1ll);
++
++    status_t switchToWebSocketMode(int32_t sessionID);
++
++    enum NotificationReason {
++        kWhatError,
++        kWhatConnected,
++        kWhatClientConnected,
++        kWhatData,
++        kWhatDatagram,
++        kWhatBinaryData,
++        kWhatWebSocketMessage,
++        kWhatNetworkStall,
++    };
++
++protected:
++    virtual ~ANetworkSession();
++
++private:
++    struct NetworkThread;
++    struct Session;
++
++    Mutex mLock;
++    sp<Thread> mThread;
++
++    int32_t mNextSessionID;
++
++    int mPipeFd[2];
++
++    KeyedVector<int32_t, sp<Session> > mSessions;
++
++    enum Mode {
++        kModeCreateUDPSession,
++        kModeCreateTCPDatagramSessionPassive,
++        kModeCreateTCPDatagramSessionActive,
++        kModeCreateRTSPServer,
++        kModeCreateRTSPClient,
++    };
++    status_t createClientOrServer(
++            Mode mode,
++            const struct in_addr *addr,
++            unsigned port,
++            const char *remoteHost,
++            unsigned remotePort,
++            const sp<AMessage> &notify,
++            int32_t *sessionID);
++
++    void threadLoop();
++    void interrupt();
++
++    static status_t MakeSocketNonBlocking(int s);
++
++    DISALLOW_EVIL_CONSTRUCTORS(ANetworkSession);
++};
++
++}  // namespace android
++
++#endif  // A_NETWORK_SESSION_H_
+diff --git a/media/libstagefright/include/media/stagefright/ParsedMessage.h b/media/libstagefright/include/media/stagefright/ParsedMessage.h
+new file mode 100644
+index 0000000000..9d43a93319
+--- /dev/null
++++ b/media/libstagefright/include/media/stagefright/ParsedMessage.h
+@@ -0,0 +1,60 @@
++/*
++ * Copyright 2012, The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#include <media/stagefright/foundation/ABase.h>
++#include <media/stagefright/foundation/AString.h>
++#include <utils/KeyedVector.h>
++#include <utils/RefBase.h>
++
++namespace android {
++
++// Encapsulates an "HTTP/RTSP style" response, i.e. a status line,
++// key/value pairs making up the headers and an optional body/content.
++struct ParsedMessage : public RefBase {
++    static sp<ParsedMessage> Parse(
++            const char *data, size_t size, bool noMoreData, size_t *length);
++
++    bool findString(const char *name, AString *value) const;
++    bool findInt32(const char *name, int32_t *value) const;
++
++    const char *getContent() const;
++
++    bool getRequestField(size_t index, AString *field) const;
++    bool getStatusCode(int32_t *statusCode) const;
++
++    AString debugString() const;
++
++    static bool GetAttribute(const char *s, const char *key, AString *value);
++
++    static bool GetInt32Attribute(
++            const char *s, const char *key, int32_t *value);
++
++
++protected:
++    virtual ~ParsedMessage();
++
++private:
++    KeyedVector<AString, AString> mDict;
++    AString mContent;
++
++    ParsedMessage();
++
++    ssize_t parse(const char *data, size_t size, bool noMoreData);
++
++    DISALLOW_EVIL_CONSTRUCTORS(ParsedMessage);
++};
++
++}  // namespace android
+diff --git a/media/libstagefright/include/media/stagefright/SurfaceMediaSource.h b/media/libstagefright/include/media/stagefright/SurfaceMediaSource.h
+new file mode 100644
+index 0000000000..c67defe30b
+--- /dev/null
++++ b/media/libstagefright/include/media/stagefright/SurfaceMediaSource.h
+@@ -0,0 +1,248 @@
++/*
++ * Copyright (C) 2011 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#ifndef ANDROID_GUI_SURFACEMEDIASOURCE_H
++#define ANDROID_GUI_SURFACEMEDIASOURCE_H
++
++#include <gui/IGraphicBufferProducer.h>
++#include <gui/BufferQueue.h>
++
++#include <utils/threads.h>
++#include <utils/Vector.h>
++#include <media/stagefright/MediaSource.h>
++#include <media/stagefright/MediaBuffer.h>
++
++#include <media/hardware/MetadataBufferType.h>
++
++#include <media/stagefright/foundation/ABase.h>
++
++namespace android {
++// ----------------------------------------------------------------------------
++
++class String8;
++class GraphicBuffer;
++
++// ASSUMPTIONS
++// 1. SurfaceMediaSource is initialized with width*height which
++// can never change.  However, deqeueue buffer does not currently
++// enforce this as in BufferQueue, dequeue can be used by Surface
++// which can modify the default width and heght.  Also neither the width
++// nor height can be 0.
++// 2. setSynchronousMode is never used (basically no one should call
++// setSynchronousMode(false)
++// 3. setCrop, setTransform, setScalingMode should never be used
++// 4. queueBuffer returns a filled buffer to the SurfaceMediaSource. In addition, a
++// timestamp must be provided for the buffer. The timestamp is in
++// nanoseconds, and must be monotonically increasing. Its other semantics
++// (zero point, etc) are client-dependent and should be documented by the
++// client.
++// 5. Once disconnected, SurfaceMediaSource can be reused (can not
++// connect again)
++// 6. Stop is a hard stop, the last few frames held by the encoder
++// may be dropped.  It is possible to wait for the buffers to be
++// returned (but not implemented)
++
++#define DEBUG_PENDING_BUFFERS   0
++
++class SurfaceMediaSource : public MediaSource,
++                                public MediaBufferObserver,
++                                protected ConsumerListener {
++public:
++    enum { MIN_UNDEQUEUED_BUFFERS = 4};
++
++    struct FrameAvailableListener : public virtual RefBase {
++        // onFrameAvailable() is called from queueBuffer() is the FIFO is
++        // empty. You can use SurfaceMediaSource::getQueuedCount() to
++        // figure out if there are more frames waiting.
++        // This is called without any lock held can be called concurrently by
++        // multiple threads.
++        virtual void onFrameAvailable() = 0;
++    };
++
++    SurfaceMediaSource(uint32_t bufferWidth, uint32_t bufferHeight);
++
++    virtual ~SurfaceMediaSource();
++
++    // For the MediaSource interface for use by StageFrightRecorder:
++    virtual status_t start(MetaData *params = NULL);
++    virtual status_t stop();
++    virtual status_t read(MediaBufferBase **buffer,
++            const ReadOptions *options = NULL);
++    virtual sp<MetaData> getFormat();
++
++    // Get / Set the frame rate used for encoding. Default fps = 30
++    status_t setFrameRate(int32_t fps) ;
++    int32_t getFrameRate( ) const;
++
++    // The call for the StageFrightRecorder to tell us that
++    // it is done using the MediaBuffer data so that its state
++    // can be set to FREE for dequeuing
++    virtual void signalBufferReturned(MediaBufferBase* buffer);
++    // end of MediaSource interface
++
++    // getTimestamp retrieves the timestamp associated with the image
++    // set by the most recent call to read()
++    //
++    // The timestamp is in nanoseconds, and is monotonically increasing. Its
++    // other semantics (zero point, etc) are source-dependent and should be
++    // documented by the source.
++    int64_t getTimestamp();
++
++    // setFrameAvailableListener sets the listener object that will be notified
++    // when a new frame becomes available.
++    void setFrameAvailableListener(const sp<FrameAvailableListener>& listener);
++
++    // dump our state in a String
++    void dumpState(String8& result) const;
++    void dumpState(String8& result, const char* prefix, char* buffer,
++                                                    size_t SIZE) const;
++
++    // metaDataStoredInVideoBuffers tells the encoder what kind of metadata
++    // is passed through the buffers. Currently, it is set to ANWBuffer
++    MetadataBufferType metaDataStoredInVideoBuffers() const;
++
++    sp<IGraphicBufferProducer> getProducer() const { return mProducer; }
++
++    // To be called before start()
++    status_t setMaxAcquiredBufferCount(size_t count);
++
++    // To be called before start()
++    status_t setUseAbsoluteTimestamps();
++
++protected:
++
++    // Implementation of the BufferQueue::ConsumerListener interface.  These
++    // calls are used to notify the Surface of asynchronous events in the
++    // BufferQueue.
++    virtual void onFrameAvailable(const BufferItem& item);
++
++    // Used as a hook to BufferQueue::disconnect()
++    // This is called by the client side when it is done
++    // TODO: Currently, this also sets mStopped to true which
++    // is needed for unblocking the encoder which might be
++    // waiting to read more frames. So if on the client side,
++    // the same thread supplies the frames and also calls stop
++    // on the encoder, the client has to call disconnect before
++    // it calls stop.
++    // In the case of the camera,
++    // that need not be required since the thread supplying the
++    // frames is separate than the one calling stop.
++    virtual void onBuffersReleased();
++
++    // SurfaceMediaSource can't handle sideband streams, so this is not expected
++    // to ever be called. Does nothing.
++    virtual void onSidebandStreamChanged();
++
++    static bool isExternalFormat(uint32_t format);
++
++private:
++    // A BufferQueue, represented by these interfaces, is the exchange point
++    // between the producer and this consumer
++    sp<IGraphicBufferProducer> mProducer;
++    sp<IGraphicBufferConsumer> mConsumer;
++
++    struct SlotData {
++        sp<GraphicBuffer> mGraphicBuffer;
++        uint64_t mFrameNumber;
++    };
++
++    // mSlots caches GraphicBuffers and frameNumbers from the buffer queue
++    SlotData mSlots[BufferQueue::NUM_BUFFER_SLOTS];
++
++    // The permenent width and height of SMS buffers
++    int mWidth;
++    int mHeight;
++
++    // mCurrentSlot is the buffer slot index of the buffer that is currently
++    // being used by buffer consumer
++    // (e.g. StageFrightRecorder in the case of SurfaceMediaSource or GLTexture
++    // in the case of Surface).
++    // It is initialized to INVALID_BUFFER_SLOT,
++    // indicating that no buffer slot is currently bound to the texture. Note,
++    // however, that a value of INVALID_BUFFER_SLOT does not necessarily mean
++    // that no buffer is bound to the texture. A call to setBufferCount will
++    // reset mCurrentTexture to INVALID_BUFFER_SLOT.
++    int mCurrentSlot;
++
++    // mCurrentBuffers is a list of the graphic buffers that are being used by
++    // buffer consumer (i.e. the video encoder). It's possible that these
++    // buffers are not associated with any buffer slots, so we must track them
++    // separately.  Buffers are added to this list in read, and removed from
++    // this list in signalBufferReturned
++    Vector<sp<GraphicBuffer> > mCurrentBuffers;
++
++    size_t mNumPendingBuffers;
++
++#if DEBUG_PENDING_BUFFERS
++    Vector<MediaBufferBase *> mPendingBuffers;
++#endif
++
++    // mCurrentTimestamp is the timestamp for the current texture. It
++    // gets set to mLastQueuedTimestamp each time updateTexImage is called.
++    int64_t mCurrentTimestamp;
++
++    // mFrameAvailableListener is the listener object that will be called when a
++    // new frame becomes available. If it is not NULL it will be called from
++    // queueBuffer.
++    sp<FrameAvailableListener> mFrameAvailableListener;
++
++    // mMutex is the mutex used to prevent concurrent access to the member
++    // variables of SurfaceMediaSource objects. It must be locked whenever the
++    // member variables are accessed.
++    mutable Mutex mMutex;
++
++    ////////////////////////// For MediaSource
++    // Set to a default of 30 fps if not specified by the client side
++    int32_t mFrameRate;
++
++    // mStarted is a flag to check if the recording is going on
++    bool mStarted;
++
++    // mNumFramesReceived indicates the number of frames recieved from
++    // the client side
++    int mNumFramesReceived;
++    // mNumFramesEncoded indicates the number of frames passed on to the
++    // encoder
++    int mNumFramesEncoded;
++
++    // mFirstFrameTimestamp is the timestamp of the first received frame.
++    // It is used to offset the output timestamps so recording starts at time 0.
++    int64_t mFirstFrameTimestamp;
++    // mStartTimeNs is the start time passed into the source at start, used to
++    // offset timestamps.
++    int64_t mStartTimeNs;
++
++    size_t mMaxAcquiredBufferCount;
++
++    bool mUseAbsoluteTimestamps;
++
++    // mFrameAvailableCondition condition used to indicate whether there
++    // is a frame available for dequeuing
++    Condition mFrameAvailableCondition;
++
++    Condition mMediaBuffersAvailableCondition;
++
++    // Allocate and return a new MediaBuffer and pass the ANW buffer as metadata into it.
++    void passMetadataBuffer_l(MediaBufferBase **buffer, ANativeWindowBuffer *bufferHandle) const;
++
++    // Avoid copying and equating and default constructor
++    DISALLOW_EVIL_CONSTRUCTORS(SurfaceMediaSource);
++};
++
++// ----------------------------------------------------------------------------
++}; // namespace android
++
++#endif // ANDROID_GUI_SURFACEMEDIASOURCE_H
+diff --git a/media/libstagefright/tests/Android.bp b/media/libstagefright/tests/Android.bp
+index e6b67ce283..08cf42b88c 100644
+--- a/media/libstagefright/tests/Android.bp
++++ b/media/libstagefright/tests/Android.bp
+@@ -19,6 +19,45 @@ license {
+     ],
+ }
+ 
++cc_test {
++    name: "SurfaceMediaSource_test",
++
++    srcs: [
++        "SurfaceMediaSource_test.cpp",
++        "DummyRecorder.cpp",
++    ],
++
++    shared_libs: [
++        "libEGL",
++        "libGLESv2",
++        "libbinder",
++        "libcutils",
++        "libgui",
++        "libmedia",
++        "libstagefright",
++        "libstagefright_foundation",
++        "libstagefright_omx",
++        "libsync",
++        "libui",
++        "libutils",
++        "liblog",
++    ],
++
++    include_dirs: [
++        "frameworks/av/media/libstagefright",
++        "frameworks/av/media/libstagefright/include",
++        "frameworks/native/include/media/openmax",
++        "frameworks/native/include/media/hardware",
++    ],
++
++    cflags: [
++        "-Werror",
++        "-Wall",
++    ],
++
++    compile_multilib: "32",
++}
++
+ cc_test {
+     name: "MediaCodecListOverrides_test",
+ 
+diff --git a/media/libstagefright/tests/DummyRecorder.cpp b/media/libstagefright/tests/DummyRecorder.cpp
+new file mode 100644
+index 0000000000..596b7e6fd7
+--- /dev/null
++++ b/media/libstagefright/tests/DummyRecorder.cpp
+@@ -0,0 +1,91 @@
++/*
++ * Copyright (C) 2011 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#define LOG_TAG "DummyRecorder"
++// #define LOG_NDEBUG 0
++
++#include <media/stagefright/MediaSource.h>
++#include <media/stagefright/MediaBuffer.h>
++#include "DummyRecorder.h"
++
++#include <utils/Log.h>
++
++namespace android {
++
++// static
++void *DummyRecorder::threadWrapper(void *pthis) {
++    ALOGV("ThreadWrapper: %p", pthis);
++    DummyRecorder *writer = static_cast<DummyRecorder *>(pthis);
++    writer->readFromSource();
++    return NULL;
++}
++
++
++status_t DummyRecorder::start() {
++    ALOGV("Start");
++    mStarted = true;
++
++    mSource->start();
++
++    pthread_attr_t attr;
++    pthread_attr_init(&attr);
++    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
++    int err = pthread_create(&mThread, &attr, threadWrapper, this);
++    pthread_attr_destroy(&attr);
++
++    if (err) {
++        ALOGE("Error creating thread!");
++        return -ENODEV;
++    }
++    return OK;
++}
++
++
++status_t DummyRecorder::stop() {
++    ALOGV("Stop");
++    mStarted = false;
++
++    mSource->stop();
++    void *dummy;
++    pthread_join(mThread, &dummy);
++    status_t err = static_cast<status_t>(reinterpret_cast<uintptr_t>(dummy));
++
++    ALOGV("Ending the reading thread");
++    return err;
++}
++
++// pretend to read the source buffers
++void DummyRecorder::readFromSource() {
++    ALOGV("ReadFromSource");
++    if (!mStarted) {
++        return;
++    }
++
++    status_t err = OK;
++    MediaBufferBase *buffer;
++    ALOGV("A fake writer accessing the frames");
++    while (mStarted && (err = mSource->read(&buffer)) == OK){
++        // if not getting a valid buffer from source, then exit
++        if (buffer == NULL) {
++            return;
++        }
++        buffer->release();
++        buffer = NULL;
++    }
++}
++
++
++} // end of namespace android
+diff --git a/media/libstagefright/tests/DummyRecorder.h b/media/libstagefright/tests/DummyRecorder.h
+new file mode 100644
+index 0000000000..33c26f4995
+--- /dev/null
++++ b/media/libstagefright/tests/DummyRecorder.h
+@@ -0,0 +1,56 @@
++/*
++ * Copyright (C) 2011 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#ifndef DUMMY_RECORDER_H_
++#define DUMMY_RECORDER_H_
++
++#include <pthread.h>
++#include <utils/String8.h>
++#include <media/stagefright/foundation/ABase.h>
++
++
++namespace android {
++
++struct MediaSource;
++class MediaBuffer;
++
++class DummyRecorder {
++    public:
++    // The media source from which this will receive frames
++    sp<MediaSource> mSource;
++    bool mStarted;
++    pthread_t mThread;
++
++    status_t start();
++    status_t stop();
++
++    // actual entry point for the thread
++    void readFromSource();
++
++    // static function to wrap the actual thread entry point
++    static void *threadWrapper(void *pthis);
++
++    explicit DummyRecorder(const sp<MediaSource> &source) : mSource(source)
++                                                    , mStarted(false) {}
++    ~DummyRecorder( ) {}
++
++    private:
++
++    DISALLOW_EVIL_CONSTRUCTORS(DummyRecorder);
++};
++
++} // end of namespace android
++#endif
+diff --git a/media/libstagefright/tests/SurfaceMediaSource_test.cpp b/media/libstagefright/tests/SurfaceMediaSource_test.cpp
+new file mode 100644
+index 0000000000..1b1c3b8cdb
+--- /dev/null
++++ b/media/libstagefright/tests/SurfaceMediaSource_test.cpp
+@@ -0,0 +1,944 @@
++/*
++ * Copyright (C) 2011 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++//#define LOG_NDEBUG 0
++#define LOG_TAG "SurfaceMediaSource_test"
++
++#include <gtest/gtest.h>
++#include <utils/String8.h>
++#include <utils/String16.h>
++#include <utils/Errors.h>
++#include <fcntl.h>
++#include <unistd.h>
++
++#include <GLES2/gl2.h>
++
++#include <media/stagefright/SurfaceMediaSource.h>
++#include <media/mediarecorder.h>
++
++#include <ui/GraphicBuffer.h>
++#include <gui/Surface.h>
++#include <gui/ISurfaceComposer.h>
++#include <gui/Surface.h>
++#include <gui/SurfaceComposerClient.h>
++
++#include <binder/ProcessState.h>
++
++#include <media/stagefright/foundation/ADebug.h>
++#include <OMX_Component.h>
++
++#include "DummyRecorder.h"
++
++
++namespace android {
++
++class GLTest : public ::testing::Test {
++protected:
++
++    GLTest():
++            mEglDisplay(EGL_NO_DISPLAY),
++            mEglSurface(EGL_NO_SURFACE),
++            mEglContext(EGL_NO_CONTEXT) {
++    }
++
++    virtual void SetUp() {
++        ALOGV("GLTest::SetUp()");
++        mEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
++        ASSERT_EQ(EGL_SUCCESS, eglGetError());
++        ASSERT_NE(EGL_NO_DISPLAY, mEglDisplay);
++
++        EGLint majorVersion;
++        EGLint minorVersion;
++        EXPECT_TRUE(eglInitialize(mEglDisplay, &majorVersion, &minorVersion));
++        ASSERT_EQ(EGL_SUCCESS, eglGetError());
++        RecordProperty("EglVersionMajor", majorVersion);
++        RecordProperty("EglVersionMajor", minorVersion);
++
++        EGLint numConfigs = 0;
++        EXPECT_TRUE(eglChooseConfig(mEglDisplay, getConfigAttribs(), &mGlConfig,
++                1, &numConfigs));
++        ASSERT_EQ(EGL_SUCCESS, eglGetError());
++
++        char* displaySecsEnv = getenv("GLTEST_DISPLAY_SECS");
++        if (displaySecsEnv != NULL) {
++            mDisplaySecs = atoi(displaySecsEnv);
++            if (mDisplaySecs < 0) {
++                mDisplaySecs = 0;
++            }
++        } else {
++            mDisplaySecs = 0;
++        }
++
++        if (mDisplaySecs > 0) {
++            mComposerClient = new SurfaceComposerClient;
++            ASSERT_EQ(NO_ERROR, mComposerClient->initCheck());
++
++            mSurfaceControl = mComposerClient->createSurface(
++                    String8("Test Surface"),
++                    getSurfaceWidth(), getSurfaceHeight(),
++                    PIXEL_FORMAT_RGB_888, 0);
++
++            ASSERT_TRUE(mSurfaceControl != NULL);
++            ASSERT_TRUE(mSurfaceControl->isValid());
++
++            SurfaceComposerClient::Transaction{}
++                    .setLayer(mSurfaceControl, 0x7FFFFFFF)
++                    .show(mSurfaceControl)
++                    .apply();
++
++            sp<ANativeWindow> window = mSurfaceControl->getSurface();
++            mEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
++                    window.get(), NULL);
++        } else {
++            ALOGV("No actual display. Choosing EGLSurface based on SurfaceMediaSource");
++            sp<IGraphicBufferProducer> sms = (new SurfaceMediaSource(
++                    getSurfaceWidth(), getSurfaceHeight()))->getProducer();
++            sp<Surface> stc = new Surface(sms);
++            sp<ANativeWindow> window = stc;
++
++            mEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
++                    window.get(), NULL);
++        }
++        ASSERT_EQ(EGL_SUCCESS, eglGetError());
++        ASSERT_NE(EGL_NO_SURFACE, mEglSurface);
++
++        mEglContext = eglCreateContext(mEglDisplay, mGlConfig, EGL_NO_CONTEXT,
++                getContextAttribs());
++        ASSERT_EQ(EGL_SUCCESS, eglGetError());
++        ASSERT_NE(EGL_NO_CONTEXT, mEglContext);
++
++        EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface,
++                mEglContext));
++        ASSERT_EQ(EGL_SUCCESS, eglGetError());
++
++        EGLint w, h;
++        EXPECT_TRUE(eglQuerySurface(mEglDisplay, mEglSurface, EGL_WIDTH, &w));
++        ASSERT_EQ(EGL_SUCCESS, eglGetError());
++        EXPECT_TRUE(eglQuerySurface(mEglDisplay, mEglSurface, EGL_HEIGHT, &h));
++        ASSERT_EQ(EGL_SUCCESS, eglGetError());
++        RecordProperty("EglSurfaceWidth", w);
++        RecordProperty("EglSurfaceHeight", h);
++
++        glViewport(0, 0, w, h);
++        ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
++    }
++
++    virtual void TearDown() {
++        // Display the result
++        if (mDisplaySecs > 0 && mEglSurface != EGL_NO_SURFACE) {
++            eglSwapBuffers(mEglDisplay, mEglSurface);
++            sleep(mDisplaySecs);
++        }
++
++        if (mComposerClient != NULL) {
++            mComposerClient->dispose();
++        }
++        if (mEglContext != EGL_NO_CONTEXT) {
++            eglDestroyContext(mEglDisplay, mEglContext);
++        }
++        if (mEglSurface != EGL_NO_SURFACE) {
++            eglDestroySurface(mEglDisplay, mEglSurface);
++        }
++        if (mEglDisplay != EGL_NO_DISPLAY) {
++            eglTerminate(mEglDisplay);
++        }
++        ASSERT_EQ(EGL_SUCCESS, eglGetError());
++    }
++
++    virtual EGLint const* getConfigAttribs() {
++        ALOGV("GLTest getConfigAttribs");
++        static EGLint sDefaultConfigAttribs[] = {
++            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
++            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
++            EGL_RED_SIZE, 8,
++            EGL_GREEN_SIZE, 8,
++            EGL_BLUE_SIZE, 8,
++            EGL_ALPHA_SIZE, 8,
++            EGL_DEPTH_SIZE, 16,
++            EGL_STENCIL_SIZE, 8,
++            EGL_NONE };
++
++        return sDefaultConfigAttribs;
++    }
++
++    virtual EGLint const* getContextAttribs() {
++        static EGLint sDefaultContextAttribs[] = {
++            EGL_CONTEXT_CLIENT_VERSION, 2,
++            EGL_NONE };
++
++        return sDefaultContextAttribs;
++    }
++
++    virtual EGLint getSurfaceWidth() {
++        return 512;
++    }
++
++    virtual EGLint getSurfaceHeight() {
++        return 512;
++    }
++
++    void loadShader(GLenum shaderType, const char* pSource, GLuint* outShader) {
++        GLuint shader = glCreateShader(shaderType);
++        ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
++        if (shader) {
++            glShaderSource(shader, 1, &pSource, NULL);
++            ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
++            glCompileShader(shader);
++            ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
++            GLint compiled = 0;
++            glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
++            ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
++            if (!compiled) {
++                GLint infoLen = 0;
++                glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
++                ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
++                if (infoLen) {
++                    char* buf = (char*) malloc(infoLen);
++                    if (buf) {
++                        glGetShaderInfoLog(shader, infoLen, NULL, buf);
++                        printf("Shader compile log:\n%s\n", buf);
++                        free(buf);
++                        FAIL();
++                    }
++                } else {
++                    char* buf = (char*) malloc(0x1000);
++                    if (buf) {
++                        glGetShaderInfoLog(shader, 0x1000, NULL, buf);
++                        printf("Shader compile log:\n%s\n", buf);
++                        free(buf);
++                        FAIL();
++                    }
++                }
++                glDeleteShader(shader);
++                shader = 0;
++            }
++        }
++        ASSERT_TRUE(shader != 0);
++        *outShader = shader;
++    }
++
++    void createProgram(const char* pVertexSource, const char* pFragmentSource,
++            GLuint* outPgm) {
++        GLuint vertexShader, fragmentShader;
++        {
++            SCOPED_TRACE("compiling vertex shader");
++            loadShader(GL_VERTEX_SHADER, pVertexSource, &vertexShader);
++            if (HasFatalFailure()) {
++                return;
++            }
++        }
++        {
++            SCOPED_TRACE("compiling fragment shader");
++            loadShader(GL_FRAGMENT_SHADER, pFragmentSource, &fragmentShader);
++            if (HasFatalFailure()) {
++                return;
++            }
++        }
++
++        GLuint program = glCreateProgram();
++        ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
++        if (program) {
++            glAttachShader(program, vertexShader);
++            ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
++            glAttachShader(program, fragmentShader);
++            ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
++            glLinkProgram(program);
++            GLint linkStatus = GL_FALSE;
++            glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
++            if (linkStatus != GL_TRUE) {
++                GLint bufLength = 0;
++                glGetProgramiv(program, GL_INFO_LOG_LENGTH, &bufLength);
++                if (bufLength) {
++                    char* buf = (char*) malloc(bufLength);
++                    if (buf) {
++                        glGetProgramInfoLog(program, bufLength, NULL, buf);
++                        printf("Program link log:\n%s\n", buf);
++                        free(buf);
++                        FAIL();
++                    }
++                }
++                glDeleteProgram(program);
++                program = 0;
++            }
++        }
++        glDeleteShader(vertexShader);
++        glDeleteShader(fragmentShader);
++        ASSERT_TRUE(program != 0);
++        *outPgm = program;
++    }
++
++    static int abs(int value) {
++        return value > 0 ? value : -value;
++    }
++
++    ::testing::AssertionResult checkPixel(int x, int y, int r,
++            int g, int b, int a, int tolerance=2) {
++        GLubyte pixel[4];
++        String8 msg;
++        glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
++        GLenum err = glGetError();
++        if (err != GL_NO_ERROR) {
++            msg += String8::format("error reading pixel: %#x", err);
++            while ((err = glGetError()) != GL_NO_ERROR) {
++                msg += String8::format(", %#x", err);
++            }
++            fprintf(stderr, "pixel check failure: %s\n", msg.string());
++            return ::testing::AssertionFailure(
++                    ::testing::Message(msg.string()));
++        }
++        if (r >= 0 && abs(r - int(pixel[0])) > tolerance) {
++            msg += String8::format("r(%d isn't %d)", pixel[0], r);
++        }
++        if (g >= 0 && abs(g - int(pixel[1])) > tolerance) {
++            if (!msg.isEmpty()) {
++                msg += " ";
++            }
++            msg += String8::format("g(%d isn't %d)", pixel[1], g);
++        }
++        if (b >= 0 && abs(b - int(pixel[2])) > tolerance) {
++            if (!msg.isEmpty()) {
++                msg += " ";
++            }
++            msg += String8::format("b(%d isn't %d)", pixel[2], b);
++        }
++        if (a >= 0 && abs(a - int(pixel[3])) > tolerance) {
++            if (!msg.isEmpty()) {
++                msg += " ";
++            }
++            msg += String8::format("a(%d isn't %d)", pixel[3], a);
++        }
++        if (!msg.isEmpty()) {
++            fprintf(stderr, "pixel check failure: %s\n", msg.string());
++            return ::testing::AssertionFailure(
++                    ::testing::Message(msg.string()));
++        } else {
++            return ::testing::AssertionSuccess();
++        }
++    }
++
++    int mDisplaySecs;
++    sp<SurfaceComposerClient> mComposerClient;
++    sp<SurfaceControl> mSurfaceControl;
++
++    EGLDisplay mEglDisplay;
++    EGLSurface mEglSurface;
++    EGLContext mEglContext;
++    EGLConfig  mGlConfig;
++};
++
++///////////////////////////////////////////////////////////////////////
++//    Class for  the NON-GL tests
++///////////////////////////////////////////////////////////////////////
++class SurfaceMediaSourceTest : public ::testing::Test {
++public:
++
++    SurfaceMediaSourceTest( ): mYuvTexWidth(176), mYuvTexHeight(144) { }
++    void oneBufferPass(int width, int height );
++    void oneBufferPassNoFill(int width, int height );
++    static void fillYV12Buffer(uint8_t* buf, int w, int h, int stride) ;
++    static void fillYV12BufferRect(uint8_t* buf, int w, int h,
++                        int stride, const android_native_rect_t& rect) ;
++protected:
++
++    virtual void SetUp() {
++        android::ProcessState::self()->startThreadPool();
++        mSMS = new SurfaceMediaSource(mYuvTexWidth, mYuvTexHeight);
++        mSTC = new Surface(mSMS->getProducer());
++        mANW = mSTC;
++    }
++
++    virtual void TearDown() {
++        mSMS.clear();
++        mSTC.clear();
++        mANW.clear();
++    }
++
++    const int mYuvTexWidth;
++    const int mYuvTexHeight;
++
++    sp<SurfaceMediaSource> mSMS;
++    sp<Surface> mSTC;
++    sp<ANativeWindow> mANW;
++};
++
++///////////////////////////////////////////////////////////////////////
++//    Class for  the GL tests
++///////////////////////////////////////////////////////////////////////
++class SurfaceMediaSourceGLTest : public GLTest {
++public:
++
++    SurfaceMediaSourceGLTest( ): mYuvTexWidth(176), mYuvTexHeight(144) { }
++    virtual EGLint const* getConfigAttribs();
++    void oneBufferPassGL(int num = 0);
++    static sp<MediaRecorder> setUpMediaRecorder(int fileDescriptor, int videoSource,
++        int outputFormat, int videoEncoder, int width, int height, int fps);
++protected:
++
++    virtual void SetUp() {
++        ALOGV("SMS-GLTest::SetUp()");
++        android::ProcessState::self()->startThreadPool();
++        mSMS = new SurfaceMediaSource(mYuvTexWidth, mYuvTexHeight);
++        mSTC = new Surface(mSMS->getProducer());
++        mANW = mSTC;
++
++        // Doing the setup related to the GL Side
++        GLTest::SetUp();
++    }
++
++    virtual void TearDown() {
++        mSMS.clear();
++        mSTC.clear();
++        mANW.clear();
++        GLTest::TearDown();
++    }
++
++    void setUpEGLSurfaceFromMediaRecorder(sp<MediaRecorder>& mr);
++
++    const int mYuvTexWidth;
++    const int mYuvTexHeight;
++
++    sp<SurfaceMediaSource> mSMS;
++    sp<Surface> mSTC;
++    sp<ANativeWindow> mANW;
++};
++
++/////////////////////////////////////////////////////////////////////
++// Methods in SurfaceMediaSourceGLTest
++/////////////////////////////////////////////////////////////////////
++EGLint const* SurfaceMediaSourceGLTest::getConfigAttribs() {
++        ALOGV("SurfaceMediaSourceGLTest getConfigAttribs");
++    static EGLint sDefaultConfigAttribs[] = {
++        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
++        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
++        EGL_RED_SIZE, 8,
++        EGL_GREEN_SIZE, 8,
++        EGL_BLUE_SIZE, 8,
++        EGL_RECORDABLE_ANDROID, EGL_TRUE,
++        EGL_NONE };
++
++    return sDefaultConfigAttribs;
++}
++
++// One pass of dequeuing and queuing a GLBuffer
++void SurfaceMediaSourceGLTest::oneBufferPassGL(int num) {
++    int d = num % 50;
++    float f = 0.2f; // 0.1f * d;
++
++    glClearColor(0, 0.3, 0, 0.6);
++    glClear(GL_COLOR_BUFFER_BIT);
++
++    glEnable(GL_SCISSOR_TEST);
++    glScissor(4 + d, 4 + d, 4, 4);
++    glClearColor(1.0 - f, f, f, 1.0);
++    glClear(GL_COLOR_BUFFER_BIT);
++
++    glScissor(24 + d, 48 + d, 4, 4);
++    glClearColor(f, 1.0 - f, f, 1.0);
++    glClear(GL_COLOR_BUFFER_BIT);
++
++    glScissor(37 + d, 17 + d, 4, 4);
++    glClearColor(f, f, 1.0 - f, 1.0);
++    glClear(GL_COLOR_BUFFER_BIT);
++
++    // The following call dequeues and queues the buffer
++    eglSwapBuffers(mEglDisplay, mEglSurface);
++    ASSERT_EQ(EGL_SUCCESS, eglGetError());
++    glDisable(GL_SCISSOR_TEST);
++}
++
++// Set up the MediaRecorder which runs in the same process as mediaserver
++sp<MediaRecorder> SurfaceMediaSourceGLTest::setUpMediaRecorder(int fd, int videoSource,
++        int outputFormat, int videoEncoder, int width, int height, int fps) {
++    sp<MediaRecorder> mr = new MediaRecorder(String16());
++    mr->setVideoSource(videoSource);
++    mr->setOutputFormat(outputFormat);
++    mr->setVideoEncoder(videoEncoder);
++    mr->setOutputFile(fd);
++    mr->setVideoSize(width, height);
++    mr->setVideoFrameRate(fps);
++    mr->prepare();
++    ALOGV("Starting MediaRecorder...");
++    CHECK_EQ((status_t)OK, mr->start());
++    return mr;
++}
++
++// query the mediarecorder for a surfacemeidasource and create an egl surface with that
++void SurfaceMediaSourceGLTest::setUpEGLSurfaceFromMediaRecorder(sp<MediaRecorder>& mr) {
++    sp<IGraphicBufferProducer> iST = mr->querySurfaceMediaSourceFromMediaServer();
++    mSTC = new Surface(iST);
++    mANW = mSTC;
++
++    if (mEglSurface != EGL_NO_SURFACE) {
++        EXPECT_TRUE(eglDestroySurface(mEglDisplay, mEglSurface));
++        mEglSurface = EGL_NO_SURFACE;
++    }
++    mEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
++                                mANW.get(), NULL);
++    ASSERT_EQ(EGL_SUCCESS, eglGetError());
++    ASSERT_NE(EGL_NO_SURFACE, mEglSurface) ;
++
++    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface,
++            mEglContext));
++    ASSERT_EQ(EGL_SUCCESS, eglGetError());
++}
++
++
++/////////////////////////////////////////////////////////////////////
++// Methods in SurfaceMediaSourceTest
++/////////////////////////////////////////////////////////////////////
++
++// One pass of dequeuing and queuing the buffer. Fill it in with
++// cpu YV12 buffer
++void SurfaceMediaSourceTest::oneBufferPass(int width, int height ) {
++    ANativeWindowBuffer* anb;
++    ASSERT_EQ(NO_ERROR, native_window_dequeue_buffer_and_wait(mANW.get(), &anb));
++    ASSERT_TRUE(anb != NULL);
++
++
++    // Fill the buffer with the a checkerboard pattern
++    uint8_t* img = NULL;
++    sp<GraphicBuffer> buf(GraphicBuffer::from(anb));
++    buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
++    SurfaceMediaSourceTest::fillYV12Buffer(img, width, height, buf->getStride());
++    buf->unlock();
++
++    ASSERT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(), buf->getNativeBuffer(),
++            -1));
++}
++
++// Dequeuing and queuing the buffer without really filling it in.
++void SurfaceMediaSourceTest::oneBufferPassNoFill(
++        int /* width */, int /* height  */) {
++    ANativeWindowBuffer* anb;
++    ASSERT_EQ(NO_ERROR, native_window_dequeue_buffer_and_wait(mANW.get(), &anb));
++    ASSERT_TRUE(anb != NULL);
++
++    // We do not fill the buffer in. Just queue it back.
++    sp<GraphicBuffer> buf(GraphicBuffer::from(anb));
++    ASSERT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(), buf->getNativeBuffer(),
++            -1));
++}
++
++// Fill a YV12 buffer with a multi-colored checkerboard pattern
++void SurfaceMediaSourceTest::fillYV12Buffer(uint8_t* buf, int w, int h, int stride) {
++    const int blockWidth = w > 16 ? w / 16 : 1;
++    const int blockHeight = h > 16 ? h / 16 : 1;
++    const int yuvTexOffsetY = 0;
++    int yuvTexStrideY = stride;
++    int yuvTexOffsetV = yuvTexStrideY * h;
++    int yuvTexStrideV = (yuvTexStrideY/2 + 0xf) & ~0xf;
++    int yuvTexOffsetU = yuvTexOffsetV + yuvTexStrideV * h/2;
++    int yuvTexStrideU = yuvTexStrideV;
++    for (int x = 0; x < w; x++) {
++        for (int y = 0; y < h; y++) {
++            int parityX = (x / blockWidth) & 1;
++            int parityY = (y / blockHeight) & 1;
++            unsigned char intensity = (parityX ^ parityY) ? 63 : 191;
++            buf[yuvTexOffsetY + (y * yuvTexStrideY) + x] = intensity;
++            if (x < w / 2 && y < h / 2) {
++                buf[yuvTexOffsetU + (y * yuvTexStrideU) + x] = intensity;
++                if (x * 2 < w / 2 && y * 2 < h / 2) {
++                    buf[yuvTexOffsetV + (y*2 * yuvTexStrideV) + x*2 + 0] =
++                    buf[yuvTexOffsetV + (y*2 * yuvTexStrideV) + x*2 + 1] =
++                    buf[yuvTexOffsetV + ((y*2+1) * yuvTexStrideV) + x*2 + 0] =
++                    buf[yuvTexOffsetV + ((y*2+1) * yuvTexStrideV) + x*2 + 1] =
++                        intensity;
++                }
++            }
++        }
++    }
++}
++
++// Fill a YV12 buffer with red outside a given rectangle and green inside it.
++void SurfaceMediaSourceTest::fillYV12BufferRect(uint8_t* buf, int w,
++                  int h, int stride, const android_native_rect_t& rect) {
++    const int yuvTexOffsetY = 0;
++    int yuvTexStrideY = stride;
++    int yuvTexOffsetV = yuvTexStrideY * h;
++    int yuvTexStrideV = (yuvTexStrideY/2 + 0xf) & ~0xf;
++    int yuvTexOffsetU = yuvTexOffsetV + yuvTexStrideV * h/2;
++    int yuvTexStrideU = yuvTexStrideV;
++    for (int x = 0; x < w; x++) {
++        for (int y = 0; y < h; y++) {
++            bool inside = rect.left <= x && x < rect.right &&
++                    rect.top <= y && y < rect.bottom;
++            buf[yuvTexOffsetY + (y * yuvTexStrideY) + x] = inside ? 240 : 64;
++            if (x < w / 2 && y < h / 2) {
++                bool inside = rect.left <= 2*x && 2*x < rect.right &&
++                        rect.top <= 2*y && 2*y < rect.bottom;
++                buf[yuvTexOffsetU + (y * yuvTexStrideU) + x] = 16;
++                buf[yuvTexOffsetV + (y * yuvTexStrideV) + x] =
++                                                inside ? 16 : 255;
++            }
++        }
++    }
++}  ///////// End of class SurfaceMediaSourceTest
++
++///////////////////////////////////////////////////////////////////
++// Class to imitate the recording     /////////////////////////////
++// ////////////////////////////////////////////////////////////////
++struct SimpleDummyRecorder {
++        sp<MediaSource> mSource;
++
++        explicit SimpleDummyRecorder
++                (const sp<MediaSource> &source): mSource(source) {}
++
++        status_t start() { return mSource->start();}
++        status_t stop()  { return mSource->stop();}
++
++        // fakes reading from a media source
++        status_t readFromSource() {
++            MediaBufferBase *buffer;
++            status_t err = mSource->read(&buffer);
++            if (err != OK) {
++                return err;
++            }
++            buffer->release();
++            buffer = NULL;
++            return OK;
++        }
++};
++///////////////////////////////////////////////////////////////////
++//           TESTS
++// SurfaceMediaSourceTest class contains tests that fill the buffers
++// using the cpu calls
++// SurfaceMediaSourceGLTest class contains tests that fill the buffers
++// using the GL calls.
++// TODO: None of the tests actually verify the encoded images.. so at this point,
++// these are mostly functionality tests + visual inspection
++//////////////////////////////////////////////////////////////////////
++
++// Just pass one buffer from the native_window to the SurfaceMediaSource
++// Dummy Encoder
++static int testId = 1;
++TEST_F(SurfaceMediaSourceTest, DISABLED_DummyEncodingFromCpuFilledYV12BufferNpotOneBufferPass) {
++    ALOGV("Test # %d", testId++);
++    ALOGV("Testing OneBufferPass ******************************");
++
++    ASSERT_EQ(NO_ERROR, native_window_set_buffers_format(mANW.get(),
++            HAL_PIXEL_FORMAT_YV12));
++    oneBufferPass(mYuvTexWidth, mYuvTexHeight);
++}
++
++// Pass the buffer with the wrong height and weight and should not be accepted
++// Dummy Encoder
++TEST_F(SurfaceMediaSourceTest, DISABLED_DummyEncodingFromCpuFilledYV12BufferNpotWrongSizeBufferPass) {
++    ALOGV("Test # %d", testId++);
++    ALOGV("Testing Wrong size BufferPass ******************************");
++
++    // setting the client side buffer size different than the server size
++    ASSERT_EQ(NO_ERROR, native_window_set_buffers_dimensions(mANW.get(),
++             10, 10));
++    ASSERT_EQ(NO_ERROR, native_window_set_buffers_format(mANW.get(),
++            HAL_PIXEL_FORMAT_YV12));
++
++    ANativeWindowBuffer* anb;
++
++    // Note: make sure we get an ERROR back when dequeuing!
++    ASSERT_NE(NO_ERROR, native_window_dequeue_buffer_and_wait(mANW.get(), &anb));
++}
++
++// pass multiple buffers from the native_window the SurfaceMediaSource
++// Dummy Encoder
++TEST_F(SurfaceMediaSourceTest,  DISABLED_DummyEncodingFromCpuFilledYV12BufferNpotMultiBufferPass) {
++    ALOGV("Test # %d", testId++);
++    ALOGV("Testing MultiBufferPass, Dummy Recorder *********************");
++    ASSERT_EQ(NO_ERROR, native_window_set_buffers_format(mANW.get(),
++            HAL_PIXEL_FORMAT_YV12));
++
++    SimpleDummyRecorder writer(mSMS);
++    writer.start();
++
++    int32_t nFramesCount = 0;
++    while (nFramesCount < 300) {
++        oneBufferPass(mYuvTexWidth, mYuvTexHeight);
++
++        ASSERT_EQ(NO_ERROR, writer.readFromSource());
++
++        nFramesCount++;
++    }
++    writer.stop();
++}
++
++// Delayed pass of multiple buffers from the native_window the SurfaceMediaSource
++// Dummy Encoder
++TEST_F(SurfaceMediaSourceTest,  DummyLagEncodingFromCpuFilledYV12BufferNpotMultiBufferPass) {
++    ALOGV("Test # %d", testId++);
++    ALOGV("Testing MultiBufferPass, Dummy Recorder Lagging **************");
++
++    ASSERT_EQ(NO_ERROR, native_window_set_buffers_format(mANW.get(),
++            HAL_PIXEL_FORMAT_YV12));
++
++    SimpleDummyRecorder writer(mSMS);
++    writer.start();
++
++    int32_t nFramesCount = 1;
++    const int FRAMES_LAG = SurfaceMediaSource::MIN_UNDEQUEUED_BUFFERS;
++
++    while (nFramesCount <= 300) {
++        ALOGV("Frame: %d", nFramesCount);
++        oneBufferPass(mYuvTexWidth, mYuvTexHeight);
++        // Forcing the writer to lag behind a few frames
++        if (nFramesCount > FRAMES_LAG) {
++            ASSERT_EQ(NO_ERROR, writer.readFromSource());
++        }
++        nFramesCount++;
++    }
++    writer.stop();
++}
++
++// pass multiple buffers from the native_window the SurfaceMediaSource
++// A dummy writer (MULTITHREADED) is used to simulate actual MPEG4Writer
++TEST_F(SurfaceMediaSourceTest, DummyThreadedEncodingFromCpuFilledYV12BufferNpotMultiBufferPass) {
++    ALOGV("Test # %d", testId++);
++    ALOGV("Testing MultiBufferPass, Dummy Recorder Multi-Threaded **********");
++    ASSERT_EQ(NO_ERROR, native_window_set_buffers_format(mANW.get(),
++            HAL_PIXEL_FORMAT_YV12));
++
++    DummyRecorder writer(mSMS);
++    writer.start();
++
++    int32_t nFramesCount = 0;
++    while (nFramesCount <= 300) {
++        ALOGV("Frame: %d", nFramesCount);
++        oneBufferPass(mYuvTexWidth, mYuvTexHeight);
++
++        nFramesCount++;
++    }
++    writer.stop();
++}
++
++// Test to examine actual encoding using mediarecorder
++// We use the mediaserver to create a mediarecorder and send
++// it back to us. So SurfaceMediaSource lives in the same process
++// as the mediaserver.
++// Very close to the actual camera, except that the
++// buffers are filled and queueud by the CPU instead of GL.
++TEST_F(SurfaceMediaSourceTest, DISABLED_EncodingFromCpuYV12BufferNpotWriteMediaServer) {
++    ALOGV("Test # %d", testId++);
++    ALOGV("************** Testing the whole pipeline with actual MediaRecorder ***********");
++    ALOGV("************** SurfaceMediaSource is same process as mediaserver    ***********");
++
++    const char *fileName = "/sdcard/outputSurfEncMSource.mp4";
++    int fd = open(fileName, O_RDWR | O_CREAT, 0744);
++    if (fd < 0) {
++        ALOGE("ERROR: Could not open the the file %s, fd = %d !!", fileName, fd);
++    }
++    CHECK(fd >= 0);
++
++    sp<MediaRecorder> mr = SurfaceMediaSourceGLTest::setUpMediaRecorder(fd,
++            VIDEO_SOURCE_SURFACE, OUTPUT_FORMAT_MPEG_4, VIDEO_ENCODER_H264,
++            mYuvTexWidth, mYuvTexHeight, 30);
++    // get the reference to the surfacemediasource living in
++    // mediaserver that is created by stagefrightrecorder
++    sp<IGraphicBufferProducer> iST = mr->querySurfaceMediaSourceFromMediaServer();
++    mSTC = new Surface(iST);
++    mANW = mSTC;
++    ASSERT_EQ(NO_ERROR, native_window_api_connect(mANW.get(), NATIVE_WINDOW_API_CPU));
++    ASSERT_EQ(NO_ERROR, native_window_set_buffers_format(mANW.get(),
++                                                HAL_PIXEL_FORMAT_YV12));
++
++    int32_t nFramesCount = 0;
++    while (nFramesCount <= 300) {
++        oneBufferPassNoFill(mYuvTexWidth, mYuvTexHeight);
++        nFramesCount++;
++        ALOGV("framesCount = %d", nFramesCount);
++    }
++
++    ASSERT_EQ(NO_ERROR, native_window_api_disconnect(mANW.get(), NATIVE_WINDOW_API_CPU));
++    ALOGV("Stopping MediaRecorder...");
++    CHECK_EQ((status_t)OK, mr->stop());
++    mr.clear();
++    close(fd);
++}
++
++//////////////////////////////////////////////////////////////////////
++// GL tests
++/////////////////////////////////////////////////////////////////////
++
++// Test to examine whether we can choose the Recordable Android GLConfig
++// DummyRecorder used- no real encoding here
++TEST_F(SurfaceMediaSourceGLTest, ChooseAndroidRecordableEGLConfigDummyWriter) {
++    ALOGV("Test # %d", testId++);
++    ALOGV("Verify creating a surface w/ right config + dummy writer*********");
++
++    mSMS = new SurfaceMediaSource(mYuvTexWidth, mYuvTexHeight);
++    mSTC = new Surface(mSMS->getProducer());
++    mANW = mSTC;
++
++    DummyRecorder writer(mSMS);
++    writer.start();
++
++    if (mEglSurface != EGL_NO_SURFACE) {
++        EXPECT_TRUE(eglDestroySurface(mEglDisplay, mEglSurface));
++        mEglSurface = EGL_NO_SURFACE;
++    }
++
++    mEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
++                                mANW.get(), NULL);
++    ASSERT_EQ(EGL_SUCCESS, eglGetError());
++    ASSERT_NE(EGL_NO_SURFACE, mEglSurface) ;
++
++    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface,
++            mEglContext));
++    ASSERT_EQ(EGL_SUCCESS, eglGetError());
++
++    int32_t nFramesCount = 0;
++    while (nFramesCount <= 300) {
++        oneBufferPassGL();
++        nFramesCount++;
++        ALOGV("framesCount = %d", nFramesCount);
++    }
++
++    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
++            EGL_NO_CONTEXT));
++    ASSERT_EQ(EGL_SUCCESS, eglGetError());
++    eglDestroySurface(mEglDisplay, mEglSurface);
++    mEglSurface = EGL_NO_SURFACE;
++
++    writer.stop();
++}
++// Test to examine whether we can render GL buffers in to the surface
++// created with the native window handle
++TEST_F(SurfaceMediaSourceGLTest, RenderingToRecordableEGLSurfaceWorks) {
++    ALOGV("Test # %d", testId++);
++    ALOGV("RenderingToRecordableEGLSurfaceWorks *********************");
++    // Do the producer side of things
++    glClearColor(0.6, 0.6, 0.6, 0.6);
++    glClear(GL_COLOR_BUFFER_BIT);
++
++    glEnable(GL_SCISSOR_TEST);
++    glScissor(4, 4, 4, 4);
++    glClearColor(1.0, 0.0, 0.0, 1.0);
++    glClear(GL_COLOR_BUFFER_BIT);
++
++    glScissor(24, 48, 4, 4);
++    glClearColor(0.0, 1.0, 0.0, 1.0);
++    glClear(GL_COLOR_BUFFER_BIT);
++
++    glScissor(37, 17, 4, 4);
++    glClearColor(0.0, 0.0, 1.0, 1.0);
++    glClear(GL_COLOR_BUFFER_BIT);
++
++    EXPECT_TRUE(checkPixel( 0,  0, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel(63,  0, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel(63, 63, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel( 0, 63, 153, 153, 153, 153));
++
++    EXPECT_TRUE(checkPixel( 4,  7, 255,   0,   0, 255));
++    EXPECT_TRUE(checkPixel(25, 51,   0, 255,   0, 255));
++    EXPECT_TRUE(checkPixel(40, 19,   0,   0, 255, 255));
++    EXPECT_TRUE(checkPixel(29, 51, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel( 5, 32, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel(13,  8, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel(46,  3, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel(30, 33, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel( 6, 52, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel(55, 33, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel(16, 29, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel( 1, 30, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel(41, 37, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel(46, 29, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel(15, 25, 153, 153, 153, 153));
++    EXPECT_TRUE(checkPixel( 3, 52, 153, 153, 153, 153));
++}
++
++// Test to examine the actual encoding with GL buffers
++// Actual encoder, Actual GL Buffers Filled SurfaceMediaSource
++// The same pattern is rendered every frame
++TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaSameImageEachBufNpotWrite) {
++    ALOGV("Test # %d", testId++);
++    ALOGV("************** Testing the whole pipeline with actual Recorder ***********");
++    ALOGV("************** GL Filling the buffers ***********");
++    // Note: No need to set the colorformat for the buffers. The colorformat is
++    // in the GRAlloc buffers itself.
++
++    const char *fileName = "/sdcard/outputSurfEncMSourceGL.mp4";
++    int fd = open(fileName, O_RDWR | O_CREAT, 0744);
++    if (fd < 0) {
++        ALOGE("ERROR: Could not open the the file %s, fd = %d !!", fileName, fd);
++    }
++    CHECK(fd >= 0);
++
++    sp<MediaRecorder> mr = setUpMediaRecorder(fd, VIDEO_SOURCE_SURFACE,
++            OUTPUT_FORMAT_MPEG_4, VIDEO_ENCODER_H264, mYuvTexWidth, mYuvTexHeight, 30);
++
++    // get the reference to the surfacemediasource living in
++    // mediaserver that is created by stagefrightrecorder
++    setUpEGLSurfaceFromMediaRecorder(mr);
++
++    int32_t nFramesCount = 0;
++    while (nFramesCount <= 300) {
++        oneBufferPassGL();
++        nFramesCount++;
++        ALOGV("framesCount = %d", nFramesCount);
++    }
++
++    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
++            EGL_NO_CONTEXT));
++    ASSERT_EQ(EGL_SUCCESS, eglGetError());
++    eglDestroySurface(mEglDisplay, mEglSurface);
++    mEglSurface = EGL_NO_SURFACE;
++
++    ALOGV("Stopping MediaRecorder...");
++    CHECK_EQ((status_t)OK, mr->stop());
++    mr.clear();
++    close(fd);
++}
++
++// Test to examine the actual encoding from the GL Buffers
++// Actual encoder, Actual GL Buffers Filled SurfaceMediaSource
++// A different pattern is rendered every frame
++TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaDiffImageEachBufNpotWrite) {
++    ALOGV("Test # %d", testId++);
++    ALOGV("************** Testing the whole pipeline with actual Recorder ***********");
++    ALOGV("************** Diff GL Filling the buffers ***********");
++    // Note: No need to set the colorformat for the buffers. The colorformat is
++    // in the GRAlloc buffers itself.
++
++    const char *fileName = "/sdcard/outputSurfEncMSourceGLDiff.mp4";
++    int fd = open(fileName, O_RDWR | O_CREAT, 0744);
++    if (fd < 0) {
++        ALOGE("ERROR: Could not open the the file %s, fd = %d !!", fileName, fd);
++    }
++    CHECK(fd >= 0);
++
++    sp<MediaRecorder> mr = setUpMediaRecorder(fd, VIDEO_SOURCE_SURFACE,
++            OUTPUT_FORMAT_MPEG_4, VIDEO_ENCODER_H264, mYuvTexWidth, mYuvTexHeight, 30);
++
++    // get the reference to the surfacemediasource living in
++    // mediaserver that is created by stagefrightrecorder
++    setUpEGLSurfaceFromMediaRecorder(mr);
++
++    int32_t nFramesCount = 0;
++    while (nFramesCount <= 300) {
++        oneBufferPassGL(nFramesCount);
++        nFramesCount++;
++        ALOGV("framesCount = %d", nFramesCount);
++    }
++
++    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
++            EGL_NO_CONTEXT));
++    ASSERT_EQ(EGL_SUCCESS, eglGetError());
++    eglDestroySurface(mEglDisplay, mEglSurface);
++    mEglSurface = EGL_NO_SURFACE;
++
++    ALOGV("Stopping MediaRecorder...");
++    CHECK_EQ((status_t)OK, mr->stop());
++    mr.clear();
++    close(fd);
++}
++} // namespace android
 diff --git a/media/libstagefright/wifi-display/Android.bp b/media/libstagefright/wifi-display/Android.bp
 new file mode 100644
-index 0000000000..fb08c5b072
+index 0000000000..2f1e74943f
 --- /dev/null
 +++ b/media/libstagefright/wifi-display/Android.bp
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,57 @@
 +cc_library_shared {
 +    name: "libstagefright_wfd",
 +
@@ -1160,11 +5045,17 @@ index 0000000000..fb08c5b072
 +        "libcutils",
 +        "liblog",
 +        "libmedia",
++        "libmedia_omx",
 +        "libstagefright",
 +        "libstagefright_foundation",
 +        "libui",
 +        "libgui",
 +        "libutils",
++    ],
++
++    header_libs: [
++        "libmediadrm_headers",
++        "libmediametrics_headers",
 +    ],
 +
 +    cflags: [
@@ -1185,7 +5076,7 @@ index 0000000000..fb08c5b072
 +}
 diff --git a/media/libstagefright/wifi-display/MediaSender.cpp b/media/libstagefright/wifi-display/MediaSender.cpp
 new file mode 100644
-index 0000000000..6c7731779e
+index 0000000000..f74421173c
 --- /dev/null
 +++ b/media/libstagefright/wifi-display/MediaSender.cpp
 @@ -0,0 +1,518 @@
@@ -1214,14 +5105,14 @@ index 0000000000..6c7731779e
 +#include "rtp/RTPSender.h"
 +#include "source/TSPacketizer.h"
 +
-+#include "include/avc_utils.h"
-+
 +#include <media/IHDCP.h>
-+#include <media/stagefright/MediaBuffer.h>
++#include <media/stagefright/foundation/avc_utils.h>
 +#include <media/stagefright/foundation/ABuffer.h>
 +#include <media/stagefright/foundation/ADebug.h>
 +#include <media/stagefright/foundation/AMessage.h>
-+#include <media/stagefright/foundation/ANetworkSession.h>
++#include <media/stagefright/ANetworkSession.h>
++#include <media/stagefright/MediaBuffer.h>
++#include <media/stagefright/MediaBufferBase.h>
 +#include <ui/GraphicBuffer.h>
 +
 +namespace android {
@@ -1591,7 +5482,7 @@ index 0000000000..6c7731779e
 +    bool manuallyPrependSPSPPS =
 +        !info.mIsAudio
 +        && (info.mFlags & FLAG_MANUALLY_PREPEND_SPS_PPS)
-+        && IsIDR(accessUnit);
++        && IsIDR(accessUnit->data(), accessUnit->size());
 +
 +    if (mHDCP != NULL && !info.mIsAudio) {
 +        isHDCPEncrypted = true;
@@ -2729,7 +6620,7 @@ index 0000000000..a03d16519e
 +#endif  // RTP_BASE_H_
 diff --git a/media/libstagefright/wifi-display/rtp/RTPSender.cpp b/media/libstagefright/wifi-display/rtp/RTPSender.cpp
 new file mode 100644
-index 0000000000..e5aeb03cf1
+index 0000000000..e2afb6d7b6
 --- /dev/null
 +++ b/media/libstagefright/wifi-display/rtp/RTPSender.cpp
 @@ -0,0 +1,807 @@
@@ -2755,15 +6646,15 @@ index 0000000000..e5aeb03cf1
 +
 +#include "RTPSender.h"
 +
++#include <media/stagefright/foundation/avc_utils.h>
 +#include <media/stagefright/foundation/ABuffer.h>
 +#include <media/stagefright/foundation/ADebug.h>
 +#include <media/stagefright/foundation/AMessage.h>
-+#include <media/stagefright/foundation/ANetworkSession.h>
++#include <media/stagefright/foundation/ByteUtils.h>
 +#include <media/stagefright/foundation/hexdump.h>
++#include <media/stagefright/ANetworkSession.h>
 +#include <media/stagefright/MediaErrors.h>
 +#include <media/stagefright/Utils.h>
-+
-+#include "include/avc_utils.h"
 +
 +namespace android {
 +
@@ -3667,10 +7558,10 @@ index 0000000000..bedfd01a8a
 +#endif  // RTP_SENDER_H_
 diff --git a/media/libstagefright/wifi-display/source/Converter.cpp b/media/libstagefright/wifi-display/source/Converter.cpp
 new file mode 100644
-index 0000000000..273af18d62
+index 0000000000..5502b063ab
 --- /dev/null
 +++ b/media/libstagefright/wifi-display/source/Converter.cpp
-@@ -0,0 +1,821 @@
+@@ -0,0 +1,826 @@
 +/*
 + * Copyright 2012, The Android Open Source Project
 + *
@@ -3694,19 +7585,20 @@ index 0000000000..273af18d62
 +#include "Converter.h"
 +
 +#include "MediaPuller.h"
-+#include "include/avc_utils.h"
 +
 +#include <cutils/properties.h>
 +#include <gui/Surface.h>
-+#include <media/ICrypto.h>
++#include <mediadrm/ICrypto.h>
 +#include <media/MediaCodecBuffer.h>
++#include <media/stagefright/foundation/avc_utils.h>
 +#include <media/stagefright/foundation/ABuffer.h>
 +#include <media/stagefright/foundation/ADebug.h>
 +#include <media/stagefright/foundation/AMessage.h>
-+#include <media/stagefright/MediaBuffer.h>
++#include <media/stagefright/MediaBufferBase.h>
 +#include <media/stagefright/MediaCodec.h>
 +#include <media/stagefright/MediaDefs.h>
 +#include <media/stagefright/MediaErrors.h>
++#include <media/MediaBufferHolder.h>
 +
 +#include <arpa/inet.h>
 +
@@ -3978,7 +7870,7 @@ index 0000000000..273af18d62
 +                    sp<ABuffer> accessUnit;
 +                    CHECK(msg->findBuffer("accessUnit", &accessUnit));
 +
-+                    accessUnit->setMediaBufferBase(NULL);
++                    accessUnit->meta()->setObject("mediaBufferHolder", sp<MediaBufferHolder>(nullptr));
 +                }
 +                break;
 +            }
@@ -4001,7 +7893,7 @@ index 0000000000..273af18d62
 +                        ALOGI("dropping frame.");
 +                    }
 +
-+                    accessUnit->setMediaBufferBase(NULL);
++                    accessUnit->meta()->setObject("mediaBufferHolder", sp<MediaBufferHolder>(nullptr));
 +                    break;
 +                }
 +
@@ -4298,13 +8190,17 @@ index 0000000000..273af18d62
 +                   buffer->data(),
 +                   buffer->size());
 +
-+            MediaBuffer *mediaBuffer =
-+                (MediaBuffer *)(buffer->getMediaBufferBase());
-+            if (mediaBuffer != NULL) {
-+                mEncoderInputBuffers.itemAt(bufferIndex)->setMediaBufferBase(
-+                        mediaBuffer);
++            MediaBufferBase *mediaBuffer = NULL;
++            sp<RefBase> holder;
 +
-+                buffer->setMediaBufferBase(NULL);
++            if (buffer->meta()->findObject("mediaBufferHolder", &holder)) {
++                mediaBuffer = (holder != nullptr) ?
++                    static_cast<MediaBufferHolder*>(holder.get())->mediaBuffer() : nullptr;
++            }
++            if (mediaBuffer != NULL) {
++                mEncoderInputBuffers.itemAt(bufferIndex)->meta()->setObject("mediaBufferHolder", new MediaBufferHolder(mediaBuffer));
++
++                buffer->meta()->setObject("mediaBufferHolder", sp<MediaBufferHolder>(nullptr));
 +            }
 +        } else {
 +            flags = MediaCodec::BUFFER_FLAG_EOS;
@@ -4436,7 +8332,7 @@ index 0000000000..273af18d62
 +                if (mNeedToManuallyPrependSPSPPS
 +                        && mIsH264
 +                        && (mFlags & FLAG_PREPEND_CSD_IF_NECESSARY)
-+                        && IsIDR(buffer)) {
++                        && IsIDR(buffer->data(), buffer->size())) {
 +                    buffer = prependCSD(buffer);
 +                }
 +
@@ -4657,10 +8553,10 @@ index 0000000000..ad95ab5ce9
 +#endif  // CONVERTER_H_
 diff --git a/media/libstagefright/wifi-display/source/MediaPuller.cpp b/media/libstagefright/wifi-display/source/MediaPuller.cpp
 new file mode 100644
-index 0000000000..15d5ddbb26
+index 0000000000..b4030808f1
 --- /dev/null
 +++ b/media/libstagefright/wifi-display/source/MediaPuller.cpp
-@@ -0,0 +1,223 @@
+@@ -0,0 +1,226 @@
 +/*
 + * Copyright 2012, The Android Open Source Project
 + *
@@ -4686,9 +8582,10 @@ index 0000000000..15d5ddbb26
 +#include <media/stagefright/foundation/ABuffer.h>
 +#include <media/stagefright/foundation/ADebug.h>
 +#include <media/stagefright/foundation/AMessage.h>
-+#include <media/stagefright/MediaBuffer.h>
++#include <media/stagefright/MediaBufferBase.h>
 +#include <media/stagefright/MediaSource.h>
 +#include <media/stagefright/MetaData.h>
++#include <media/MediaBufferHolder.h>
 +
 +namespace android {
 +
@@ -4801,7 +8698,7 @@ index 0000000000..15d5ddbb26
 +                break;
 +            }
 +
-+            MediaBuffer *mbuf;
++            MediaBufferBase *mbuf;
 +            status_t err = mSource->read(&mbuf);
 +
 +            if (mPaused) {
@@ -4826,7 +8723,7 @@ index 0000000000..15d5ddbb26
 +                notify->post();
 +            } else {
 +                int64_t timeUs;
-+                CHECK(mbuf->meta_data()->findInt64(kKeyTime, &timeUs));
++                CHECK(mbuf->meta_data().findInt64(kKeyTime, &timeUs));
 +
 +                sp<ABuffer> accessUnit = new ABuffer(mbuf->range_length());
 +
@@ -4840,9 +8737,11 @@ index 0000000000..15d5ddbb26
 +                    mbuf->release();
 +                    mbuf = NULL;
 +                } else {
-+                    // video encoder will release MediaBuffer when done
++                    // video encoder will release MediaBufferBase when done
 +                    // with underlying data.
-+                    accessUnit->setMediaBufferBase(mbuf);
++                    accessUnit->meta()->setObject("mediaBufferHolder", new MediaBufferHolder(mbuf));
++                    mbuf->release();
++                    mbuf = NULL;
 +                }
 +
 +                sp<AMessage> notify = mNotify->dup();
@@ -4960,10 +8859,10 @@ index 0000000000..1291bb3f9e
 +#endif  // MEDIA_PULLER_H_
 diff --git a/media/libstagefright/wifi-display/source/PlaybackSession.cpp b/media/libstagefright/wifi-display/source/PlaybackSession.cpp
 new file mode 100644
-index 0000000000..3355f0e3fa
+index 0000000000..f441d07dd2
 --- /dev/null
 +++ b/media/libstagefright/wifi-display/source/PlaybackSession.cpp
-@@ -0,0 +1,1111 @@
+@@ -0,0 +1,1115 @@
 +/*
 + * Copyright 2012, The Android Open Source Project
 + *
@@ -4989,13 +8888,13 @@ index 0000000000..3355f0e3fa
 +#include "Converter.h"
 +#include "MediaPuller.h"
 +#include "RepeaterSource.h"
-+#include "include/avc_utils.h"
 +#include "WifiDisplaySource.h"
 +
 +#include <binder/IServiceManager.h>
 +#include <cutils/properties.h>
 +#include <media/IHDCP.h>
 +#include <media/IMediaHTTPService.h>
++#include <media/stagefright/foundation/avc_utils.h>
 +#include <media/stagefright/foundation/ABitReader.h>
 +#include <media/stagefright/foundation/ABuffer.h>
 +#include <media/stagefright/foundation/ADebug.h>
@@ -5009,6 +8908,7 @@ index 0000000000..3355f0e3fa
 +#include <media/stagefright/NuMediaExtractor.h>
 +#include <media/stagefright/SurfaceMediaSource.h>
 +#include <media/stagefright/Utils.h>
++#include <media/IOMX.h>
 +
 +#include <OMX_IVCommon.h>
 +
@@ -5713,7 +9613,7 @@ index 0000000000..3355f0e3fa
 +
 +status_t WifiDisplaySource::PlaybackSession::setupMediaPacketizer(
 +        bool enableAudio, bool enableVideo) {
-+    mExtractor = new NuMediaExtractor;
++    mExtractor = new NuMediaExtractor(NuMediaExtractor::EntryPoint::OTHER);
 +
 +    status_t err = mExtractor->setDataSource(
 +            NULL /* httpService */, mMediaPath.c_str());
@@ -6035,8 +9935,11 @@ index 0000000000..3355f0e3fa
 +}
 +
 +status_t WifiDisplaySource::PlaybackSession::addAudioSource(bool usePCMAudio) {
++    audio_attributes_t attr = AUDIO_ATTRIBUTES_INITIALIZER;
++    attr.source = AUDIO_SOURCE_REMOTE_SUBMIX;
++
 +    sp<AudioSource> audioSource = new AudioSource(
-+            AUDIO_SOURCE_REMOTE_SUBMIX,
++            &attr,
 +            mOpPackageName,
 +            48000 /* sampleRate */,
 +            2 /* channelCount */);
@@ -6258,7 +10161,7 @@ index 0000000000..88b7e3d180
 +#endif  // PLAYBACK_SESSION_H_
 diff --git a/media/libstagefright/wifi-display/source/RepeaterSource.cpp b/media/libstagefright/wifi-display/source/RepeaterSource.cpp
 new file mode 100644
-index 0000000000..af6b66337d
+index 0000000000..e225a02773
 --- /dev/null
 +++ b/media/libstagefright/wifi-display/source/RepeaterSource.cpp
 @@ -0,0 +1,219 @@
@@ -6271,7 +10174,7 @@ index 0000000000..af6b66337d
 +#include <media/stagefright/foundation/ADebug.h>
 +#include <media/stagefright/foundation/ALooper.h>
 +#include <media/stagefright/foundation/AMessage.h>
-+#include <media/stagefright/MediaBuffer.h>
++#include <media/stagefright/MediaBufferBase.h>
 +#include <media/stagefright/MetaData.h>
 +
 +namespace android {
@@ -6371,7 +10274,7 @@ index 0000000000..af6b66337d
 +}
 +
 +status_t RepeaterSource::read(
-+        MediaBuffer **buffer, const ReadOptions *options) {
++        MediaBufferBase **buffer, const ReadOptions *options) {
 +    int64_t seekTimeUs;
 +    ReadOptions::SeekMode seekMode;
 +    CHECK(options == NULL || !options->getSeekTo(&seekTimeUs, &seekMode));
@@ -6419,7 +10322,7 @@ index 0000000000..af6b66337d
 +            {
 +                mBuffer->add_ref();
 +                *buffer = mBuffer;
-+                (*buffer)->meta_data()->setInt64(kKeyTime, bufferTimeUs);
++                (*buffer)->meta_data().setInt64(kKeyTime, bufferTimeUs);
 +                ++mFrameCount;
 +            }
 +        }
@@ -6444,7 +10347,7 @@ index 0000000000..af6b66337d
 +    switch (msg->what()) {
 +        case kWhatRead:
 +        {
-+            MediaBuffer *buffer;
++            MediaBufferBase *buffer;
 +            status_t err = mSource->read(&buffer);
 +
 +            ALOGV("read mbuf %p", buffer);
@@ -6483,7 +10386,7 @@ index 0000000000..af6b66337d
 +}  // namespace android
 diff --git a/media/libstagefright/wifi-display/source/RepeaterSource.h b/media/libstagefright/wifi-display/source/RepeaterSource.h
 new file mode 100644
-index 0000000000..8d414fd538
+index 0000000000..1647fb1c1f
 --- /dev/null
 +++ b/media/libstagefright/wifi-display/source/RepeaterSource.h
 @@ -0,0 +1,67 @@
@@ -6509,7 +10412,7 @@ index 0000000000..8d414fd538
 +    virtual sp<MetaData> getFormat();
 +
 +    virtual status_t read(
-+            MediaBuffer **buffer, const ReadOptions *options);
++            MediaBufferBase **buffer, const ReadOptions *options);
 +
 +    void onMessageReceived(const sp<AMessage> &msg);
 +
@@ -6539,7 +10442,7 @@ index 0000000000..8d414fd538
 +    sp<ALooper> mLooper;
 +    sp<AHandlerReflector<RepeaterSource> > mReflector;
 +
-+    MediaBuffer *mBuffer;
++    MediaBufferBase *mBuffer;
 +    status_t mResult;
 +    int64_t mLastBufferUpdateUs;
 +
@@ -6556,7 +10459,7 @@ index 0000000000..8d414fd538
 +#endif // REPEATER_SOURCE_H_
 diff --git a/media/libstagefright/wifi-display/source/TSPacketizer.cpp b/media/libstagefright/wifi-display/source/TSPacketizer.cpp
 new file mode 100644
-index 0000000000..fbe5bba816
+index 0000000000..c990fda201
 --- /dev/null
 +++ b/media/libstagefright/wifi-display/source/TSPacketizer.cpp
 @@ -0,0 +1,1054 @@
@@ -6581,8 +10484,8 @@ index 0000000000..fbe5bba816
 +#include <utils/Log.h>
 +
 +#include "TSPacketizer.h"
-+#include "include/avc_utils.h"
 +
++#include <media/stagefright/foundation/avc_utils.h>
 +#include <media/stagefright/foundation/ABuffer.h>
 +#include <media/stagefright/foundation/ADebug.h>
 +#include <media/stagefright/foundation/AMessage.h>
@@ -7033,7 +10936,7 @@ index 0000000000..fbe5bba816
 +    const sp<Track> &track = mTracks.itemAt(trackIndex);
 +
 +    if (track->isH264() && (flags & PREPEND_SPS_PPS_TO_IDR_FRAMES)
-+            && IsIDR(accessUnit)) {
++            && IsIDR(accessUnit->data(), accessUnit->size())) {
 +        // prepend codec specific data, i.e. SPS and PPS.
 +        accessUnit = track->prependCSD(accessUnit);
 +    } else if (track->isAAC() && track->lacksADTSHeader()) {
@@ -7601,7 +11504,7 @@ index 0000000000..fbe5bba816
 +    CHECK_LT(trackIndex, mTracks.size());
 +
 +    const sp<Track> &track = mTracks.itemAt(trackIndex);
-+    CHECK(track->isH264() && IsIDR(accessUnit));
++    CHECK(track->isH264() && IsIDR(accessUnit->data(), accessUnit->size()));
 +
 +    int64_t timeUs;
 +    CHECK(accessUnit->meta()->findInt64("timeUs", &timeUs));
@@ -7715,10 +11618,10 @@ index 0000000000..def95669ff
 +#endif  // TS_PACKETIZER_H_
 diff --git a/media/libstagefright/wifi-display/source/WifiDisplaySource.cpp b/media/libstagefright/wifi-display/source/WifiDisplaySource.cpp
 new file mode 100644
-index 0000000000..4c02e14e20
+index 0000000000..b2b325f63c
 --- /dev/null
 +++ b/media/libstagefright/wifi-display/source/WifiDisplaySource.cpp
-@@ -0,0 +1,1736 @@
+@@ -0,0 +1,1737 @@
 +/*
 + * Copyright 2012, The Android Open Source Project
 + *
@@ -7743,6 +11646,7 @@ index 0000000000..4c02e14e20
 +#include "PlaybackSession.h"
 +#include "Parameters.h"
 +#include "rtp/RTPSender.h"
++#include <media/stagefright/FoundationUtils.h>
 +
 +#include <binder/IServiceManager.h>
 +#include <gui/IGraphicBufferProducer.h>
@@ -7752,7 +11656,7 @@ index 0000000000..4c02e14e20
 +#include <media/stagefright/foundation/ABuffer.h>
 +#include <media/stagefright/foundation/ADebug.h>
 +#include <media/stagefright/foundation/AMessage.h>
-+#include <media/stagefright/foundation/ParsedMessage.h>
++#include <media/stagefright/ParsedMessage.h>
 +#include <media/stagefright/MediaErrors.h>
 +#include <media/stagefright/Utils.h>
 +
@@ -7799,11 +11703,11 @@ index 0000000000..4c02e14e20
 +    mSupportedSourceVideoFormats.disableAll();
 +
 +    mSupportedSourceVideoFormats.setNativeResolution(
-+            VideoFormats::RESOLUTION_CEA, 5);  // 1280x720 p30
++            VideoFormats::RESOLUTION_CEA, 8);  // 1920x1080p60
 +
-+    // Enable all resolutions up to 1280x720p30
++    // Enable all resolutions up to 1920x1080p60
 +    mSupportedSourceVideoFormats.enableResolutionUpto(
-+            VideoFormats::RESOLUTION_CEA, 5,
++            VideoFormats::RESOLUTION_CEA, 8,
 +            VideoFormats::PROFILE_CHP,  // Constrained High Profile
 +            VideoFormats::LEVEL_32);    // Level 3.2
 +}
@@ -9457,7 +13361,7 @@ index 0000000000..4c02e14e20
 +}  // namespace android
 diff --git a/media/libstagefright/wifi-display/source/WifiDisplaySource.h b/media/libstagefright/wifi-display/source/WifiDisplaySource.h
 new file mode 100644
-index 0000000000..c25a675ee2
+index 0000000000..47047f8f7b
 --- /dev/null
 +++ b/media/libstagefright/wifi-display/source/WifiDisplaySource.h
 @@ -0,0 +1,278 @@
@@ -9484,7 +13388,7 @@ index 0000000000..c25a675ee2
 +#include "VideoFormats.h"
 +
 +#include <media/stagefright/foundation/AHandler.h>
-+#include <media/stagefright/foundation/ANetworkSession.h>
++#include <media/stagefright/ANetworkSession.h>
 +
 +#include <netinet/in.h>
 +
@@ -9739,6 +13643,55 @@ index 0000000000..c25a675ee2
 +}  // namespace android
 +
 +#endif  // WIFI_DISPLAY_SOURCE_H_
+diff --git a/services/audiopolicy/enginedefault/src/Engine.cpp b/services/audiopolicy/enginedefault/src/Engine.cpp
+index 52b9826c2f..d0087b2d8c 100644
+--- a/services/audiopolicy/enginedefault/src/Engine.cpp
++++ b/services/audiopolicy/enginedefault/src/Engine.cpp
+@@ -401,6 +401,10 @@ DeviceVector Engine::getDevicesForStrategyInt(legacy_strategy strategy,
+             devices2 = availableOutputDevices.getDevicesFromType(
+                     AUDIO_DEVICE_OUT_ANLG_DOCK_HEADSET);
+         }
++        if ((devices2.isEmpty()) && (strategy != STRATEGY_SONIFICATION)) {
++            // no sonification on WFD sink
++            devices2 = availableOutputDevices.getDevicesFromType(AUDIO_DEVICE_OUT_PROXY);
++        }
+         if (devices2.isEmpty()) {
+             devices2 = availableOutputDevices.getFirstDevicesFromTypes({
+                         AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET, AUDIO_DEVICE_OUT_SPEAKER});
+diff --git a/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp b/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+index 140cabb808..357e2bf5d8 100644
+--- a/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
++++ b/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+@@ -615,7 +615,7 @@ Status AudioPolicyService::getInputForAttr(const media::AudioAttributesInternal&
+     // type is API_INPUT_MIX_EXT_POLICY_REROUTE and by AudioService if a media projection
+     // is used and input type is API_INPUT_MIX_PUBLIC_CAPTURE_PLAYBACK
+     // - ECHO_REFERENCE source is controlled by captureAudioOutputAllowed()
+-    if (!(recordingAllowed(attributionSource, inputSource)
++    if (!isAudioServerOrMediaServerUid(attributionSource.uid) && !(recordingAllowed(attributionSource, inputSource)
+             || inputSource == AUDIO_SOURCE_FM_TUNER
+             || inputSource == AUDIO_SOURCE_REMOTE_SUBMIX
+             || inputSource == AUDIO_SOURCE_ECHO_REFERENCE)) {
+@@ -696,7 +696,7 @@ Status AudioPolicyService::getInputForAttr(const media::AudioAttributesInternal&
+                 // FIXME: use the same permission as for remote submix for now.
+                 FALLTHROUGH_INTENDED;
+             case AudioPolicyInterface::API_INPUT_MIX_CAPTURE:
+-                if (!canCaptureOutput) {
++                if (!isAudioServerOrMediaServerUid(attributionSource.uid) && !canCaptureOutput) {
+                     ALOGE("%s permission denied: capture not allowed", __func__);
+                     status = PERMISSION_DENIED;
+                 }
+@@ -780,8 +780,9 @@ Status AudioPolicyService::startInput(int32_t portIdAidl)
+     std::stringstream msg;
+     msg << "Audio recording on session " << client->session;
+ 
+-    // check calling permissions
+-    if (!(startRecording(client->attributionSource, String16(msg.str().c_str()),
++
++     // check calling permissions
++    if (!isAudioServerOrMediaServerUid(client->attributionSource.uid) && !(startRecording(client->attributionSource, String16(msg.str().c_str()),
+                          client->attributes.source)
+             || client->attributes.source == AUDIO_SOURCE_FM_TUNER
+             || client->attributes.source == AUDIO_SOURCE_REMOTE_SUBMIX
 -- 
 2.34.1
 
