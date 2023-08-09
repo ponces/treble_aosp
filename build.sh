@@ -92,6 +92,29 @@ generatePackages() {
     echo
 }
 
+generateOta() {
+    echo "--> Generating OTA file"
+    version="$(date +v%Y.%m.%d)"
+    timestamp="$START"
+    json="{\"version\": \"$version\",\"date\": \"$timestamp\",\"variants\": ["
+    find $BD/ -name "aosp-*" | sort | {
+        while read file; do
+            filename="$(basename $file)"
+            if [[ $filename == *"vanilla"* ]]; then
+                name="treble_arm64_bvN"
+            else
+                name="treble_arm64_bgN"
+            fi
+            size=$(wc -c $file | awk '{print $1}')
+            url="https://github.com/ponces/treble_build_aosp/releases/download/$version/$filename"
+            json="${json} {\"name\": \"$name\",\"size\": \"$size\",\"url\": \"$url\"},"
+        done
+        json="${json%?}]}"
+        echo "$json" | jq . > $BL/ota.json
+    }
+    echo
+}
+
 START=$(date +%s)
 
 initRepos
@@ -102,6 +125,7 @@ buildTrebleApp
 buildVanillaVariant
 buildGappsVariant
 generatePackages
+generateOta
 
 END=$(date +%s)
 ELAPSEDM=$(($(($END-$START))/60))
