@@ -1,0 +1,16 @@
+{
+  "version": "v2023.08.22",
+  "date": "1692720226",
+  "variants": [
+    {
+      "name": "treble_arm64_bgN",
+      "size": "1050818680",
+      "url": "https://github.com/ponces/treble_build_aosp/releases/download/v2023.08.22/aosp-arm64-ab-gapps-13.0-20230822.img.xz"
+    },
+    {
+      "name": "treble_arm64_bvN",
+      "size": "641639512",
+      "url": "https://github.com/ponces/treble_build_aosp/releases/download/v2023.08.22/aosp-arm64-ab-vanilla-13.0-20230822.img.xz"
+    }
+  ]
+}
