@@ -1,8 +1,8 @@
-From a05e7866b74891933d1c5d244b00029ee0a5fbe3 Mon Sep 17 00:00:00 2001
+From 35747a1fe78a5c35320a3409687da6e1ca9fcc0d Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 14 Aug 2019 23:37:10 +0200
-Subject: [PATCH 01/10] On Samsung, we need to send a hack-message to HAL to
- get all Sensors
+Subject: [PATCH 1/6] On Samsung, we need to send a hack-message to HAL to get
+ all Sensors
 
 Change-Id: Id6a1fa48340de61c418493668e9abd22c2599376
 ---
@@ -10,7 +10,7 @@ Change-Id: Id6a1fa48340de61c418493668e9abd22c2599376
  1 file changed, 3 insertions(+)
 
 diff --git a/services/sensorservice/SensorDevice.cpp b/services/sensorservice/SensorDevice.cpp
-index de050e02d0..3daeece62b 100644
+index 10ca990f87..e603f6d404 100644
 --- a/services/sensorservice/SensorDevice.cpp
 +++ b/services/sensorservice/SensorDevice.cpp
 @@ -38,6 +38,7 @@
@@ -19,9 +19,9 @@ index de050e02d0..3daeece62b 100644
  
 +#include <android-base/properties.h>
  using namespace android::hardware::sensors;
- using android::hardware::Return;
  using android::util::ProtoOutputStream;
-@@ -77,6 +78,8 @@ SensorDevice::SensorDevice() {
+ 
+@@ -76,6 +77,8 @@ SensorDevice::SensorDevice() {
  }
  
  void SensorDevice::initializeSensorList() {
@@ -31,5 +31,5 @@ index de050e02d0..3daeece62b 100644
          return;
      }
 -- 
-2.25.1
+2.34.1
 

@@ -1,4 +1,4 @@
-From d0da7fbdcc0cc4a65cd6f7c3ada20d36b0aed418 Mon Sep 17 00:00:00 2001
+From c2af11313cd418df8c7172f15b9e211552fecc4f Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Wed, 8 Dec 2021 07:04:53 +0000
 Subject: [PATCH 3/4] Remove init.vndk-nodef.rc
@@ -19,10 +19,10 @@ Change-Id: I7c14fe5229e953f620bb225fa5c981752d0ac5f9
  delete mode 100644 target/product/gsi/init.vndk-nodef.rc
 
 diff --git a/target/product/gsi/Android.mk b/target/product/gsi/Android.mk
-index 85e551d3f2..c1f37e07fa 100644
+index 107c94f685..0ad39c3610 100644
 --- a/target/product/gsi/Android.mk
 +++ b/target/product/gsi/Android.mk
-@@ -247,16 +247,3 @@ LOCAL_SYSTEM_EXT_MODULE := true
+@@ -256,16 +256,3 @@ LOCAL_SYSTEM_EXT_MODULE := true
  LOCAL_MODULE_RELATIVE_PATH := init
  
  include $(BUILD_PREBUILT)
@@ -59,17 +59,17 @@ index 1b141a05e7..0000000000
 -    # Reboot if BOARD_VNDK_VERSION is not defined
 -    exec - root -- /system/bin/reboot bootloader
 diff --git a/target/product/gsi_release.mk b/target/product/gsi_release.mk
-index 74501cd1f1..575e90b148 100644
+index 3b977927d1..7bade98ca1 100644
 --- a/target/product/gsi_release.mk
 +++ b/target/product/gsi_release.mk
-@@ -60,7 +60,6 @@ PRODUCT_PACKAGES += com.android.apex.cts.shim.v1_with_prebuilts.flattened
+@@ -62,7 +62,6 @@ PRODUCT_PACKAGES += com.android.apex.cts.shim.v1_with_prebuilts.flattened
  PRODUCT_PACKAGES += \
      gsi_skip_mount.cfg \
      init.gsi.rc \
 -    init.vndk-nodef.rc \
  
- # Support additional VNDK snapshots
- PRODUCT_EXTRA_VNDK_VERSIONS := \
+ # Overlay the GSI specific SystemUI setting
+ PRODUCT_PACKAGES += gsi_overlay_systemui
 -- 
-2.25.1
+2.34.1
 

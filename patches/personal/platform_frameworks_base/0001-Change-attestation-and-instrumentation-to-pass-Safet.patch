@@ -1,7 +1,7 @@
-From c682852eb401d513ecc3295c68a9015abcb1c386 Mon Sep 17 00:00:00 2001
+From 1c737d0f6b2bcea7e8684c1cdf9dd3f754661a32 Mon Sep 17 00:00:00 2001
 From: Raphael Mounier <mounierr07@gmail.com>
 Date: Wed, 22 Feb 2023 17:52:12 +0100
-Subject: [PATCH 1/8] Change attestation and instrumentation to pass SafetyNet
+Subject: [PATCH 1/7] Change attestation and instrumentation to pass SafetyNet
 
 Original Author : Danny Lin <danny@kdrag0n.dev>
 
@@ -21,10 +21,10 @@ The unstable process is where SafetyNet attestation actually runs, so we  need t
  create mode 100644 core/java/com/android/internal/gmscompat/AttestationHooks.java
 
 diff --git a/core/java/android/app/Instrumentation.java b/core/java/android/app/Instrumentation.java
-index 556058b567f9..44449588bbab 100644
+index e31486f18dbf..56ff16f6c358 100644
 --- a/core/java/android/app/Instrumentation.java
 +++ b/core/java/android/app/Instrumentation.java
-@@ -57,6 +57,8 @@ import android.view.WindowManagerGlobal;
+@@ -60,6 +60,8 @@ import android.view.WindowManagerGlobal;
  
  import com.android.internal.content.ReferrerIntent;
  
@@ -33,7 +33,7 @@ index 556058b567f9..44449588bbab 100644
  import java.io.File;
  import java.lang.annotation.Retention;
  import java.lang.annotation.RetentionPolicy;
-@@ -1242,6 +1244,7 @@ public class Instrumentation {
+@@ -1281,6 +1283,7 @@ public class Instrumentation {
          Application app = getFactory(context.getPackageName())
                  .instantiateApplication(cl, className);
          app.attach(context);
@@ -41,7 +41,7 @@ index 556058b567f9..44449588bbab 100644
          return app;
      }
      
-@@ -1259,6 +1262,7 @@ public class Instrumentation {
+@@ -1298,6 +1301,7 @@ public class Instrumentation {
              ClassNotFoundException {
          Application app = (Application)clazz.newInstance();
          app.attach(context);
@@ -162,10 +162,10 @@ index 000000000000..991e3967d79c
 +    }
 +}
 diff --git a/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java b/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java
-index 33411e1ec5b9..133a4094d434 100644
+index 25f5dec9de40..b34351585c4b 100644
 --- a/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java
 +++ b/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java
-@@ -42,6 +42,7 @@ import android.system.keystore2.ResponseCode;
+@@ -45,6 +45,7 @@ import android.system.keystore2.ResponseCode;
  import android.util.Log;
  
  import com.android.internal.annotations.VisibleForTesting;
@@ -173,7 +173,7 @@ index 33411e1ec5b9..133a4094d434 100644
  
  import java.io.ByteArrayInputStream;
  import java.io.IOException;
-@@ -164,6 +165,8 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
+@@ -174,6 +175,8 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
  
      @Override
      public Certificate[] engineGetCertificateChain(String alias) {

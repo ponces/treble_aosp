@@ -1,0 +1,82 @@
+From 55c1079968030b3ee2e418cb5d546c0a7a0dfa54 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Mon, 11 Oct 2021 16:10:42 -0400
+Subject: [PATCH 19/28] Revert "Remove support for audio HAL V2 from the
+ framework"
+
+This reverts commit cbf517f837f7bf8a59f3ff8aa1e0e3e19612e251.
+
+Also enable new extensions required to actually build
+
+Change-Id: Icfd638a91b22ffa6d2cd6d19a624e699a85a850a
+---
+ media/libaudiohal/Android.bp      |  1 +
+ media/libaudiohal/FactoryHal.cpp  |  3 ++-
+ media/libaudiohal/impl/Android.bp | 18 ++++++++++++++++++
+ 3 files changed, 21 insertions(+), 1 deletion(-)
+
+diff --git a/media/libaudiohal/Android.bp b/media/libaudiohal/Android.bp
+index 3c05b0b472..1426930603 100644
+--- a/media/libaudiohal/Android.bp
++++ b/media/libaudiohal/Android.bp
+@@ -23,6 +23,7 @@ cc_library_shared {
+     ],
+ 
+     required: [
++        "libaudiohal@2.0",
+         "libaudiohal@4.0",
+         "libaudiohal@5.0",
+         "libaudiohal@6.0",
+diff --git a/media/libaudiohal/FactoryHal.cpp b/media/libaudiohal/FactoryHal.cpp
+index f88915d7f4..24e5adbae3 100644
+--- a/media/libaudiohal/FactoryHal.cpp
++++ b/media/libaudiohal/FactoryHal.cpp
+@@ -50,7 +50,7 @@ using InterfaceName = std::pair<std::string, std::string>;
+  * This list need to keep sync with AudioHalVersionInfo.VERSIONS in
+  * media/java/android/media/AudioHalVersionInfo.java.
+  */
+-static const std::array<AudioHalVersionInfo, 5> sAudioHALVersions = {
++static const std::array<AudioHalVersionInfo, 6> sAudioHALVersions = {
+     // TODO: remove this comment to get AIDL
+     // AudioHalVersionInfo(AudioHalVersionInfo::Type::AIDL, 1, 0),
+     AudioHalVersionInfo(AudioHalVersionInfo::Type::HIDL, 7, 1),
+@@ -58,6 +58,7 @@ static const std::array<AudioHalVersionInfo, 5> sAudioHALVersions = {
+     AudioHalVersionInfo(AudioHalVersionInfo::Type::HIDL, 6, 0),
+     AudioHalVersionInfo(AudioHalVersionInfo::Type::HIDL, 5, 0),
+     AudioHalVersionInfo(AudioHalVersionInfo::Type::HIDL, 4, 0),
++    AudioHalVersionInfo(AudioHalVersionInfo::Type::HIDL, 2, 0),
+ };
+ 
+ static const std::map<AudioHalVersionInfo::Type, InterfaceName> sDevicesHALInterfaces = {
+diff --git a/media/libaudiohal/impl/Android.bp b/media/libaudiohal/impl/Android.bp
+index 09e70ebfb8..50cfe4b79c 100644
+--- a/media/libaudiohal/impl/Android.bp
++++ b/media/libaudiohal/impl/Android.bp
+@@ -82,6 +82,24 @@ cc_defaults {
+     ],
+ }
+ 
++cc_library_shared {
++    name: "libaudiohal@2.0",
++    defaults: ["libaudiohal_default"],
++    shared_libs: [
++        "android.hardware.audio.common@2.0",
++        "android.hardware.audio.common@2.0-util",
++        "android.hardware.audio.effect@2.0",
++        "android.hardware.audio.effect@2.0-util",
++        "android.hardware.audio@2.0",
++        "android.hardware.audio@2.0-util",
++    ],
++    cflags: [
++        "-DMAJOR_VERSION=2",
++        "-DMINOR_VERSION=0",
++        "-include common/all-versions/VersionMacro.h",
++    ]
++}
++
+ cc_library_shared {
+     name: "libaudiohal@4.0",
+     defaults: [
+-- 
+2.34.1
+

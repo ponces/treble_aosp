@@ -1,0 +1,121 @@
+From 0e49f18e9612bb8bb9128ca5440505de65d40021 Mon Sep 17 00:00:00 2001
+From: dhacker29 <dhackerdvm@gmail.com>
+Date: Tue, 24 Nov 2015 01:53:47 -0500
+Subject: [PATCH 4/7] fw/b: Use ro.build.version.incremental to signal OTA
+ upgrades
+
+[PeterCxy]: On T, there is a new class PackagePartitions that is
+responsible for detecting updates to not just the system, but also other
+partitions. Most of the fingerprint detection were moved there, and thus
+modifications were made there to use the
+ro.<partition>.build.version.incremental property.
+
+Squash of:
+
+Author: dhacker29 <dhackerdvm@gmail.com>
+Date:   Tue Nov 24 01:53:47 2015 -0500
+    Core: Use ro.build.date to signal mIsUpgrade
+
+    M: We use a static fingerprint that is only changed when a new OEM build is released, so
+       every flash shows Android is starting instead of upgrading.  This will fix that.
+    N: even though we dont have the dexopt sceen on N, this is still needed to delete the
+       correct caches, and grant/deny specific runtime permissions like a true oem update
+       would do.
+       Updated for Nougat By: BeansTown106
+
+    Change-Id: I0e3ed5c8f0351e48944432ae6a0c5194ddeff1fa
+
+Author: Sam Mortimer <sam@mortimer.me.uk>
+Date:   Fri Sep 28 13:45:00 2018 -0700
+    fw/b UserManagerService: Use ro.build.date to signal upgrades
+
+    *) We changed PackageManagerService to use Build.DATE instead of
+       Build.FINGERPRINT to detect upgrade.  Do the same for
+       UserManagerService.
+    *) Affects generation of preboot intent and app data migration.
+
+    Change-Id: I56887b7ca842afdcf3cf84b27b4c04667cf43307
+
+Author: Wang Han <416810799@qq.com>
+Date:   Sat Dec 29 23:33:20 2018 +0800
+    ShortcutService: Use ro.build.date to signal package scanning
+
+     * Affects system apps scanning.
+
+    Change-Id: I5f6d6647929f5b5ae7e820b18e95bf5ed2ec8d1c
+
+Author: maxwen <max.weninger@gmail.com>
+Date:   Tue Nov 19 01:02:01 2019 +0100
+    base: Use ro.build.date to clear cache dirs on update
+
+    instead of using ro.build.fingerprint we explictly need to use ro.build.date
+
+    Change-Id: Ib3e80e58eb8c9a21c108e9f5cd2dbdb7ada8e3a4
+
+Author: maxwen <max.weninger@gmail.com>
+Date:   Wed Oct 28 07:07:10 2020 -0400
+    One more Build.FINGERPRINT to Build.DATE change
+
+    Change-Id: I13dbf3d7f6587d3fcd6591cc0f861b34b6d5561c
+
+Change-Id: If0eb969ba509981f9209ffa37a949d9042ef4c2a
+---
+ core/java/android/app/admin/SystemUpdateInfo.java             | 4 ++--
+ core/java/android/content/pm/PackagePartitions.java           | 4 ++--
+ services/core/java/com/android/server/pm/ShortcutService.java | 2 +-
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/core/java/android/app/admin/SystemUpdateInfo.java b/core/java/android/app/admin/SystemUpdateInfo.java
+index 9e6c91f4ec31..7459b0e05e3a 100644
+--- a/core/java/android/app/admin/SystemUpdateInfo.java
++++ b/core/java/android/app/admin/SystemUpdateInfo.java
+@@ -133,7 +133,7 @@ public final class SystemUpdateInfo implements Parcelable {
+         out.startTag(null, tag);
+         out.attributeLong(null, ATTR_RECEIVED_TIME, mReceivedTime);
+         out.attributeInt(null, ATTR_SECURITY_PATCH_STATE, mSecurityPatchState);
+-        out.attribute(null, ATTR_ORIGINAL_BUILD , Build.FINGERPRINT);
++        out.attribute(null, ATTR_ORIGINAL_BUILD , Build.VERSION.INCREMENTAL);
+         out.endTag(null, tag);
+     }
+ 
+@@ -142,7 +142,7 @@ public final class SystemUpdateInfo implements Parcelable {
+     public static SystemUpdateInfo readFromXml(TypedXmlPullParser parser) {
+         // If an OTA has been applied (build fingerprint has changed), discard stale info.
+         final String buildFingerprint = parser.getAttributeValue(null, ATTR_ORIGINAL_BUILD );
+-        if (!Build.FINGERPRINT.equals(buildFingerprint)) {
++        if (!Build.VERSION.INCREMENTAL.equals(buildFingerprint)) {
+             return null;
+         }
+         try {
+diff --git a/core/java/android/content/pm/PackagePartitions.java b/core/java/android/content/pm/PackagePartitions.java
+index ff80e614be58..8bf0d5ffff76 100644
+--- a/core/java/android/content/pm/PackagePartitions.java
++++ b/core/java/android/content/pm/PackagePartitions.java
+@@ -129,9 +129,9 @@ public class PackagePartitions {
+         final String[] digestProperties = new String[SYSTEM_PARTITIONS.size() + 1];
+         for (int i = 0; i < SYSTEM_PARTITIONS.size(); i++) {
+             final String partitionName = SYSTEM_PARTITIONS.get(i).getName();
+-            digestProperties[i] = "ro." + partitionName + ".build.fingerprint";
++            digestProperties[i] = "ro." + partitionName + ".build.version.incremental";
+         }
+-        digestProperties[SYSTEM_PARTITIONS.size()] = "ro.build.fingerprint"; // build fingerprint
++        digestProperties[SYSTEM_PARTITIONS.size()] = "ro.build.version.incremental"; // build fingerprint
+         return SystemProperties.digestOf(digestProperties);
+     }
+ 
+diff --git a/services/core/java/com/android/server/pm/ShortcutService.java b/services/core/java/com/android/server/pm/ShortcutService.java
+index 5b3514c01f9f..265125987be1 100644
+--- a/services/core/java/com/android/server/pm/ShortcutService.java
++++ b/services/core/java/com/android/server/pm/ShortcutService.java
+@@ -5175,7 +5175,7 @@ public class ShortcutService extends IShortcutService.Stub {
+ 
+     // Injection point.
+     String injectBuildFingerprint() {
+-        return Build.FINGERPRINT;
++        return Build.VERSION.INCREMENTAL;
+     }
+ 
+     final void wtf(String message) {
+-- 
+2.34.1
+

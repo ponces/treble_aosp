@@ -1,4 +1,4 @@
-From d66a62317bf5b3eb67b4c0a904377e5ec8c8088b Mon Sep 17 00:00:00 2001
+From 9b0aa581636b738c8a26e25e8782a8ec60978f61 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 26 Oct 2022 18:02:18 -0400
 Subject: [PATCH] Restore back the behavior of isValid(): It is legal to have
@@ -8,36 +8,45 @@ Subject: [PATCH] Restore back the behavior of isValid(): It is legal to have
 
 Change-Id: Ie7815c186400614f0c6b483c04aa8971af348380
 ---
- common/native/bpf_headers/include/bpf/BpfMap.h | 13 ++++++++-----
- 1 file changed, 8 insertions(+), 5 deletions(-)
+ common/native/bpf_headers/include/bpf/BpfMap.h | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
 
 diff --git a/common/native/bpf_headers/include/bpf/BpfMap.h b/common/native/bpf_headers/include/bpf/BpfMap.h
-index 2bee2ee4..9e8a7836 100644
+index 51e6d162..6d74ff3a 100644
 --- a/common/native/bpf_headers/include/bpf/BpfMap.h
 +++ b/common/native/bpf_headers/include/bpf/BpfMap.h
-@@ -50,14 +50,17 @@ class BpfMap {
-     // flag must be within BPF_OBJ_FLAG_MASK, ie. 0, BPF_F_RDONLY, BPF_F_WRONLY
-     BpfMap<Key, Value>(const char* pathname, uint32_t flags) {
-         mMapFd.reset(mapRetrieve(pathname, flags));
--        if (mMapFd < 0) abort();
+@@ -54,21 +54,25 @@ class BpfMap {
+ 
+   private:
+     void abortOnKeyOrValueSizeMismatch() {
+-        if (!mMapFd.ok()) abort();
 -        if (isAtLeastKernelVersion(4, 14, 0)) {
 -            if (bpfGetFdKeySize(mMapFd) != sizeof(Key)) abort();
 -            if (bpfGetFdValueSize(mMapFd) != sizeof(Value)) abort();
 -        }
++        if (!isOk()) abort();
+     }
+ 
+   protected:
+     // flag must be within BPF_OBJ_FLAG_MASK, ie. 0, BPF_F_RDONLY, BPF_F_WRONLY
+     BpfMap<Key, Value>(const char* pathname, uint32_t flags) {
+         mMapFd.reset(mapRetrieve(pathname, flags));
+-        abortOnKeyOrValueSizeMismatch();
      }
  
    public:
 +    bool isOk() {
-+        if (mMapFd < 0) return false;
++        if (!mMapFd.ok()) return false;
 +        if (isAtLeastKernelVersion(4, 14, 0)) {
 +            if (bpfGetFdKeySize(mMapFd) != sizeof(Key)) return false;
 +            if (bpfGetFdValueSize(mMapFd) != sizeof(Value)) return false;
 +        }
 +        return true;
 +    }
++
      explicit BpfMap<Key, Value>(const char* pathname) : BpfMap<Key, Value>(pathname, 0) {}
  
-     BpfMap<Key, Value>(bpf_map_type map_type, uint32_t max_entries, uint32_t map_flags = 0) {
+ #ifdef BPF_MAP_MAKE_VISIBLE_FOR_TESTING
 -- 
-2.25.1
+2.34.1
 

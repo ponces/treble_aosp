@@ -1,7 +1,7 @@
-From 2e360897a26995a9a7f44d98caf8d810bdd4c5a6 Mon Sep 17 00:00:00 2001
+From 79357b704fc7715b89e19188057d56213f4df1ab Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Sun, 26 Feb 2023 22:13:35 +0000
-Subject: [PATCH 3/8] monet: Use Style.SPRITZ by default
+Subject: [PATCH 3/7] monet: Use Style.SPRITZ by default
 
 Change-Id: Ia44ba56c8daa07033b290de89bb300bda9d39d86
 ---
@@ -9,19 +9,19 @@ Change-Id: Ia44ba56c8daa07033b290de89bb300bda9d39d86
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/packages/SystemUI/src/com/android/systemui/theme/ThemeOverlayController.java b/packages/SystemUI/src/com/android/systemui/theme/ThemeOverlayController.java
-index adef1823d491..3e6d842c5884 100644
+index b78329cfa5aa..56bef4733ed5 100644
 --- a/packages/SystemUI/src/com/android/systemui/theme/ThemeOverlayController.java
 +++ b/packages/SystemUI/src/com/android/systemui/theme/ThemeOverlayController.java
-@@ -128,7 +128,7 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
-     // Dominant color extracted from wallpaper, NOT the color used on the overlay
-     protected int mMainWallpaperColor = Color.TRANSPARENT;
+@@ -145,7 +145,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
+     private float mContrast = 0;
      // Theme variant: Vibrant, Tonal, Expressive, etc
--    private Style mThemeStyle = Style.TONAL_SPOT;
-+    private Style mThemeStyle = Style.SPRITZ;
+     @VisibleForTesting
+-    protected Style mThemeStyle = Style.TONAL_SPOT;
++    protected Style mThemeStyle = Style.SPRITZ;
      // Accent colors overlay
      private FabricatedOverlay mSecondaryOverlay;
      // Neutral system colors overlay
-@@ -673,11 +673,11 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
+@@ -800,11 +800,11 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
                  style = Style.valueOf(
                          object.getString(ThemeOverlayApplier.OVERLAY_CATEGORY_THEME_STYLE));
                  if (!validStyles.contains(style)) {

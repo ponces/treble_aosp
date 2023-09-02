@@ -1,4 +1,4 @@
-From 0778c18d10a6131f0418bc685003a32713b05ad4 Mon Sep 17 00:00:00 2001
+From 5a8bb726afdd79bb5af54a7f4b77d8f3218aff2c Mon Sep 17 00:00:00 2001
 From: Peter Cai <peter@typeblog.net>
 Date: Mon, 5 Sep 2022 14:02:37 -0400
 Subject: [PATCH 01/10] SubscriptionController: Do not override default calling
@@ -14,39 +14,45 @@ to keep re-selecting the desired calling account after every reboot.
 Test: manual
 Change-Id: Iccab64e9b3b3ab4773bd8944d47c2006f229d472
 ---
- .../telephony/SubscriptionController.java     | 19 ++++++++++++++++---
- 1 file changed, 16 insertions(+), 3 deletions(-)
+ .../SubscriptionManagerService.java            | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
 
-diff --git a/src/java/com/android/internal/telephony/SubscriptionController.java b/src/java/com/android/internal/telephony/SubscriptionController.java
-index 82799bea8b..a9131f6b7a 100644
---- a/src/java/com/android/internal/telephony/SubscriptionController.java
-+++ b/src/java/com/android/internal/telephony/SubscriptionController.java
-@@ -2855,9 +2855,22 @@ public class SubscriptionController extends ISub.Stub {
-                         subId);
+diff --git a/src/java/com/android/internal/telephony/subscription/SubscriptionManagerService.java b/src/java/com/android/internal/telephony/subscription/SubscriptionManagerService.java
+index 8e773c072d..1efe9ba3b4 100644
+--- a/src/java/com/android/internal/telephony/subscription/SubscriptionManagerService.java
++++ b/src/java/com/android/internal/telephony/subscription/SubscriptionManagerService.java
+@@ -78,6 +78,7 @@ import android.util.Base64;
+ import android.util.EventLog;
+ import android.util.IndentingPrintWriter;
+ import android.util.LocalLog;
++import android.util.Log;
  
-         TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
--
--        telecomManager.setUserSelectedOutgoingPhoneAccount(newHandle);
--        logd("[setDefaultVoiceSubId] requesting change to phoneAccountHandle=" + newHandle);
-+        PhoneAccountHandle currentHandle = telecomManager.getUserSelectedOutgoingPhoneAccount();
-+        logd("[setDefaultVoiceSubId] current phoneAccountHandle=" + currentHandle);
-+
-+        String currentPackageName =
-+            currentHandle == null ? null : currentHandle.getComponentName().getPackageName();
-+        boolean currentIsSim = "com.android.phone".equals(currentPackageName);
-+        // Do not override user selected outgoing calling account
-+        // if the user has selected a third-party app as default
-+        boolean shouldKeepOutgoingAccount = currentHandle != null && !currentIsSim;
-+
-+        if (!shouldKeepOutgoingAccount) {
-+            telecomManager.setUserSelectedOutgoingPhoneAccount(newHandle);
-+            logd("[setDefaultVoiceSubId] change to phoneAccountHandle=" + newHandle);
-+        } else {
-+            logd("[setDefaultVoiceSubId] default phoneAccountHandle not changed.");
-+        }
+ import com.android.internal.R;
+ import com.android.internal.annotations.VisibleForTesting;
+@@ -2839,7 +2840,22 @@ public class SubscriptionManagerService extends ISub.Stub {
  
-         if (previousDefaultSub != getDefaultSubId()) {
-             sendDefaultChangedBroadcast(getDefaultSubId());
+                 TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
+                 if (telecomManager != null) {
+-                    telecomManager.setUserSelectedOutgoingPhoneAccount(newHandle);
++                    PhoneAccountHandle currentHandle = telecomManager.getUserSelectedOutgoingPhoneAccount();
++                    log("[setDefaultVoiceSubId] current phoneAccountHandle=" + currentHandle);
++
++                    String currentPackageName =
++                        currentHandle == null ? null : currentHandle.getComponentName().getPackageName();
++                    boolean currentIsSim = "com.android.phone".equals(currentPackageName);
++                    // Do not override user selected outgoing calling account
++                    // if the user has selected a third-party app as default
++                    boolean shouldKeepOutgoingAccount = currentHandle != null && !currentIsSim;
++
++                    if (!shouldKeepOutgoingAccount) {
++                        telecomManager.setUserSelectedOutgoingPhoneAccount(newHandle);
++                        log("[setDefaultVoiceSubId] change to phoneAccountHandle=" + newHandle);
++                    } else {
++                        log("[setDefaultVoiceSubId] default phoneAccountHandle not changed.");
++                    }
+                 }
+ 
+                 updateDefaultSubId();
 -- 
-2.25.1
+2.34.1
 

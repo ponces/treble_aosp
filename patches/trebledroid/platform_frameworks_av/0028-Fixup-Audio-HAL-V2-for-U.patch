@@ -1,0 +1,35 @@
+From c6416a15c675db6d95f1236ea28150cd498d4bed Mon Sep 17 00:00:00 2001
+From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
+Date: Wed, 2 Aug 2023 21:58:13 +0800
+Subject: [PATCH 28/28] Fixup Audio HAL V2 for U
+
+Change-Id: I65c809cd98feaff869a143439992de7098230ca4
+---
+ media/libaudiohal/impl/Android.bp | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/media/libaudiohal/impl/Android.bp b/media/libaudiohal/impl/Android.bp
+index 3a8adac40f..78050513ae 100644
+--- a/media/libaudiohal/impl/Android.bp
++++ b/media/libaudiohal/impl/Android.bp
+@@ -84,11 +84,14 @@ cc_defaults {
+ 
+ cc_library_shared {
+     name: "libaudiohal@2.0",
+-    defaults: ["libaudiohal_default"],
++    defaults: [
++        "libaudiohal_default",
++        "libaudiohal_hidl_default"
++    ],
+     srcs: [
+         ":audio_core_hal_client_sources",
+-        ":audio_effect_hal_client_sources",
+-        "EffectsFactoryHalHidlEntry.cpp",
++        ":audio_effect_hidl_hal_client_sources",
++        "EffectsFactoryHalEntry.cpp",
+     ],
+     shared_libs: [
+         "android.hardware.audio.common@2.0",
+-- 
+2.34.1
+

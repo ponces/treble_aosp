@@ -1,4 +1,4 @@
-From 1cf59255f74b0bb40a4382f5bba10ead73cf6c1c Mon Sep 17 00:00:00 2001
+From 4896ef76b054e7d37b15797fae7d5a87329d2b28 Mon Sep 17 00:00:00 2001
 From: Raphael Mounier <mounierr07@gmail.com>
 Date: Tue, 22 Nov 2022 06:54:35 +0100
 Subject: [PATCH 10/10] Fix 3G signalstrength for huawei kirin (hi6250, hi3670)
@@ -15,10 +15,10 @@ The RILUtils.convertHalSignalStrength function does not work correctly under Hua
  1 file changed, 98 insertions(+), 93 deletions(-)
 
 diff --git a/src/java/com/android/internal/telephony/RIL.java b/src/java/com/android/internal/telephony/RIL.java
-index f30bee5846..6b27f9dacd 100644
+index f4447e356b..1c0113e899 100644
 --- a/src/java/com/android/internal/telephony/RIL.java
 +++ b/src/java/com/android/internal/telephony/RIL.java
-@@ -5940,114 +5940,119 @@ public class RIL extends BaseCommands implements CommandsInterface {
+@@ -6929,114 +6929,119 @@ public class RIL extends BaseCommands implements CommandsInterface {
          int gsmSignalStrength = signalStrength.gw.signalStrength;
          int gsmBitErrorRate = signalStrength.gw.bitErrorRate;
          int gsmTimingAdvance = signalStrength.gw.timingAdvance;
@@ -46,11 +46,11 @@ index f30bee5846..6b27f9dacd 100644
  
  
  
--	//Calcul level with Rssnr, Rsrq, Rsrp value - so specify KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT (parameters_used_for_lte_signal_bar_int) to use this 3 values
--	//RSRP = 1 << 0
--	//RSRQ = 1 << 1
--	//RSSNR = 1 << 2
--	//
+-   //Calcul level with Rssnr, Rsrq, Rsrp value - so specify KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT (parameters_used_for_lte_signal_bar_int) to use this 3 values
+-   //RSRP = 1 << 0
+-   //RSRQ = 1 << 1
+-   //RSSNR = 1 << 2
+-   //
 -        if (lteRsrp != 0) { // LTE
 -            // Nothing to DO
 -        } else if (gsmSignalStrength == 0 && lteRsrp == 0) { // 3G
@@ -93,49 +93,49 @@ index f30bee5846..6b27f9dacd 100644
 -        }
 -
 -
--	// 4G - LTE
--	// .lte = {.signalStrength = 99, .rsrp = -104, .rsrq = -16, .rssnr = -4, .cqi = 2147483647, .timingAdvance = -1},
--	// public CellSignalStrengthLte(int rssi, int rsrp, int rsrq, int rssnr, int cqi, int timingAdvance) {
--	CellSignalStrengthLte lteStrength = new CellSignalStrengthLte(SignalStrength.INVALID,
--						lteRsrp,
--						lteRsrq,
--						lteRssnr,
--						lteCqi,
--						lteTimingAdvance);
+-   // 4G - LTE
+-   // .lte = {.signalStrength = 99, .rsrp = -104, .rsrq = -16, .rssnr = -4, .cqi = 2147483647, .timingAdvance = -1},
+-   // public CellSignalStrengthLte(int rssi, int rsrp, int rsrq, int rssnr, int cqi, int timingAdvance) {
+-   CellSignalStrengthLte lteStrength = new CellSignalStrengthLte(SignalStrength.INVALID,
+-                       lteRsrp,
+-                       lteRsrq,
+-                       lteRssnr,
+-                       lteCqi,
+-                       lteTimingAdvance);
 -
--	// GSM
--	// .gw = {.signalStrength = -91, .bitErrorRate = -1, .timingAdvance = 0}
--	// public CellSignalStrengthGsm(int rssi, int ber, int ta) {
--	// rssi in dBm [-113, -51] or UNAVAILABLE
--	// bit error rate (0-7, 99) TS 27.007 8.5 or UNAVAILABLE
--	CellSignalStrengthGsm gsmStrength = new CellSignalStrengthGsm(gsmSignalStrength,
--						gsmBitErrorRate,
--						gsmTimingAdvance);
+-   // GSM
+-   // .gw = {.signalStrength = -91, .bitErrorRate = -1, .timingAdvance = 0}
+-   // public CellSignalStrengthGsm(int rssi, int ber, int ta) {
+-   // rssi in dBm [-113, -51] or UNAVAILABLE
+-   // bit error rate (0-7, 99) TS 27.007 8.5 or UNAVAILABLE
+-   CellSignalStrengthGsm gsmStrength = new CellSignalStrengthGsm(gsmSignalStrength,
+-                       gsmBitErrorRate,
+-                       gsmTimingAdvance);
 -
--	if (RILJ_LOGD) {
--		riljLog("Huawei signal : LTE dbm : " + String.valueOf(lteStrength.getDbm()) +
--				", level : " + String.valueOf(lteStrength.getLevel()) +
--				", Rsrp  : " + String.valueOf(lteStrength.getRsrp()) +
--				", Rsrq  : " + String.valueOf(lteStrength.getRsrq()) +
--				", Rssi  : " + String.valueOf(lteStrength.getRssi()) +
--				", Rssnr  : " + String.valueOf(lteStrength.getRssnr()));
--		riljLog("Huawei signal : GSM dbm : " + String.valueOf(gsmStrength.getDbm()) +
--			", errorrate : " + String.valueOf(gsmStrength.getBitErrorRate()) +
--			", timingadvance  : " + String.valueOf(gsmStrength.getTimingAdvance()));
--	}
+-   if (RILJ_LOGD) {
+-       riljLog("Huawei signal : LTE dbm : " + String.valueOf(lteStrength.getDbm()) +
+-               ", level : " + String.valueOf(lteStrength.getLevel()) +
+-               ", Rsrp  : " + String.valueOf(lteStrength.getRsrp()) +
+-               ", Rsrq  : " + String.valueOf(lteStrength.getRsrq()) +
+-               ", Rssi  : " + String.valueOf(lteStrength.getRssi()) +
+-               ", Rssnr  : " + String.valueOf(lteStrength.getRssnr()));
+-       riljLog("Huawei signal : GSM dbm : " + String.valueOf(gsmStrength.getDbm()) +
+-           ", errorrate : " + String.valueOf(gsmStrength.getBitErrorRate()) +
+-           ", timingadvance  : " + String.valueOf(gsmStrength.getTimingAdvance()));
+-   }
 -
 -
 -
--	// Perhaps add also gsm signalStrength
--	return new SignalStrength(
--			new CellSignalStrengthCdma(),
--			gsmStrength,
--			new CellSignalStrengthWcdma(),
--			new CellSignalStrengthTdscdma(),
--			lteStrength,
--			new CellSignalStrengthNr());
+-   // Perhaps add also gsm signalStrength
+-   return new SignalStrength(
+-           new CellSignalStrengthCdma(),
+-           gsmStrength,
+-           new CellSignalStrengthWcdma(),
+-           new CellSignalStrengthTdscdma(),
+-           lteStrength,
+-           new CellSignalStrengthNr());
 -
--	}
+-   }
 +        // 3G (UMTS) have a lot of protocol (WCDMA, TDSCDMA, CDMA, EVDO, CDMA-EVDO) - only WCDMA, TDSCDMA, CDMA on Android
 +        // [UNSL]< UNSOL_SIGNAL_STRENGTH {
 +        //.gw = {.signalStrength = -100, .bitErrorRate = -1, .timingAdvance = 0},
@@ -229,8 +229,8 @@ index f30bee5846..6b27f9dacd 100644
 +                       new CellSignalStrengthNr());
 +    }
  
- 
-     /**
+     void notifyBarringInfoChanged(@NonNull BarringInfo barringInfo) {
+         mLastBarringInfo = barringInfo;
 -- 
-2.25.1
+2.34.1
 

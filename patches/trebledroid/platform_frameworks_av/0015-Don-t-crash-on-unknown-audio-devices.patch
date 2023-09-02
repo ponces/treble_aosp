@@ -1,0 +1,26 @@
+From e58d90c04ac5efb013d66fa3c2e023079343d3b1 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 23 Mar 2021 00:16:42 +0100
+Subject: [PATCH 15/28] Don't crash on unknown audio devices
+
+Change-Id: I2df8d88f742da6a84aa8888cdf19de25444de919
+---
+ .../audiopolicy/common/managerdefinitions/src/Serializer.cpp    | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
+index a13a793d27..fdea56b50b 100644
+--- a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
++++ b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
+@@ -867,7 +867,7 @@ std::variant<status_t, ModuleTraits::Element> PolicySerializer::deserialize<Modu
+                         sp<DeviceDescriptor> device = module->getDeclaredDevices().
+                                 getDeviceFromTagName(std::string(reinterpret_cast<const char*>(
+                                                         attachedDevice.get())));
+-                        if (device == nullptr && mIgnoreVendorExtensions) {
++                        if (device == nullptr) {
+                             ALOGW("Skipped attached device \"%s\" because it likely uses a vendor"
+                                     "extension type",
+                                     reinterpret_cast<const char*>(attachedDevice.get()));
+-- 
+2.34.1
+

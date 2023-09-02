@@ -1,0 +1,43 @@
+From 4aa9efdd1c85427ec653484829856c282f607b2c Mon Sep 17 00:00:00 2001
+From: Peter Cai <peter@typeblog.net>
+Date: Wed, 24 Aug 2022 10:41:29 -0400
+Subject: [PATCH 1/7] gd: hci: Ignore unexpected status events
+
+For some reason, on some old devices, the controller will report a
+remote to support SNIFF_SUBRATING even when it does not. Just ignore the
+error here (the status event comes from the failure response).
+
+Change-Id: Ifb9a65fd77f21d15a8dc1ced9240194d38218ef6
+---
+ system/gd/hci/hci_layer.cc | 15 +++++++--------
+ 1 file changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/system/gd/hci/hci_layer.cc b/system/gd/hci/hci_layer.cc
+index c3312a557c..3e8ab78371 100644
+--- a/system/gd/hci/hci_layer.cc
++++ b/system/gd/hci/hci_layer.cc
+@@ -211,14 +211,13 @@ struct HciLayer::impl {
+       command_queue_.front().GetCallback<CommandCompleteView>()->Invoke(
+           std::move(command_complete_view));
+     } else {
+-      ASSERT_LOG(
+-          command_queue_.front().waiting_for_status_ == is_status,
+-          "0x%02hx (%s) was not expecting %s event",
+-          op_code,
+-          OpCodeText(op_code).c_str(),
+-          logging_id.c_str());
+-
+-      command_queue_.front().GetCallback<TResponse>()->Invoke(std::move(response_view));
++      if (command_queue_.front().waiting_for_status_ == is_status) {
++        command_queue_.front().GetCallback<TResponse>()->Invoke(std::move(response_view));
++      } else {
++        CommandCompleteView command_complete_view = CommandCompleteView::Create(
++            EventView::Create(PacketView<kLittleEndian>(std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>()))));
++        command_queue_.front().GetCallback<CommandCompleteView>()->Invoke(std::move(command_complete_view));
++      }
+     }
+ 
+     command_queue_.pop_front();
+-- 
+2.34.1
+

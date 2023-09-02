@@ -1,4 +1,4 @@
-From 05abdbd96587cfd22e34ac278495e6d130de1c07 Mon Sep 17 00:00:00 2001
+From ec516d3b4ccc546d4fd81135e1b05b29b1d7364c Mon Sep 17 00:00:00 2001
 From: corneranchu <corneranchu@gmail.com>
 Date: Sat, 1 Oct 2022 01:49:58 +0000
 Subject: [PATCH 06/10] telephony: forward-port support for forceCognitive
@@ -9,12 +9,11 @@ Subject: [PATCH 06/10] telephony: forward-port support for forceCognitive
 
 Change-Id: I7dd387a9f064a969ca5774e53b05388de12aa308
 ---
- src/java/com/android/internal/telephony/RadioDataProxy.java   | 4 +++-
- .../android/internal/telephony/dataconnection/DcTracker.java  | 3 ++-
- 2 files changed, 5 insertions(+), 2 deletions(-)
+ src/java/com/android/internal/telephony/RadioDataProxy.java | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/src/java/com/android/internal/telephony/RadioDataProxy.java b/src/java/com/android/internal/telephony/RadioDataProxy.java
-index cbc762a59d..868a926667 100644
+index 9671077b0f..561fceaa7d 100644
 --- a/src/java/com/android/internal/telephony/RadioDataProxy.java
 +++ b/src/java/com/android/internal/telephony/RadioDataProxy.java
 @@ -21,6 +21,7 @@ import android.net.LinkProperties;
@@ -25,7 +24,7 @@ index cbc762a59d..868a926667 100644
  import android.telephony.Rlog;
  import android.telephony.ServiceState;
  import android.telephony.data.DataProfile;
-@@ -234,7 +235,8 @@ public class RadioDataProxy extends RadioServiceProxy {
+@@ -244,7 +245,8 @@ public class RadioDataProxy extends RadioServiceProxy {
          } else {
              ArrayList<android.hardware.radio.V1_0.DataProfileInfo> dpis = new ArrayList<>();
              for (DataProfile dp : profiles) {
@@ -35,21 +34,6 @@ index cbc762a59d..868a926667 100644
                      dpis.add(RILUtils.convertToHalDataProfile10(dp));
                  }
              }
-diff --git a/src/java/com/android/internal/telephony/dataconnection/DcTracker.java b/src/java/com/android/internal/telephony/dataconnection/DcTracker.java
-index 28f69dcdc9..3e73e2b9ef 100755
---- a/src/java/com/android/internal/telephony/dataconnection/DcTracker.java
-+++ b/src/java/com/android/internal/telephony/dataconnection/DcTracker.java
-@@ -2160,8 +2160,9 @@ public class DcTracker extends Handler {
-         }
- 
-         // profile id is only meaningful when the profile is persistent on the modem.
-+	boolean forceCognitive = SystemProperties.getBoolean("persist.sys.phh.radio.force_cognitive", false);
-         int profileId = DATA_PROFILE_INVALID;
--        if (apnSetting.isPersistent()) {
-+        if (apnSetting.isPersistent() || forceCognitive) {
-             profileId = apnSetting.getProfileId();
-             if (profileId == DATA_PROFILE_DEFAULT) {
-                 profileId = getApnProfileID(apnContext.getApnType());
 -- 
-2.25.1
+2.34.1
 

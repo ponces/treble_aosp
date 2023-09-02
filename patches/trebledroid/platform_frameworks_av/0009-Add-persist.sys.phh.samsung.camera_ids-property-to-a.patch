@@ -1,4 +1,4 @@
-From 0f0f9092e7db6d60e076ff8d02d5f3ccc3a16f9c Mon Sep 17 00:00:00 2001
+From 03b45c6a0a13464ad777108c12313eb258e66f43 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Thu, 14 May 2020 19:54:55 +0200
 Subject: [PATCH 09/28] Add persist.sys.phh.samsung.camera_ids property to
@@ -11,19 +11,19 @@ Change-Id: I2c7bf535272acc28ed2277e96c78ddd28a0b4593
  2 files changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/services/camera/libcameraservice/Android.bp b/services/camera/libcameraservice/Android.bp
-index 981c56942c..7c4e4d9bcd 100644
+index a45365ad53..25fd8451a9 100644
 --- a/services/camera/libcameraservice/Android.bp
 +++ b/services/camera/libcameraservice/Android.bp
-@@ -164,6 +164,7 @@ cc_library_shared {
+@@ -175,6 +175,7 @@ cc_library_shared {
          "android.hardware.camera.device@3.6",
          "android.hardware.camera.device@3.7",
-         "android.hardware.camera.device-V1-ndk",
+         "android.hardware.camera.device-V2-ndk",
 +        "vendor.samsung.hardware.camera.provider@3.0",
          "media_permission-aidl-cpp",
      ],
  
 diff --git a/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp b/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp
-index 630090b4ac..1acf9c2990 100644
+index 8ff5c3fb01..d498ecbee5 100644
 --- a/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp
 +++ b/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp
 @@ -27,6 +27,7 @@
@@ -76,5 +76,5 @@ index 630090b4ac..1acf9c2990 100644
          ALOGE("%s: Transaction error in getting camera ID list from provider '%s': %s",
                  __FUNCTION__, mProviderName.c_str(), linked.description().c_str());
 -- 
-2.25.1
+2.34.1
 

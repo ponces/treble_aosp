@@ -1,8 +1,8 @@
-From 05d8284db7e7bb2674c1a9a6334a6f427aa4420f Mon Sep 17 00:00:00 2001
+From 5c94e1f0b6b9a5725dac757777ca4b437e2312c4 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 19 Dec 2021 17:03:15 -0500
-Subject: [PATCH] Add a vendor800 command, to be able to call vendor-specific
- hwc functions
+Subject: [PATCH 1/2] Add a vendor800 command, to be able to call
+ vendor-specific hwc functions
 
 Change-Id: Icbef1e9e3a331ae3bd5a05687d545851d94d88a8
 ---
@@ -27,5 +27,5 @@ index 499d3b96e..489578468 100644
       template <typename T>
       void beginCommand(T command, uint16_t length) {
 -- 
-2.25.1
+2.34.1
 

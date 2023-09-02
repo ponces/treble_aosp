@@ -1,4 +1,4 @@
-From f310ec6095f06709cbb087a1a34642e51e4f1b91 Mon Sep 17 00:00:00 2001
+From 49b0d8cb2786e9b4c5960e880b5360e101f2cf22 Mon Sep 17 00:00:00 2001
 From: Peter Cai <peter@typeblog.net>
 Date: Thu, 23 Jan 2020 11:13:43 +0800
 Subject: [PATCH 06/28] audiopolicy: try again with trimmed audio port name if
@@ -19,7 +19,7 @@ Change-Id: I993708b28e8404bc8c483d71a850ac69382231bd
  1 file changed, 14 insertions(+)
 
 diff --git a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
-index 456c5a935c..45ee70ab6e 100644
+index b30ad7e8af..53fabcc71e 100644
 --- a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 +++ b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 @@ -593,6 +593,17 @@ std::variant<status_t, DevicePortTraits::Element> PolicySerializer::deserialize<
@@ -51,5 +51,5 @@ index 456c5a935c..45ee70ab6e 100644
                  ALOGE("%s: no source found with name=%s", __func__, devTag);
                  return BAD_VALUE;
 -- 
-2.25.1
+2.34.1
 

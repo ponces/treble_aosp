@@ -1,0 +1,93 @@
+From fa9a262af80efed6d3a647866285f689487c84a8 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Wed, 9 Nov 2022 17:10:52 -0500
+Subject: [PATCH 25/28] Fix audio hal 2.0 support. Fixup of Revert "Remove
+ support for audio HAL V2 from the framework"
+
+---
+ media/libaudiohal/impl/Android.bp                |  5 +++++
+ media/libaudiohal/impl/DeviceHalHidl.cpp         | 10 ++++++++++
+ media/libaudiohal/impl/DevicesFactoryHalHidl.cpp |  4 ++++
+ 3 files changed, 19 insertions(+)
+
+diff --git a/media/libaudiohal/impl/Android.bp b/media/libaudiohal/impl/Android.bp
+index 50cfe4b79c..3a8adac40f 100644
+--- a/media/libaudiohal/impl/Android.bp
++++ b/media/libaudiohal/impl/Android.bp
+@@ -85,6 +85,11 @@ cc_defaults {
+ cc_library_shared {
+     name: "libaudiohal@2.0",
+     defaults: ["libaudiohal_default"],
++    srcs: [
++        ":audio_core_hal_client_sources",
++        ":audio_effect_hal_client_sources",
++        "EffectsFactoryHalHidlEntry.cpp",
++    ],
+     shared_libs: [
+         "android.hardware.audio.common@2.0",
+         "android.hardware.audio.common@2.0-util",
+diff --git a/media/libaudiohal/impl/DeviceHalHidl.cpp b/media/libaudiohal/impl/DeviceHalHidl.cpp
+index 826461f9a5..b05c9e1427 100644
+--- a/media/libaudiohal/impl/DeviceHalHidl.cpp
++++ b/media/libaudiohal/impl/DeviceHalHidl.cpp
+@@ -574,6 +574,7 @@ status_t DeviceHalHidl::setConnectedState(const struct audio_port_v7 *port, bool
+         // call is successful. Also remove the cache here to avoid a large cache after a long run.
+         return NO_ERROR;
+     }
++#if MAJOR_VERSION > 2
+ #if MAJOR_VERSION == 7 && MINOR_VERSION == 1
+     if (supportsSetConnectedState7_1) {
+         AudioPort hidlPort;
+@@ -596,11 +597,17 @@ status_t DeviceHalHidl::setConnectedState(const struct audio_port_v7 *port, bool
+         return result;
+     }
+     return processReturn("setConnectedState", mDevice->setConnectedState(hidlAddress, connected));
++#else
++    (void) port;
++    (void) connected;
++    return NO_ERROR;
++#endif
+ }
+ 
+ error::Result<audio_hw_sync_t> DeviceHalHidl::getHwAvSync() {
+     TIME_CHECK();
+     if (mDevice == 0) return NO_INIT;
++#if MAJOR_VERSION > 2
+     audio_hw_sync_t value;
+     Result result;
+     Return<void> ret = mDevice->getHwAvSync([&value, &result](Result r, audio_hw_sync_t v) {
+@@ -609,6 +616,9 @@ error::Result<audio_hw_sync_t> DeviceHalHidl::getHwAvSync() {
+     });
+     RETURN_IF_ERROR(processReturn("getHwAvSync", ret, result));
+     return value;
++#else
++    return 0xdeadbeef;
++#endif
+ }
+ 
+ status_t DeviceHalHidl::dump(int fd, const Vector<String16>& args) {
+diff --git a/media/libaudiohal/impl/DevicesFactoryHalHidl.cpp b/media/libaudiohal/impl/DevicesFactoryHalHidl.cpp
+index eef60b506c..e303e54b41 100644
+--- a/media/libaudiohal/impl/DevicesFactoryHalHidl.cpp
++++ b/media/libaudiohal/impl/DevicesFactoryHalHidl.cpp
+@@ -119,6 +119,7 @@ status_t DevicesFactoryHalHidl::openDevice(const char *name, sp<DeviceHalInterfa
+     Result retval = Result::NOT_INITIALIZED;
+     for (const auto& factory : factories) {
+         Return<void> ret;
++#if MAJOR_VERSION > 2
+         if (strcmp(name, AUDIO_HARDWARE_MODULE_ID_PRIMARY) == 0) {
+             // In V7.1 it's not possible to cast IDevice back to IPrimaryDevice,
+             // thus openPrimaryDevice must be used.
+@@ -135,6 +136,9 @@ status_t DevicesFactoryHalHidl::openDevice(const char *name, sp<DeviceHalInterfa
+                         }
+                     });
+         } else {
++#else
++        if (true) {
++#endif
+ #if MAJOR_VERSION == 7 && MINOR_VERSION == 1
+             ret = factory->openDevice_7_1(
+ #else
+-- 
+2.34.1
+
