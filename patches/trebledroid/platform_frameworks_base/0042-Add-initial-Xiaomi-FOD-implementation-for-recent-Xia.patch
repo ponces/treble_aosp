@@ -1,4 +1,4 @@
-From 8758bfba56f8dad68b750ea8f33a94175dc50add Mon Sep 17 00:00:00 2001
+From 77c645d927a5a58dba3f4bf07313fe27e7f13750 Mon Sep 17 00:00:00 2001
 From: jgudec <jakov.gudec@gmail.com>
 Date: Fri, 18 Aug 2023 08:41:49 +0100
 Subject: [PATCH 42/42] Add initial Xiaomi FOD implementation for recent Xiaomi
@@ -7,10 +7,10 @@ Subject: [PATCH 42/42] Add initial Xiaomi FOD implementation for recent Xiaomi
 Huge thanks to phhusson for the help and guidance.
 ---
  packages/SystemUI/Android.bp                  |  2 +
- .../android/systemui/biometrics/UdfpsView.kt  | 43 ++++++++++++++++++
+ .../android/systemui/biometrics/UdfpsView.kt  | 43 +++++++++++++++++
  services/core/Android.bp                      |  1 +
- .../server/biometrics/AuthService.java        | 45 +++++++++++++++++++
- 4 files changed, 91 insertions(+)
+ .../server/biometrics/AuthService.java        | 46 +++++++++++++++++++
+ 4 files changed, 92 insertions(+)
 
 diff --git a/packages/SystemUI/Android.bp b/packages/SystemUI/Android.bp
 index dc2244c94080..8927c967c7d0 100644
@@ -113,10 +113,18 @@ index 145a74a43464..b99d95713731 100644
      javac_shard_size: 50,
  }
 diff --git a/services/core/java/com/android/server/biometrics/AuthService.java b/services/core/java/com/android/server/biometrics/AuthService.java
-index b47b47c41f76..9e79f88eea14 100644
+index b47b47c41f76..696d5b42cd46 100644
 --- a/services/core/java/com/android/server/biometrics/AuthService.java
 +++ b/services/core/java/com/android/server/biometrics/AuthService.java
-@@ -91,6 +91,7 @@ import vendor.samsung.hardware.biometrics.fingerprint.V3_0.ISehBiometricsFingerp
+@@ -64,6 +64,7 @@ import android.os.ServiceManager;
+ import android.os.SystemProperties;
+ import android.os.UserHandle;
+ import android.provider.Settings;
++import android.text.TextUtils;
+ import android.util.Slog;
+ 
+ import com.android.internal.R;
+@@ -91,6 +92,7 @@ import vendor.samsung.hardware.biometrics.fingerprint.V3_0.ISehBiometricsFingerp
  import vendor.goodix.hardware.biometrics.fingerprint.V2_1.IGoodixFingerprintDaemon;
  import vendor.samsung.hardware.sysinput.V1_0.ISehSysInputDev;
  
@@ -124,7 +132,7 @@ index b47b47c41f76..9e79f88eea14 100644
  /**
   * System service that provides an interface for authenticating with biometrics and
   * PIN/pattern/password to BiometricPrompt and lock screen.
-@@ -112,6 +113,7 @@ public class AuthService extends SystemService {
+@@ -112,6 +114,7 @@ public class AuthService extends SystemService {
      private FileObserver fodFileObserver = null;
      private ISehBiometricsFingerprint mSamsungFingerprint = null;
  
@@ -132,7 +140,7 @@ index b47b47c41f76..9e79f88eea14 100644
      /**
       * Class for injecting dependencies into AuthService.
       * TODO(b/141025588): Replace with a dependency injection framework (e.g. Guice, Dagger).
-@@ -675,6 +677,12 @@ public class AuthService extends SystemService {
+@@ -675,6 +678,12 @@ public class AuthService extends SystemService {
          } catch(Exception e) {
              android.util.Log.e("PHH", "Failed getting Samsung fingerprint HAL", e);
          }
@@ -145,7 +153,7 @@ index b47b47c41f76..9e79f88eea14 100644
          if(samsungHasCmd("fod_enable") && mSamsungFingerprint != null) {
              samsungCmd("fod_enable,1,1,0");
              String actualMaskBrightnessPath = "/sys/class/lcd/panel/actual_mask_brightness";
-@@ -735,6 +743,31 @@ public class AuthService extends SystemService {
+@@ -735,6 +744,31 @@ public class AuthService extends SystemService {
              fodFileObserver.startWatching();
          }
  
@@ -177,11 +185,11 @@ index b47b47c41f76..9e79f88eea14 100644
      }
  
      /**
-@@ -936,6 +969,18 @@ public class AuthService extends SystemService {
+@@ -936,6 +970,18 @@ public class AuthService extends SystemService {
              return udfpsProps;
          }
  
-+        if(android.os.SystemProperties.get("persist.vendor.sys.fp.fod.location.X_Y") != null) {
++        if(!TextUtils.isEmpty(android.os.SystemProperties.get("persist.vendor.sys.fp.fod.location.X_Y"))) {
 +            int[] udfpsProps = new int[3];
 +            String[] coordinates = android.os.SystemProperties.get("persist.vendor.sys.fp.fod.location.X_Y").split(",");
 +            udfpsProps[0] = displayRealSize.x/2;
