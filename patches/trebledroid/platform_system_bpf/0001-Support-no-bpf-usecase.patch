@@ -1,28 +1,66 @@
-From 4279cd4544c82505d6093e87d951681442610e99 Mon Sep 17 00:00:00 2001
+From 4b484de1b55acb758be89fbbdffd25a02b2dde5b Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 13 Oct 2021 10:56:52 -0400
 Subject: [PATCH 1/2] Support no-bpf usecase
 
 Change-Id: I75a427a2a41aa4ab1104ad88a891bef0dc2d9c91
 ---
- bpfloader/BpfLoader.cpp | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ bpfloader/BpfLoader.cpp | 25 ++++++++++++++++---------
+ 1 file changed, 16 insertions(+), 9 deletions(-)
 
 diff --git a/bpfloader/BpfLoader.cpp b/bpfloader/BpfLoader.cpp
-index 5cd80b7..bbfa7a8 100644
+index e53669a..158dca6 100644
 --- a/bpfloader/BpfLoader.cpp
 +++ b/bpfloader/BpfLoader.cpp
-@@ -194,8 +194,8 @@ int main(int argc, char** argv) {
-             ALOGE("If this triggers randomly, you might be hitting some memory allocation "
-                   "problems or startup script race.");
-             ALOGE("--- DO NOT EXPECT SYSTEM TO BOOT SUCCESSFULLY ---");
+@@ -284,7 +284,9 @@ int main(int argc, char** argv) {
+     //  which could otherwise fail with ENOENT during object pinning or renaming,
+     //  due to ordering issues)
+     for (const auto& location : locations) {
+-        if (createSysFsBpfSubDir(location.prefix)) return 1;
++        if (createSysFsBpfSubDir(location.prefix)) {
++            goto fail;
++        }
+     }
+ 
+     // Note: there's no actual src dir for fs_bpf_loader .o's,
+@@ -292,18 +294,15 @@ int main(int argc, char** argv) {
+     // This is because this is primarily meant for triggering genfscon rules,
+     // and as such this will likely always be the case.
+     // Thus we need to manually create the /sys/fs/bpf/loader subdirectory.
+-    if (createSysFsBpfSubDir("loader")) return 1;
++    if (createSysFsBpfSubDir("loader")) {
++        goto fail;
++        return 1;
++    }
+ 
+     // Load all ELF objects, create programs and maps, and pin them
+     for (const auto& location : locations) {
+         if (loadAllElfObjects(location) != 0) {
+-            ALOGE("=== CRITICAL FAILURE LOADING BPF PROGRAMS FROM %s ===", location.dir);
+-            ALOGE("If this triggers reliably, you're probably missing kernel options or patches.");
+-            ALOGE("If this triggers randomly, you might be hitting some memory allocation "
+-                  "problems or startup script race.");
+-            ALOGE("--- DO NOT EXPECT SYSTEM TO BOOT SUCCESSFULLY ---");
 -            sleep(20);
 -            return 2;
-+	    android::base::SetProperty("bpf.progs_loaded", "1");
-+	    return 0;
++            goto fail;
          }
      }
  
+@@ -321,5 +320,13 @@ int main(int argc, char** argv) {
+         return 1;
+     }
+ 
++    return 0;
++fail:
++    ALOGE("=== CRITICAL FAILURE LOADING BPF PROGRAMS ===");
++    ALOGE("If this triggers reliably, you're probably missing kernel options or patches.");
++    ALOGE("If this triggers randomly, you might be hitting some memory allocation "
++            "problems or startup script race.");
++    ALOGE("--- DO NOT EXPECT SYSTEM TO BOOT SUCCESSFULLY ---");
++    android::base::SetProperty("bpf.progs_loaded", "1");
+     return 0;
+ }
 -- 
-2.25.1
+2.34.1
 

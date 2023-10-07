@@ -1,8 +1,8 @@
-From d04e4d34aa66841e3cd8f716ebc0baa1a562159b Mon Sep 17 00:00:00 2001
+From e62c978dbf5f214f392355a0d111adc772f10b60 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Thu, 20 Jul 2023 14:21:21 -0400
-Subject: [PATCH 9/9] Allow /sys/vm/watermark_scale_factor conflict -- seen on
- Freebox Player Pop
+Subject: [PATCH 09/10] Allow /sys/vm/watermark_scale_factor conflict -- seen
+ on Freebox Player Pop
 
 ---
  libsepol/cil/src/cil_post.c | 9 +++++++++

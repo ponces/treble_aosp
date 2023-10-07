@@ -1,4 +1,4 @@
-From d397d0a8dae0a1c14090d004f324f83652370ce8 Mon Sep 17 00:00:00 2001
+From ae11f38991dcfdb1c1b0bda40e73fed37621a720 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sat, 7 Mar 2020 14:49:09 +0100
 Subject: [PATCH 2/5] Failing to create facedata shouldn't be fatal
@@ -12,10 +12,10 @@ See https://github.com/phhusson/treble_experimentations/issues/1119
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/vold_prepare_subdirs.cpp b/vold_prepare_subdirs.cpp
-index 94d7f151..671ae6fb 100644
+index 60e82f50..c1ded02e 100644
 --- a/vold_prepare_subdirs.cpp
 +++ b/vold_prepare_subdirs.cpp
-@@ -198,7 +198,7 @@ static bool prepare_subdirs(const std::string& volume_uuid, int user_id, int fla
+@@ -205,7 +205,7 @@ static bool prepare_subdirs(const std::string& volume_uuid, int user_id, int fla
              }
              auto facedata_path = vendor_de_path + "/facedata";
              if (!prepare_dir(sehandle, 0700, AID_SYSTEM, AID_SYSTEM, facedata_path)) {
@@ -24,7 +24,7 @@ index 94d7f151..671ae6fb 100644
              }
          }
      }
-@@ -247,7 +247,7 @@ static bool prepare_subdirs(const std::string& volume_uuid, int user_id, int fla
+@@ -254,7 +254,7 @@ static bool prepare_subdirs(const std::string& volume_uuid, int user_id, int fla
              auto vendor_ce_path = android::vold::BuildDataVendorCePath(user_id);
              auto facedata_path = vendor_ce_path + "/facedata";
              if (!prepare_dir(sehandle, 0700, AID_SYSTEM, AID_SYSTEM, facedata_path)) {
@@ -34,5 +34,5 @@ index 94d7f151..671ae6fb 100644
          }
      }
 -- 
-2.25.1
+2.34.1
 

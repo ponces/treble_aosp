@@ -1,0 +1,28 @@
+From e76c50b995e2f51a1a981621cb0065afd4c8f4e1 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Fri, 6 Oct 2023 05:18:39 -0400
+Subject: [PATCH] Include vndk v28 apex
+
+Change-Id: I5689074542f13e136e5bc1292afec2a8288f9e1c
+---
+ apex/Android.bp | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/apex/Android.bp b/apex/Android.bp
+index da5d4b7..eaa5ce4 100644
+--- a/apex/Android.bp
++++ b/apex/Android.bp
+@@ -82,3 +82,10 @@ apex_vndk {
+     system_ext_specific: true,
+ }
+ 
++apex_vndk {
++    name: "com.android.vndk.v28",
++    defaults: ["vndk-apex-defaults"],
++    vndk_version: "28",
++    system_ext_specific: true,
++}
++
+-- 
+2.34.1
+

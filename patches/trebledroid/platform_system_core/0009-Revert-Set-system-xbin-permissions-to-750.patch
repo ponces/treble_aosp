@@ -1,7 +1,7 @@
-From ff9d6468f5e9af74f243563bbe49b87237c5b89e Mon Sep 17 00:00:00 2001
+From 3293f4325501ccbbc18c129713c42dda7a0a9f39 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Tue, 1 Feb 2022 13:48:35 +0000
-Subject: [PATCH 08/18] Revert "Set /system/xbin permissions to 750."
+Subject: [PATCH 09/21] Revert "Set /system/xbin permissions to 750."
 
 This reverts commit 42a1a126e554a8bca31d0afc832848b7b0fa1f4e.
 
@@ -11,7 +11,7 @@ Change-Id: I277def5153616d6f00bc877e6170b7fed7cd799d
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/libcutils/fs_config.cpp b/libcutils/fs_config.cpp
-index f90a1bc3ca..8aadc3bb74 100644
+index f90a1bc3c..8aadc3bb7 100644
 --- a/libcutils/fs_config.cpp
 +++ b/libcutils/fs_config.cpp
 @@ -87,7 +87,7 @@ static const struct fs_path_config android_dirs[] = {

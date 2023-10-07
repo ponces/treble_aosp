@@ -1,7 +1,7 @@
-From 6fd00e3c22a1953e9238b43bcdf6e62539799876 Mon Sep 17 00:00:00 2001
+From 1629fd7946e9c880d440912c55b7995acfd92770 Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Wed, 2 Aug 2023 20:59:53 +0800
-Subject: [PATCH 36/37] Restore getSimStateForSlotIndex in SubscriptionManager
+Subject: [PATCH 34/36] Restore getSimStateForSlotIndex in SubscriptionManager
 
 MTK IMS still needs it here
 

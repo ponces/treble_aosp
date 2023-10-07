@@ -1,17 +1,17 @@
-From b17499b405387f9ab27960f9de2414efaaebd539 Mon Sep 17 00:00:00 2001
+From 6836703b7235859020c6e23edd97ad89f170df1a Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 21 Dec 2020 20:19:11 +0100
-Subject: [PATCH 13/28] Make camera IDs filter-out optional
+Subject: [PATCH 13/21] Make camera IDs filter-out optional
 
 Nowadays most people have Camera 2 apps, and would like to have all
 cameras, rather than limit which cameras are available.
 Add a property for that.
 ---
- .../camera/libcameraservice/common/CameraProviderManager.cpp  | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ .../common/CameraProviderManager.cpp               | 14 +++++++++-----
+ 1 file changed, 9 insertions(+), 5 deletions(-)
 
 diff --git a/services/camera/libcameraservice/common/CameraProviderManager.cpp b/services/camera/libcameraservice/common/CameraProviderManager.cpp
-index 0ec647a941..90f808f7b8 100644
+index 0ec647a941..bba0fedaea 100644
 --- a/services/camera/libcameraservice/common/CameraProviderManager.cpp
 +++ b/services/camera/libcameraservice/common/CameraProviderManager.cpp
 @@ -265,7 +265,9 @@ std::vector<std::string> CameraProviderManager::getAPI1CompatibleCameraDeviceIds
@@ -25,6 +25,23 @@ index 0ec647a941..90f808f7b8 100644
          collectDeviceIdsLocked(providerDeviceIds, publicDeviceIds, systemDeviceIds);
      }
      auto sortFunc =
+@@ -997,10 +999,12 @@ SystemCameraKind CameraProviderManager::ProviderInfo::DeviceInfo3::getSystemCame
+ 
+     // Go through the capabilities and check if it has
+     // ANDROID_REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA
+-    for (size_t i = 0; i < entryCap.count; ++i) {
+-        uint8_t capability = entryCap.data.u8[i];
+-        if (capability == ANDROID_REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA) {
+-            return SystemCameraKind::SYSTEM_ONLY_CAMERA;
++    if(!property_get_bool("persist.sys.phh.include_all_cameras", false)) {
++        for (size_t i = 0; i < entryCap.count; ++i) {
++            uint8_t capability = entryCap.data.u8[i];
++            if (capability == ANDROID_REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA) {
++                return SystemCameraKind::SYSTEM_ONLY_CAMERA;
++            }
+         }
+     }
+     return SystemCameraKind::PUBLIC;
 -- 
 2.34.1
 

@@ -1,7 +1,7 @@
-From e7ba65dec84597c2471033f65f50549a3cc3db80 Mon Sep 17 00:00:00 2001
+From dc79caf62c2ddb3e045c96cecd6f0afa502df7d4 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sat, 17 Jun 2023 08:31:55 -0400
-Subject: [PATCH 34/37] Add Mediatek power hints on touch
+Subject: [PATCH 32/36] Add Mediatek power hints on touch
 
 Mediatek has multiple HALs (which existed concurrently), so it is a bit
 of a mess.
@@ -42,7 +42,7 @@ index 735959270c11..05782235ea1c 100644
      javac_shard_size: 50,
      javacflags: [
 diff --git a/services/core/java/com/android/server/wm/DisplayPolicy.java b/services/core/java/com/android/server/wm/DisplayPolicy.java
-index 95c953a5cf2d..6a4a3a6b6028 100644
+index a1a9a0877710..289a37b9b60a 100644
 --- a/services/core/java/com/android/server/wm/DisplayPolicy.java
 +++ b/services/core/java/com/android/server/wm/DisplayPolicy.java
 @@ -208,6 +208,9 @@ public class DisplayPolicy {

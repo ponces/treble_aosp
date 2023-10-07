@@ -1,4 +1,4 @@
-From e14fbf8efcedf6de8a5eb3bf97d0388d398df539 Mon Sep 17 00:00:00 2001
+From e62433081df0f9cae64d2de5a7455552a4df72e8 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 29 Nov 2021 17:49:13 -0500
 Subject: [PATCH 3/5] Don't unmount rw-system.sh binds
@@ -9,10 +9,10 @@ Change-Id: If9132c21defa8b09879b79a70794c5275d6852d0
  1 file changed, 1 insertion(+)
 
 diff --git a/VolumeManager.cpp b/VolumeManager.cpp
-index a7d39c11..0d7bbb6f 100644
+index e29b9206..b87b9bae 100644
 --- a/VolumeManager.cpp
 +++ b/VolumeManager.cpp
-@@ -969,6 +969,7 @@ int VolumeManager::unmountAll() {
+@@ -983,6 +983,7 @@ int VolumeManager::unmountAll() {
      while ((mentry = getmntent(fp)) != NULL) {
          auto test = std::string(mentry->mnt_dir);
          if ((StartsWith(test, "/mnt/") &&
@@ -21,5 +21,5 @@ index a7d39c11..0d7bbb6f 100644
               !StartsWith(test, "/mnt/scratch") &&
  #endif
 -- 
-2.25.1
+2.34.1
 

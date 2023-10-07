@@ -1,4 +1,4 @@
-From 5fafd6b44e9cb3da7897a9748eadd91f127f4cd6 Mon Sep 17 00:00:00 2001
+From 7adc66904796a05023a6ed6ec81e5ada75fe3991 Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Tue, 18 Apr 2023 23:48:15 +0000
 Subject: [PATCH 2/2] Fix light sensor crash on Xiaomi 13

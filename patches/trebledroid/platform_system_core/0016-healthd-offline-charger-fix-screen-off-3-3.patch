@@ -1,7 +1,7 @@
-From d2ce11855e73f5365edb92a4ebfd0c354e4b4e51 Mon Sep 17 00:00:00 2001
+From 6528e4748095821637601d7212f39438eb6474b3 Mon Sep 17 00:00:00 2001
 From: Raphael Mounier <mounierr07@gmail.com>
 Date: Sun, 21 May 2023 16:15:42 +0200
-Subject: [PATCH 16/18] healthd : offline charger fix screen off 3/3
+Subject: [PATCH 16/21] healthd : offline charger fix screen off 3/3
 
 When the phone is charging, the animation never turns off on huawei phones (kernel 4.9). This patch allows you to turn it off by setting the brightness to 0. This problem may also exist on other phone models.
 
@@ -20,7 +20,7 @@ allow load sysfs_backlight_attr:file rw_file_perms;
  4 files changed, 108 insertions(+), 7 deletions(-)
 
 diff --git a/healthd/healthd_draw.cpp b/healthd/healthd_draw.cpp
-index 7c79319445..2266233e18 100644
+index 7c7931944..2266233e1 100644
 --- a/healthd/healthd_draw.cpp
 +++ b/healthd/healthd_draw.cpp
 @@ -15,18 +15,28 @@
@@ -142,7 +142,7 @@ index 7c79319445..2266233e18 100644
  
  // support screen rotation for foldable phone
 diff --git a/healthd/healthd_draw.h b/healthd/healthd_draw.h
-index 016db8e071..e8e51748d9 100644
+index 016db8e07..e8e51748d 100644
 --- a/healthd/healthd_draw.h
 +++ b/healthd/healthd_draw.h
 @@ -84,9 +84,15 @@ class HealthdDraw {
@@ -162,7 +162,7 @@ index 016db8e071..e8e51748d9 100644
  
  #endif  // HEALTHD_DRAW_H
 diff --git a/healthd/healthd_mode_charger.cpp b/healthd/healthd_mode_charger.cpp
-index 26af13b314..0d4ba32ff1 100644
+index 26af13b31..0d4ba32ff 100644
 --- a/healthd/healthd_mode_charger.cpp
 +++ b/healthd/healthd_mode_charger.cpp
 @@ -93,9 +93,9 @@ char* locale;
@@ -213,7 +213,7 @@ index 26af13b314..0d4ba32ff1 100644
  
  void Charger::OnHealthInfoChanged(const ChargerHealthInfo& health_info) {
 diff --git a/healthd/include_charger/charger/healthd_mode_charger.h b/healthd/include_charger/charger/healthd_mode_charger.h
-index c463b92aa8..50267ffee8 100644
+index c463b92aa..50267ffee 100644
 --- a/healthd/include_charger/charger/healthd_mode_charger.h
 +++ b/healthd/include_charger/charger/healthd_mode_charger.h
 @@ -103,6 +103,7 @@ class Charger {

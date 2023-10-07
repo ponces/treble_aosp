@@ -1,7 +1,7 @@
-From 9a0ba3f13ff9e91a531c56bad26de836e1094188 Mon Sep 17 00:00:00 2001
+From 5e102101733669fa99ed8a53f2053f8576d917d8 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Mon, 18 Oct 2021 17:20:18 +0100
-Subject: [PATCH 2/4] build: Bypass vendor calls
+Subject: [PATCH 2/5] build: Bypass vendor calls
 
 Change-Id: I69830d6264356dadd7b037553a899a4eb3d211f1
 ---

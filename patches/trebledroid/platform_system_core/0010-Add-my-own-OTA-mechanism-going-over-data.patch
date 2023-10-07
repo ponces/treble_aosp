@@ -1,7 +1,7 @@
-From ceaf49f2cf3ba5b4efed0318765858dbf4a3687a Mon Sep 17 00:00:00 2001
+From d3c3768156f5d20213a83aa2b811c13b4e267827 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sat, 22 Jan 2022 14:34:45 -0500
-Subject: [PATCH 10/18] Add my own OTA mechanism going over /data
+Subject: [PATCH 10/21] Add my own OTA mechanism going over /data
 
 Change-Id: I9cacff2d761affa0376b4bb8ca63353a9d95b5de
 ---
@@ -10,7 +10,7 @@ Change-Id: I9cacff2d761affa0376b4bb8ca63353a9d95b5de
  2 files changed, 65 insertions(+), 1 deletion(-)
 
 diff --git a/fs_mgr/libfiemap/image_manager.cpp b/fs_mgr/libfiemap/image_manager.cpp
-index c416f4df44..b8eba80aac 100644
+index c416f4df4..b8eba80aa 100644
 --- a/fs_mgr/libfiemap/image_manager.cpp
 +++ b/fs_mgr/libfiemap/image_manager.cpp
 @@ -156,7 +156,7 @@ bool ImageManager::MetadataDirIsTest() const {
@@ -23,7 +23,7 @@ index c416f4df44..b8eba80aac 100644
  
  FiemapStatus ImageManager::CreateBackingImage(
 diff --git a/init/selinux.cpp b/init/selinux.cpp
-index 907eb80e31..636c16bb6f 100644
+index 907eb80e3..636c16bb6 100644
 --- a/init/selinux.cpp
 +++ b/init/selinux.cpp
 @@ -62,6 +62,9 @@

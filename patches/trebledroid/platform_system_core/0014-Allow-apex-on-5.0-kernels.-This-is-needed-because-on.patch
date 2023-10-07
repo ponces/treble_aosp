@@ -1,7 +1,7 @@
-From 1de45868776bf79d77afdb81139a6f8b4c8eb455 Mon Sep 17 00:00:00 2001
+From ee4b52fd5deca426b21be5380ab0f3cf36fcf5a3 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 28 Apr 2023 12:29:05 -0400
-Subject: [PATCH 14/18] Allow apex on > 5.0 kernels. This is needed because on
+Subject: [PATCH 14/21] Allow apex on > 5.0 kernels. This is needed because on
  Pixels, camera HAL are exclusively in vendor apex
 
 Change-Id: I334cde4c5557b0ff70d550205c5bb727d4b5dbf5
@@ -10,7 +10,7 @@ Change-Id: I334cde4c5557b0ff70d550205c5bb727d4b5dbf5
  1 file changed, 14 insertions(+), 1 deletion(-)
 
 diff --git a/init/property_service.cpp b/init/property_service.cpp
-index da69dbe69e..a1993c8224 100644
+index da69dbe69..a1993c822 100644
 --- a/init/property_service.cpp
 +++ b/init/property_service.cpp
 @@ -62,6 +62,7 @@

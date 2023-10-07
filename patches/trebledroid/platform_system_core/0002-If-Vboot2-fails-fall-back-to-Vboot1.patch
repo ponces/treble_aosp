@@ -1,7 +1,7 @@
-From 7c6aa2020602f04e55e8157c1532c0fb4aa35188 Mon Sep 17 00:00:00 2001
+From 092f6994e24f4d13f2635c4576e243214376a688 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Thu, 12 Sep 2019 13:05:37 +0200
-Subject: [PATCH 02/18] If Vboot2 fails, fall-back to Vboot1
+Subject: [PATCH 02/21] If Vboot2 fails, fall-back to Vboot1
 
 Some devices, for instance Honor View 10, running Pie vendor declares
 vbmeta in their device-tree, but doesn't have a vbmeta partition.
@@ -18,7 +18,7 @@ Change-Id: I97a7042fb03f817c41b801d558e438d2c1f6c375
  1 file changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/init/first_stage_mount.cpp b/init/first_stage_mount.cpp
-index 07ce4588d0..7b16c69139 100644
+index 07ce4588d..7b16c6913 100644
 --- a/init/first_stage_mount.cpp
 +++ b/init/first_stage_mount.cpp
 @@ -820,10 +820,17 @@ bool DoFirstStageMount(bool create_devices) {

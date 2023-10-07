@@ -1,7 +1,7 @@
-From 275478ef9d9acd8eccfb6eeda4137949658e5001 Mon Sep 17 00:00:00 2001
+From 8c3f657915f1bbc48601d6a5330f6a1b3c2566cc Mon Sep 17 00:00:00 2001
 From: Isaac Chen <tingyi364@gmail.com>
 Date: Wed, 23 Jun 2021 13:07:30 +0800
-Subject: [PATCH 05/18] init: Do not start console service when debuggable
+Subject: [PATCH 05/21] init: Do not start console service when debuggable
 
 Google added a check for this in R, when it's running it will show a
 notification about that performance is impacted.
@@ -13,7 +13,7 @@ Change-Id: I34cfd6b42d3b9aee4b3e63181480cfb8b1255f29
  1 file changed, 3 deletions(-)
 
 diff --git a/rootdir/init.rc b/rootdir/init.rc
-index 1e6918d002..8b48a9c877 100644
+index 1e6918d00..8b48a9c87 100644
 --- a/rootdir/init.rc
 +++ b/rootdir/init.rc
 @@ -1312,9 +1312,6 @@ on property:ro.debuggable=1

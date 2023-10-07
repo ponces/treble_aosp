@@ -1,0 +1,78 @@
+From 4db0a4f57fa8369814156eb5a1c00bf4e73c7f2e Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Fri, 6 Oct 2023 09:27:33 -0400
+Subject: [PATCH 3/3] Make the use of IBpfMaps optional
+
+---
+ .../server/net/NetworkStatsService.java       | 29 +++++++++++--------
+ .../src/com/android/server/BpfNetMaps.java    |  7 ++++-
+ 2 files changed, 23 insertions(+), 13 deletions(-)
+
+diff --git a/service-t/src/com/android/server/net/NetworkStatsService.java b/service-t/src/com/android/server/net/NetworkStatsService.java
+index 877f351b5f..79314b6454 100644
+--- a/service-t/src/com/android/server/net/NetworkStatsService.java
++++ b/service-t/src/com/android/server/net/NetworkStatsService.java
+@@ -412,12 +412,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
+      * mActiveUidCounterSet to avoid accessing kernel too frequently.
+      */
+     private SparseIntArray mActiveUidCounterSet = new SparseIntArray();
+-    private final IBpfMap<S32, U8> mUidCounterSetMap;
+-    private final IBpfMap<CookieTagMapKey, CookieTagMapValue> mCookieTagMap;
+-    private final IBpfMap<StatsMapKey, StatsMapValue> mStatsMapA;
+-    private final IBpfMap<StatsMapKey, StatsMapValue> mStatsMapB;
+-    private final IBpfMap<UidStatsMapKey, StatsMapValue> mAppUidStatsMap;
+-    private final IBpfMap<S32, StatsMapValue> mIfaceStatsMap;
++    private IBpfMap<S32, U8> mUidCounterSetMap = null;
++    private IBpfMap<CookieTagMapKey, CookieTagMapValue> mCookieTagMap = null;
++    private IBpfMap<StatsMapKey, StatsMapValue> mStatsMapA = null;
++    private IBpfMap<StatsMapKey, StatsMapValue> mStatsMapB = null;
++    private IBpfMap<UidStatsMapKey, StatsMapValue> mAppUidStatsMap = null;
++    private IBpfMap<S32, StatsMapValue> mIfaceStatsMap = null;
+ 
+     /** Data layer operation counters for splicing into other structures. */
+     private NetworkStats mUidOperations = new NetworkStats(0L, 10);
+@@ -603,12 +603,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
+         mLocationPermissionChecker = mDeps.makeLocationPermissionChecker(mContext);
+         mInterfaceMapUpdater = mDeps.makeBpfInterfaceMapUpdater(mContext, mHandler);
+         mInterfaceMapUpdater.start();
+-        mUidCounterSetMap = mDeps.getUidCounterSetMap();
+-        mCookieTagMap = mDeps.getCookieTagMap();
+-        mStatsMapA = mDeps.getStatsMapA();
+-        mStatsMapB = mDeps.getStatsMapB();
+-        mAppUidStatsMap = mDeps.getAppUidStatsMap();
+-        mIfaceStatsMap = mDeps.getIfaceStatsMap();
++
++        try {
++            mUidCounterSetMap = mDeps.getUidCounterSetMap();
++            mCookieTagMap = mDeps.getCookieTagMap();
++            mStatsMapA = mDeps.getStatsMapA();
++            mStatsMapB = mDeps.getStatsMapB();
++            mAppUidStatsMap = mDeps.getAppUidStatsMap();
++            mIfaceStatsMap = mDeps.getIfaceStatsMap();
++        } catch(Throwable t) {
++            android.util.Log.e("PHH", "Failed creating bpf maps", t);
++        }
+ 
+         // TODO: Remove bpfNetMaps creation and always start SkDestroyListener
+         // Following code is for the experiment to verify the SkDestroyListener refactoring. Based
+diff --git a/service/src/com/android/server/BpfNetMaps.java b/service/src/com/android/server/BpfNetMaps.java
+index ec168dd0ab..744df6e9b8 100644
+--- a/service/src/com/android/server/BpfNetMaps.java
++++ b/service/src/com/android/server/BpfNetMaps.java
+@@ -345,7 +345,12 @@ public class BpfNetMaps {
+     @VisibleForTesting
+     public BpfNetMaps(final Context context, final INetd netd, final Dependencies deps) {
+         if (!PRE_T) {
+-            ensureInitialized(context);
++            try {
++                ensureInitialized(context);
++            } catch(Throwable t) {
++                android.util.Log.e("PHH", "Failed initialization BpfMaps, doing without it", t);
++                sEnableJavaBpfMap = false;
++            }
+         }
+         mNetd = netd;
+         mDeps = deps;
+-- 
+2.34.1
+

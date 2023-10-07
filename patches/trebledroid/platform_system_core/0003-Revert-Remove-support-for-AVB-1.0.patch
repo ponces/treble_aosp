@@ -1,7 +1,7 @@
-From 0ffb0e8eb8cad323547fd93ecbbda2c911980695 Mon Sep 17 00:00:00 2001
+From 4f1bde38a1c252f515b32e7333c822edfbf5c399 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Wed, 28 Sep 2022 17:04:03 +0100
-Subject: [PATCH 03/18] Revert "Remove support for AVB 1.0."
+Subject: [PATCH 03/21] Revert "Remove support for AVB 1.0."
 
 This reverts commit 21ef2310eb1ef4e61117b8a63741f3a9577a20c9.
 
@@ -20,7 +20,7 @@ This reverts commit ace7d45d0783d465d3dda4fa255e5280ff0c792f.
  create mode 100644 fs_mgr/fs_mgr_verity.cpp
 
 diff --git a/fs_mgr/Android.bp b/fs_mgr/Android.bp
-index dd612720f2..31c458306f 100644
+index dd612720f..31c458306 100644
 --- a/fs_mgr/Android.bp
 +++ b/fs_mgr/Android.bp
 @@ -69,6 +69,7 @@ cc_defaults {
@@ -32,7 +32,7 @@ index dd612720f2..31c458306f 100644
          "fs_mgr_overlayfs.cpp",
          "fs_mgr_roots.cpp",
 diff --git a/fs_mgr/fs_mgr.cpp b/fs_mgr/fs_mgr.cpp
-index 742cdfab01..2038b347f1 100644
+index 742cdfab0..2038b347f 100644
 --- a/fs_mgr/fs_mgr.cpp
 +++ b/fs_mgr/fs_mgr.cpp
 @@ -1467,6 +1467,14 @@ MountAllResult fs_mgr_mount_all(Fstab* fstab, int mount_mode) {
@@ -144,7 +144,7 @@ index 742cdfab01..2038b347f1 100644
      std::string filesystems;
      if (!android::base::ReadFileToString("/proc/filesystems", &filesystems)) return false;
 diff --git a/fs_mgr/fs_mgr_fstab.cpp b/fs_mgr/fs_mgr_fstab.cpp
-index 598a3d2ecb..7731545d0f 100644
+index 598a3d2ec..7731545d0 100644
 --- a/fs_mgr/fs_mgr_fstab.cpp
 +++ b/fs_mgr/fs_mgr_fstab.cpp
 @@ -167,10 +167,12 @@ bool ParseFsMgrFlags(const std::string& flags, FstabEntry* entry) {
@@ -162,7 +162,7 @@ index 598a3d2ecb..7731545d0f 100644
          CheckFlag("logical", logical);
 diff --git a/fs_mgr/fs_mgr_verity.cpp b/fs_mgr/fs_mgr_verity.cpp
 new file mode 100644
-index 0000000000..efa2180787
+index 000000000..efa218078
 --- /dev/null
 +++ b/fs_mgr/fs_mgr_verity.cpp
 @@ -0,0 +1,557 @@
@@ -724,7 +724,7 @@ index 0000000000..efa2180787
 +    return true;
 +}
 diff --git a/fs_mgr/include_fstab/fstab/fstab.h b/fs_mgr/include_fstab/fstab/fstab.h
-index a914b53bb3..221d6c41f0 100644
+index a914b53bb..221d6c41f 100644
 --- a/fs_mgr/include_fstab/fstab/fstab.h
 +++ b/fs_mgr/include_fstab/fstab/fstab.h
 @@ -64,6 +64,7 @@ struct FstabEntry {
@@ -744,7 +744,7 @@ index a914b53bb3..221d6c41f0 100644
          bool avb : 1;
          bool logical : 1;
 diff --git a/fs_mgr/tests/fs_mgr_test.cpp b/fs_mgr/tests/fs_mgr_test.cpp
-index e33681c3f6..6aeac9a9e1 100644
+index e33681c3f..6aeac9a9e 100644
 --- a/fs_mgr/tests/fs_mgr_test.cpp
 +++ b/fs_mgr/tests/fs_mgr_test.cpp
 @@ -192,6 +192,7 @@ bool CompareFlags(FstabEntry::FsMgrFlags& lhs, FstabEntry::FsMgrFlags& rhs) {
@@ -782,7 +782,7 @@ index e33681c3f6..6aeac9a9e1 100644
      }
  
 diff --git a/init/first_stage_mount.cpp b/init/first_stage_mount.cpp
-index 7b16c69139..1fc981719c 100644
+index 7b16c6913..1fc981719 100644
 --- a/init/first_stage_mount.cpp
 +++ b/init/first_stage_mount.cpp
 @@ -81,7 +81,8 @@ class FirstStageMount {

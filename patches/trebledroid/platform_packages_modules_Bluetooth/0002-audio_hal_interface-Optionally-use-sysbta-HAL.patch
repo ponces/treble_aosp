@@ -1,4 +1,4 @@
-From 7330c8e32a670f23a209b68ca08121c5062ee52b Mon Sep 17 00:00:00 2001
+From 0987ccb088ce9f264cbd6c2bd438ba7d960a6721 Mon Sep 17 00:00:00 2001
 From: Peter Cai <peter@typeblog.net>
 Date: Wed, 24 Aug 2022 15:45:18 -0400
 Subject: [PATCH 2/7] audio_hal_interface: Optionally use sysbta HAL

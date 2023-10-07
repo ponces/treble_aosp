@@ -1,4 +1,4 @@
-From 7ac7eb6a7750a7d95375b742f46cc70a467d4865 Mon Sep 17 00:00:00 2001
+From a613dcfa688ce7cb17d79f07bc3a0ad0e48dd3a0 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 26 Oct 2022 18:13:56 -0400
 Subject: [PATCH 4/4] Don't abort in case of cgroup/bpf setup fail, since some
@@ -9,10 +9,10 @@ Subject: [PATCH 4/4] Don't abort in case of cgroup/bpf setup fail, since some
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/server/main.cpp b/server/main.cpp
-index 0e81d4e5..18287d37 100644
+index 3c6b0d52..89bf4e9e 100644
 --- a/server/main.cpp
 +++ b/server/main.cpp
-@@ -134,7 +134,7 @@ int main() {
+@@ -147,7 +147,7 @@ int main() {
  
      if (libnetd_updatable_init(cg2_path.c_str())) {
          ALOGE("libnetd_updatable_init failed");
@@ -22,5 +22,5 @@ index 0e81d4e5..18287d37 100644
      gLog.info("libnetd_updatable_init success");
  
 -- 
-2.25.1
+2.34.1
 
