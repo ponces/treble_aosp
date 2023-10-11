@@ -1,4 +1,4 @@
-From 08ee14098fc3ff8a645d44d891535fe73a81dacd Mon Sep 17 00:00:00 2001
+From fcdcf697c9dbd0bf817da3b5acef5c7f7666e100 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 6 Oct 2023 08:25:11 -0400
 Subject: [PATCH] Revert "Remove 28.0 compat support"
@@ -45,7 +45,7 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/private/file_contexts      |  541 ++++
  prebuilts/api/28.0/private/file_contexts_asan |   11 +
  prebuilts/api/28.0/private/fingerprintd.te    |    3 +
- prebuilts/api/28.0/private/fs_use             |   23 +
+ prebuilts/api/28.0/private/fs_use             |   22 +
  prebuilts/api/28.0/private/fsck.te            |    5 +
  prebuilts/api/28.0/private/fsck_untrusted.te  |    1 +
  prebuilts/api/28.0/private/gatekeeperd.te     |    3 +
@@ -59,7 +59,7 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/private/idmap.te           |    1 +
  prebuilts/api/28.0/private/incident.te        |   30 +
  prebuilts/api/28.0/private/incident_helper.te |   14 +
- prebuilts/api/28.0/private/incidentd.te       |  166 +
+ prebuilts/api/28.0/private/incidentd.te       |  165 +
  prebuilts/api/28.0/private/init.te            |   22 +
  .../api/28.0/private/initial_sid_contexts     |   27 +
  prebuilts/api/28.0/private/initial_sids       |   35 +
@@ -68,14 +68,14 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/private/installd.te        |   22 +
  prebuilts/api/28.0/private/isolated_app.te    |  119 +
  prebuilts/api/28.0/private/kernel.te          |    3 +
- prebuilts/api/28.0/private/keys.conf          |   25 +
+ prebuilts/api/28.0/private/keys.conf          |   24 +
  prebuilts/api/28.0/private/keystore.te        |   19 +
  prebuilts/api/28.0/private/lmkd.te            |    3 +
  prebuilts/api/28.0/private/logd.te            |   39 +
  prebuilts/api/28.0/private/logpersist.te      |   24 +
  .../api/28.0/private/mac_permissions.xml      |   59 +
  prebuilts/api/28.0/private/mdnsd.te           |   12 +
- prebuilts/api/28.0/private/mediadrmserver.te  |    8 +
+ prebuilts/api/28.0/private/mediadrmserver.te  |    7 +
  prebuilts/api/28.0/private/mediaextractor.te  |    3 +
  prebuilts/api/28.0/private/mediametrics.te    |    3 +
  prebuilts/api/28.0/private/mediaprovider.te   |   43 +
@@ -95,8 +95,8 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/private/performanced.te    |    3 +
  prebuilts/api/28.0/private/perfprofd.te       |    8 +
  prebuilts/api/28.0/private/platform_app.te    |   85 +
- .../api/28.0/private/policy_capabilities      |   13 +
- prebuilts/api/28.0/private/port_contexts      |    3 +
+ .../api/28.0/private/policy_capabilities      |   12 +
+ prebuilts/api/28.0/private/port_contexts      |    2 +
  prebuilts/api/28.0/private/postinstall.te     |    3 +
  .../api/28.0/private/postinstall_dexopt.te    |    5 +
  prebuilts/api/28.0/private/ppp.te             |    3 +
@@ -122,7 +122,7 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/private/shared_relro.te    |    5 +
  prebuilts/api/28.0/private/shell.te           |   53 +
  prebuilts/api/28.0/private/slideshow.te       |    1 +
- prebuilts/api/28.0/private/stats.te           |   25 +
+ prebuilts/api/28.0/private/stats.te           |   24 +
  prebuilts/api/28.0/private/statsd.te          |  116 +
  prebuilts/api/28.0/private/storaged.te        |   61 +
  prebuilts/api/28.0/private/su.te              |   23 +
@@ -130,7 +130,7 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/private/system_app.te      |  129 +
  prebuilts/api/28.0/private/system_server.te   |  868 ++++++
  prebuilts/api/28.0/private/technical_debt.cil |   38 +
- prebuilts/api/28.0/private/thermalserviced.te |    4 +
+ prebuilts/api/28.0/private/thermalserviced.te |    3 +
  prebuilts/api/28.0/private/tombstoned.te      |    3 +
  prebuilts/api/28.0/private/toolbox.te         |    3 +
  prebuilts/api/28.0/private/traced.te          |   60 +
@@ -169,7 +169,7 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/public/blkid.te            |    2 +
  prebuilts/api/28.0/public/blkid_untrusted.te  |    2 +
  prebuilts/api/28.0/public/bluetooth.te        |    2 +
- prebuilts/api/28.0/public/bootanim.te         |   42 +
+ prebuilts/api/28.0/public/bootanim.te         |   41 +
  prebuilts/api/28.0/public/bootstat.te         |   57 +
  prebuilts/api/28.0/public/bufferhubd.te       |   20 +
  prebuilts/api/28.0/public/cameraserver.te     |   65 +
@@ -207,8 +207,8 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/public/hal_contexthub.te   |    6 +
  prebuilts/api/28.0/public/hal_drm.te          |   53 +
  prebuilts/api/28.0/public/hal_dumpstate.te    |   11 +
- prebuilts/api/28.0/public/hal_evs.te          |    5 +
- prebuilts/api/28.0/public/hal_fingerprint.te  |   17 +
+ prebuilts/api/28.0/public/hal_evs.te          |    4 +
+ prebuilts/api/28.0/public/hal_fingerprint.te  |   15 +
  prebuilts/api/28.0/public/hal_gatekeeper.te   |    8 +
  prebuilts/api/28.0/public/hal_gnss.te         |    6 +
  .../api/28.0/public/hal_graphics_allocator.te |   13 +
@@ -231,8 +231,8 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/public/hal_thermal.te      |    6 +
  prebuilts/api/28.0/public/hal_tv_cec.te       |    6 +
  prebuilts/api/28.0/public/hal_tv_input.te     |    6 +
- prebuilts/api/28.0/public/hal_usb.te          |   18 +
- prebuilts/api/28.0/public/hal_usb_gadget.te   |   14 +
+ prebuilts/api/28.0/public/hal_usb.te          |   17 +
+ prebuilts/api/28.0/public/hal_usb_gadget.te   |   13 +
  prebuilts/api/28.0/public/hal_vehicle.te      |    7 +
  prebuilts/api/28.0/public/hal_vibrator.te     |    9 +
  prebuilts/api/28.0/public/hal_vr.te           |    6 +
@@ -245,9 +245,9 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/public/hwservice.te        |   62 +
  prebuilts/api/28.0/public/hwservicemanager.te |   22 +
  prebuilts/api/28.0/public/idmap.te            |   20 +
- prebuilts/api/28.0/public/incident.te         |    8 +
+ prebuilts/api/28.0/public/incident.te         |    7 +
  prebuilts/api/28.0/public/incident_helper.te  |    5 +
- prebuilts/api/28.0/public/incidentd.te        |    3 +
+ prebuilts/api/28.0/public/incidentd.te        |    2 +
  prebuilts/api/28.0/public/init.te             |  509 ++++
  prebuilts/api/28.0/public/inputflinger.te     |   16 +
  prebuilts/api/28.0/public/install_recovery.te |   27 +
@@ -290,7 +290,7 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/public/racoon.te           |   33 +
  prebuilts/api/28.0/public/radio.te            |   41 +
  prebuilts/api/28.0/public/recovery.te         |  161 +
- prebuilts/api/28.0/public/recovery_persist.te |   27 +
+ prebuilts/api/28.0/public/recovery_persist.te |   26 +
  prebuilts/api/28.0/public/recovery_refresh.te |   24 +
  prebuilts/api/28.0/public/roles               |    1 +
  prebuilts/api/28.0/public/runas.te            |   42 +
@@ -301,13 +301,13 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/public/sgdisk.te           |   22 +
  prebuilts/api/28.0/public/shared_relro.te     |   10 +
  prebuilts/api/28.0/public/shell.te            |  226 ++
- prebuilts/api/28.0/public/slideshow.te        |   14 +
+ prebuilts/api/28.0/public/slideshow.te        |   13 +
  prebuilts/api/28.0/public/su.te               |  100 +
  prebuilts/api/28.0/public/surfaceflinger.te   |    2 +
  prebuilts/api/28.0/public/system_app.te       |    7 +
  prebuilts/api/28.0/public/system_server.te    |    5 +
  prebuilts/api/28.0/public/te_macros           |  597 ++++
- prebuilts/api/28.0/public/tee.te              |   11 +
+ prebuilts/api/28.0/public/tee.te              |   10 +
  prebuilts/api/28.0/public/thermalserviced.te  |   13 +
  prebuilts/api/28.0/public/tombstoned.te       |   22 +
  prebuilts/api/28.0/public/toolbox.te          |   24 +
@@ -321,7 +321,7 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  prebuilts/api/28.0/public/update_engine.te    |   58 +
  .../api/28.0/public/update_engine_common.te   |   45 +
  prebuilts/api/28.0/public/update_verifier.te  |   31 +
- prebuilts/api/28.0/public/usbd.te             |    3 +
+ prebuilts/api/28.0/public/usbd.te             |    2 +
  prebuilts/api/28.0/public/vdc.te              |   20 +
  prebuilts/api/28.0/public/vendor_init.te      |  198 ++
  prebuilts/api/28.0/public/vendor_shell.te     |   19 +
@@ -354,7 +354,7 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  private/compat/28.0/28.0.cil                  | 1745 +++++++++++
  private/compat/28.0/28.0.compat.cil           |   15 +
  private/compat/28.0/28.0.ignore.cil           |  160 +
- 347 files changed, 31599 insertions(+)
+ 347 files changed, 31579 insertions(+)
  create mode 100644 prebuilts/api/28.0/private/access_vectors
  create mode 100644 prebuilts/api/28.0/private/adbd.te
  create mode 100644 prebuilts/api/28.0/private/app.te
@@ -3497,10 +3497,10 @@ index 000000000..eb73ef8cc
 +init_daemon_domain(fingerprintd)
 diff --git a/prebuilts/api/28.0/private/fs_use b/prebuilts/api/28.0/private/fs_use
 new file mode 100644
-index 000000000..4bd11126e
+index 000000000..c4d25a2b9
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/fs_use
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,22 @@
 +# Label inodes via getxattr.
 +fs_use_xattr yaffs2 u:object_r:labeledfs:s0;
 +fs_use_xattr jffs2 u:object_r:labeledfs:s0;
@@ -3523,7 +3523,6 @@ index 000000000..4bd11126e
 +fs_use_trans devtmpfs u:object_r:device:s0;
 +fs_use_trans shm u:object_r:shm:s0;
 +fs_use_trans mqueue u:object_r:mqueue:s0;
-+
 diff --git a/prebuilts/api/28.0/private/fsck.te b/prebuilts/api/28.0/private/fsck.te
 new file mode 100644
 index 000000000..f8e09b645
@@ -4017,10 +4016,10 @@ index 000000000..e1e3fc826
 +neverallow { domain -incidentd -incident_helper -shell } incident_helper_exec:file { execute execute_no_trans };
 diff --git a/prebuilts/api/28.0/private/incidentd.te b/prebuilts/api/28.0/private/incidentd.te
 new file mode 100644
-index 000000000..35b184c89
+index 000000000..4ae928e79
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/incidentd.te
-@@ -0,0 +1,166 @@
+@@ -0,0 +1,165 @@
 +typeattribute incidentd coredomain;
 +typeattribute incidentd mlstrustedsubject;
 +
@@ -4186,7 +4185,6 @@ index 000000000..35b184c89
 +neverallow { domain -incidentd -init -vold -system_server } incident_data_file:file r_file_perms;
 +# limited access to the directory itself
 +neverallow { domain -incidentd -init -vold } incident_data_file:dir create_dir_perms;
-+
 diff --git a/prebuilts/api/28.0/private/init.te b/prebuilts/api/28.0/private/init.te
 new file mode 100644
 index 000000000..e9959d3d2
@@ -4471,10 +4469,10 @@ index 000000000..a4e6ebe36
 +domain_auto_trans(kernel, init_exec, init)
 diff --git a/prebuilts/api/28.0/private/keys.conf b/prebuilts/api/28.0/private/keys.conf
 new file mode 100644
-index 000000000..7a307b5de
+index 000000000..7bb3ad55e
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/keys.conf
-@@ -0,0 +1,25 @@
+@@ -0,0 +1,24 @@
 +#
 +# Maps an arbitrary tag [TAGNAME] with the string contents found in
 +# TARGET_BUILD_VARIANT. Common convention is to start TAGNAME with an @ and
@@ -4499,7 +4497,6 @@ index 000000000..7a307b5de
 +ENG       : $DEFAULT_SYSTEM_DEV_CERTIFICATE/testkey.x509.pem
 +USER      : $DEFAULT_SYSTEM_DEV_CERTIFICATE/testkey.x509.pem
 +USERDEBUG : $DEFAULT_SYSTEM_DEV_CERTIFICATE/testkey.x509.pem
-+
 diff --git a/prebuilts/api/28.0/private/keystore.te b/prebuilts/api/28.0/private/keystore.te
 new file mode 100644
 index 000000000..7f71028ba
@@ -4694,10 +4691,10 @@ index 000000000..96259e298
 +r_dir_file(mdnsd, proc_net)
 diff --git a/prebuilts/api/28.0/private/mediadrmserver.te b/prebuilts/api/28.0/private/mediadrmserver.te
 new file mode 100644
-index 000000000..4e511a819
+index 000000000..d5270e28e
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/mediadrmserver.te
-@@ -0,0 +1,8 @@
+@@ -0,0 +1,7 @@
 +typeattribute mediadrmserver coredomain;
 +
 +init_daemon_domain(mediadrmserver)
@@ -4705,7 +4702,6 @@ index 000000000..4e511a819
 +# allocate and use graphic buffers
 +hal_client_domain(mediadrmserver, hal_graphics_allocator)
 +auditallow mediadrmserver hal_graphics_allocator_server:binder call;
-+
 diff --git a/prebuilts/api/28.0/private/mediaextractor.te b/prebuilts/api/28.0/private/mediaextractor.te
 new file mode 100644
 index 000000000..c1a85219c
@@ -5337,10 +5333,10 @@ index 000000000..6d6ec9832
 +neverallow platform_app fuse_device:chr_file *;
 diff --git a/prebuilts/api/28.0/private/policy_capabilities b/prebuilts/api/28.0/private/policy_capabilities
 new file mode 100644
-index 000000000..ab55c15e3
+index 000000000..2df2c34b9
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/policy_capabilities
-@@ -0,0 +1,13 @@
+@@ -0,0 +1,12 @@
 +# Enable new networking controls.
 +policycap network_peer_controls;
 +
@@ -5353,16 +5349,14 @@ index 000000000..ab55c15e3
 +# ICMP and SCTP sockets previously mapped
 +# to the rawip_socket class.
 +policycap extended_socket_class;
-+
 diff --git a/prebuilts/api/28.0/private/port_contexts b/prebuilts/api/28.0/private/port_contexts
 new file mode 100644
-index 000000000..b473c0c9b
+index 000000000..c60089e02
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/port_contexts
-@@ -0,0 +1,3 @@
+@@ -0,0 +1,2 @@
 +# portcon statements go here, e.g.
 +# portcon tcp 80 u:object_r:http_port:s0
-+
 diff --git a/prebuilts/api/28.0/private/postinstall.te b/prebuilts/api/28.0/private/postinstall.te
 new file mode 100644
 index 000000000..363e362dd
@@ -6445,10 +6439,10 @@ index 000000000..7dfa994ea
 +typeattribute slideshow coredomain;
 diff --git a/prebuilts/api/28.0/private/stats.te b/prebuilts/api/28.0/private/stats.te
 new file mode 100644
-index 000000000..be8cfbd25
+index 000000000..019dfc82c
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/stats.te
-@@ -0,0 +1,25 @@
+@@ -0,0 +1,24 @@
 +type stats, domain;
 +typeattribute stats coredomain;
 +type stats_exec, exec_type, file_type;
@@ -6473,7 +6467,6 @@ index 000000000..be8cfbd25
 +allow stats stats_service:service_manager find;
 +binder_call(stats, statsd)
 +allow stats statsd:fifo_file write;
-+
 diff --git a/prebuilts/api/28.0/private/statsd.te b/prebuilts/api/28.0/private/statsd.te
 new file mode 100644
 index 000000000..74b89c242
@@ -7874,14 +7867,13 @@ index 000000000..7f9d315ed
 +(typeattributeset hal_neuralnetworks_client ((and (appdomain) ((not (isolated_app))))))
 diff --git a/prebuilts/api/28.0/private/thermalserviced.te b/prebuilts/api/28.0/private/thermalserviced.te
 new file mode 100644
-index 000000000..1a09e203e
+index 000000000..8fa08e066
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/thermalserviced.te
-@@ -0,0 +1,4 @@
+@@ -0,0 +1,3 @@
 +typeattribute thermalserviced coredomain;
 +
 +init_daemon_domain(thermalserviced)
-+
 diff --git a/prebuilts/api/28.0/private/tombstoned.te b/prebuilts/api/28.0/private/tombstoned.te
 new file mode 100644
 index 000000000..305f9d006
@@ -9896,10 +9888,10 @@ index 000000000..9b3442aa5
 +type bluetooth, domain;
 diff --git a/prebuilts/api/28.0/public/bootanim.te b/prebuilts/api/28.0/public/bootanim.te
 new file mode 100644
-index 000000000..32602273d
+index 000000000..5cce7f9e4
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/bootanim.te
-@@ -0,0 +1,42 @@
+@@ -0,0 +1,41 @@
 +# bootanimation oneshot service
 +type bootanim, domain;
 +type bootanim_exec, exec_type, file_type;
@@ -9941,7 +9933,6 @@ index 000000000..32602273d
 +
 +# Read ro.boot.bootreason b/30654343
 +get_prop(bootanim, bootloader_boot_reason_prop)
-+
 diff --git a/prebuilts/api/28.0/public/bootstat.te b/prebuilts/api/28.0/public/bootstat.te
 new file mode 100644
 index 000000000..7ba023815
@@ -13429,21 +13420,20 @@ index 000000000..2853567e0
 +allow hal_dumpstate proc_interrupts:file r_file_perms;
 diff --git a/prebuilts/api/28.0/public/hal_evs.te b/prebuilts/api/28.0/public/hal_evs.te
 new file mode 100644
-index 000000000..710051eee
+index 000000000..b42a5602c
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_evs.te
-@@ -0,0 +1,5 @@
+@@ -0,0 +1,4 @@
 +hwbinder_use(hal_evs_client)
 +hwbinder_use(hal_evs_server)
 +binder_call(hal_evs_client, hal_evs_server)
 +binder_call(hal_evs_server, hal_evs_client)
-+
 diff --git a/prebuilts/api/28.0/public/hal_fingerprint.te b/prebuilts/api/28.0/public/hal_fingerprint.te
 new file mode 100644
-index 000000000..ebe0b0c82
+index 000000000..d62ccff6f
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_fingerprint.te
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,15 @@
 +# HwBinder IPC from client to server, and callbacks
 +binder_call(hal_fingerprint_client, hal_fingerprint_server)
 +binder_call(hal_fingerprint_server, hal_fingerprint_client)
@@ -13459,8 +13449,6 @@ index 000000000..ebe0b0c82
 +
 +r_dir_file(hal_fingerprint, cgroup)
 +r_dir_file(hal_fingerprint, sysfs)
-+
-+
 diff --git a/prebuilts/api/28.0/public/hal_gatekeeper.te b/prebuilts/api/28.0/public/hal_gatekeeper.te
 new file mode 100644
 index 000000000..123acf567
@@ -13911,10 +13899,10 @@ index 000000000..31a006740
 +allow hal_tv_input_client hal_tv_input_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_usb.te b/prebuilts/api/28.0/public/hal_usb.te
 new file mode 100644
-index 000000000..9cfd5165d
+index 000000000..f63f156d2
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_usb.te
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,17 @@
 +# HwBinder IPC from client to server, and callbacks
 +binder_call(hal_usb_client, hal_usb_server)
 +binder_call(hal_usb_server, hal_usb_client)
@@ -13932,13 +13920,12 @@ index 000000000..9cfd5165d
 +allow hal_usb sysfs:file open;
 +allow hal_usb sysfs:file write;
 +allow hal_usb sysfs:file getattr;
-+
 diff --git a/prebuilts/api/28.0/public/hal_usb_gadget.te b/prebuilts/api/28.0/public/hal_usb_gadget.te
 new file mode 100644
-index 000000000..16f4f0821
+index 000000000..dcee9837b
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_usb_gadget.te
-@@ -0,0 +1,14 @@
+@@ -0,0 +1,13 @@
 +# HwBinder IPC from client to server, and callbacks
 +binder_call(hal_usb_gadget_client, hal_usb_gadget_server)
 +binder_call(hal_usb_gadget_server, hal_usb_gadget_client)
@@ -13952,7 +13939,6 @@ index 000000000..16f4f0821
 +allow hal_usb_gadget_server configfs:file rw_file_perms;
 +allow hal_usb_gadget_server functionfs:dir { read search };
 +allow hal_usb_gadget_server functionfs:file read;
-+
 diff --git a/prebuilts/api/28.0/public/hal_vehicle.te b/prebuilts/api/28.0/public/hal_vehicle.te
 new file mode 100644
 index 000000000..a59f8d2bd
@@ -14314,10 +14300,10 @@ index 000000000..3f336a32d
 +r_dir_file(idmap, vendor_overlay_file)
 diff --git a/prebuilts/api/28.0/public/incident.te b/prebuilts/api/28.0/public/incident.te
 new file mode 100644
-index 000000000..ce57bf650
+index 000000000..5c41dcebf
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/incident.te
-@@ -0,0 +1,8 @@
+@@ -0,0 +1,7 @@
 +# The incident command is used to call into the incidentd service to
 +# take an incident report (binary, shared bugreport), download incident
 +# reports that have already been taken, and monitor for new ones.
@@ -14325,7 +14311,6 @@ index 000000000..ce57bf650
 +
 +# incident
 +type incident, domain;
-+
 diff --git a/prebuilts/api/28.0/public/incident_helper.te b/prebuilts/api/28.0/public/incident_helper.te
 new file mode 100644
 index 000000000..bca101869
@@ -14339,13 +14324,12 @@ index 000000000..bca101869
 +type incident_helper, domain;
 diff --git a/prebuilts/api/28.0/public/incidentd.te b/prebuilts/api/28.0/public/incidentd.te
 new file mode 100644
-index 000000000..b03249c88
+index 000000000..00b710a48
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/incidentd.te
-@@ -0,0 +1,3 @@
+@@ -0,0 +1,2 @@
 +# incidentd
 +type incidentd, domain;
-+
 diff --git a/prebuilts/api/28.0/public/init.te b/prebuilts/api/28.0/public/init.te
 new file mode 100644
 index 000000000..dafc06f99
@@ -20263,10 +20247,10 @@ index 000000000..57ad2028b
 +}:dir no_w_dir_perms;
 diff --git a/prebuilts/api/28.0/public/recovery_persist.te b/prebuilts/api/28.0/public/recovery_persist.te
 new file mode 100644
-index 000000000..091d3001a
+index 000000000..59dff8c62
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/recovery_persist.te
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,26 @@
 +# android recovery persistent log manager
 +type recovery_persist, domain;
 +type recovery_persist_exec, exec_type, file_type;
@@ -20293,7 +20277,6 @@ index 000000000..091d3001a
 +
 +# Write to files in /data/data
 +neverallow recovery_persist { app_data_file system_data_file }:dir_file_class_set write;
-+
 diff --git a/prebuilts/api/28.0/public/recovery_refresh.te b/prebuilts/api/28.0/public/recovery_refresh.te
 new file mode 100644
 index 000000000..602ed51d7
@@ -20912,10 +20895,10 @@ index 000000000..307e10342
 +neverallow shell dev_type:blk_file ~getattr;
 diff --git a/prebuilts/api/28.0/public/slideshow.te b/prebuilts/api/28.0/public/slideshow.te
 new file mode 100644
-index 000000000..10fbbb852
+index 000000000..8ded68655
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/slideshow.te
-@@ -0,0 +1,14 @@
+@@ -0,0 +1,13 @@
 +# slideshow seclabel is specified in init.rc since
 +# it lives in the rootfs and has no unique file type.
 +type slideshow, domain;
@@ -20929,7 +20912,6 @@ index 000000000..10fbbb852
 +allow slideshow input_device:dir r_dir_perms;
 +allow slideshow input_device:chr_file r_file_perms;
 +allow slideshow tty_device:chr_file rw_file_perms;
-+
 diff --git a/prebuilts/api/28.0/public/su.te b/prebuilts/api/28.0/public/su.te
 new file mode 100644
 index 000000000..031294548
@@ -21673,10 +21655,10 @@ index 000000000..9cfe47c84
 +')
 diff --git a/prebuilts/api/28.0/public/tee.te b/prebuilts/api/28.0/public/tee.te
 new file mode 100644
-index 000000000..0f9b32dc9
+index 000000000..06627c33a
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/tee.te
-@@ -0,0 +1,11 @@
+@@ -0,0 +1,10 @@
 +##
 +# trusted execution environment (tee) daemon
 +#
@@ -21687,7 +21669,6 @@ index 000000000..0f9b32dc9
 +
 +allow tee fingerprint_vendor_data_file:dir rw_dir_perms;
 +allow tee fingerprint_vendor_data_file:file create_file_perms;
-+
 diff --git a/prebuilts/api/28.0/public/thermalserviced.te b/prebuilts/api/28.0/public/thermalserviced.te
 new file mode 100644
 index 000000000..00e007132
@@ -22129,13 +22110,12 @@ index 000000000..5d20eca82
 +hal_client_domain(update_verifier, hal_bootctl)
 diff --git a/prebuilts/api/28.0/public/usbd.te b/prebuilts/api/28.0/public/usbd.te
 new file mode 100644
-index 000000000..98786e062
+index 000000000..a98724b69
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/usbd.te
-@@ -0,0 +1,3 @@
+@@ -0,0 +1,2 @@
 +type usbd, domain;
 +type usbd_exec, exec_type, file_type;
-+
 diff --git a/prebuilts/api/28.0/public/vdc.te b/prebuilts/api/28.0/public/vdc.te
 new file mode 100644
 index 000000000..424bdea02

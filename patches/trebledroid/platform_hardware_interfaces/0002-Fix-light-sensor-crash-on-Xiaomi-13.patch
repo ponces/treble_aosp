@@ -12,7 +12,7 @@ Change-Id: Ie358321d5328d01541f455d6af86944ff413c9c9
  1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/sensors/aidl/convert/convert.cpp b/sensors/aidl/convert/convert.cpp
-index 2dc7a177a..be3833dfa 100644
+index 2dc7a177a0..be3833dfa7 100644
 --- a/sensors/aidl/convert/convert.cpp
 +++ b/sensors/aidl/convert/convert.cpp
 @@ -162,7 +162,14 @@ void convertToSensorEvent(const Event& src, sensors_event_t* dst) {
