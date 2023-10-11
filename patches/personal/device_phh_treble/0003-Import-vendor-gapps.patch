@@ -1,7 +1,7 @@
 From 35e411820e4af4b2695e0e492b447855b703c162 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Tue, 21 Feb 2023 22:51:12 +0000
-Subject: [PATCH 3/3] Import vendor/gapps
+Subject: [PATCH 3/4] Import vendor/gapps
 
 ---
  generate.sh | 2 +-
