@@ -1,7 +1,7 @@
-From 3b0f0c247c6d7522af15869ca01f94c5b476b7fb Mon Sep 17 00:00:00 2001
+From bc7b5f9d7ab6cecf44513515f5b2982cf098806a Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Sat, 7 Oct 2023 21:41:53 +0000
-Subject: [PATCH 4/4] Revert "treble: Override media volume steps to 25"
+Subject: [PATCH 5/5] Revert "treble: Override media volume steps to 25"
 
 This reverts commit a5d5328f43b8d05a67dda385c66d7952a107d0e4.
 ---
@@ -9,7 +9,7 @@ This reverts commit a5d5328f43b8d05a67dda385c66d7952a107d0e4.
  1 file changed, 2 insertions(+)
 
 diff --git a/rw-system.sh b/rw-system.sh
-index fcabb01..557ce81 100644
+index 1b69198..3cf0571 100644
 --- a/rw-system.sh
 +++ b/rw-system.sh
 @@ -1026,6 +1026,8 @@ fi
@@ -21,6 +21,6 @@ index fcabb01..557ce81 100644
  fi
  
  if [ "$board" = universal8825 ];then
---
+-- 
 2.34.1
 

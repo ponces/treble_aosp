@@ -1,0 +1,87 @@
+From e4dfa33f48a26ff8aad08ae712a73511fbc551f9 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Wed, 11 Oct 2023 17:18:16 +0000
+Subject: [PATCH] Revert "[Wi-Fi] Check if domain field is not empty when users
+ choose a ca certificate"
+
+Change-Id: I8f71fe85cd035fd241386500136830cfdbe981dd
+---
+ .../settings/wifi/WifiConfigController.java        | 14 +++++++++-----
+ .../settings/wifi/WifiConfigController2.java       | 14 +++++++++-----
+ 2 files changed, 18 insertions(+), 10 deletions(-)
+
+diff --git a/src/com/android/settings/wifi/WifiConfigController.java b/src/com/android/settings/wifi/WifiConfigController.java
+index 8f0a983d1f..0aa0314a1b 100644
+--- a/src/com/android/settings/wifi/WifiConfigController.java
++++ b/src/com/android/settings/wifi/WifiConfigController.java
+@@ -544,10 +544,11 @@ public class WifiConfigController implements TextWatcher,
+                 // Disallow submit if the user has not selected a CA certificate for an EAP network
+                 // configuration.
+                 enabled = false;
+-            } else if (mEapDomainView != null
++            } else if (caCertSelection.equals(mUseSystemCertsString)
++                    && mEapDomainView != null
+                     && mView.findViewById(R.id.l_domain).getVisibility() != View.GONE
+                     && TextUtils.isEmpty(mEapDomainView.getText().toString())) {
+-                // Disallow submit if the user chooses to use a certificate for EAP server
++                // Disallow submit if the user chooses to use a system certificate for EAP server
+                 // validation, but does not provide a domain.
+                 enabled = false;
+             }
+@@ -578,11 +579,14 @@ public class WifiConfigController implements TextWatcher,
+         }
+         if (mEapCaCertSpinner != null
+                 && mView.findViewById(R.id.l_ca_cert).getVisibility() != View.GONE) {
+-            if (mEapDomainView != null
++            String caCertSelection = (String) mEapCaCertSpinner.getSelectedItem();
++            if (caCertSelection.equals(mUseSystemCertsString)
++                    && mEapDomainView != null
+                     && mView.findViewById(R.id.l_domain).getVisibility() != View.GONE
+                     && TextUtils.isEmpty(mEapDomainView.getText().toString())) {
+-                // Display warning if user chooses to use a certificate without restricting the
+-                // server domain that these certificates can be used to validate.
++                // Display warning if user chooses to use pre-installed public CA certificates
++                // without restricting the server domain that these certificates can be used to
++                // validate.
+                 mView.findViewById(R.id.no_domain_warning).setVisibility(View.VISIBLE);
+             }
+         }
+diff --git a/src/com/android/settings/wifi/WifiConfigController2.java b/src/com/android/settings/wifi/WifiConfigController2.java
+index f92b58fbd1..11d301e85e 100644
+--- a/src/com/android/settings/wifi/WifiConfigController2.java
++++ b/src/com/android/settings/wifi/WifiConfigController2.java
+@@ -532,10 +532,11 @@ public class WifiConfigController2 implements TextWatcher,
+                 // Disallow submit if the user has not selected a CA certificate for an EAP network
+                 // configuration.
+                 enabled = false;
+-            } else if (mEapDomainView != null
++            } else if (caCertSelection.equals(mUseSystemCertsString)
++                    && mEapDomainView != null
+                     && mView.findViewById(R.id.l_domain).getVisibility() != View.GONE
+                     && TextUtils.isEmpty(mEapDomainView.getText().toString())) {
+-                // Disallow submit if the user chooses to use a certificate for EAP server
++                // Disallow submit if the user chooses to use a system certificate for EAP server
+                 // validation, but does not provide a domain.
+                 enabled = false;
+             }
+@@ -566,11 +567,14 @@ public class WifiConfigController2 implements TextWatcher,
+         }
+         if (mEapCaCertSpinner != null
+                 && mView.findViewById(R.id.l_ca_cert).getVisibility() != View.GONE) {
+-            if (mEapDomainView != null
++            String caCertSelection = (String) mEapCaCertSpinner.getSelectedItem();
++            if (caCertSelection.equals(mUseSystemCertsString)
++                    && mEapDomainView != null
+                     && mView.findViewById(R.id.l_domain).getVisibility() != View.GONE
+                     && TextUtils.isEmpty(mEapDomainView.getText().toString())) {
+-                // Display warning if user chooses to use a certificate without restricting the
+-                // server domain that these certificates can be used to validate.
++                // Display warning if user chooses to use pre-installed public CA certificates
++                // without restricting the server domain that these certificates can be used to
++                // validate.
+                 mView.findViewById(R.id.no_domain_warning).setVisibility(View.VISIBLE);
+             }
+         }
+-- 
+2.34.1
+
