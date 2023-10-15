@@ -1,0 +1,67 @@
+From d09e5b4ad397b8483911103b3d4765c2bb849682 Mon Sep 17 00:00:00 2001
+From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
+Date: Sun, 15 Oct 2023 11:21:58 +0800
+Subject: [PATCH 40/40] SystemUI: Add MTK's brightness path for FOD
+
+Rewrote the part for easier extension
+
+Change-Id: Ifec88c625210301b5d1146bba0275cd9699243e8
+---
+ .../android/systemui/biometrics/UdfpsView.kt  | 30 ++++++++++++++-----
+ 1 file changed, 22 insertions(+), 8 deletions(-)
+
+diff --git a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
+index 505b57f3a1f9..c005c66f96bc 100644
+--- a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
++++ b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
+@@ -35,6 +35,7 @@ import com.android.settingslib.udfps.UdfpsOverlayParams
+ import com.android.systemui.R
+ import com.android.systemui.doze.DozeReceiver
+ import java.io.File
++import java.io.FileNotFoundException
+ 
+ import vendor.goodix.hardware.biometrics.fingerprint.V2_1.IGoodixFingerprintDaemon
+ 
+@@ -240,18 +241,31 @@ class UdfpsView(
+         mySurfaceView.setVisibility(VISIBLE)
+         Log.d("PHH", "setting surface visible!")
+ 
+-        val brightnessFile = File("/sys/class/backlight/panel/brightness")
+-        val maxBrightnessFile = File("/sys/class/backlight/panel/max_brightness")
++        val brightnessFiles = listOf(
++            File("/sys/class/backlight/panel/brightness"),
++            File("/sys/class/backlight/panel0-backlight/brightness"),
++            File("/sys/devices/platform/soc/soc:mtk_leds/leds/lcd-backlight/brightness")
++        )
++        val maxBrightnessFiles = listOf(
++            File("/sys/class/backlight/panel/max_brightness"),
++            File("/sys/class/backlight/panel0-backlight/max_brightness"),
++            File("/sys/devices/platform/soc/soc:mtk_leds/leds/lcd-backlight/max_brightness")
++        )
+ 
+         var brightness: Double = 0.0
+         var maxBrightness: Double = 0.0
++        var bmFilesExist: Boolean = false
+ 
+-        if (brightnessFile.exists() && maxBrightnessFile.exists()) {
+-            brightness = brightnessFile.readText().toDouble()
+-            maxBrightness = maxBrightnessFile.readText().toDouble()
+-        } else {
+-            brightness = File("/sys/class/backlight/panel0-backlight/brightness").readText().toDouble()
+-            maxBrightness = File("/sys/class/backlight/panel0-backlight/max_brightness").readText().toDouble()
++        brightnessFiles.zip(maxBrightnessFiles) {bFile, mFile ->
++            if (bFile.exists() && mFile.exists()) {
++                bmFilesExist = true
++                brightness = bFile.readText().toDouble()
++                maxBrightness = mFile.readText().toDouble()
++            }
++        }
++
++        if (!bmFilesExist) {
++            throw FileNotFoundException("No brightness files under expected paths")
+         }
+ 
+         // Assume HBM is max brightness
+-- 
+2.34.1
+
