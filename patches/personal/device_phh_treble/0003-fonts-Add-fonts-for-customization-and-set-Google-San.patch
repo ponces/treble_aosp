@@ -1,7 +1,7 @@
 From 0e9961bddc54911d0464d9ed5dc8c17c3e4650e0 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Wed, 22 Feb 2023 14:43:58 +0000
-Subject: [PATCH 3/5] fonts: Add fonts for customization and set Google Sans as
+Subject: [PATCH 3/4] fonts: Add fonts for customization and set Google Sans as
  default font
 
 ---

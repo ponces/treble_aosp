@@ -1,7 +1,7 @@
 From 13ce93569ae27bf947f61b3abf01b930f9dae5df Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 12 Oct 2023 17:00:26 +0000
-Subject: [PATCH 4/5] WifiOverlay: Disable domain validation on Enterprise
+Subject: [PATCH 4/4] WifiOverlay: Disable domain validation on Enterprise
  networks
 
 ---
