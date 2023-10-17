@@ -1,0 +1,30 @@
+From 9b3cbd5f98313ebd634a948cb3e686b6fc647369 Mon Sep 17 00:00:00 2001
+From: Chris Poultney <poultney@google.com>
+Date: Mon, 14 Aug 2023 20:57:09 +0000
+Subject: [PATCH 2/2] Make ThemePicker override any other AOSP picker
+
+Bug: b/294871815
+Test: manually verified that ThemePicker is chosen
+Change-Id: I9e7a13fd9b32ff9f15774d50525e902bc0cbde81
+---
+ Android.bp | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/Android.bp b/Android.bp
+index b8dcbe57..8780675b 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -127,5 +127,9 @@ android_app {
+     platform_apis: true,
+     manifest: "AndroidManifest.xml",
+     additional_manifests: [":WallpaperPicker2_Manifest"],
+-    overrides: ["WallpaperPicker2"],
++    overrides: [
++        "WallpaperCropper",
++        "WallpaperPicker",
++        "WallpaperPicker2",
++    ],
+ }
+-- 
+2.34.1
+
