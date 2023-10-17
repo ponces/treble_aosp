@@ -15,6 +15,9 @@ To get started with building AOSP GSI, you'll need to get familiar with [Git and
     bash treble_build_aosp/build.sh
     ```
 
+## Issues
+[Open issue](https://github.com/ponces/treble_build_aosp/issues/new/choose)
+
 ## Credits
 These people have helped this project in some way or another, so they should be the ones who receive all the credit:
 - [phhusson](https://github.com/phhusson)
