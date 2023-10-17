@@ -74,6 +74,15 @@ buildVanillaVariant() {
     echo
 }
 
+buildGappsVariant() {
+    echo "--> Building treble_arm64_bgN"
+    lunch treble_arm64_bgN-userdebug
+    make -j$(nproc --all) installclean
+    make -j$(nproc --all) systemimage
+    mv $OUT/system.img $BD/system-treble_arm64_bgN.img
+    echo
+}
+
 buildVndkliteVariant() {
     echo "--> Building treble_arm64_bvN-vndklite"
     cd sas-creator
@@ -81,15 +90,6 @@ buildVndkliteVariant() {
     cp s.img $BD/system-treble_arm64_bvN-vndklite.img
     sudo rm -rf s.img d tmp
     cd ..
-    echo
-}
-
-buildGappsVariant() {
-    echo "--> Building treble_arm64_bgN"
-    lunch treble_arm64_bgN-userdebug
-    make -j$(nproc --all) installclean
-    make -j$(nproc --all) systemimage
-    mv $OUT/system.img $BD/system-treble_arm64_bgN.img
     echo
 }
 
@@ -136,8 +136,8 @@ applyPatches
 setupEnv
 buildTrebleApp
 buildVanillaVariant
-buildVndkliteVariant
 buildGappsVariant
+buildVndkliteVariant
 generatePackages
 generateOta
 
