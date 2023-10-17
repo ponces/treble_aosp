@@ -14,7 +14,7 @@ We don't care much about dm-verity so let's just ignore this
  1 file changed, 1 deletion(-)
 
 diff --git a/init/first_stage_mount.cpp b/init/first_stage_mount.cpp
-index 1fc981719..d0e00b316 100644
+index 1fc981719c..d0e00b3164 100644
 --- a/init/first_stage_mount.cpp
 +++ b/init/first_stage_mount.cpp
 @@ -438,7 +438,6 @@ bool FirstStageMount::MountPartition(const Fstab::iterator& begin, bool erase_sa

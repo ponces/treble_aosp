@@ -9,7 +9,7 @@ Subject: [PATCH 21/21] Disable project_quota on old devices but new enough to
  1 file changed, 8 insertions(+)
 
 diff --git a/fs_mgr/fs_mgr.cpp b/fs_mgr/fs_mgr.cpp
-index df9372c05..1bead469d 100644
+index df9372c051..1bead469de 100644
 --- a/fs_mgr/fs_mgr.cpp
 +++ b/fs_mgr/fs_mgr.cpp
 @@ -385,6 +385,14 @@ static void tune_quota(const std::string& blk_device, const FstabEntry& entry,

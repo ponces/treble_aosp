@@ -12,7 +12,7 @@ Change-Id: If04bb6572dc66677d7b44f7d302b2d69ce526200
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/init/reboot_utils.cpp b/init/reboot_utils.cpp
-index e6b868e79..1c8fed965 100644
+index e6b868e797..1c8fed9653 100644
 --- a/init/reboot_utils.cpp
 +++ b/init/reboot_utils.cpp
 @@ -36,7 +36,7 @@

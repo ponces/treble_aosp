@@ -12,7 +12,7 @@ devices without cgroupv2 simply won't freeze processes at all
  1 file changed, 3 insertions(+)
 
 diff --git a/init/service.cpp b/init/service.cpp
-index 35beaad33..964236929 100644
+index 35beaad33d..9642369292 100644
 --- a/init/service.cpp
 +++ b/init/service.cpp
 @@ -707,6 +707,8 @@ Result<void> Service::Start() {

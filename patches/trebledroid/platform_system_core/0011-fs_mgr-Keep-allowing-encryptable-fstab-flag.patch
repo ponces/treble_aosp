@@ -11,7 +11,7 @@ Change-Id: Id2554d6563a869bb5bcf39c67b0322484bdab0c9
  1 file changed, 11 deletions(-)
 
 diff --git a/fs_mgr/fs_mgr_fstab.cpp b/fs_mgr/fs_mgr_fstab.cpp
-index 7731545d0..fad84c653 100644
+index 7731545d0f..fad84c653b 100644
 --- a/fs_mgr/fs_mgr_fstab.cpp
 +++ b/fs_mgr/fs_mgr_fstab.cpp
 @@ -322,17 +322,6 @@ bool ParseFsMgrFlags(const std::string& flags, FstabEntry* entry) {

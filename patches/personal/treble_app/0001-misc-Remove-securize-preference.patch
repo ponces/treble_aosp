@@ -1,4 +1,4 @@
-From b57bc9c19071e85bfd23b5cb249ee5571acfa423 Mon Sep 17 00:00:00 2001
+From 1586c804a971422cd93de3743ae67d27212986be Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Tue, 8 Jun 2021 09:44:26 +0100
 Subject: [PATCH] misc: Remove securize preference
@@ -53,18 +53,18 @@ index dc2e0e3..80530b1 100644
          removeTelephonyPref!!.setOnPreferenceClickListener {
  
 diff --git a/app/src/main/res/xml/pref_misc.xml b/app/src/main/res/xml/pref_misc.xml
-index 609f556..534fc3f 100644
+index 4210106..9176674 100644
 --- a/app/src/main/res/xml/pref_misc.xml
 +++ b/app/src/main/res/xml/pref_misc.xml
-@@ -155,8 +155,6 @@
+@@ -161,8 +161,6 @@
  		    android:entryValues="@array/pref_misc_fod_color_values"
  		    android:key="key_misc_fod_color"
              android:title="Under-display fp color" />
 -		<Preference android:title="Securize"
 -            android:key="key_misc_securize" />
- 		<Preference android:title="@string/remove_telephony_subsystem"
-             android:key="key_misc_removetelephony" />
  	</PreferenceCategory>
+     <PreferenceCategory android:title="Debugging">
+         <Preference android:title="Debug Sensors">
 -- 
 2.34.1
 

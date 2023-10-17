@@ -1,0 +1,32 @@
+From 08eca1bfdc1644bb5d507a2738c8f827933901e0 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 17 Oct 2023 11:08:06 -0400
+Subject: [PATCH 10/10] When logging UiccSlot, ignore error if we cant print
+ IccIds
+
+---
+ .../com/android/internal/telephony/uicc/UiccSlot.java     | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/src/java/com/android/internal/telephony/uicc/UiccSlot.java b/src/java/com/android/internal/telephony/uicc/UiccSlot.java
+index db10271a2f..00c8acb0db 100644
+--- a/src/java/com/android/internal/telephony/uicc/UiccSlot.java
++++ b/src/java/com/android/internal/telephony/uicc/UiccSlot.java
+@@ -687,7 +687,13 @@ public class UiccSlot extends Handler {
+     @NonNull
+     @Override
+     public String toString() {
+-        return "[UiccSlot: mActive=" + mActive + ", mIccId=" + getPrintableIccIds() + ", mIsEuicc="
++        Map<Integer,String> printableIccIds = null;
++        try {
++            printableIccIds = getPrintableIccIds();
++        } catch(Throwable t) {
++            android.util.Log.e("PHH", "getPrintableIccIds failed", t);
++        }
++        return "[UiccSlot: mActive=" + mActive + ", mIccId=" + printableIccIds + ", mIsEuicc="
+                 + mIsEuicc + ", MEP=" + isMultipleEnabledProfileSupported() + ", mPortIdxToPhoneId="
+                 + mPortIdxToPhoneId + ", mEid=" + Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, mEid)
+                 + ", mCardState=" + mCardState + " mSupportedMepMode=" + mSupportedMepMode + "]";
+-- 
+2.34.1
+

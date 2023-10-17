@@ -18,7 +18,7 @@ Change-Id: I97a7042fb03f817c41b801d558e438d2c1f6c375
  1 file changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/init/first_stage_mount.cpp b/init/first_stage_mount.cpp
-index 07ce4588d..7b16c6913 100644
+index 07ce4588d0..7b16c69139 100644
 --- a/init/first_stage_mount.cpp
 +++ b/init/first_stage_mount.cpp
 @@ -820,10 +820,17 @@ bool DoFirstStageMount(bool create_devices) {

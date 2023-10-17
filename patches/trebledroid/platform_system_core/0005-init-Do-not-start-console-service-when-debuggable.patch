@@ -13,7 +13,7 @@ Change-Id: I34cfd6b42d3b9aee4b3e63181480cfb8b1255f29
  1 file changed, 3 deletions(-)
 
 diff --git a/rootdir/init.rc b/rootdir/init.rc
-index 1e6918d00..8b48a9c87 100644
+index 1e6918d002..8b48a9c877 100644
 --- a/rootdir/init.rc
 +++ b/rootdir/init.rc
 @@ -1312,9 +1312,6 @@ on property:ro.debuggable=1

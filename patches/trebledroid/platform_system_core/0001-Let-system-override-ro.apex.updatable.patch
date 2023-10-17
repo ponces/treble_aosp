@@ -13,7 +13,7 @@ So, ignore the override policy for this prop
  1 file changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/init/property_service.cpp b/init/property_service.cpp
-index 8da69822c..545c25e26 100644
+index 8da69822cc..545c25e26f 100644
 --- a/init/property_service.cpp
 +++ b/init/property_service.cpp
 @@ -787,8 +787,12 @@ static void LoadProperties(char* data, const char* filter, const char* filename,

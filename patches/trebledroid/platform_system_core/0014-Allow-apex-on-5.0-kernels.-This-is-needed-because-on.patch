@@ -10,7 +10,7 @@ Change-Id: I334cde4c5557b0ff70d550205c5bb727d4b5dbf5
  1 file changed, 14 insertions(+), 1 deletion(-)
 
 diff --git a/init/property_service.cpp b/init/property_service.cpp
-index da69dbe69..a1993c822 100644
+index da69dbe69e..a1993c8224 100644
 --- a/init/property_service.cpp
 +++ b/init/property_service.cpp
 @@ -62,6 +62,7 @@

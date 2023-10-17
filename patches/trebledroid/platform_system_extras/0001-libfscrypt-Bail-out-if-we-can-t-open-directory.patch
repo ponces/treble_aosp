@@ -18,7 +18,7 @@ Change-Id: I5ea37019221cd0887b8a5d7454f5a42ac01335c7
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/libfscrypt/fscrypt.cpp b/libfscrypt/fscrypt.cpp
-index 174cecad..285cb9d7 100644
+index 174cecada..285cb9d7c 100644
 --- a/libfscrypt/fscrypt.cpp
 +++ b/libfscrypt/fscrypt.cpp
 @@ -328,7 +328,7 @@ bool EnsurePolicy(const EncryptionPolicy& policy, const std::string& directory)

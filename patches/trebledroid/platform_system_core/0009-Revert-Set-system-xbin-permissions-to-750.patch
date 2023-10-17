@@ -11,7 +11,7 @@ Change-Id: I277def5153616d6f00bc877e6170b7fed7cd799d
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/libcutils/fs_config.cpp b/libcutils/fs_config.cpp
-index f90a1bc3c..8aadc3bb7 100644
+index f90a1bc3ca..8aadc3bb74 100644
 --- a/libcutils/fs_config.cpp
 +++ b/libcutils/fs_config.cpp
 @@ -87,7 +87,7 @@ static const struct fs_path_config android_dirs[] = {

@@ -10,7 +10,7 @@ Source: https://t.me/phhtreblebuilders/20521 and https://t.me/phhtreblebuilders/
  1 file changed, 7 insertions(+)
 
 diff --git a/fs_mgr/fs_mgr.cpp b/fs_mgr/fs_mgr.cpp
-index 2038b347f..df9372c05 100644
+index 2038b347f1..df9372c051 100644
 --- a/fs_mgr/fs_mgr.cpp
 +++ b/fs_mgr/fs_mgr.cpp
 @@ -378,6 +378,13 @@ static void tune_quota(const std::string& blk_device, const FstabEntry& entry,

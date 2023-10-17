@@ -9,7 +9,7 @@ Subject: [PATCH 18/21] Add /vendor/firmware_mnt. Moto Razr 2019 look for
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/rootdir/ueventd.rc b/rootdir/ueventd.rc
-index e06e453b1..0af6948f8 100644
+index e06e453b11..0af6948f8d 100644
 --- a/rootdir/ueventd.rc
 +++ b/rootdir/ueventd.rc
 @@ -1,7 +1,7 @@
