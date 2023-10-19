@@ -1,0 +1,40 @@
+From 57cb5ea561e40950f346c2f3e26d21ba620f56c3 Mon Sep 17 00:00:00 2001
+From: ganeshi4u <ganeshvarmai4u@gmail.com>
+Date: Fri, 6 Sep 2019 18:31:15 +0200
+Subject: [PATCH 3/3] Automatically set CCACHE_EXEC to the system's ccache
+
+* Check for ccache tool and set its path in CCACHE_EXEC if it hasn't been set already
+
+* Enable ccache and compression by default
+
+Change-Id: Ife9d0a723cb90b89392ee288ebe6e7e9f2be7eef
+---
+ envsetup.sh | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/envsetup.sh b/envsetup.sh
+index 905635c890..d7b785a042 100644
+--- a/envsetup.sh
++++ b/envsetup.sh
+@@ -2085,3 +2085,18 @@ set_global_paths
+ source_vendorsetup
+ addcompletions
+ 
++# check and set ccache path on envsetup
++if [ -z ${CCACHE_EXEC} ]; then
++    ccache_path=$(which ccache)
++    if [ ! -z "$ccache_path" ]; then
++        export USE_CCACHE=1
++        export CCACHE_EXEC="$ccache_path"
++        if [ -z ${CCACHE_DIR} ]; then
++            export CCACHE_DIR=${HOME}/.ccache
++        fi
++        $ccache_path -o compression=true
++        echo -e "ccache enabled and CCACHE_EXEC has been set to : $ccache_path"
++    else
++        echo -e "ccache not found installed!"
++    fi
++fi
+-- 
+2.34.1
+

@@ -1,0 +1,31 @@
+From a965fe2c8adea0b20b210816aaadbfd58f405d37 Mon Sep 17 00:00:00 2001
+From: daniml3 <danimoral1001@gmail.com>
+Date: Mon, 11 Oct 2021 14:12:34 +0200
+Subject: [PATCH] sandbox_linux: set CCACHE_DIR as a writable path
+
+fixes Read-only dir issue when using ccache
+
+Signed-off-by: daniml3 <danimoral1001@gmail.com>
+Change-Id: I99afe644c8ee0e0b881c1643fef0cb31b83bcd17
+---
+ ui/build/sandbox_linux.go | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/ui/build/sandbox_linux.go b/ui/build/sandbox_linux.go
+index edb3b66d4..386dc552e 100644
+--- a/ui/build/sandbox_linux.go
++++ b/ui/build/sandbox_linux.go
+@@ -228,6 +228,10 @@ func (c *Cmd) wrapSandbox() {
+ 		sandboxArgs = append(sandboxArgs, "-N")
+ 	}
+ 
++	if ccacheDir := os.Getenv("CCACHE_DIR"); ccacheDir != "" {
++		sandboxArgs = append(sandboxArgs, "-B", ccacheDir)
++	}
++
+ 	// Stop nsjail from parsing arguments
+ 	sandboxArgs = append(sandboxArgs, "--")
+ 
+-- 
+2.34.1
+
