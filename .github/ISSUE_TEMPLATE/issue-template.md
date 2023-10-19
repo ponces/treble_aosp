@@ -5,11 +5,12 @@ title: Brief description of your problem
 ---
 
 ## Info
-<!-- Anything that can help us identify the build, device and firmware that you are using. -->
+<!-- Anything that can help us identify the device, build and firmware version that you are using. -->
 <!-- THIS SECTION IS MANDATORY. If it is not filled out correctly, your issue will be closed. -->
 ```
 Device: 
-Build version: 
+GSI version: 
+Vendor version: 
 ```
 
 ## Expected Behavior
