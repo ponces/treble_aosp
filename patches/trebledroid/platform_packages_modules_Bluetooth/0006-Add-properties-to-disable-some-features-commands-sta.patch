@@ -9,7 +9,7 @@ Subject: [PATCH 6/7] Add properties to disable some features/commands/states
  1 file changed, 68 insertions(+), 4 deletions(-)
 
 diff --git a/system/gd/hci/controller.cc b/system/gd/hci/controller.cc
-index c08ecab9d5..66b7de6b5e 100644
+index c08ecab9d55..66b7de6b5e2 100644
 --- a/system/gd/hci/controller.cc
 +++ b/system/gd/hci/controller.cc
 @@ -16,6 +16,7 @@

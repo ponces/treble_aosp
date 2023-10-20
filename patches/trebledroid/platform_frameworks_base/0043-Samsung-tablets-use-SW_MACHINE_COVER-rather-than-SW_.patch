@@ -1,7 +1,7 @@
 From aff6d95f97bea391c6fe0b08fa3928567fcb055c Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 18 Oct 2023 16:57:34 -0400
-Subject: [PATCH 43/43] Samsung tablets use SW_MACHINE_COVER rather than SW_LID
+Subject: [PATCH 43/47] Samsung tablets use SW_MACHINE_COVER rather than SW_LID
 
 So check whether SW_MACHINE_COVER is declared, then use it
 Otherwise stick to SW_LID

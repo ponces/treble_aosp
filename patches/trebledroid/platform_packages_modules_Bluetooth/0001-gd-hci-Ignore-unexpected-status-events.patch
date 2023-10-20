@@ -13,7 +13,7 @@ Change-Id: Ifb9a65fd77f21d15a8dc1ced9240194d38218ef6
  1 file changed, 7 insertions(+), 8 deletions(-)
 
 diff --git a/system/gd/hci/hci_layer.cc b/system/gd/hci/hci_layer.cc
-index c3312a557c..3e8ab78371 100644
+index c3312a557ce..3e8ab783714 100644
 --- a/system/gd/hci/hci_layer.cc
 +++ b/system/gd/hci/hci_layer.cc
 @@ -211,14 +211,13 @@ struct HciLayer::impl {

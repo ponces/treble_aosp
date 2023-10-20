@@ -1,7 +1,7 @@
 From c244e37c04e1c9601d11544adac52051159a7972 Mon Sep 17 00:00:00 2001
 From: Christian Hoffmann <chrmhoffmann@gmail.com>
 Date: Fri, 21 Oct 2022 12:58:04 +0200
-Subject: [PATCH 08/10] Fix NPE with 1.0 and 1.1 CardStatus
+Subject: [PATCH 08/11] Fix NPE with 1.0 and 1.1 CardStatus
 
 Change-Id: I965f6ef419b7aef828da02f5d4745bd33d09fe3a
 ---

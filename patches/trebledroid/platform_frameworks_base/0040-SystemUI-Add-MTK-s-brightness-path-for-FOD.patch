@@ -1,7 +1,7 @@
 From d09e5b4ad397b8483911103b3d4765c2bb849682 Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Sun, 15 Oct 2023 11:21:58 +0800
-Subject: [PATCH 40/43] SystemUI: Add MTK's brightness path for FOD
+Subject: [PATCH 40/47] SystemUI: Add MTK's brightness path for FOD
 
 Rewrote the part for easier extension
 

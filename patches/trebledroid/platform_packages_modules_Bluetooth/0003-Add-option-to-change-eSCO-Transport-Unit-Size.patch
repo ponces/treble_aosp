@@ -15,7 +15,7 @@ Change-Id: I3e5897c2ce983042b9a4bef9def6744ba4253bcb
  1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/system/device/src/esco_parameters.cc b/system/device/src/esco_parameters.cc
-index 48607e6d54..3b19d7c3ea 100644
+index 48607e6d54a..3b19d7c3eaf 100644
 --- a/system/device/src/esco_parameters.cc
 +++ b/system/device/src/esco_parameters.cc
 @@ -22,7 +22,8 @@

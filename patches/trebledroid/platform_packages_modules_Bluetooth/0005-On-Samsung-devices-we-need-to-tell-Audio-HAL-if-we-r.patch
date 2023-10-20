@@ -12,7 +12,7 @@ Change-Id: I7802b7a29c017a2cd7018e82772183df1dfa0b89
  1 file changed, 8 insertions(+)
 
 diff --git a/android/app/src/com/android/bluetooth/hfp/HeadsetStateMachine.java b/android/app/src/com/android/bluetooth/hfp/HeadsetStateMachine.java
-index 57eb9aff4c..fbe29415b8 100644
+index 57eb9aff4cf..fbe29415b8e 100644
 --- a/android/app/src/com/android/bluetooth/hfp/HeadsetStateMachine.java
 +++ b/android/app/src/com/android/bluetooth/hfp/HeadsetStateMachine.java
 @@ -151,6 +151,7 @@ public class HeadsetStateMachine extends StateMachine {

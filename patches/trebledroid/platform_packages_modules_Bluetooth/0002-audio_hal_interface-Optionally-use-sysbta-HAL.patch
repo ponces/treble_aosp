@@ -13,7 +13,7 @@ Change-Id: I59973e6ec84c5923be8a7c67b36b2e237f000860
  3 files changed, 19 insertions(+), 5 deletions(-)
 
 diff --git a/system/audio_hal_interface/aidl/client_interface_aidl.cc b/system/audio_hal_interface/aidl/client_interface_aidl.cc
-index 897b891aa7..ed41627c3e 100644
+index 897b891aa77..ed41627c3ed 100644
 --- a/system/audio_hal_interface/aidl/client_interface_aidl.cc
 +++ b/system/audio_hal_interface/aidl/client_interface_aidl.cc
 @@ -56,7 +56,7 @@ BluetoothAudioClientInterface::BluetoothAudioClientInterface(
@@ -53,7 +53,7 @@ index 897b891aa7..ed41627c3e 100644
    if (provider_factory == nullptr) {
      LOG(ERROR) << __func__ << ", can't get aidl version from unknown factory";
 diff --git a/system/audio_hal_interface/aidl/client_interface_aidl.h b/system/audio_hal_interface/aidl/client_interface_aidl.h
-index 8a40c1d7d7..6d962d3473 100644
+index 8a40c1d7d75..6d962d3473b 100644
 --- a/system/audio_hal_interface/aidl/client_interface_aidl.h
 +++ b/system/audio_hal_interface/aidl/client_interface_aidl.h
 @@ -28,6 +28,7 @@
@@ -78,7 +78,7 @@ index 8a40c1d7d7..6d962d3473 100644
   private:
    IBluetoothTransportInstance* transport_;
 diff --git a/system/audio_hal_interface/hal_version_manager.cc b/system/audio_hal_interface/hal_version_manager.cc
-index a2c192f37d..c3d1cf35c2 100644
+index a2c192f37d1..c3d1cf35c2c 100644
 --- a/system/audio_hal_interface/hal_version_manager.cc
 +++ b/system/audio_hal_interface/hal_version_manager.cc
 @@ -24,6 +24,7 @@

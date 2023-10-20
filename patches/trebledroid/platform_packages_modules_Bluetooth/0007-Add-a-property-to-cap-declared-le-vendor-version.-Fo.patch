@@ -9,7 +9,7 @@ Subject: [PATCH 7/7] Add a property to cap declared le vendor version. Found
  1 file changed, 11 insertions(+)
 
 diff --git a/system/gd/hci/controller.cc b/system/gd/hci/controller.cc
-index 66b7de6b5e..a51382cd0d 100644
+index 66b7de6b5e2..a51382cd0d8 100644
 --- a/system/gd/hci/controller.cc
 +++ b/system/gd/hci/controller.cc
 @@ -603,6 +603,13 @@ struct Controller::impl {
