@@ -1,0 +1,40 @@
+From 83da0b6c152bbd3235613b28a49efeacba137735 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Fri, 20 Oct 2023 23:36:20 +0000
+Subject: [PATCH] Revert "Aperture: Inherit aapt_version_code_defaults"
+
+This reverts commit aca4ae5c172a8ab8f3e0079da3c4d583db12b078.
+---
+ app/Android.bp           | 2 --
+ lens_launcher/Android.bp | 2 --
+ 2 files changed, 4 deletions(-)
+
+diff --git a/app/Android.bp b/app/Android.bp
+index d0925ff..f3d9d59 100644
+--- a/app/Android.bp
++++ b/app/Android.bp
+@@ -10,8 +10,6 @@ package {
+ android_app {
+     name: "Aperture",
+ 
+-    defaults: ["aapt_version_code_defaults"],
+-
+     srcs: ["src/main/java/**/*.kt"],
+     resource_dirs: ["src/main/res"],
+     manifest: "src/main/AndroidManifest.xml",
+diff --git a/lens_launcher/Android.bp b/lens_launcher/Android.bp
+index 54e5307..5c50f9c 100644
+--- a/lens_launcher/Android.bp
++++ b/lens_launcher/Android.bp
+@@ -10,8 +10,6 @@ package {
+ android_app {
+     name: "ApertureLensLauncher",
+ 
+-    defaults: ["aapt_version_code_defaults"],
+-
+     srcs: ["src/main/java/**/*.kt"],
+     manifest: "src/main/AndroidManifest.xml",
+ 
+-- 
+2.34.1
+
