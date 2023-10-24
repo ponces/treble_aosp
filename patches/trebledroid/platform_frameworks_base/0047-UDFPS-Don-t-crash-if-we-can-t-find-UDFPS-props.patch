@@ -1,0 +1,31 @@
+From ff8a0ebfcca14acbb4a69efc7bdf724938fce8c5 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Wed, 25 Oct 2023 07:30:45 -0400
+Subject: [PATCH 47/47] UDFPS Don't crash if we can't find UDFPS props
+
+---
+ .../java/com/android/server/biometrics/AuthService.java   | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/services/core/java/com/android/server/biometrics/AuthService.java b/services/core/java/com/android/server/biometrics/AuthService.java
+index add882656713..26ca8c9940f5 100644
+--- a/services/core/java/com/android/server/biometrics/AuthService.java
++++ b/services/core/java/com/android/server/biometrics/AuthService.java
+@@ -1016,7 +1016,13 @@ public class AuthService extends SystemService {
+                 com.android.internal.R.array.config_udfps_sensor_props);
+ 
+         boolean isUdfps = !ArrayUtils.isEmpty(udfpsProps);
+-        if(!isUdfps) udfpsProps = dynamicUdfpsProps();
++        if(!isUdfps) {
++            try {
++                udfpsProps = dynamicUdfpsProps();
++            } catch(Throwable t) {
++                Slog.e("PHH-Enroll", "Failed generating UDFPS props");
++            }
++        }
+         isUdfps = !ArrayUtils.isEmpty(udfpsProps);
+ 
+         if(udfpsProps.length > 0) {
+-- 
+2.34.1
+

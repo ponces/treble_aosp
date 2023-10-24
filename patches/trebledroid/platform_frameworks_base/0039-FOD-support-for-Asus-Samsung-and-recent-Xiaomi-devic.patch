@@ -1,4 +1,4 @@
-From 38999b41d5c2a54387748cc1bdc058761df07a0d Mon Sep 17 00:00:00 2001
+From f8f0e27db4fd44fb2e376e31a2892acd559c8551 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 18 Dec 2022 18:20:40 -0500
 Subject: [PATCH 39/47] FOD support for Asus, Samsung and recent Xiaomi devices
@@ -58,7 +58,7 @@ index cabe9008ab47..826804492bc7 100644
                          if (accessibilityManager.isTouchExplorationEnabled) {
                              setOnHoverListener { v, event -> onTouch(v, event, true) }
 diff --git a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
-index 06dee7a2b9f6..505b57f3a1f9 100644
+index 06dee7a2b9f6..bfc875290216 100644
 --- a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
 +++ b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
 @@ -19,16 +19,30 @@ import android.content.Context
@@ -122,7 +122,7 @@ index 06dee7a2b9f6..505b57f3a1f9 100644
 +                try {
 +                    canvas = p0.lockCanvas();
 +                    Log.d("PHH", "Surface dimensions ${canvas.getWidth()*1.0f} ${canvas.getHeight()*1.0f}")
-+                    canvas.drawOval(RectF(0.0f, 0.0f, canvas.getWidth()*1.0f, canvas.getHeight()*1.0f), paint);
++                    canvas.drawOval(RectF(overlayParams.sensorBounds), paint);
 +                } finally {
 +                    // Make sure the surface is never left in a bad state.
 +                    if (canvas != null) {

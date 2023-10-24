@@ -9,7 +9,7 @@ Change-Id: Id45f3ff1d31e3d4492f956e68a1eb4b2fb82ce63
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/target/product/emulator_vendor.mk b/target/product/emulator_vendor.mk
-index f71b275b0e..62984253f3 100644
+index f71b275b0e2..62984253f31 100644
 --- a/target/product/emulator_vendor.mk
 +++ b/target/product/emulator_vendor.mk
 @@ -28,7 +28,7 @@ PRODUCT_PACKAGES += \

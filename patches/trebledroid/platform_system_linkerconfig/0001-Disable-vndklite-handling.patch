@@ -9,7 +9,7 @@ Change-Id: I4a132512471a68891f2efb59539267c35a3c3e56
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/modules/environment.cc b/modules/environment.cc
-index 82801f3..e05341b 100644
+index 82801f32..e05341b7 100644
 --- a/modules/environment.cc
 +++ b/modules/environment.cc
 @@ -29,7 +29,7 @@ bool IsLegacyDevice() {

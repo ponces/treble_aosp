@@ -1,7 +1,7 @@
 From c2dc1a137d727236440151841575334196f17dcb Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sat, 27 May 2023 05:36:21 -0400
-Subject: [PATCH 15/21] watchdogd: Support pinging two watchdogs
+Subject: [PATCH 15/22] watchdogd: Support pinging two watchdogs
 
 ---
  watchdogd/watchdogd.cpp | 33 +++++++++++++++++++++++++++++++++

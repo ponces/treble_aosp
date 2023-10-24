@@ -9,7 +9,7 @@ Subject: [PATCH 4/4] Don't abort in case of cgroup/bpf setup fail, since some
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/server/main.cpp b/server/main.cpp
-index 3c6b0d52..89bf4e9e 100644
+index 3c6b0d52e..89bf4e9e4 100644
 --- a/server/main.cpp
 +++ b/server/main.cpp
 @@ -147,7 +147,7 @@ int main() {

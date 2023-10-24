@@ -11,7 +11,7 @@ Change-Id: I29384a820a0c07b29d3f11d7039bed40eeaee926
  1 file changed, 1 deletion(-)
 
 diff --git a/target/product/base_system.mk b/target/product/base_system.mk
-index a3f5ab3470..0096f23b3d 100644
+index a3f5ab34703..0096f23b3d2 100644
 --- a/target/product/base_system.mk
 +++ b/target/product/base_system.mk
 @@ -208,7 +208,6 @@ PRODUCT_PACKAGES += \

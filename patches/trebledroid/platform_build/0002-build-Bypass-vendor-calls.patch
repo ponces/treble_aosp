@@ -9,7 +9,7 @@ Change-Id: I69830d6264356dadd7b037553a899a4eb3d211f1
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/target/product/aosp_arm64.mk b/target/product/aosp_arm64.mk
-index 6c907db0ed..0adced1672 100644
+index 6c907db0edd..0adced1672e 100644
 --- a/target/product/aosp_arm64.mk
 +++ b/target/product/aosp_arm64.mk
 @@ -54,9 +54,9 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_product.mk)

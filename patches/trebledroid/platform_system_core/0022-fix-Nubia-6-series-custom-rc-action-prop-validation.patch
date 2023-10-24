@@ -1,0 +1,24 @@
+From 5a6e774867278feaffe9e0c13dc23ccfb5872b0a Mon Sep 17 00:00:00 2001
+From: Huy Hoang <38396158+boydaihungst@users.noreply.github.com>
+Date: Thu, 19 Oct 2023 07:06:55 +0700
+Subject: [PATCH 22/22] fix: Nubia 6 series custom rc action prop validation
+
+---
+ init/action_parser.cpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/init/action_parser.cpp b/init/action_parser.cpp
+index 49fe24a436..f683790e99 100644
+--- a/init/action_parser.cpp
++++ b/init/action_parser.cpp
+@@ -47,6 +47,7 @@ bool IsActionableProperty(Subcontext* subcontext, const std::string& prop_name)
+             "init.svc.vendor.", "ro.vendor.",    "persist.vendor.",
+             "vendor.",          "init.svc.odm.", "ro.odm.",
+             "persist.odm.",     "odm.",          "ro.boot.",
++            "nubia.perf."
+     };
+ 
+     for (const auto& prefix : kPartnerPrefixes) {
+-- 
+2.34.1
+

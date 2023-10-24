@@ -12,7 +12,7 @@ Change-Id: I9aa63d18e54a8254133adf97bf757c03d6b66757
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/server/TetherController.cpp b/server/TetherController.cpp
-index 79193574..d867cea4 100644
+index 791935746..d867cea4a 100644
 --- a/server/TetherController.cpp
 +++ b/server/TetherController.cpp
 @@ -718,7 +718,7 @@ int TetherController::setForwardRules(bool add, const char *intIface, const char

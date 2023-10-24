@@ -1,4 +1,4 @@
-From d09e5b4ad397b8483911103b3d4765c2bb849682 Mon Sep 17 00:00:00 2001
+From f8f001272af3f0d09b1ebe85223e09cbbd82cf65 Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Sun, 15 Oct 2023 11:21:58 +0800
 Subject: [PATCH 40/47] SystemUI: Add MTK's brightness path for FOD
@@ -11,7 +11,7 @@ Change-Id: Ifec88c625210301b5d1146bba0275cd9699243e8
  1 file changed, 22 insertions(+), 8 deletions(-)
 
 diff --git a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
-index 505b57f3a1f9..c005c66f96bc 100644
+index bfc875290216..f03642f47d02 100644
 --- a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
 +++ b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsView.kt
 @@ -35,6 +35,7 @@ import com.android.settingslib.udfps.UdfpsOverlayParams

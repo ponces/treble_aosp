@@ -9,7 +9,7 @@ Change-Id: Ic759e2cfaf11705169a4a6b677b0e5aca26907b3
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/server/Controllers.cpp b/server/Controllers.cpp
-index 43a2d1ee..35e2b890 100644
+index 43a2d1ee3..35e2b890d 100644
 --- a/server/Controllers.cpp
 +++ b/server/Controllers.cpp
 @@ -284,7 +284,7 @@ void Controllers::init() {
