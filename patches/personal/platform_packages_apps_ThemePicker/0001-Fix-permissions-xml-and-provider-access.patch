@@ -1,7 +1,7 @@
-From 7813802b60a924d4942f34ad6f848e0019a3b4b1 Mon Sep 17 00:00:00 2001
+From befca87774c1b404eeb53099f21d172710379658 Mon Sep 17 00:00:00 2001
 From: Edward Savage-Jones <edward.savage-jones@sony.com>
 Date: Fri, 13 May 2022 00:49:59 +0200
-Subject: [PATCH 1/2] Fix permissions xml and provider access
+Subject: [PATCH 1/4] Fix permissions xml and provider access
 
 ThemePicker need to add its use of permissions and declare the
 priv app permission parts in an xml file to be able to start.
@@ -20,7 +20,7 @@ Change-Id: I55fb94279abeab15dd16a6cabc0bf086c621fc42
  create mode 100644 android.software.theme_picker.xml
 
 diff --git a/Android.bp b/Android.bp
-index 3694ea05..b8dcbe57 100644
+index f6c85581..7c77533e 100644
 --- a/Android.bp
 +++ b/Android.bp
 @@ -94,6 +94,8 @@ java_defaults {

@@ -1,0 +1,52 @@
+From e9ab5de805fbc71ada8d6915c739050c917c154b Mon Sep 17 00:00:00 2001
+From: Tommy Webb <tommy@calyxinstitute.org>
+Date: Tue, 20 Jun 2023 13:20:57 -0400
+Subject: [PATCH 4/4] ThemePicker: Fix crash choosing Live Wallpapers
+
+LivePreviewFragment expects arguments, too.
+
+Issue: calyxos#1624
+Change-Id: I9ec7ff501dba4b4ed3d1747c2593afc7dc949f53
+---
+ .../module/ThemePickerInjector.kt             | 25 ++++++++++---------
+ 1 file changed, 13 insertions(+), 12 deletions(-)
+
+diff --git a/src/com/android/customization/module/ThemePickerInjector.kt b/src/com/android/customization/module/ThemePickerInjector.kt
+index cceb8965..cd12c38e 100644
+--- a/src/com/android/customization/module/ThemePickerInjector.kt
++++ b/src/com/android/customization/module/ThemePickerInjector.kt
+@@ -167,18 +167,19 @@ open class ThemePickerInjector : WallpaperPicker2Injector(), CustomizationInject
+         viewFullScreen: Boolean,
+         testingModeEnabled: Boolean
+     ): Fragment {
+-        return if (wallpaperInfo is LiveWallpaperInfo) LivePreviewFragment()
+-        else
+-            ImagePreviewFragment().apply {
+-                arguments =
+-                    Bundle().apply {
+-                        putParcelable(PreviewFragment.ARG_WALLPAPER, wallpaperInfo)
+-                        putInt(PreviewFragment.ARG_PREVIEW_MODE, mode)
+-                        putBoolean(PreviewFragment.ARG_VIEW_AS_HOME, viewAsHome)
+-                        putBoolean(PreviewFragment.ARG_FULL_SCREEN, viewFullScreen)
+-                        putBoolean(PreviewFragment.ARG_TESTING_MODE_ENABLED, testingModeEnabled)
+-                    }
+-            }
++        val fragment = if (wallpaperInfo is LiveWallpaperInfo) LivePreviewFragment()
++        else ImagePreviewFragment()
++
++        return fragment.apply {
++            arguments =
++                Bundle().apply {
++                    putParcelable(PreviewFragment.ARG_WALLPAPER, wallpaperInfo)
++                    putInt(PreviewFragment.ARG_PREVIEW_MODE, mode)
++                    putBoolean(PreviewFragment.ARG_VIEW_AS_HOME, viewAsHome)
++                    putBoolean(PreviewFragment.ARG_FULL_SCREEN, viewFullScreen)
++                    putBoolean(PreviewFragment.ARG_TESTING_MODE_ENABLED, testingModeEnabled)
++                }
++        }
+     }
+ 
+     @Synchronized
+-- 
+2.34.1
+
