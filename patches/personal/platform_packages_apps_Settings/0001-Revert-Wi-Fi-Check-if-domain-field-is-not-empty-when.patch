@@ -1,8 +1,8 @@
-From e4dfa33f48a26ff8aad08ae712a73511fbc551f9 Mon Sep 17 00:00:00 2001
+From 40c6bcbc7ac674d18bb5a4467676929b116d77d3 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Wed, 11 Oct 2023 17:18:16 +0000
-Subject: [PATCH] Revert "[Wi-Fi] Check if domain field is not empty when users
- choose a ca certificate"
+Subject: [PATCH 1/2] Revert "[Wi-Fi] Check if domain field is not empty when
+ users choose a ca certificate"
 
 Change-Id: I8f71fe85cd035fd241386500136830cfdbe981dd
 ---
