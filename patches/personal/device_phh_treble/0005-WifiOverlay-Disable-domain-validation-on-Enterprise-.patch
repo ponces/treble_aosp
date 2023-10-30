@@ -1,7 +1,7 @@
-From 13ce93569ae27bf947f61b3abf01b930f9dae5df Mon Sep 17 00:00:00 2001
+From 69cc61a53a1c7c5b21dd00b80cbe6aa628057f4a Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 12 Oct 2023 17:00:26 +0000
-Subject: [PATCH 4/4] WifiOverlay: Disable domain validation on Enterprise
+Subject: [PATCH 5/5] WifiOverlay: Disable domain validation on Enterprise
  networks
 
 ---
@@ -15,10 +15,10 @@ Subject: [PATCH 4/4] WifiOverlay: Disable domain validation on Enterprise
  create mode 100644 rro_overlays/WifiOverlay/res/values/config.xml
 
 diff --git a/base.mk b/base.mk
-index d6c34d3..1e176b5 100644
+index c41e920..0104133 100644
 --- a/base.mk
 +++ b/base.mk
-@@ -156,6 +156,9 @@ SELINUX_IGNORE_NEVERALLOWS := true
+@@ -157,6 +157,9 @@ SELINUX_IGNORE_NEVERALLOWS := true
  PRODUCT_PACKAGES += \
      NoCutoutOverlay
  

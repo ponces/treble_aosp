@@ -1,4 +1,5 @@
 $(call inherit-product, device/phh/treble/fonts/fonts.mk)
+$(call inherit-product, device/phh/treble/clocks/clocks.mk)
 
 PRODUCT_PACKAGES += \
     ThemePicker
