@@ -1,0 +1,33 @@
+From b4caeaffb8844015cac45ec9fcaa64c27e79d2da Mon Sep 17 00:00:00 2001
+From: Pranav Vashi <neobuddy89@gmail.com>
+Date: Tue, 9 Aug 2022 23:49:03 +0530
+Subject: [PATCH 4/4] ThemePicker: Remove beta tag for themed icons
+
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+Change-Id: I474f27dac5a8040592931b4b118e54d680cc6162
+---
+ res/layout/themed_icon_section_view.xml | 10 ----------
+ 1 file changed, 10 deletions(-)
+
+diff --git a/res/layout/themed_icon_section_view.xml b/res/layout/themed_icon_section_view.xml
+index 84ef3e84..c2a92c78 100644
+--- a/res/layout/themed_icon_section_view.xml
++++ b/res/layout/themed_icon_section_view.xml
+@@ -55,14 +55,4 @@
+         android:layout_width="0dp"
+         android:layout_height="8dp" />
+ 
+-    <TextView
+-        android:id="@+id/beta_tag"
+-        android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"
+-        android:paddingHorizontal="8dp"
+-        android:paddingVertical="4dp"
+-        android:text="@string/beta_title"
+-        android:textColor="@color/text_color_on_accent"
+-        style="@style/BetaTagTextStyle" />
+-
+ </com.android.customization.picker.themedicon.ThemedIconSectionView>
+-- 
+2.34.1
+
