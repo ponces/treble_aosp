@@ -1,7 +1,7 @@
-From 6c631e43d06d0ebdca7c0efc46011669aa7431dd Mon Sep 17 00:00:00 2001
+From 82f37eaa0cad2aacd50bbcb4530031fb03391ef6 Mon Sep 17 00:00:00 2001
 From: Arne Coucheron <arco68@gmail.com>
 Date: Sat, 1 Jul 2017 09:58:41 +0200
-Subject: [PATCH 04/21] Launcher3: Replace 4x4 grid option with a 4x5 one
+Subject: [PATCH 04/22] Launcher3: Replace 4x4 grid option with a 4x5 one
 
 Change-Id: Idc4d2622a4155854ff2762b2392a8d0f8cddb2c6
 ---

@@ -1,7 +1,7 @@
-From 84d61a4de86fdaba5c4203389d2ed8b9474c71f3 Mon Sep 17 00:00:00 2001
+From 4ca2fcc9be054d921833eb4aa7703ef0697978d7 Mon Sep 17 00:00:00 2001
 From: LibXZR <i@xzr.moe>
 Date: Sat, 30 Apr 2022 09:50:39 +0800
-Subject: [PATCH 17/21] Launcher3: Do not attach cleanupScreenshot() to frame
+Subject: [PATCH 17/22] Launcher3: Do not attach cleanupScreenshot() to frame
  update event
 
 When the animation get canceled, cleanupScreenshot() should

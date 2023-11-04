@@ -1,7 +1,7 @@
-From 3fec5be485d5195d4ce8988ac179bf8fe46047fb Mon Sep 17 00:00:00 2001
+From 4fa971e026294d7f21dbc045bf932475afd7dc9f Mon Sep 17 00:00:00 2001
 From: Michael Bestas <mkbestas@gmail.com>
 Date: Sat, 26 Nov 2022 16:39:06 +0200
-Subject: [PATCH 18/21] Launcher3: Disable all caps from Personal and Work tabs
+Subject: [PATCH 18/22] Launcher3: Disable all caps from Personal and Work tabs
 
 Matches Pixel launcher look.
 

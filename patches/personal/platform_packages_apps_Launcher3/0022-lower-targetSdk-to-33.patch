@@ -1,0 +1,54 @@
+From dc712b9e385438a52fb21a05ae07502b8bb66e85 Mon Sep 17 00:00:00 2001
+From: Dmitry Muhomor <muhomor.dmitry@gmail.com>
+Date: Wed, 11 Oct 2023 15:12:15 +0300
+Subject: [PATCH 22/22] lower targetSdk to 33
+
+It seems that it's been raised accidentally, stock OS launcher (which is based on this repo) still
+targets SDK 33, and targetSdk 33 is set in AndroidManifest.
+---
+ Android.bp | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Android.bp b/Android.bp
+index a7edf2a9b9..caf1618890 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -207,7 +207,7 @@ android_app {
+ 
+     sdk_version: "current",
+     min_sdk_version: min_launcher3_sdk_version,
+-    target_sdk_version: "current",
++    target_sdk_version: "33",
+     privileged: true,
+     system_ext_specific: true,
+ 
+@@ -335,7 +335,7 @@ android_app {
+ 
+     sdk_version: "current",
+     min_sdk_version: "current",
+-    target_sdk_version: "current",
++    target_sdk_version: "33",
+     privileged: true,
+     system_ext_specific: true,
+     overrides: [
+@@ -369,7 +369,7 @@ android_app {
+ 
+     platform_apis: true,
+     min_sdk_version: "current",
+-    target_sdk_version: "current",
++    target_sdk_version: "33",
+ 
+     privileged: true,
+     system_ext_specific: true,
+@@ -406,7 +406,7 @@ android_app {
+ 
+     platform_apis: true,
+     min_sdk_version: "current",
+-    target_sdk_version: "current",
++    target_sdk_version: "33",
+ 
+     srcs: [ ],
+ 
+-- 
+2.34.1
+

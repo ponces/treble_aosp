@@ -1,7 +1,7 @@
-From b6163b49ce35e4bdc975da941d8f40cc9030be58 Mon Sep 17 00:00:00 2001
+From 5af107ecb9a7253cf60dcce33380694989fb3e97 Mon Sep 17 00:00:00 2001
 From: Bruno Martins <bgcngm@gmail.com>
 Date: Sun, 8 Mar 2020 14:33:24 +0530
-Subject: [PATCH 08/21] Launcher3: Update default workspace
+Subject: [PATCH 08/22] Launcher3: Update default workspace
 
 Squash of commits 9eeb786 and c183526.
 Includes:

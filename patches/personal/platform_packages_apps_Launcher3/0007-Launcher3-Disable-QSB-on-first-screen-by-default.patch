@@ -1,7 +1,7 @@
-From 93cf5acf529b46295d7d64afeef6562313a236bc Mon Sep 17 00:00:00 2001
+From 8fac4b178e61cc95b588badd8d14bac9e0d9752d Mon Sep 17 00:00:00 2001
 From: Arne Coucheron <arco68@gmail.com>
 Date: Wed, 28 Jun 2017 02:20:46 +0200
-Subject: [PATCH 07/21] Launcher3: Disable QSB on first screen by default
+Subject: [PATCH 07/22] Launcher3: Disable QSB on first screen by default
 
 Change-Id: I24f1682cbad10610f04f7b8ada238b43addd23da
 ---

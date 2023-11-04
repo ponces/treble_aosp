@@ -1,7 +1,7 @@
-From 4d6aeeb93f654bd3811bfdc8b06fe2f65ad9b49c Mon Sep 17 00:00:00 2001
+From a7dbd240713cb6b46bc25c7138f8cdc17d904893 Mon Sep 17 00:00:00 2001
 From: Tommy Webb <tommy@calyxinstitute.org>
 Date: Mon, 16 Jan 2023 18:53:37 -0500
-Subject: [PATCH 19/21] Launcher3: Skip glitchy search animation
+Subject: [PATCH 19/22] Launcher3: Skip glitchy search animation
 
 * Entering and leaving search now takes effect right away.
 * Should fix race in which tapping an app while search results are

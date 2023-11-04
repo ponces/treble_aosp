@@ -1,7 +1,7 @@
-From f639327c730a5789cf3ecf48e08f8b2c59bb49c9 Mon Sep 17 00:00:00 2001
+From d9c58e0af61d35ad1f86331b44278bcce125e8d3 Mon Sep 17 00:00:00 2001
 From: Danny Lin <danny@kdrag0n.dev>
 Date: Mon, 2 Nov 2020 22:47:19 -0800
-Subject: [PATCH 06/21] Launcher3: Add 2x2 workspace grid option
+Subject: [PATCH 06/22] Launcher3: Add 2x2 workspace grid option
 
 The Pixel stock ROM offers this option in ThemePicker.
 

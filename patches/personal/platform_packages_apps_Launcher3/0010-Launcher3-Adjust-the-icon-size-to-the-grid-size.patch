@@ -1,7 +1,7 @@
-From ea2052c4254c60fd17be4d639b6c1a0480bfa3d1 Mon Sep 17 00:00:00 2001
+From 98003902b14197f88a87d64496458cb6db4b23e3 Mon Sep 17 00:00:00 2001
 From: daniml3 <danimoral1001@gmail.com>
 Date: Sun, 7 Mar 2021 21:03:20 +0100
-Subject: [PATCH 10/21] Launcher3: Adjust the icon size to the grid size
+Subject: [PATCH 10/22] Launcher3: Adjust the icon size to the grid size
 
 [ghostrider-reborn: also adjust text sizes]
 

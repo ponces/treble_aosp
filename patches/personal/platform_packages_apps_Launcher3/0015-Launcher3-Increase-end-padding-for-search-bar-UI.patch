@@ -1,7 +1,7 @@
-From 887fcbe345faa6c0257abe4da06db3cbeb5d092a Mon Sep 17 00:00:00 2001
+From f9d6be9201d491976ba061bcd03e093204f16334 Mon Sep 17 00:00:00 2001
 From: Pranav Vashi <neobuddy89@gmail.com>
 Date: Thu, 3 Feb 2022 09:08:54 +0530
-Subject: [PATCH 15/21] Launcher3: Increase end padding for search bar UI
+Subject: [PATCH 15/22] Launcher3: Increase end padding for search bar UI
 
 * Else text goes brrrr....
 

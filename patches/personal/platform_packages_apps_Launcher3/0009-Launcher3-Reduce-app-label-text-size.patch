@@ -1,7 +1,7 @@
-From b47163cf98139c4269632990c2b338b2528705cc Mon Sep 17 00:00:00 2001
+From cf017e60121e7a237437ae59b1518066d7b50d13 Mon Sep 17 00:00:00 2001
 From: Danny Lin <danny@kdrag0n.dev>
 Date: Sat, 12 Dec 2020 19:05:59 -0800
-Subject: [PATCH 09/21] Launcher3: Reduce app label text size
+Subject: [PATCH 09/22] Launcher3: Reduce app label text size
 
 The default 13-point label size can barely fit any app names on modern
 phone form factors without ellipsizing. Reducing the size to 12 points

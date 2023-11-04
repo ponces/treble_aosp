@@ -1,7 +1,7 @@
-From b1a685a72d92b44a209ef93b3ba49c07ff391c81 Mon Sep 17 00:00:00 2001
+From b2bcd208670b2132f8c1b2bc5ed9799e631f05f7 Mon Sep 17 00:00:00 2001
 From: Danny Lin <danny@kdrag0n.dev>
 Date: Sun, 10 Oct 2021 03:40:52 -0700
-Subject: [PATCH 12/21] Launcher3: Improve search bar UI in All Apps
+Subject: [PATCH 12/22] Launcher3: Improve search bar UI in All Apps
 
 This is similar to, but not exactly the same as, Pixel stock:
 

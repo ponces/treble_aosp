@@ -1,7 +1,7 @@
-From 205eac80077bf87020cc1cc62adeafffa34c40bb Mon Sep 17 00:00:00 2001
+From fef2edaca8187e166abd0c7d81b06d91bd961877 Mon Sep 17 00:00:00 2001
 From: Luca Stefani <luca.stefani.ge1@gmail.com>
 Date: Fri, 1 Nov 2019 23:17:59 +0100
-Subject: [PATCH 01/21] Launcher3: Properly expose GridOptionsProvider
+Subject: [PATCH 01/22] Launcher3: Properly expose GridOptionsProvider
 
 Change-Id: I8268a215257ae0e399c56ac8b44cdfdff8cc92a0
 ---

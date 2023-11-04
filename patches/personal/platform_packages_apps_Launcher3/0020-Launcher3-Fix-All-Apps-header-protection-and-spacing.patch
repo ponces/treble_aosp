@@ -1,7 +1,7 @@
-From 769cea6493214024ad378ec443690f8ded82e6ff Mon Sep 17 00:00:00 2001
+From 23add4add167ac3680f5babde75698112d51f694 Mon Sep 17 00:00:00 2001
 From: Tommy Webb <tommy@calyxinstitute.org>
 Date: Mon, 16 Jan 2023 13:52:41 -0500
-Subject: [PATCH 20/21] Launcher3: Fix All Apps header protection and spacing
+Subject: [PATCH 20/22] Launcher3: Fix All Apps header protection and spacing
  again
 
 Redone, again. This time, many comments added.

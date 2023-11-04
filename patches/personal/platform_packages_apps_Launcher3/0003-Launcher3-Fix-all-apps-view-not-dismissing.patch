@@ -1,7 +1,7 @@
-From d8769c71c703b5694d95377c62823f4ecbe1bb80 Mon Sep 17 00:00:00 2001
+From 48a15f722be7c26010332536df1ba5bd029c6843 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Timi=20Rautam=C3=A4ki?= <timi.rautamaki@gmail.com>
 Date: Sun, 7 Nov 2021 11:17:34 +0000
-Subject: [PATCH 03/21] Launcher3: Fix all apps view not dismissing
+Subject: [PATCH 03/22] Launcher3: Fix all apps view not dismissing
 
 The logic was reversed. All apps view should dissmiss on back key when
 the searchbox is focused but empty and clear when not empty.

@@ -1,7 +1,7 @@
-From c4b5a6f4b3582093e4f03e3671a5abccccb519fc Mon Sep 17 00:00:00 2001
+From 7bdfc2abbc3eb6830679b05cf1845e67a18c87a3 Mon Sep 17 00:00:00 2001
 From: dwardo <benjamin.reveille@gmail.com>
 Date: Tue, 7 Apr 2020 22:36:48 +0200
-Subject: [PATCH 05/21] Launcher3: Add 5x6, 5x7 and 6x6 default workspaces
+Subject: [PATCH 05/22] Launcher3: Add 5x6, 5x7 and 6x6 default workspaces
 
   Had a 5x6 grid (with 6 hotseat spots) on my fajita back in los 16.0
   and wanted one on los 17.1

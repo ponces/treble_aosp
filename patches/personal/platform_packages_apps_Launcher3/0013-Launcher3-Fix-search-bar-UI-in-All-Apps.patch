@@ -1,7 +1,7 @@
-From b0478cce0377eb2ba833f8bef50c4468d08226b2 Mon Sep 17 00:00:00 2001
+From 5385983d0d1f6e73ec8f5b16274a00771082d67f Mon Sep 17 00:00:00 2001
 From: Michael Bestas <mkbestas@gmail.com>
 Date: Wed, 19 Jan 2022 23:24:39 +0200
-Subject: [PATCH 13/21] Launcher3: Fix search bar UI in All Apps
+Subject: [PATCH 13/22] Launcher3: Fix search bar UI in All Apps
 
 Commit Ifa9fabe3a8236513fad8030c0bd8ed4d27ebd549 improved the look
 of the search bar, however it had a few issues and the overall

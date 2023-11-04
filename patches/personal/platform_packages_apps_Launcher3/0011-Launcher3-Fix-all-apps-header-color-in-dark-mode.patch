@@ -1,7 +1,7 @@
-From 603dc2a065faa29469bdfe34246ba72af3c378d8 Mon Sep 17 00:00:00 2001
+From 6adb8809df3b129aab34c6e7a93ecff27abc37cd Mon Sep 17 00:00:00 2001
 From: Danny Lin <danny@kdrag0n.dev>
 Date: Wed, 6 Oct 2021 22:45:33 -0700
-Subject: [PATCH 11/21] Launcher3: Fix all apps header color in dark mode
+Subject: [PATCH 11/22] Launcher3: Fix all apps header color in dark mode
 
 Change-Id: Ib2ce7f6e3c9b87a4626699cb54673d88392a5f41
 ---

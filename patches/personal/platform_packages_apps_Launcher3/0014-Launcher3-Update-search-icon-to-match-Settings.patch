@@ -1,7 +1,7 @@
-From eec3d37792a366f800d5666eba95b74259713b2c Mon Sep 17 00:00:00 2001
+From 944ff6bccfa5d89516fb02017efceb9fb7a5ff4a Mon Sep 17 00:00:00 2001
 From: Michael Bestas <mkbestas@gmail.com>
 Date: Thu, 20 Jan 2022 02:13:38 +0200
-Subject: [PATCH 14/21] Launcher3: Update search icon to match Settings
+Subject: [PATCH 14/22] Launcher3: Update search icon to match Settings
 
 Change-Id: Ic779bf0bf20046bfe92385e6a09796e94ba68644
 ---

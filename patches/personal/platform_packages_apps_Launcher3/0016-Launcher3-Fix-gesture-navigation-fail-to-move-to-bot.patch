@@ -1,7 +1,7 @@
-From aedf4dcbf46415837ef7bd0ccd2a729130b9bec3 Mon Sep 17 00:00:00 2001
+From f50603723fd3c527aac99bf04707af65e584fb77 Mon Sep 17 00:00:00 2001
 From: Yingren Wang <yingrenw@codeaurora.org>
 Date: Tue, 8 Dec 2020 12:59:43 +0800
-Subject: [PATCH 16/21] Launcher3: Fix gesture navigation fail to move to
+Subject: [PATCH 16/22] Launcher3: Fix gesture navigation fail to move to
  bottom
 
 Go to the recents page from all apps page and rotate to horizontal, at

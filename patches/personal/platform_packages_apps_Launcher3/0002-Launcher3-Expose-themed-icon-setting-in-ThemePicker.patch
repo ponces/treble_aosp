@@ -1,7 +1,7 @@
-From c2041499f93d66c9aa4cfb998cdb02c5ca91e4c7 Mon Sep 17 00:00:00 2001
+From 1fd694e3918f94b7aaa3af507f5682bfd0185323 Mon Sep 17 00:00:00 2001
 From: Danny Lin <danny@kdrag0n.dev>
 Date: Mon, 11 Oct 2021 20:48:44 -0700
-Subject: [PATCH 02/21] Launcher3: Expose themed icon setting in ThemePicker
+Subject: [PATCH 02/22] Launcher3: Expose themed icon setting in ThemePicker
 
 Change-Id: I44e9288c3de13a3604b7a03857ec400753317d9a
 ---
