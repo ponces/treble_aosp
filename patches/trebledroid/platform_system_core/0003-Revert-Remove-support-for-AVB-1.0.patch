@@ -1,4 +1,4 @@
-From 4f1bde38a1c252f515b32e7333c822edfbf5c399 Mon Sep 17 00:00:00 2001
+From 2a139e408da2542a280da4d833bee3d0348b9b2a Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Wed, 28 Sep 2022 17:04:03 +0100
 Subject: [PATCH 03/22] Revert "Remove support for AVB 1.0."
@@ -32,10 +32,10 @@ index dd612720f2..31c458306f 100644
          "fs_mgr_overlayfs.cpp",
          "fs_mgr_roots.cpp",
 diff --git a/fs_mgr/fs_mgr.cpp b/fs_mgr/fs_mgr.cpp
-index 742cdfab01..2038b347f1 100644
+index 8b9bce1dbb..e5dbaf32cb 100644
 --- a/fs_mgr/fs_mgr.cpp
 +++ b/fs_mgr/fs_mgr.cpp
-@@ -1467,6 +1467,14 @@ MountAllResult fs_mgr_mount_all(Fstab* fstab, int mount_mode) {
+@@ -1490,6 +1490,14 @@ MountAllResult fs_mgr_mount_all(Fstab* fstab, int mount_mode) {
                  // Skips mounting the device.
                  continue;
              }
@@ -50,7 +50,7 @@ index 742cdfab01..2038b347f1 100644
          }
  
          int last_idx_inspected;
-@@ -1631,6 +1639,13 @@ int fs_mgr_umount_all(android::fs_mgr::Fstab* fstab) {
+@@ -1654,6 +1662,13 @@ int fs_mgr_umount_all(android::fs_mgr::Fstab* fstab) {
                  ret |= FsMgrUmountStatus::ERROR_VERITY;
                  continue;
              }
@@ -64,7 +64,7 @@ index 742cdfab01..2038b347f1 100644
          }
      }
      return ret;
-@@ -1927,6 +1942,14 @@ static int fs_mgr_do_mount_helper(Fstab* fstab, const std::string& n_name,
+@@ -1950,6 +1965,14 @@ static int fs_mgr_do_mount_helper(Fstab* fstab, const std::string& n_name,
                  // Skips mounting the device.
                  continue;
              }
@@ -79,7 +79,7 @@ index 742cdfab01..2038b347f1 100644
          }
  
          int retry_count = 2;
-@@ -2146,7 +2169,7 @@ bool fs_mgr_swapon_all(const Fstab& fstab) {
+@@ -2169,7 +2192,7 @@ bool fs_mgr_swapon_all(const Fstab& fstab) {
  }
  
  bool fs_mgr_is_verity_enabled(const FstabEntry& entry) {
@@ -88,7 +88,7 @@ index 742cdfab01..2038b347f1 100644
          return false;
      }
  
-@@ -2157,12 +2180,17 @@ bool fs_mgr_is_verity_enabled(const FstabEntry& entry) {
+@@ -2180,12 +2203,17 @@ bool fs_mgr_is_verity_enabled(const FstabEntry& entry) {
          return false;
      }
  
@@ -108,7 +108,7 @@ index 742cdfab01..2038b347f1 100644
      if (*status == 'C' || *status == 'V') {
          return true;
      }
-@@ -2171,7 +2199,7 @@ bool fs_mgr_is_verity_enabled(const FstabEntry& entry) {
+@@ -2194,7 +2222,7 @@ bool fs_mgr_is_verity_enabled(const FstabEntry& entry) {
  }
  
  std::optional<HashtreeInfo> fs_mgr_get_hashtree_info(const android::fs_mgr::FstabEntry& entry) {
@@ -117,7 +117,7 @@ index 742cdfab01..2038b347f1 100644
          return {};
      }
      DeviceMapper& dm = DeviceMapper::Instance();
-@@ -2333,25 +2361,6 @@ bool fs_mgr_mount_overlayfs_fstab_entry(const FstabEntry& entry) {
+@@ -2356,25 +2384,6 @@ bool fs_mgr_mount_overlayfs_fstab_entry(const FstabEntry& entry) {
      return true;
  }
  

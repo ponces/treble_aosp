@@ -1,4 +1,4 @@
-From ecbee27486f6bd05041e1dc79e35010bf5db7c28 Mon Sep 17 00:00:00 2001
+From 4c2aa214c094ae085b866cf28eafcbcb82ce446a Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Sun, 29 Oct 2023 18:34:01 +0000
 Subject: [PATCH 3/3] Don't crash when we get no DeviceLockManager
@@ -9,7 +9,7 @@ Change-Id: I8f87cdb00e0950ee6528598b8dff2cafff0309e7
  1 file changed, 9 insertions(+), 8 deletions(-)
 
 diff --git a/src/com/android/settings/devicelock/DeviceLockPreferenceController.java b/src/com/android/settings/devicelock/DeviceLockPreferenceController.java
-index 4b6fe88f66..0f65b1f725 100644
+index 4b6fe88f66c..0f65b1f725d 100644
 --- a/src/com/android/settings/devicelock/DeviceLockPreferenceController.java
 +++ b/src/com/android/settings/devicelock/DeviceLockPreferenceController.java
 @@ -47,13 +47,14 @@ public final class DeviceLockPreferenceController extends BasePreferenceControll

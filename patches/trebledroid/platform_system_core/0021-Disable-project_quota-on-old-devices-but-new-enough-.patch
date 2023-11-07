@@ -1,4 +1,4 @@
-From 7ecd5ebdedb7ee3e9e5b82ddf48653beddef5915 Mon Sep 17 00:00:00 2001
+From dc0d5f1d71faad330e9b9e21ff68c9a4050fae39 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 6 Oct 2023 19:01:27 -0400
 Subject: [PATCH 21/22] Disable project_quota on old devices but new enough to
@@ -9,7 +9,7 @@ Subject: [PATCH 21/22] Disable project_quota on old devices but new enough to
  1 file changed, 8 insertions(+)
 
 diff --git a/fs_mgr/fs_mgr.cpp b/fs_mgr/fs_mgr.cpp
-index df9372c051..1bead469de 100644
+index 2b8dbd46cf..285ea21fdf 100644
 --- a/fs_mgr/fs_mgr.cpp
 +++ b/fs_mgr/fs_mgr.cpp
 @@ -385,6 +385,14 @@ static void tune_quota(const std::string& blk_device, const FstabEntry& entry,

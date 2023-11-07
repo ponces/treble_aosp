@@ -1,4 +1,4 @@
-From 4be839207fc072d674ceedd9612639f6a340fa26 Mon Sep 17 00:00:00 2001
+From 124199023c3994f5e6a79eb2e4a1a64982807851 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 6 Jun 2023 16:17:11 +0100
 Subject: [PATCH 17/22] Disable quotas on legacy devices with encryption
@@ -10,7 +10,7 @@ Source: https://t.me/phhtreblebuilders/20521 and https://t.me/phhtreblebuilders/
  1 file changed, 7 insertions(+)
 
 diff --git a/fs_mgr/fs_mgr.cpp b/fs_mgr/fs_mgr.cpp
-index 2038b347f1..df9372c051 100644
+index e5dbaf32cb..2b8dbd46cf 100644
 --- a/fs_mgr/fs_mgr.cpp
 +++ b/fs_mgr/fs_mgr.cpp
 @@ -378,6 +378,13 @@ static void tune_quota(const std::string& blk_device, const FstabEntry& entry,
