@@ -1,23 +1,18 @@
-From 1c737d0f6b2bcea7e8684c1cdf9dd3f754661a32 Mon Sep 17 00:00:00 2001
-From: Raphael Mounier <mounierr07@gmail.com>
-Date: Wed, 22 Feb 2023 17:52:12 +0100
-Subject: [PATCH 1/7] Change attestation and instrumentation to pass SafetyNet
+From 3ffca829246dc92e6f2e362e4a382114324ddbee Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Thu, 9 Nov 2023 12:33:55 +0100
+Subject: [PATCH 1/7] gmscompat: Change attestation and instrumentation to pass
+ SafetyNet and Play Integrity API.
 
-Original Author : Danny Lin <danny@kdrag0n.dev>
-
-SafetyNet (part of Google Play Services) opportunistically uses hardware-backed key attestation via KeyStore as a strong integrity check. This causes SafetyNet to fail on custom ROMs because the verified boot key and bootloader unlock state can be detected from attestation certificates.
-
-As a workaround, we can take advantage of the fact that SafetyNet's usage of key attestation is opportunistic (i.e. falls back to basic integrity checks if it fails) and prevent it from getting the attestation certificate chain from KeyStore. This is done by checking the stack for DroidGuard, which is the codename for SafetyNet, and
-pretending that the device doesn't support key attestation.
-
-Key attestation has only been blocked for SafetyNet specifically, as Google Play Services and other apps have many valid reasons to use it. For example, it appears to be involved in Google's mobile security key ferature.
-
-The unstable process is where SafetyNet attestation actually runs, so we  need to spoof the model, fingerprint,, product etc ... in that process. Leaving other rocesses fixes various issues caused by model detection and flag provisioning, including screen-off Voice Match in Google Assistant, broken At a Glance weather and  settings on Android 12, and more.
+Original work by @kdrag0n.
+Updated by many people like @dereference23, @Stallix, @dyneteve, @neobuddy89 and @jhenrique09.
+Adapted by @iceows for his own AOSP A13 GSI.
+Adapted by @ponces based on the work of @chiteroman to pass newest Play Integrity API.
 ---
  core/java/android/app/Instrumentation.java    |   4 +
- .../internal/gmscompat/AttestationHooks.java  | 106 ++++++++++++++++++
+ .../internal/gmscompat/AttestationHooks.java  | 107 ++++++++++++++++++
  .../keystore2/AndroidKeyStoreSpi.java         |   3 +
- 3 files changed, 113 insertions(+)
+ 3 files changed, 114 insertions(+)
  create mode 100644 core/java/com/android/internal/gmscompat/AttestationHooks.java
 
 diff --git a/core/java/android/app/Instrumentation.java b/core/java/android/app/Instrumentation.java
@@ -51,10 +46,10 @@ index e31486f18dbf..56ff16f6c358 100644
  
 diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 new file mode 100644
-index 000000000000..991e3967d79c
+index 000000000000..fa8ca554f898
 --- /dev/null
 +++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
-@@ -0,0 +1,106 @@
+@@ -0,0 +1,107 @@
 +/*
 + * Copyright (C) 2021 The Android Open Source Project
 + *
@@ -129,11 +124,12 @@ index 000000000000..991e3967d79c
 +
 +    private static void spoofBuildGms() {
 +        // Alter model name and fingerprint to avoid hardware attestation enforcement
-+        setBuildField("DEVICE", "marlin");
-+        setBuildField("PRODUCT", "marlin");
-+        setBuildField("MODEL", "Pixel XL");
-+        setBuildField("FINGERPRINT", "google/marlin/marlin:7.1.2/NJH47F/4146041:user/release-keys");
-+        setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N_MR1);
++        setBuildField("PRODUCT", "WW_Phone");
++        setBuildField("DEVICE", "ASUS_X00HD_4");
++        setBuildField("MANUFACTURER", "Asus");
++        setBuildField("BRAND", "Asus");
++        setBuildField("MODEL", "ASUS_X00HD");
++        setBuildField("FINGERPRINT", "asus/WW_Phone/ASUS_X00HD_4:7.1.1/NMF26F/14.2016.1801.372-20180119:user/release-keys");
 +    }
 +
 +    public static void initApplicationBeforeOnCreate(Application app) {

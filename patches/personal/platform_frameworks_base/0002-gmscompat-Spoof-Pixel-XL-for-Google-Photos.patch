@@ -1,7 +1,7 @@
-From 60374c6f5e7721c126d92bbf54f01e2f44d7d946 Mon Sep 17 00:00:00 2001
-From: Alberto Ponces <ponces26@gmail.com>
-Date: Sat, 25 Feb 2023 18:27:13 +0000
-Subject: [PATCH 2/7] Spoof Pixel XL for Google Photos
+From 1d602372ea9c3bb7917bd7737e82c3d35ea608fc Mon Sep 17 00:00:00 2001
+From: vladsendrix <83285656+vladsendrix@users.noreply.github.com>
+Date: Fri, 31 Dec 2021 03:18:04 +0100
+Subject: [PATCH 2/7] gmscompat: Spoof Pixel XL for Google Photos
 
 Change-Id: I905e40625b07ebf500cbb3ce1deadedee2e624c5
 ---
@@ -9,7 +9,7 @@ Change-Id: I905e40625b07ebf500cbb3ce1deadedee2e624c5
  1 file changed, 14 insertions(+)
 
 diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
-index 991e3967d79c..91f0dbb7621b 100644
+index fa8ca554f898..188f016f21dc 100644
 --- a/core/java/com/android/internal/gmscompat/AttestationHooks.java
 +++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 @@ -31,6 +31,7 @@ public final class AttestationHooks {
@@ -20,15 +20,15 @@ index 991e3967d79c..91f0dbb7621b 100644
      private static final String PROCESS_UNSTABLE = "com.google.android.gms.unstable";
  
      private static volatile boolean sIsGms = false;
-@@ -79,6 +80,15 @@ public final class AttestationHooks {
-         setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N_MR1);
+@@ -80,6 +81,15 @@ public final class AttestationHooks {
+         setBuildField("FINGERPRINT", "asus/WW_Phone/ASUS_X00HD_4:7.1.1/NMF26F/14.2016.1801.372-20180119:user/release-keys");
      }
  
 +    private static void spoofGooglePhotos() {
-+        setBuildField("BRAND", "google");
-+        setBuildField("MANUFACTURER", "Google");
-+        setBuildField("DEVICE", "marlin");
 +        setBuildField("PRODUCT", "marlin");
++        setBuildField("DEVICE", "marlin");
++        setBuildField("MANUFACTURER", "Google");
++        setBuildField("BRAND", "google");
 +        setBuildField("MODEL", "Pixel XL");
 +        setBuildField("FINGERPRINT", "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys");
 +    }
@@ -36,7 +36,7 @@ index 991e3967d79c..91f0dbb7621b 100644
      public static void initApplicationBeforeOnCreate(Application app) {
          if (PACKAGE_GMS.equals(app.getPackageName()) &&
                  PROCESS_UNSTABLE.equals(Application.getProcessName())) {
-@@ -89,6 +99,10 @@ public final class AttestationHooks {
+@@ -90,6 +100,10 @@ public final class AttestationHooks {
          if (PACKAGE_FINSKY.equals(app.getPackageName())) {
              sIsFinsky = true;
          }
