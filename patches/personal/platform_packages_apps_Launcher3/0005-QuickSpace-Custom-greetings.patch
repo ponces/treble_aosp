@@ -1,0 +1,143 @@
+From 835c613ca29bbe6446b8c27b83832ee6e7091b65 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Fri, 10 Nov 2023 17:22:22 +0000
+Subject: [PATCH 5/5] QuickSpace: Custom greetings
+
+---
+ res/values/cr_strings.xml                        |  2 +-
+ res/xml/launcher_home_screen_preferences.xml     | 16 ----------------
+ src/com/android/launcher3/Utilities.java         |  4 ++--
+ .../quickspace/QuickEventsController.java        | 10 +++++-----
+ .../launcher3/quickspace/QuickSpaceView.java     |  8 +-------
+ 5 files changed, 9 insertions(+), 31 deletions(-)
+
+diff --git a/res/values/cr_strings.xml b/res/values/cr_strings.xml
+index 98e5723e3a..03f82a8da0 100644
+--- a/res/values/cr_strings.xml
++++ b/res/values/cr_strings.xml
+@@ -17,7 +17,7 @@
+ <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+ 
+     <!-- Application name -->
+-    <string name="crdroid_app_name" translatable="false">crDroid Home</string>
++    <string name="crdroid_app_name" translatable="false">Quickstep</string>
+ 
+     <!-- Folder titles -->
+     <string name="google_folder_title" translatable="false">Google</string>
+diff --git a/res/xml/launcher_home_screen_preferences.xml b/res/xml/launcher_home_screen_preferences.xml
+index 1287f247e5..5b55646dda 100644
+--- a/res/xml/launcher_home_screen_preferences.xml
++++ b/res/xml/launcher_home_screen_preferences.xml
+@@ -127,22 +127,6 @@
+             android:defaultValue="true"
+             android:persistent="true"/>
+ 
+-        <SwitchPreference
+-            android:key="pref_quickspace_psonality"
+-            android:title="@string/quickspace_psa_title"
+-            android:summary="@string/quickspace_psa_summary"
+-            android:dependency="pref_show_quickspace"
+-            android:defaultValue="true"
+-            android:persistent="true" />
+-
+-        <SwitchPreference
+-            android:key="pref_show_alt_quickspace"
+-            android:title="@string/quickspace_alternate_style_title"
+-            android:summary="@string/quickspace_alternate_style_summary"
+-            android:dependency="pref_show_quickspace"
+-            android:defaultValue="false"
+-            android:persistent="true"/>
+-
+         <SwitchPreference
+             android:key="pref_quickspace_np"
+             android:title="@string/quickspace_now_playing_title"
+diff --git a/src/com/android/launcher3/Utilities.java b/src/com/android/launcher3/Utilities.java
+index 34fc8eee51..e7c237306e 100644
+--- a/src/com/android/launcher3/Utilities.java
++++ b/src/com/android/launcher3/Utilities.java
+@@ -1024,12 +1024,12 @@ public final class Utilities {
+ 
+     public static boolean useAlternativeQuickspaceUI(Context context) {
+         SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
+-        return prefs.getBoolean(KEY_SHOW_ALT_QUICKSPACE, false);
++        return prefs.getBoolean(KEY_SHOW_ALT_QUICKSPACE, true);
+     }
+ 
+     public static boolean isQuickspacePersonalityEnabled(Context context) {
+         SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
+-        return prefs.getBoolean(KEY_SHOW_QUICKSPACE_PSONALITY, true);
++        return prefs.getBoolean(KEY_SHOW_QUICKSPACE_PSONALITY, false);
+     }
+ 
+     public static boolean isQuickspaceNowPlaying(Context context) {
+diff --git a/src/com/android/launcher3/quickspace/QuickEventsController.java b/src/com/android/launcher3/quickspace/QuickEventsController.java
+index ef27486811..43bb0bcf3c 100644
+--- a/src/com/android/launcher3/quickspace/QuickEventsController.java
++++ b/src/com/android/launcher3/quickspace/QuickEventsController.java
+@@ -64,7 +64,7 @@ public class QuickEventsController {
+     private boolean mRegistered = false;
+ 
+     // Device Intro
+-    private boolean mIsFirstTimeDone = false;
++    private boolean mIsFirstTimeDone = true;
+     private SharedPreferences mPreferences;
+ 
+     // PSA + Personality
+@@ -96,7 +96,7 @@ public class QuickEventsController {
+ 
+     public void initQuickEvents() {
+         mPreferences = mContext.getSharedPreferences(LauncherFiles.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
+-        mIsFirstTimeDone = mPreferences.getBoolean(SETTING_DEVICE_INTRO_COMPLETED, false);
++        mIsFirstTimeDone = mPreferences.getBoolean(SETTING_DEVICE_INTRO_COMPLETED, true);
+         registerPSAListener();
+         updateQuickEvents();
+     }
+@@ -129,7 +129,7 @@ public class QuickEventsController {
+ 
+         if (mIsFirstTimeDone) return;
+         
+-        mIsQuickEvent = true;
++        mIsQuickEvent = false;
+ 
+         if (Utilities.useAlternativeQuickspaceUI(mContext)) {
+             mEventTitle = mContext.getResources().getString(R.string.quick_event_rom_intro_welcome_ext);
+@@ -251,7 +251,7 @@ public class QuickEventsController {
+ 
+     public void psonalityEvent() {
+         if (!mIsFirstTimeDone || mEventNowPlaying) return;
+-	
++
+ 	mEventTitle = Utilities.formatDateTime(mContext);
+         mPSAMorningStr = mContext.getResources().getStringArray(R.array.quickspace_psa_morning);
+         mPSAEvenStr = mContext.getResources().getStringArray(R.array.quickspace_psa_evening);
+@@ -313,7 +313,7 @@ public class QuickEventsController {
+             mClockExt = mContext.getResources().getString(R.string.quickspace_ext_two);
+         }
+ 
+-        if (getLuckyNumber(13) <= 7) {
++        if (true) {
+             mIsQuickEvent = false;
+             return;
+         } else if (getLuckyNumber(13) == 7) {
+diff --git a/src/com/android/launcher3/quickspace/QuickSpaceView.java b/src/com/android/launcher3/quickspace/QuickSpaceView.java
+index 9605adff40..3532a48dcb 100644
+--- a/src/com/android/launcher3/quickspace/QuickSpaceView.java
++++ b/src/com/android/launcher3/quickspace/QuickSpaceView.java
+@@ -105,13 +105,7 @@ public class QuickSpaceView extends FrameLayout implements AnimatorUpdateListene
+             } else {
+                 mGreetingsExt.setVisibility(View.GONE);
+             }
+-            if (!mController.getEventController().getClockExt().isEmpty()) {
+-                mGreetingsExtClock.setVisibility(View.VISIBLE);
+-                mGreetingsExtClock.setText(mController.getEventController().getClockExt());
+-                mGreetingsExtClock.setOnClickListener(mController.getEventController().getAction());
+-            } else {
+-                mGreetingsExtClock.setVisibility(View.GONE);
+-            }
++            mGreetingsExtClock.setVisibility(View.GONE);
+         }
+         if (mIsQuickEvent && (Utilities.isQuickspacePersonalityEnabled(getContext()) ||
+                         mController.getEventController().isNowPlaying())) {
+-- 
+2.34.1
+

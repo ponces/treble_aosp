@@ -1,0 +1,45 @@
+From dddc52d2e293463b03620aeff634df655c3c518c Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Sat, 11 Nov 2023 09:34:21 +0000
+Subject: [PATCH 4/5] Revert "Launcher3: Add AppInfo Bottom Sheet from Shade
+ Launcher"
+
+This reverts commit 31318f09a2bf69602cbeb7a6c9c22815348565b4.
+---
+ .../android/launcher3/popup/SystemShortcut.java  | 16 ++--------------
+ 1 file changed, 2 insertions(+), 14 deletions(-)
+
+diff --git a/src/com/android/launcher3/popup/SystemShortcut.java b/src/com/android/launcher3/popup/SystemShortcut.java
+index 1decdfc27f..da1638d074 100644
+--- a/src/com/android/launcher3/popup/SystemShortcut.java
++++ b/src/com/android/launcher3/popup/SystemShortcut.java
+@@ -199,24 +199,12 @@ public abstract class SystemShortcut<T extends Context & ActivityContext> extend
+             }
+         }
+ 
+-
+         @Override
+         public void onClick(View view) {
+-            InfoBottomSheet cbs;
+             dismissTaskMenuView(mTarget);
+             Rect sourceBounds = Utilities.getViewBounds(view);
+-            try {
+-                cbs = (InfoBottomSheet) mTarget.getLayoutInflater().inflate(
+-                        R.layout.app_info_bottom_sheet,
+-                        mTarget.getDragLayer(),
+-                        false);
+-                cbs.configureBottomSheet(sourceBounds, mTarget);
+-                cbs.populateAndShow(mItemInfo);
+-            } catch (InflateException e) {
+-                new PackageManagerHelper(mTarget).startDetailsActivityForInfo(
+-                        mItemInfo, sourceBounds, ActivityOptions.makeBasic().toBundle());
+-            }
+-
++            new PackageManagerHelper(mTarget).startDetailsActivityForInfo(
++                    mItemInfo, sourceBounds, ActivityOptions.makeBasic().toBundle());
+             mTarget.getStatsLogManager().logger().withItemInfo(mItemInfo)
+                     .log(LAUNCHER_SYSTEM_SHORTCUT_APP_INFO_TAP);
+         }
+-- 
+2.34.1
+

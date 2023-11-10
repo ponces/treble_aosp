@@ -1,7 +1,7 @@
-From fdf76dd78fddc71403591da2c1baea1b6f186bfd Mon Sep 17 00:00:00 2001
+From 511c86d1e535111e9e301cb4efe5b9374e8b914e Mon Sep 17 00:00:00 2001
 From: dhacker29 <dhackerdvm@gmail.com>
 Date: Tue, 24 Nov 2015 01:53:47 -0500
-Subject: [PATCH 4/7] fw/b: Use ro.build.version.incremental to signal OTA
+Subject: [PATCH 4/9] fw/b: Use ro.build.version.incremental to signal OTA
  upgrades
 
 [PeterCxy]: On T, there is a new class PackagePartitions that is

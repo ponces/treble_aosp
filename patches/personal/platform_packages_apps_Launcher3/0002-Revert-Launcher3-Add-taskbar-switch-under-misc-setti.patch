@@ -1,0 +1,202 @@
+From 7af2418bc7280ea8648b8cf12a5ba726b008ee01 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Thu, 9 Nov 2023 23:41:44 +0000
+Subject: [PATCH 2/5] Revert "Launcher3: Add taskbar switch under misc
+ settings"
+
+This reverts commit 11688e2507a98dc9700387c144808512b42f1b4b.
+---
+ AndroidManifest-common.xml                    |  1 -
+ .../launcher3/taskbar/TaskbarManager.java     | 35 +++++++++----------
+ res/values/cr_strings.xml                     |  4 ---
+ res/xml/launcher_misc_preferences.xml         |  5 ---
+ src/com/android/launcher3/DeviceProfile.java  |  8 +++--
+ .../launcher3/settings/SettingsMisc.java      |  3 --
+ 6 files changed, 22 insertions(+), 34 deletions(-)
+
+diff --git a/AndroidManifest-common.xml b/AndroidManifest-common.xml
+index b7045b6c56..5760e3df1c 100644
+--- a/AndroidManifest-common.xml
++++ b/AndroidManifest-common.xml
+@@ -55,7 +55,6 @@
+     <uses-permission android:name="android.permission.DEVICE_POWER" />
+     <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
+     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+-    <uses-permission android:name="lineageos.permission.WRITE_SETTINGS" />
+     <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+     <uses-permission android:name="org.omnirom.omnijaws.READ_WEATHER" />
+     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
+diff --git a/quickstep/src/com/android/launcher3/taskbar/TaskbarManager.java b/quickstep/src/com/android/launcher3/taskbar/TaskbarManager.java
+index 5e8c8feb29..15fecb2494 100644
+--- a/quickstep/src/com/android/launcher3/taskbar/TaskbarManager.java
++++ b/quickstep/src/com/android/launcher3/taskbar/TaskbarManager.java
+@@ -35,7 +35,6 @@ import android.content.Context;
+ import android.content.Intent;
+ import android.content.IntentFilter;
+ import android.content.SharedPreferences;
+-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+ import android.content.pm.ActivityInfo;
+ import android.content.res.Configuration;
+ import android.hardware.display.DisplayManager;
+@@ -76,7 +75,7 @@ import java.util.StringJoiner;
+ /**
+  * Class to manage taskbar lifecycle
+  */
+-public class TaskbarManager implements OnSharedPreferenceChangeListener {
++public class TaskbarManager {
+     private static final String TAG = "TaskbarManager";
+     private static final boolean DEBUG = false;
+ 
+@@ -89,11 +88,15 @@ public class TaskbarManager implements OnSharedPreferenceChangeListener {
+     private static final Uri NAV_BAR_KIDS_MODE = Settings.Secure.getUriFor(
+             Settings.Secure.NAV_BAR_KIDS_MODE);
+ 
++    private static final Uri ENABLE_TASKBAR_URI = LineageSettings.System.getUriFor(
++            LineageSettings.System.ENABLE_TASKBAR);
++
+     private final Context mContext;
+     private final DisplayController mDisplayController;
+     private final TaskbarNavButtonController mNavButtonController;
+     private final SettingsCache.OnChangeListener mUserSetupCompleteListener;
+     private final SettingsCache.OnChangeListener mNavBarKidsModeListener;
++    private final SettingsCache.OnChangeListener mEnableTaskBarListener;
+     private final ComponentCallbacks mComponentCallbacks;
+     private final SimpleBroadcastReceiver mShutdownReceiver;
+ 
+@@ -157,7 +160,16 @@ public class TaskbarManager implements OnSharedPreferenceChangeListener {
+                 SystemUiProxy.INSTANCE.get(mContext), new Handler());
+         mUserSetupCompleteListener = isUserSetupComplete -> recreateTaskbar();
+         mNavBarKidsModeListener = isNavBarKidsMode -> recreateTaskbar();
+-
++        mEnableTaskBarListener = isTaskBarEnabled -> {
++            // Create the illusion of this taking effect immediately
++            // Also needed because TaskbarManager inits before SystemUiProxy on start
++            boolean enabled = LineageSettings.System.getInt(mContext.getContentResolver(),
++                    LineageSettings.System.ENABLE_TASKBAR, 0) == 1;
++            SystemUiProxy.INSTANCE.get(mContext).setTaskbarEnabled(enabled);
++
++            // Restart launcher
++            System.exit(0);
++        };
+         // TODO(b/227669780): Consolidate this w/ DisplayController callbacks
+         mComponentCallbacks = new ComponentCallbacks() {
+             private Configuration mOldConfig = mContext.getResources().getConfiguration();
+@@ -243,6 +255,8 @@ public class TaskbarManager implements OnSharedPreferenceChangeListener {
+                 mUserSetupCompleteListener);
+         SettingsCache.INSTANCE.get(mContext).register(NAV_BAR_KIDS_MODE,
+                 mNavBarKidsModeListener);
++        SettingsCache.INSTANCE.get(mContext).register(ENABLE_TASKBAR_URI,
++                mEnableTaskBarListener);
+         mContext.registerComponentCallbacks(mComponentCallbacks);
+         mShutdownReceiver.register(mContext, Intent.ACTION_SHUTDOWN);
+         UI_HELPER_EXECUTOR.execute(() -> {
+@@ -261,19 +275,6 @@ public class TaskbarManager implements OnSharedPreferenceChangeListener {
+         recreateTaskbar();
+     }
+ 
+-    @Override
+-    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+-        switch (key) {
+-            case DeviceProfile.KEY_PHONE_TASKBAR:
+-                boolean enabled = LauncherPrefs.getPrefs(mContext).getBoolean(DeviceProfile.KEY_PHONE_TASKBAR, false);
+-                SystemUiProxy.INSTANCE.get(mContext).setTaskbarEnabled(enabled);
+-
+-                LineageSettings.System.putInt(mContext.getContentResolver(),
+-                        LineageSettings.System.ENABLE_TASKBAR, enabled ? 1 : 0);
+-                break;
+-        }
+-    }
+-
+     private void destroyExistingTaskbar() {
+         debugWhyTaskbarNotDestroyed("destroyExistingTaskbar: " + mTaskbarActivityContext);
+         if (mTaskbarActivityContext != null) {
+@@ -311,8 +312,6 @@ public class TaskbarManager implements OnSharedPreferenceChangeListener {
+      */
+     public void onUserUnlocked() {
+         mUserUnlocked = true;
+-        SharedPreferences prefs = LauncherPrefs.getPrefs(mContext);
+-        prefs.registerOnSharedPreferenceChangeListener(this);
+         recreateTaskbar();
+     }
+ 
+diff --git a/res/values/cr_strings.xml b/res/values/cr_strings.xml
+index 5c958f4e4d..98e5723e3a 100644
+--- a/res/values/cr_strings.xml
++++ b/res/values/cr_strings.xml
+@@ -109,10 +109,6 @@
+     <string name="recent_task_option_kill_app">Kill</string>
+     <string name="recents_app_killed">App killed</string>
+ 
+-    <!-- Taskbar -->
+-    <string name="pref_allow_phone_taskbar_title">Use taskbar</string>
+-    <string name="pref_allow_phone_taskbar_summary">For opening and switching apps anywhere</string>
+-
+     <!-- Hotseat searchbar -->
+     <string name="label_search">Search</string>
+     <string name="label_lens">Google Lens</string>
+diff --git a/res/xml/launcher_misc_preferences.xml b/res/xml/launcher_misc_preferences.xml
+index c5a9aec70b..e5d359708e 100644
+--- a/res/xml/launcher_misc_preferences.xml
++++ b/res/xml/launcher_misc_preferences.xml
+@@ -19,11 +19,6 @@
+     xmlns:launcher="http://schemas.android.com/apk/res-auto"
+     xmlns:settings="http://schemas.android.com/apk/res/com.android.launcher3">
+ 
+-    <SwitchPreference
+-        android:key="pref_allow_phone_taskbar"
+-        android:title="@string/pref_allow_phone_taskbar_title"
+-        android:summary="@string/pref_allow_phone_taskbar_summary" />
+-
+     <SwitchPreference
+         android:key="pref_allowRotation"
+         android:title="@string/allow_rotation_title"
+diff --git a/src/com/android/launcher3/DeviceProfile.java b/src/com/android/launcher3/DeviceProfile.java
+index b8630fca76..ef7df07235 100644
+--- a/src/com/android/launcher3/DeviceProfile.java
++++ b/src/com/android/launcher3/DeviceProfile.java
+@@ -62,6 +62,8 @@ import com.android.launcher3.util.WindowBounds;
+ import com.android.launcher3.workspace.CalculatedWorkspaceSpec;
+ import com.android.launcher3.workspace.WorkspaceSpecs;
+ 
++import lineageos.providers.LineageSettings;
++
+ import java.io.PrintWriter;
+ import java.util.Locale;
+ import java.util.function.Consumer;
+@@ -69,7 +71,6 @@ import java.util.function.Consumer;
+ @SuppressLint("NewApi")
+ public class DeviceProfile {
+ 
+-    public static final String KEY_PHONE_TASKBAR = "pref_allow_phone_taskbar";
+     public static final String KEY_ROW_HEIGHT = "pref_row_height";
+ 
+     private static final int DEFAULT_DOT_SIZE = 100;
+@@ -325,8 +326,9 @@ public class DeviceProfile {
+         isTablet = info.isTablet(windowBounds);
+         isPhone = !isTablet;
+         isTwoPanels = isTablet && isMultiDisplay;
+-        boolean allowTaskbar = prefs.getBoolean(KEY_PHONE_TASKBAR, isTablet);
+-        isTaskbarPresent = allowTaskbar && ApiWrapper.TASKBAR_DRAWN_IN_PROCESS;
++        boolean isTaskBarEnabled = LineageSettings.System.getInt(context.getContentResolver(),
++                LineageSettings.System.ENABLE_TASKBAR, isTablet ? 1 : 0) == 1;
++        isTaskbarPresent = isTaskBarEnabled && ApiWrapper.TASKBAR_DRAWN_IN_PROCESS;
+ 
+         // Some more constants.
+         context = getContext(context, info, isVerticalBarLayout() || (isTablet && isLandscape)
+diff --git a/src/com/android/launcher3/settings/SettingsMisc.java b/src/com/android/launcher3/settings/SettingsMisc.java
+index f53ddbb504..2fb12af7aa 100644
+--- a/src/com/android/launcher3/settings/SettingsMisc.java
++++ b/src/com/android/launcher3/settings/SettingsMisc.java
+@@ -146,9 +146,6 @@ public class SettingsMisc extends CollapsingToolbarBaseActivity
+     @Override
+     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) { 
+         switch (key) {
+-            case DeviceProfile.KEY_PHONE_TASKBAR:
+-                LauncherAppState.getInstanceNoCreate().setNeedsRestart();
+-                break;
+             case Utilities.KEY_BLUR_DEPTH:
+                 LauncherAppState.getInstanceNoCreate().setNeedsRestart();
+                 break;
+-- 
+2.34.1
+

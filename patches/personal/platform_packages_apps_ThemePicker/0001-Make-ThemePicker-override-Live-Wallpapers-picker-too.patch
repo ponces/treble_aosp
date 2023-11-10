@@ -1,0 +1,23 @@
+From 8c4999ed9a060e690e51cbc4ee464026c04a2aa8 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Fri, 10 Nov 2023 00:58:32 +0000
+Subject: [PATCH] Make ThemePicker override Live Wallpapers picker too
+
+---
+ Android.bp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Android.bp b/Android.bp
+index 9de3ae18..979b2e8a 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -127,5 +127,5 @@ android_app {
+     platform_apis: true,
+     manifest: "AndroidManifest.xml",
+     additional_manifests: [":WallpaperPicker2_Manifest"],
+-    overrides: ["WallpaperCropper", "WallpaperPicker", "WallpaperPicker2"],
++    overrides: ["LiveWallpapersPicker", "WallpaperCropper", "WallpaperPicker", "WallpaperPicker2"],
+ }
+-- 
+2.34.1
+
