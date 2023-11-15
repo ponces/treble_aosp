@@ -16,6 +16,7 @@
   <project name="ponces/vendor_ponces" path="vendor/ponces" remote="github" revision="android-14.0" />
   <project name="ponces/vendor_gapps" path="vendor/gapps" remote="gitlab" revision="android-14.0" clone-depth="1" />
   <project name="ponces/treble_adapter" path="treble_adapter" remote="github" revision="master" />
+  <project name="ponces/android_packages_apps_ParanoidSense" path="packages/apps/ParanoidSense" remote="github" revision="uvite" />
 
   <!-- LineageOS -->
   <remove-project name="platform/packages/apps/Launcher3" />
