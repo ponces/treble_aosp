@@ -10,7 +10,7 @@ This reverts commit ead9d83423877458023056f6ccf9390950d6726f.
  1 file changed, 9 deletions(-)
 
 diff --git a/bpfloader/BpfLoader.cpp b/bpfloader/BpfLoader.cpp
-index 158dca6..0af23c9 100644
+index 158dca62..0af23c92 100644
 --- a/bpfloader/BpfLoader.cpp
 +++ b/bpfloader/BpfLoader.cpp
 @@ -306,15 +306,6 @@ int main(int argc, char** argv) {
