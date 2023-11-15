@@ -9,7 +9,7 @@ Change-Id: I75a427a2a41aa4ab1104ad88a891bef0dc2d9c91
  1 file changed, 16 insertions(+), 9 deletions(-)
 
 diff --git a/bpfloader/BpfLoader.cpp b/bpfloader/BpfLoader.cpp
-index e53669a..158dca6 100644
+index e53669ad..158dca62 100644
 --- a/bpfloader/BpfLoader.cpp
 +++ b/bpfloader/BpfLoader.cpp
 @@ -284,7 +284,9 @@ int main(int argc, char** argv) {
