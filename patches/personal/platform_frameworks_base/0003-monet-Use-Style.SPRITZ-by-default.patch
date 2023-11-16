@@ -1,4 +1,4 @@
-From d0d8d1b86ad66dc298284cd4361f532a4ca1099e Mon Sep 17 00:00:00 2001
+From 8a310e3890dbc11cd821a893280bf498642caf19 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Sun, 26 Feb 2023 22:13:35 +0000
 Subject: [PATCH 3/9] monet: Use Style.SPRITZ by default

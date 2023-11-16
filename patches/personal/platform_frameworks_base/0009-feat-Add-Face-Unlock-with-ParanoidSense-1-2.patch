@@ -1,4 +1,4 @@
-From 3554ced4edcf4567ef68c2ab4b1deff4ee2c44bc Mon Sep 17 00:00:00 2001
+From 2109626d610069fa73059b93514f32d2e9bda2c3 Mon Sep 17 00:00:00 2001
 From: Chris Crump <chriscrawford893@gmail.com>
 Date: Tue, 1 Nov 2022 17:27:48 -0400
 Subject: [PATCH 9/9] feat: Add Face Unlock with ParanoidSense (1/2)

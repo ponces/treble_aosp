@@ -1,4 +1,4 @@
-From 006c50420944736fb504cd6b4e6f443277689ee9 Mon Sep 17 00:00:00 2001
+From 9ab5cdb6eb1841112453353ea72c2c87ee63326e Mon Sep 17 00:00:00 2001
 From: vladsendrix <83285656+vladsendrix@users.noreply.github.com>
 Date: Fri, 31 Dec 2021 03:18:04 +0100
 Subject: [PATCH 2/9] gmscompat: Spoof Pixel XL for Google Photos
@@ -9,7 +9,7 @@ Change-Id: I905e40625b07ebf500cbb3ce1deadedee2e624c5
  1 file changed, 14 insertions(+)
 
 diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
-index fa8ca554f898..188f016f21dc 100644
+index ebd9040b2781..a6f490867bd9 100644
 --- a/core/java/com/android/internal/gmscompat/AttestationHooks.java
 +++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 @@ -31,6 +31,7 @@ public final class AttestationHooks {
@@ -20,8 +20,8 @@ index fa8ca554f898..188f016f21dc 100644
      private static final String PROCESS_UNSTABLE = "com.google.android.gms.unstable";
  
      private static volatile boolean sIsGms = false;
-@@ -80,6 +81,15 @@ public final class AttestationHooks {
-         setBuildField("FINGERPRINT", "asus/WW_Phone/ASUS_X00HD_4:7.1.1/NMF26F/14.2016.1801.372-20180119:user/release-keys");
+@@ -81,6 +82,15 @@ public final class AttestationHooks {
+         setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N);
      }
  
 +    private static void spoofGooglePhotos() {
@@ -36,7 +36,7 @@ index fa8ca554f898..188f016f21dc 100644
      public static void initApplicationBeforeOnCreate(Application app) {
          if (PACKAGE_GMS.equals(app.getPackageName()) &&
                  PROCESS_UNSTABLE.equals(Application.getProcessName())) {
-@@ -90,6 +100,10 @@ public final class AttestationHooks {
+@@ -91,6 +101,10 @@ public final class AttestationHooks {
          if (PACKAGE_FINSKY.equals(app.getPackageName())) {
              sIsFinsky = true;
          }
