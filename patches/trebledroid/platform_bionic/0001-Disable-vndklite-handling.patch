@@ -9,7 +9,7 @@ Change-Id: Ic4474cf80fc4b45a9a2760dd51e2ca29c4d961e2
  1 file changed, 5 deletions(-)
 
 diff --git a/linker/linker.cpp b/linker/linker.cpp
-index 17b574fc1..c863f8ea6 100644
+index 17b574fc1f..c863f8ea69 100644
 --- a/linker/linker.cpp
 +++ b/linker/linker.cpp
 @@ -95,7 +95,6 @@ static uint64_t g_module_unload_counter = 0;
