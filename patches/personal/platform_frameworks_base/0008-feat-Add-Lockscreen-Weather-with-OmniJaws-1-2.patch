@@ -1,4 +1,4 @@
-From f73e76d8d9c100cd98a1202321e18132192c2255 Mon Sep 17 00:00:00 2001
+From 81918273d7f8eceb262085d386a13d241f4e9d68 Mon Sep 17 00:00:00 2001
 From: maxwen <max.weninger@gmail.com>
 Date: Fri, 22 Oct 2021 14:55:26 +0200
 Subject: [PATCH 8/9] feat: Add Lockscreen Weather with OmniJaws (1/2)
@@ -10,15 +10,15 @@ Co-authored-by: maxwen <max.weninger@gmail.com>
 Co-authored-by: Pranav Vashi <neobuddy89@gmail.com>
 ---
  core/java/android/provider/Settings.java      |  10 +
- .../internal/util/crdroid/OmniJawsClient.java | 453 ++++++++++++++++++
+ .../internal/util/crdroid/OmniJawsClient.java | 435 ++++++++++++++++++
  data/etc/com.android.systemui.xml             |   1 +
  packages/SystemUI/AndroidManifest.xml         |   4 +
  .../layout/current_weather_view.xml           |  59 +++
  .../layout/keyguard_clock_switch.xml          |   6 +
- .../KeyguardClockSwitchController.java        |  52 +-
+ .../KeyguardClockSwitchController.java        |  52 ++-
  .../KeyguardStatusViewController.java         |   1 +
  .../systemui/crdroid/CurrentWeatherView.java  | 163 +++++++
- 9 files changed, 748 insertions(+), 1 deletion(-)
+ 9 files changed, 730 insertions(+), 1 deletion(-)
  create mode 100644 core/java/com/android/internal/util/crdroid/OmniJawsClient.java
  create mode 100644 packages/SystemUI/res-keyguard/layout/current_weather_view.xml
  create mode 100644 packages/SystemUI/src/com/android/systemui/crdroid/CurrentWeatherView.java
@@ -46,10 +46,10 @@ index d695c0cb3760..ac1cb32f852e 100644
           * process when restoring historical backup datasets.
 diff --git a/core/java/com/android/internal/util/crdroid/OmniJawsClient.java b/core/java/com/android/internal/util/crdroid/OmniJawsClient.java
 new file mode 100644
-index 000000000000..74d0876df541
+index 000000000000..7063d17663d4
 --- /dev/null
 +++ b/core/java/com/android/internal/util/crdroid/OmniJawsClient.java
-@@ -0,0 +1,453 @@
+@@ -0,0 +1,435 @@
 +/*
 +* Copyright (C) 2021 The OmniROM Project
 +*
@@ -104,7 +104,6 @@ index 000000000000..74d0876df541
 +            = Uri.parse("content://org.omnirom.omnijaws.provider/settings");
 +    public static final Uri CONTROL_URI
 +            = Uri.parse("content://org.omnirom.omnijaws.provider/control");
-+
 +    private static final String ICON_PACKAGE_DEFAULT = "org.omnirom.omnijaws";
 +    private static final String ICON_PREFIX_DEFAULT = "google";
 +    private static final String EXTRA_ERROR = "error";
@@ -129,7 +128,7 @@ index 000000000000..74d0876df541
 +            "pin_wheel"
 +    };
 +
-+    final String[] SETTINGS_PROJECTION = new String[] {
++    public static final String[] SETTINGS_PROJECTION = new String[] {
 +            "enabled",
 +            "units",
 +            "provider",
@@ -422,27 +421,6 @@ index 000000000000..74d0876df541
 +        return false;
 +    }
 +
-+    public boolean isOmniJawsSetupDone() {
-+        if (!isOmniJawsServiceInstalled()) {
-+            return false;
-+        }
-+        try {
-+            final Cursor c = mContext.getContentResolver().query(SETTINGS_URI, SETTINGS_PROJECTION,
-+                    null, null, null);
-+            if (c != null) {
-+                int count = c.getCount();
-+                if (count == 1) {
-+                    c.moveToPosition(0);
-+                    boolean setupDone = c.getInt(3) == 1;
-+                    return setupDone;
-+                }
-+            }
-+        } catch (Exception e) {
-+            Log.e(TAG, "isOmniJawsSetupDone", e);
-+        }
-+        return false;
-+    }
-+
 +    private String getTemperatureUnit() {
 +        return "\u00b0" + (mMetric ? "C" : "F");
 +    }
@@ -486,7 +464,7 @@ index 000000000000..74d0876df541
 +            filter.addAction(WEATHER_UPDATE);
 +            filter.addAction(WEATHER_ERROR);
 +            if (DEBUG) Log.d(TAG, "registerReceiver");
-+            mContext.registerReceiver(mReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
++            mContext.registerReceiver(mReceiver, filter, Context.RECEIVER_EXPORTED);
 +        }
 +        mObserver.add(observer);
 +    }
@@ -501,6 +479,10 @@ index 000000000000..74d0876df541
 +            }
 +            mReceiver = null;
 +        }
++    }
++
++    public boolean isDefaultIconPackage() {
++        return mIconPrefix.equals(ICON_PREFIX_DEFAULT);
 +    }
 +}
 diff --git a/data/etc/com.android.systemui.xml b/data/etc/com.android.systemui.xml
@@ -766,7 +748,7 @@ index 6854c97c3415..5fc5612d2a12 100644
      };
 diff --git a/packages/SystemUI/src/com/android/systemui/crdroid/CurrentWeatherView.java b/packages/SystemUI/src/com/android/systemui/crdroid/CurrentWeatherView.java
 new file mode 100644
-index 000000000000..c567e713bf95
+index 000000000000..89eaa69ef137
 --- /dev/null
 +++ b/packages/SystemUI/src/com/android/systemui/crdroid/CurrentWeatherView.java
 @@ -0,0 +1,163 @@
@@ -895,7 +877,7 @@ index 000000000000..c567e713bf95
 +            if (mWeatherInfo != null) {
 +                Drawable d = mWeatherClient.getWeatherConditionImage(mWeatherInfo.conditionCode);
 +                mCurrentImage.setImageDrawable(d);
-+                mRightText.setText(mWeatherInfo.temp + " " + mWeatherInfo.tempUnits);
++                mRightText.setText(mWeatherInfo.temp + mWeatherInfo.tempUnits);
 +                mLeftText.setText(mWeatherInfo.city);
 +                mLeftText.setVisibility(mShowWeatherLocation ? View.VISIBLE : View.GONE);
 +            }
