@@ -13,7 +13,7 @@ Change-Id: I05fa784d9f7f978be9f5944900a97ad7df19f59e
  .../phone/BiometricUnlockController.java      |    2 +-
  .../phone/KeyguardBypassController.kt         |   11 +-
  services/core/Android.bp                      |    1 +
- .../biometrics/sensors/face/FaceService.java  |   23 +
+ .../biometrics/sensors/face/FaceService.java  |   27 +-
  .../face/sense/BiometricTestSessionImpl.java  |  227 ++++
  .../face/sense/FaceAuthenticationClient.java  |  228 ++++
  .../sensors/face/sense/FaceEnrollClient.java  |  132 ++
@@ -29,7 +29,7 @@ Change-Id: I05fa784d9f7f978be9f5944900a97ad7df19f59e
  .../sensors/face/sense/SenseProvider.java     | 1111 +++++++++++++++++
  .../sensors/face/sense/SenseUtils.java        |   61 +
  .../sensors/face/sense/TestHal.java           |  144 +++
- 20 files changed, 2660 insertions(+), 5 deletions(-)
+ 20 files changed, 2662 insertions(+), 7 deletions(-)
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/sense/BiometricTestSessionImpl.java
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/sense/FaceAuthenticationClient.java
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/sense/FaceEnrollClient.java
@@ -148,7 +148,7 @@ index 18a9fe12ecb7..0b8fe87d2a86 100644
      javac_shard_size: 50,
      javacflags: [
 diff --git a/services/core/java/com/android/server/biometrics/sensors/face/FaceService.java b/services/core/java/com/android/server/biometrics/sensors/face/FaceService.java
-index 6f26e7b3e4b4..7d93441b1e11 100644
+index 6f26e7b3e4b4..ec8ffd96618d 100644
 --- a/services/core/java/com/android/server/biometrics/sensors/face/FaceService.java
 +++ b/services/core/java/com/android/server/biometrics/sensors/face/FaceService.java
 @@ -25,6 +25,7 @@ import android.annotation.Nullable;
@@ -201,10 +201,18 @@ index 6f26e7b3e4b4..7d93441b1e11 100644
          @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
          public void registerAuthenticators(
                  @NonNull List<FaceSensorPropertiesInternal> hidlSensors) {
-@@ -683,6 +705,7 @@ public class FaceService extends SystemService {
+@@ -677,12 +699,13 @@ public class FaceService extends SystemService {
+ 
+             mRegistry.registerAll(() -> {
+                 final List<ServiceProvider> providers = new ArrayList<>();
+-                for (FaceSensorPropertiesInternal hidlSensor : hidlSensors) {
++                /*for (FaceSensorPropertiesInternal hidlSensor : hidlSensors) {
+                     providers.add(
+                             Face10.newInstance(getContext(), mBiometricStateCallback,
                                      hidlSensor, mLockoutResetDispatcher));
                  }
-                 providers.addAll(getAidlProviders());
+-                providers.addAll(getAidlProviders());
++                providers.addAll(getAidlProviders());*/
 +                providers.addAll(getSenseProviders());
                  return providers;
              });
