@@ -1,4 +1,4 @@
-From 81918273d7f8eceb262085d386a13d241f4e9d68 Mon Sep 17 00:00:00 2001
+From dbdf56f56ad0c7f618068156fa29bc278244c4f0 Mon Sep 17 00:00:00 2001
 From: maxwen <max.weninger@gmail.com>
 Date: Fri, 22 Oct 2021 14:55:26 +0200
 Subject: [PATCH 8/9] feat: Add Lockscreen Weather with OmniJaws (1/2)
