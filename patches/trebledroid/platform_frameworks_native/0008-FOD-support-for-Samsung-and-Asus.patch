@@ -1,7 +1,7 @@
 From a19a46d2b29152997975ec0dc59bf79630b61d15 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 18 Dec 2022 18:17:30 -0500
-Subject: [PATCH 8/8] FOD support for Samsung and Asus
+Subject: [PATCH 8/9] FOD support for Samsung and Asus
 
 ---
  libs/gui/BLASTBufferQueue.cpp                 | 20 ++++++++++++++--

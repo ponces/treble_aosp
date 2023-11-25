@@ -1,7 +1,7 @@
-From 82759c1e76ab2e3ec2cb98d0b238c4819f29ef4d Mon Sep 17 00:00:00 2001
+From 526eb939762c8ce0249ed30ba5b0237567fc5f88 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 2 Nov 2023 10:23:56 +0000
-Subject: [PATCH 2/4] Revert "[Wi-Fi] Check if domain field is not empty when
+Subject: [PATCH 5/5] Revert "[Wi-Fi] Check if domain field is not empty when
  users choose a ca certificate"
 
 Change-Id: I52ede9eb6b5164e147578e2dc2756cc722fe36ef
@@ -11,7 +11,7 @@ Change-Id: I52ede9eb6b5164e147578e2dc2756cc722fe36ef
  2 files changed, 12 insertions(+), 10 deletions(-)
 
 diff --git a/src/com/android/settings/wifi/WifiConfigController.java b/src/com/android/settings/wifi/WifiConfigController.java
-index 6ca97c329c..d2f3afd6ba 100644
+index 6ca97c329c1..d2f3afd6ba6 100644
 --- a/src/com/android/settings/wifi/WifiConfigController.java
 +++ b/src/com/android/settings/wifi/WifiConfigController.java
 @@ -547,11 +547,11 @@ public class WifiConfigController implements TextWatcher,
@@ -46,7 +46,7 @@ index 6ca97c329c..d2f3afd6ba 100644
              }
          }
 diff --git a/src/com/android/settings/wifi/WifiConfigController2.java b/src/com/android/settings/wifi/WifiConfigController2.java
-index 6074202a97..90f518122a 100644
+index 6074202a972..90f518122a8 100644
 --- a/src/com/android/settings/wifi/WifiConfigController2.java
 +++ b/src/com/android/settings/wifi/WifiConfigController2.java
 @@ -535,11 +535,11 @@ public class WifiConfigController2 implements TextWatcher,
