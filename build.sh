@@ -89,6 +89,7 @@ buildVndkliteVariants() {
     sudo bash lite-adapter.sh 64 $BD/system-treble_arm64_bvN.img
     mv s.img $BD/system-treble_arm64_bvN-vndklite.img
     sudo rm -rf d tmp
+
     echo "--> Building treble_arm64_bgN-vndklite"
     sudo bash lite-adapter.sh 64 $BD/system-treble_arm64_bgN.img
     mv s.img $BD/system-treble_arm64_bgN-vndklite.img
