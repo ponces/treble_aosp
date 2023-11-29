@@ -1,4 +1,4 @@
-From cd327c27b8a1a83fcea489d9c3b3e1f8b44b0ddb Mon Sep 17 00:00:00 2001
+From c7f035ab382d1290ff1ed48ff9816527ce83124d Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 9 Nov 2023 12:33:55 +0100
 Subject: [PATCH 1/9] gmscompat: Change attestation and instrumentation to pass
@@ -10,9 +10,9 @@ Adapted by @iceows for his own AOSP A13 GSI.
 Adapted by @ponces based on the work of @chiteroman to pass newest Play Integrity API.
 ---
  core/java/android/app/Instrumentation.java    |   4 +
- .../internal/gmscompat/AttestationHooks.java  | 108 ++++++++++++++++++
+ .../internal/gmscompat/AttestationHooks.java  | 119 ++++++++++++++++++
  .../keystore2/AndroidKeyStoreSpi.java         |   3 +
- 3 files changed, 115 insertions(+)
+ 3 files changed, 126 insertions(+)
  create mode 100644 core/java/com/android/internal/gmscompat/AttestationHooks.java
 
 diff --git a/core/java/android/app/Instrumentation.java b/core/java/android/app/Instrumentation.java
@@ -46,10 +46,10 @@ index e31486f18dbf..56ff16f6c358 100644
  
 diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 new file mode 100644
-index 000000000000..642453d29fd1
+index 000000000000..48f35a9fdbfc
 --- /dev/null
 +++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
-@@ -0,0 +1,108 @@
+@@ -0,0 +1,119 @@
 +/*
 + * Copyright (C) 2021 The Android Open Source Project
 + *
@@ -122,15 +122,26 @@ index 000000000000..642453d29fd1
 +        }
 +    }
 +
++    private static void setVersionFieldString(String key, String value) {
++        try {
++            Field field = Build.VERSION.class.getDeclaredField(key);
++            field.setAccessible(true);
++            field.set(null, value);
++            field.setAccessible(false);
++        } catch (NoSuchFieldException | IllegalAccessException e) {
++            Log.e(TAG, "Failed to spoof Build." + key, e);
++        }
++    }
++
 +    private static void spoofBuildGms() {
 +        // Alter model name and fingerprint to avoid hardware attestation enforcement
-+        setBuildField("PRODUCT", "sailfish");
-+        setBuildField("DEVICE", "sailfish");
-+        setBuildField("MANUFACTURER", "Google");
-+        setBuildField("BRAND", "google");
-+        setBuildField("MODEL", "Pixel");
-+        setBuildField("FINGERPRINT", "google/sailfish/sailfish:8.1.0/OPM2.171019.029/4657601:user/release-keys");
-+        setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.O_MR1);
++        setBuildField("PRODUCT", "foster_e");
++        setBuildField("DEVICE", "foster");
++        setBuildField("MANUFACTURER", "NVIDIA");
++        setBuildField("BRAND", "NVIDIA");
++        setBuildField("MODEL", "SHIELD Android TV");
++        setBuildField("FINGERPRINT", "NVIDIA/foster_e/foster:7.0/NRD90M/2427173_1038.2788:user/release-keys");
++        setVersionFieldString("SECURITY_PATCH", "2018-01-05");
 +    }
 +
 +    public static void initApplicationBeforeOnCreate(Application app) {

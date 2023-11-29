@@ -1,4 +1,4 @@
-From 5361c7d6def46b986ac12385c79182ce9c969955 Mon Sep 17 00:00:00 2001
+From 22baa26d8947390ed7f0ef6bc2528affab09b06d Mon Sep 17 00:00:00 2001
 From: vladsendrix <83285656+vladsendrix@users.noreply.github.com>
 Date: Fri, 31 Dec 2021 03:18:04 +0100
 Subject: [PATCH 2/9] gmscompat: Spoof Pixel XL for Google Photos
@@ -9,7 +9,7 @@ Change-Id: I905e40625b07ebf500cbb3ce1deadedee2e624c5
  1 file changed, 14 insertions(+)
 
 diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
-index 642453d29fd1..e3c9b920a5b5 100644
+index 48f35a9fdbfc..eb3d32243594 100644
 --- a/core/java/com/android/internal/gmscompat/AttestationHooks.java
 +++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 @@ -31,6 +31,7 @@ public final class AttestationHooks {
@@ -20,8 +20,8 @@ index 642453d29fd1..e3c9b920a5b5 100644
      private static final String PROCESS_UNSTABLE = "com.google.android.gms.unstable";
  
      private static volatile boolean sIsGms = false;
-@@ -81,6 +82,15 @@ public final class AttestationHooks {
-         setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.O_MR1);
+@@ -92,6 +93,15 @@ public final class AttestationHooks {
+         setVersionFieldString("SECURITY_PATCH", "2018-01-05");
      }
  
 +    private static void spoofGooglePhotos() {
@@ -36,7 +36,7 @@ index 642453d29fd1..e3c9b920a5b5 100644
      public static void initApplicationBeforeOnCreate(Application app) {
          if (PACKAGE_GMS.equals(app.getPackageName()) &&
                  PROCESS_UNSTABLE.equals(Application.getProcessName())) {
-@@ -91,6 +101,10 @@ public final class AttestationHooks {
+@@ -102,6 +112,10 @@ public final class AttestationHooks {
          if (PACKAGE_FINSKY.equals(app.getPackageName())) {
              sIsFinsky = true;
          }
