@@ -1,7 +1,7 @@
 From 7206e745f83d1a2a70d818836878aca748e332a4 Mon Sep 17 00:00:00 2001
 From: Pranav Vashi <neobuddy89@gmail.com>
 Date: Sat, 16 Oct 2021 00:12:03 +0530
-Subject: [PATCH 2/3] build: Always use release-keys
+Subject: [PATCH 2/2] build: Always use release-keys
 
 Change-Id: Iff4d88d6bd4c7f4f6b9270dea24a2673c8535d9e
 ---
