@@ -10,7 +10,7 @@ Co-authored-by: maxwen <max.weninger@gmail.com>
 Co-authored-by: Pranav Vashi <neobuddy89@gmail.com>
 ---
  core/java/android/provider/Settings.java      |  10 +
- .../internal/util/crdroid/OmniJawsClient.java | 435 ++++++++++++++++++
+ .../internal/util/crdroid/OmniJawsClient.java | 437 ++++++++++++++++++
  data/etc/com.android.systemui.xml             |   1 +
  packages/SystemUI/AndroidManifest.xml         |   4 +
  .../layout/current_weather_view.xml           |  59 +++
@@ -18,7 +18,7 @@ Co-authored-by: Pranav Vashi <neobuddy89@gmail.com>
  .../KeyguardClockSwitchController.java        |  52 ++-
  .../KeyguardStatusViewController.java         |   1 +
  .../systemui/crdroid/CurrentWeatherView.java  | 163 +++++++
- 9 files changed, 730 insertions(+), 1 deletion(-)
+ 9 files changed, 732 insertions(+), 1 deletion(-)
  create mode 100644 core/java/com/android/internal/util/crdroid/OmniJawsClient.java
  create mode 100644 packages/SystemUI/res-keyguard/layout/current_weather_view.xml
  create mode 100644 packages/SystemUI/src/com/android/systemui/crdroid/CurrentWeatherView.java
@@ -46,10 +46,10 @@ index d695c0cb3760..ac1cb32f852e 100644
           * process when restoring historical backup datasets.
 diff --git a/core/java/com/android/internal/util/crdroid/OmniJawsClient.java b/core/java/com/android/internal/util/crdroid/OmniJawsClient.java
 new file mode 100644
-index 000000000000..7063d17663d4
+index 000000000000..26437e03495c
 --- /dev/null
 +++ b/core/java/com/android/internal/util/crdroid/OmniJawsClient.java
-@@ -0,0 +1,435 @@
+@@ -0,0 +1,437 @@
 +/*
 +* Copyright (C) 2021 The OmniROM Project
 +*
@@ -104,8 +104,10 @@ index 000000000000..7063d17663d4
 +            = Uri.parse("content://org.omnirom.omnijaws.provider/settings");
 +    public static final Uri CONTROL_URI
 +            = Uri.parse("content://org.omnirom.omnijaws.provider/control");
++
 +    private static final String ICON_PACKAGE_DEFAULT = "org.omnirom.omnijaws";
 +    private static final String ICON_PREFIX_DEFAULT = "google";
++    private static final String ICON_PREFIX_OUTLINE = "outline";
 +    private static final String EXTRA_ERROR = "error";
 +    public static final int EXTRA_ERROR_NETWORK = 0;
 +    public static final int EXTRA_ERROR_LOCATION = 1;
@@ -481,8 +483,8 @@ index 000000000000..7063d17663d4
 +        }
 +    }
 +
-+    public boolean isDefaultIconPackage() {
-+        return mIconPrefix.equals(ICON_PREFIX_DEFAULT);
++    public boolean isOutlineIconPackage() {
++        return mIconPrefix.equals(ICON_PREFIX_OUTLINE);
 +    }
 +}
 diff --git a/data/etc/com.android.systemui.xml b/data/etc/com.android.systemui.xml
