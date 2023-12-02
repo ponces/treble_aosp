@@ -1,4 +1,4 @@
-From c7f035ab382d1290ff1ed48ff9816527ce83124d Mon Sep 17 00:00:00 2001
+From 26a36a628308e8fcd0b490529fbc80dbfd2dbead Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 9 Nov 2023 12:33:55 +0100
 Subject: [PATCH 1/9] gmscompat: Change attestation and instrumentation to pass
@@ -10,9 +10,9 @@ Adapted by @iceows for his own AOSP A13 GSI.
 Adapted by @ponces based on the work of @chiteroman to pass newest Play Integrity API.
 ---
  core/java/android/app/Instrumentation.java    |   4 +
- .../internal/gmscompat/AttestationHooks.java  | 119 ++++++++++++++++++
+ .../internal/gmscompat/AttestationHooks.java  | 120 ++++++++++++++++++
  .../keystore2/AndroidKeyStoreSpi.java         |   3 +
- 3 files changed, 126 insertions(+)
+ 3 files changed, 127 insertions(+)
  create mode 100644 core/java/com/android/internal/gmscompat/AttestationHooks.java
 
 diff --git a/core/java/android/app/Instrumentation.java b/core/java/android/app/Instrumentation.java
@@ -46,10 +46,10 @@ index e31486f18dbf..56ff16f6c358 100644
  
 diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 new file mode 100644
-index 000000000000..48f35a9fdbfc
+index 000000000000..c13c4e240b1e
 --- /dev/null
 +++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
-@@ -0,0 +1,119 @@
+@@ -0,0 +1,120 @@
 +/*
 + * Copyright (C) 2021 The Android Open Source Project
 + *
@@ -135,13 +135,14 @@ index 000000000000..48f35a9fdbfc
 +
 +    private static void spoofBuildGms() {
 +        // Alter model name and fingerprint to avoid hardware attestation enforcement
-+        setBuildField("PRODUCT", "foster_e");
-+        setBuildField("DEVICE", "foster");
-+        setBuildField("MANUFACTURER", "NVIDIA");
-+        setBuildField("BRAND", "NVIDIA");
-+        setBuildField("MODEL", "SHIELD Android TV");
-+        setBuildField("FINGERPRINT", "NVIDIA/foster_e/foster:7.0/NRD90M/2427173_1038.2788:user/release-keys");
-+        setVersionFieldString("SECURITY_PATCH", "2018-01-05");
++        setBuildField("PRODUCT", "WW_Phone");
++        setBuildField("DEVICE", "ASUS_Z012D");
++        setBuildField("MANUFACTURER", "asus");
++        setBuildField("BRAND", "asus");
++        setBuildField("MODEL", "ASUS_Z012D");
++        setBuildField("FINGERPRINT", "asus/WW_Phone/ASUS_Z012D:7.0/NRD90M/14.2015.1701.8-20170222:user/release-keys");
++        setVersionFieldString("SECURITY_PATCH", "2017-01-01");
++        setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N);
 +    }
 +
 +    public static void initApplicationBeforeOnCreate(Application app) {
