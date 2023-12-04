@@ -1,4 +1,4 @@
-From 26a36a628308e8fcd0b490529fbc80dbfd2dbead Mon Sep 17 00:00:00 2001
+From 77c939bfb27e5c79abd6f0fd0289a3aaceb013b3 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 9 Nov 2023 12:33:55 +0100
 Subject: [PATCH 1/9] gmscompat: Change attestation and instrumentation to pass
@@ -10,9 +10,9 @@ Adapted by @iceows for his own AOSP A13 GSI.
 Adapted by @ponces based on the work of @chiteroman to pass newest Play Integrity API.
 ---
  core/java/android/app/Instrumentation.java    |   4 +
- .../internal/gmscompat/AttestationHooks.java  | 120 ++++++++++++++++++
+ .../internal/gmscompat/AttestationHooks.java  | 152 ++++++++++++++++++
  .../keystore2/AndroidKeyStoreSpi.java         |   3 +
- 3 files changed, 127 insertions(+)
+ 3 files changed, 159 insertions(+)
  create mode 100644 core/java/com/android/internal/gmscompat/AttestationHooks.java
 
 diff --git a/core/java/android/app/Instrumentation.java b/core/java/android/app/Instrumentation.java
@@ -46,10 +46,10 @@ index e31486f18dbf..56ff16f6c358 100644
  
 diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 new file mode 100644
-index 000000000000..c13c4e240b1e
+index 000000000000..f80728c92d3e
 --- /dev/null
 +++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
-@@ -0,0 +1,120 @@
+@@ -0,0 +1,152 @@
 +/*
 + * Copyright (C) 2021 The Android Open Source Project
 + *
@@ -72,18 +72,30 @@ index 000000000000..c13c4e240b1e
 +import android.os.Build;
 +import android.os.Build.VERSION;
 +import android.os.SystemProperties;
++import android.util.JsonReader;
 +import android.util.Log;
 +
++import java.io.DataInputStream;
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.InputStream;
++import java.io.InputStreamReader;
++import java.io.IOException;
 +import java.lang.reflect.Field;
++import java.net.URL;
++import java.net.URLConnection;
 +import java.util.Arrays;
 +
 +/** @hide */
 +public final class AttestationHooks {
 +    private static final String TAG = "GmsCompat/Attestation";
++    private static final boolean DEBUG = true;
 +
 +    private static final String PACKAGE_GMS = "com.google.android.gms";
 +    private static final String PACKAGE_FINSKY = "com.android.vending";
 +    private static final String PROCESS_UNSTABLE = "com.google.android.gms.unstable";
++    
++    private static final String GMSSPOOF_PATH = SystemProperties.get("ro.system.gms.spoof_file");
 +
 +    private static volatile boolean sIsGms = false;
 +    private static volatile boolean sIsFinsky = false;
@@ -92,37 +104,16 @@ index 000000000000..c13c4e240b1e
 +
 +    private static void setBuildField(String key, String value) {
 +        try {
-+            // Unlock
 +            Field field = Build.class.getDeclaredField(key);
 +            field.setAccessible(true);
-+
-+            // Edit
 +            field.set(null, value);
-+
-+            // Lock
 +            field.setAccessible(false);
 +        } catch (NoSuchFieldException | IllegalAccessException e) {
 +            Log.e(TAG, "Failed to spoof Build." + key, e);
 +        }
 +    }
 +
-+    private static void setVersionField(String key, Integer value) {
-+        try {
-+            // Unlock
-+            Field field = Build.VERSION.class.getDeclaredField(key);
-+            field.setAccessible(true);
-+
-+            // Edit
-+            field.set(null, value);
-+
-+            // Lock
-+            field.setAccessible(false);
-+        } catch (NoSuchFieldException | IllegalAccessException e) {
-+            Log.e(TAG, "Failed to spoof Build." + key, e);
-+        }
-+    }
-+
-+    private static void setVersionFieldString(String key, String value) {
++    private static void setVersionField(String key, Object value) {
 +        try {
 +            Field field = Build.VERSION.class.getDeclaredField(key);
 +            field.setAccessible(true);
@@ -134,14 +125,56 @@ index 000000000000..c13c4e240b1e
 +    }
 +
 +    private static void spoofBuildGms() {
-+        // Alter model name and fingerprint to avoid hardware attestation enforcement
-+        setBuildField("PRODUCT", "WW_Phone");
-+        setBuildField("DEVICE", "ASUS_Z012D");
-+        setBuildField("MANUFACTURER", "asus");
-+        setBuildField("BRAND", "asus");
-+        setBuildField("MODEL", "ASUS_Z012D");
-+        setBuildField("FINGERPRINT", "asus/WW_Phone/ASUS_Z012D:7.0/NRD90M/14.2015.1701.8-20170222:user/release-keys");
-+        setVersionFieldString("SECURITY_PATCH", "2017-01-01");
++        new Thread(new Runnable() {
++            @Override
++            public void run() {
++                try {
++                    spoofBuildGmsFile();
++                } catch (Exception e) {
++                    Log.e(TAG, "Failed to spoof with a file, spoofing with local props", e);
++                    spoofBuildGmsLegacy();
++                }
++            }
++        }).start();
++    }
++
++    private static void spoofBuildGmsFile() throws Exception {
++        InputStream stream = null;
++        File spoofFile = new File("/data/local/tmp/spoof.json");
++        if (spoofFile.exists()) {
++            Log.d(TAG, "Getting spoof file from " + spoofFile.getAbsolutePath());
++            stream = new DataInputStream(new FileInputStream(spoofFile));
++        } else {
++            Log.d(TAG, "Getting spoof file from " + GMSSPOOF_PATH);
++            URLConnection con = new URL(GMSSPOOF_PATH).openConnection();
++            con.setUseCaches(false);
++            stream = con.getInputStream();
++        }
++        JsonReader reader = new JsonReader(new InputStreamReader(stream, "UTF-8"));
++        reader.beginObject();
++        while (reader.hasNext()) {
++            String token = reader.nextName();
++            String value = reader.nextString();
++            Log.d(TAG, "Spoofing prop \"" + token + "\" with value \"" + value + "\"");
++            if (token.equals("SECURITY_PATCH")) {
++                setVersionField(token, value);
++            } else if (token.equals("DEVICE_INITIAL_SDK_INT") || token.equals("FIRST_API_LEVEL")) {
++                setVersionField("DEVICE_INITIAL_SDK_INT", Integer.parseInt(value));
++            } else {
++                setBuildField(token, value);
++            }
++        }
++        reader.endObject();
++    }
++
++    private static void spoofBuildGmsLegacy() {
++        setBuildField("PRODUCT", "MTKAC70DTI");
++        setBuildField("DEVICE", "ac70dti");
++        setBuildField("MANUFACTURER", "Archos");
++        setBuildField("BRAND", "archos");
++        setBuildField("MODEL", "Archos 70d Titanium");
++        setBuildField("FINGERPRINT", "archos/MTKAC70DTI/ac70dti:7.0/NRD90M/20170602.033254:user/release-keys");
++        setVersionField("SECURITY_PATCH", "2017-06-02");
 +        setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N);
 +    }
 +
@@ -163,7 +196,6 @@ index 000000000000..c13c4e240b1e
 +    }
 +
 +    public static void onEngineGetCertificateChain() {
-+        // Check stack for SafetyNet or Play Integrity
 +        if (isCallerSafetyNet() || sIsFinsky) {
 +            Log.i(TAG, "Blocked key attestation sIsGms=" + sIsGms + " sIsFinsky=" + sIsFinsky);
 +            throw new UnsupportedOperationException();
