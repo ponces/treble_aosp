@@ -13,11 +13,13 @@ set -e
 BL=$PWD/treble_build_aosp
 BD=$HOME/builds
 TAG="$(date +v%Y.%m.%d)"
+GUSER="ponces"
+GREPO="treble_build_aosp"
 
 createRelease() {
     echo "--> Creating release $TAG"
     res=$(curl -s -L -X POST \
-        "https://api.github.com/repos/ponces/treble_build_aosp/releases" \
+        "https://api.github.com/repos/$GUSER/$GREPO/releases" \
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer $GITHUB_API_TOKEN" \
         -d "{\"tag_name\":\"$TAG\",\"name\":\"AOSP 14.0 $TAG\",\"body\":\"## Changelog\n- ...\n\n## Notes\n- ...\",\"draft\":true}")
@@ -30,7 +32,7 @@ uploadAssets() {
     find $BD/ -name "aosp-*-14.0-$buildDate.img.xz" | while read file; do
         echo "--> Uploading $(basename $file)"
         curl -o /dev/null -s -L -X POST \
-            "https://uploads.github.com/repos/ponces/treble_build_aosp/releases/$id/assets?name=$(basename $file)" \
+            "https://uploads.github.com/repos/$GUSER/$GREPO/releases/$id/assets?name=$(basename $file)" \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GITHUB_API_TOKEN" \
             -H "Content-Type: application/octet-stream" \
