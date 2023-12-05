@@ -10,11 +10,11 @@ echo
 
 set -e
 
-BL=$PWD/treble_build_aosp
+BL=$PWD/treble_aosp
 BD=$HOME/builds
 TAG="$(date +v%Y.%m.%d)"
 GUSER="ponces"
-GREPO="treble_build_aosp"
+GREPO="treble_aosp"
 
 createRelease() {
     echo "--> Creating release $TAG"
@@ -44,7 +44,7 @@ uploadAssets() {
 updateOta() {
     echo "--> Updating OTA file"
     pushd "$BL"
-    git add ota.json
+    git add config/ota.json
     git commit -m "build: Bump OTA to $TAG"
     git push
     popd

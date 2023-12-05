@@ -8,15 +8,15 @@ To get started with building AOSP GSI, you'll need to get familiar with [Git and
     ```
 - Clone this repo:
     ```
-    git clone https://github.com/ponces/treble_build_aosp -b android-14.0
+    git clone https://github.com/ponces/treble_aosp -b android-14.0
     ```
 - Finally, start the build script:
     ```
-    bash treble_build_aosp/build.sh
+    bash treble_aosp/build.sh
     ```
 
 ## Issues
-[Open issue](https://github.com/ponces/treble_build_aosp/issues/new/choose)
+[Open issue](https://github.com/ponces/treble_aosp/issues/new/choose)
 
 ## Credits
 These people have helped this project in some way or another, so they should be the ones who receive all the credit:

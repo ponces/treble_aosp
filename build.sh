@@ -10,7 +10,7 @@ echo
 
 set -e
 
-BL=$PWD/treble_build_aosp
+BL=$PWD/treble_aosp
 BD=$HOME/builds
 
 initRepos() {
@@ -21,7 +21,7 @@ initRepos() {
 
         echo "--> Preparing local manifest"
         mkdir -p .repo/local_manifests
-        cp $BL/manifest.xml .repo/local_manifests/aosp.xml
+        cp $BL/build/manifest.xml .repo/local_manifests/aosp.xml
         echo
     fi
 }
@@ -34,16 +34,16 @@ syncRepos() {
 
 applyPatches() {
     echo "--> Applying TrebleDroid patches"
-    bash $BL/apply-patches.sh $BL trebledroid
+    bash $BL/patch.sh $BL trebledroid
     echo
 
     echo "--> Applying personal patches"
-    bash $BL/apply-patches.sh $BL personal
+    bash $BL/patch.sh $BL personal
     echo
 
     echo "--> Generating makefiles"
     cd device/phh/treble
-    cp $BL/aosp.mk .
+    cp $BL/build/aosp.mk .
     bash generate.sh aosp
     cd ../../..
     echo
@@ -128,11 +128,11 @@ generateOta() {
                 name="treble_arm64_bgN"
             fi
             size=$(wc -c $file | awk '{print $1}')
-            url="https://github.com/ponces/treble_build_aosp/releases/download/$version/$filename"
+            url="https://github.com/ponces/treble_aosp/releases/download/$version/$filename"
             json="${json} {\"name\": \"$name\",\"size\": \"$size\",\"url\": \"$url\"},"
         done
         json="${json%?}]}"
-        echo "$json" | jq . > $BL/ota.json
+        echo "$json" | jq . > $BL/config/ota.json
     }
     echo
 }
