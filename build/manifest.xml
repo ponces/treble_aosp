@@ -11,6 +11,7 @@
   <project name="phhusson/vendor_magisk" path="vendor/magisk" remote="github" revision="android-10.0" />
   <project name="AndyCGYan/android_packages_apps_QcRilAm" path="packages/apps/QcRilAm" remote="github" revision="master" />
   <project name="platform/prebuilts/vndk/v28" path="prebuilts/vndk/v28" remote="aosp" revision="204f1bad00aaf480ba33233f7b8c2ddaa03155dd" clone-depth="1" />
+  <project path="external/mockito-kotlin" name="platform/external/mockito-kotlin" remote="aosp" revision="b0a025998405b7af4a64dd04ffdf6630e678658f" />
 
   <!-- ponces -->
   <project name="ponces/vendor_ponces" path="vendor/ponces" remote="github" revision="android-14.0" />
