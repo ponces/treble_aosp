@@ -1,4 +1,4 @@
-From cd6d41438a0fbbcf3a890c1be94b5e313ce6f7da Mon Sep 17 00:00:00 2001
+From 375113fb8d0fd551b407793531812708068627f6 Mon Sep 17 00:00:00 2001
 From: Janson Kang <temasek71@gmail.com>
 Date: Mon, 14 Dec 2015 11:13:24 +0800
 Subject: [PATCH 6/9] Add "android.permission.READ_PHONE_STATE" to manifest
@@ -9,7 +9,7 @@ Change-Id: I78d90166635bbdf6b74e2a02efc1029387b4ad8d
  1 file changed, 1 insertion(+)
 
 diff --git a/packages/SystemUI/AndroidManifest.xml b/packages/SystemUI/AndroidManifest.xml
-index 5c036988eb30..829ce87a4e8c 100644
+index 4fd47232a0df..6bb7b2549237 100644
 --- a/packages/SystemUI/AndroidManifest.xml
 +++ b/packages/SystemUI/AndroidManifest.xml
 @@ -68,6 +68,7 @@

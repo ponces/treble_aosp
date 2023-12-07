@@ -1,4 +1,4 @@
-From 0e5671e933147c3a6d4c334dcd9bebf4c76a00ba Mon Sep 17 00:00:00 2001
+From 89738446a7859155250c29a44f542fb52fd5b983 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 20 Oct 2023 13:02:43 -0400
 Subject: [PATCH] Don't crash when there is no VR service
@@ -9,7 +9,7 @@ Change-Id: I02d672f9a2688df7b1abf16377634fdcf4132511
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/src/com/android/nfc/NfcService.java b/src/com/android/nfc/NfcService.java
-index f22dc9da8..1b786842e 100644
+index 175e4e9a8..339e019e9 100644
 --- a/src/com/android/nfc/NfcService.java
 +++ b/src/com/android/nfc/NfcService.java
 @@ -572,7 +572,11 @@ public class NfcService implements DeviceHostListener, ForegroundUtils.Callback

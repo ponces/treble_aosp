@@ -1,4 +1,4 @@
-From 76df3b1f16244ebbe7d1a2cc2fb09f0213d4ea2d Mon Sep 17 00:00:00 2001
+From 482b1394d851a4996fa7bab8c2801f70a0adf6ab Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 1 Oct 2019 13:35:49 +0200
 Subject: [PATCH 03/23] Add (partial, cam id is hardcoded) support for Asus ZF6
@@ -11,7 +11,7 @@ Change-Id: Iea6e1370780a1d16f728748d1d948d092532d8fe
  2 files changed, 29 insertions(+)
 
 diff --git a/services/camera/libcameraservice/CameraService.cpp b/services/camera/libcameraservice/CameraService.cpp
-index 668a51ae6d..a18425e6b8 100644
+index ebe424ec25..ac1ba38db9 100644
 --- a/services/camera/libcameraservice/CameraService.cpp
 +++ b/services/camera/libcameraservice/CameraService.cpp
 @@ -26,6 +26,7 @@
@@ -30,7 +30,7 @@ index 668a51ae6d..a18425e6b8 100644
          mCameraServiceProxyWrapper(cameraServiceProxyWrapper == nullptr ?
                  std::make_shared<CameraServiceProxyWrapper>() : cameraServiceProxyWrapper),
          mEventLog(DEFAULT_EVENT_LOG_LENGTH),
-@@ -2154,6 +2156,7 @@ Status CameraService::connectHelper(const sp<CALLBACK>& cameraCb, const String8&
+@@ -2344,6 +2346,7 @@ Status CameraService::connectHelper(const sp<CALLBACK>& cameraCb, const String8&
              mServiceLock.lock();
          } else {
              // Otherwise, add client to active clients list
@@ -38,7 +38,7 @@ index 668a51ae6d..a18425e6b8 100644
              finishConnectLocked(client, partial, oomScoreOffset, systemNativeClient);
          }
  
-@@ -2278,6 +2281,27 @@ status_t CameraService::addOfflineClient(String8 cameraId, sp<BasicClient> offli
+@@ -2468,6 +2471,27 @@ status_t CameraService::addOfflineClient(String8 cameraId, sp<BasicClient> offli
      return OK;
  }
  
@@ -63,10 +63,10 @@ index 668a51ae6d..a18425e6b8 100644
 +    }
 +}
 +
- Status CameraService::turnOnTorchWithStrengthLevel(const String16& cameraId, int32_t torchStrength,
+ Status CameraService::turnOnTorchWithStrengthLevel(const String16& unresolvedCameraId,
+         int32_t torchStrength,
          const sp<IBinder>& clientBinder) {
-     Mutex::Autolock lock(mServiceLock);
-@@ -3539,6 +3563,8 @@ binder::Status CameraService::BasicClient::disconnect() {
+@@ -3733,6 +3757,8 @@ binder::Status CameraService::BasicClient::disconnect() {
      }
      mDisconnected = true;
  
@@ -76,10 +76,10 @@ index 668a51ae6d..a18425e6b8 100644
      sCameraService->logDisconnected(mCameraIdStr, mClientPid, String8(mClientPackageName));
      sCameraService->mCameraProviderManager->removeRef(CameraProviderManager::DeviceMode::CAMERA,
 diff --git a/services/camera/libcameraservice/CameraService.h b/services/camera/libcameraservice/CameraService.h
-index 3214d4c475..69e189d844 100644
+index 208138f4ab..4ac9362621 100644
 --- a/services/camera/libcameraservice/CameraService.h
 +++ b/services/camera/libcameraservice/CameraService.h
-@@ -244,6 +244,9 @@ public:
+@@ -252,6 +252,9 @@ public:
      // Register an offline client for a given active camera id
      status_t addOfflineClient(String8 cameraId, sp<BasicClient> offlineClient);
  

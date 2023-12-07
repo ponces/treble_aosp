@@ -1,4 +1,4 @@
-From 20748e3c5508725c893ee6f52a58eb66a0865598 Mon Sep 17 00:00:00 2001
+From 7931aae2ec6768100170b67520512119e9d6e94b Mon Sep 17 00:00:00 2001
 From: Raphael Mounier <mounierr07@gmail.com>
 Date: Thu, 6 Oct 2022 08:35:38 +0200
 Subject: [PATCH 05/11] Fix signalstrength for huawei kirin (hi6250, hi3670)

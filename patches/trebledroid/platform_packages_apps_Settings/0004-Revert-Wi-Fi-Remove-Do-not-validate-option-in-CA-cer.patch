@@ -1,4 +1,4 @@
-From e94316fe4155e4dd662041fae1b31068b1fe4a27 Mon Sep 17 00:00:00 2001
+From 99c4744df7361c8d675ea699f36aa11b6cf36ec8 Mon Sep 17 00:00:00 2001
 From: TogoFire <italomellopereira@gmail.com>
 Date: Fri, 6 Aug 2021 08:54:07 -0300
 Subject: [PATCH 4/5] Revert "[Wi-Fi] Remove 'Do not validate' option in CA
@@ -50,10 +50,10 @@ index 6fe39bf0261..5a9d6e64df0 100644
                            android:layout_width="match_parent"
                            android:layout_height="wrap_content"
 diff --git a/res/values/strings.xml b/res/values/strings.xml
-index fa79cbbb33b..3db6c1c3883 100644
+index 7fe1daa5cba..b5e993fe843 100644
 --- a/res/values/strings.xml
 +++ b/res/values/strings.xml
-@@ -1882,6 +1882,10 @@
+@@ -1895,6 +1895,10 @@
      <string name="wifi_use_system_certs">Use system certificates</string>
      <!-- Menu option for not providing an EAP user certificate -->
      <string name="wifi_do_not_provide_eap_user_cert">Do not provide</string>

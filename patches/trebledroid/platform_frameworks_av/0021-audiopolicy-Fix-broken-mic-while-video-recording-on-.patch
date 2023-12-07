@@ -1,4 +1,4 @@
-From 8c0037526514147fe998ab4a629d991a6aa85c09 Mon Sep 17 00:00:00 2001
+From d05e5da997931d4202dfc8cd528c1e2a55b572dc Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Sun, 30 Apr 2023 23:29:04 +0100
 Subject: [PATCH 21/23] audiopolicy: Fix broken mic while video recording on

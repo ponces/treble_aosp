@@ -1,4 +1,4 @@
-From 7e98059046a96f7982f5dfa7245bbffb0c3fd95c Mon Sep 17 00:00:00 2001
+From 565248347f94ede02f0c4c33444e9d73926dc754 Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Wed, 8 Dec 2021 07:04:53 +0000
 Subject: [PATCH 3/6] Remove init.vndk-nodef.rc
@@ -59,7 +59,7 @@ index 1b141a05e70..00000000000
 -    # Reboot if BOARD_VNDK_VERSION is not defined
 -    exec - root -- /system/bin/reboot bootloader
 diff --git a/target/product/gsi_release.mk b/target/product/gsi_release.mk
-index 3b977927d19..7bade98ca14 100644
+index 9d102ea515d..ec42b2ce775 100644
 --- a/target/product/gsi_release.mk
 +++ b/target/product/gsi_release.mk
 @@ -62,7 +62,6 @@ PRODUCT_PACKAGES += com.android.apex.cts.shim.v1_with_prebuilts.flattened

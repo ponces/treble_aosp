@@ -1,4 +1,4 @@
-From b93e5cad5b579ed01be6fda4f9451cd32e265487 Mon Sep 17 00:00:00 2001
+From 702a3038300d11638339e0659d93409c1480208d Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 18 Dec 2022 18:20:40 -0500
 Subject: [PATCH 39/45] FOD support for Asus, Samsung recent Xiaomi and
@@ -25,10 +25,10 @@ Change-Id: Ibd0f9ea8fba584a38c060fd9271549a5e106b4eb
  7 files changed, 585 insertions(+), 6 deletions(-)
 
 diff --git a/packages/SystemUI/Android.bp b/packages/SystemUI/Android.bp
-index 7df3dfb89d96..5d7b5494d7fd 100644
+index 07f7ecd112e4..31bb77a7101e 100644
 --- a/packages/SystemUI/Android.bp
 +++ b/packages/SystemUI/Android.bp
-@@ -197,6 +197,10 @@ android_library {
+@@ -200,6 +200,10 @@ android_library {
          "lottie",
          "LowLightDreamLib",
          "motion_tool_lib",
@@ -40,10 +40,10 @@ index 7df3dfb89d96..5d7b5494d7fd 100644
      manifest: "AndroidManifest.xml",
  
 diff --git a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsController.java b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsController.java
-index 10e45dadee60..efb88b9fe1ec 100644
+index 3472a859ac82..19b67b5f3def 100644
 --- a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsController.java
 +++ b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsController.java
-@@ -47,6 +47,7 @@ import android.os.Handler;
+@@ -48,6 +48,7 @@ import android.os.Handler;
  import android.os.PowerManager;
  import android.os.Process;
  import android.os.Trace;
@@ -51,7 +51,7 @@ index 10e45dadee60..efb88b9fe1ec 100644
  import android.os.VibrationAttributes;
  import android.os.VibrationEffect;
  import android.util.Log;
-@@ -110,9 +111,13 @@ import java.util.HashSet;
+@@ -114,9 +115,13 @@ import java.util.HashSet;
  import java.util.Optional;
  import java.util.Set;
  import java.util.concurrent.Executor;
@@ -65,7 +65,7 @@ index 10e45dadee60..efb88b9fe1ec 100644
  
  /**
   * Shows and hides the under-display fingerprint sensor (UDFPS) overlay, handles UDFPS touch events,
-@@ -243,6 +248,46 @@ public class UdfpsController implements DozeReceiver, Dumpable {
+@@ -253,6 +258,46 @@ public class UdfpsController implements DozeReceiver, Dumpable {
              mScreenOn = false;
          }
      };
@@ -112,7 +112,7 @@ index 10e45dadee60..efb88b9fe1ec 100644
  
      @Override
      public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
-@@ -1188,10 +1233,17 @@ public class UdfpsController implements DozeReceiver, Dumpable {
+@@ -1241,10 +1286,17 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                  view.configureDisplay(() -> dispatchOnUiReady(requestId));
              }
          }
@@ -130,7 +130,7 @@ index 10e45dadee60..efb88b9fe1ec 100644
      }
  
      private void onFingerUp(long requestId, @NonNull UdfpsView view) {
-@@ -1242,6 +1294,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
+@@ -1295,6 +1347,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                      mFingerprintManager.onPointerUp(requestId, mSensorProps.sensorId);
                  }
              }
@@ -142,10 +142,10 @@ index 10e45dadee60..efb88b9fe1ec 100644
                  cb.onFingerUp();
              }
 diff --git a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsControllerOverlay.kt b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsControllerOverlay.kt
-index cabe9008ab47..826804492bc7 100644
+index d6ef94d18e71..bcc12831a62c 100644
 --- a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsControllerOverlay.kt
 +++ b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsControllerOverlay.kt
-@@ -124,7 +124,9 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
+@@ -133,7 +133,9 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
          gravity = android.view.Gravity.TOP or android.view.Gravity.LEFT
          layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
          flags = (Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS or
@@ -156,7 +156,7 @@ index cabe9008ab47..826804492bc7 100644
          privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
          // Avoid announcing window title.
          accessibilityTitle = " "
-@@ -185,6 +187,9 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
+@@ -194,6 +196,9 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                      windowManager.addView(this, coreLayoutParams.updateDimensions(animation))
                      sensorRect = sensorBounds
                      touchExplorationEnabled = accessibilityManager.isTouchExplorationEnabled
@@ -803,26 +803,20 @@ index bc741a5e2396..26ca8c9940f5 100644
 +    }
  }
 diff --git a/services/core/java/com/android/server/biometrics/sensors/fingerprint/FingerprintService.java b/services/core/java/com/android/server/biometrics/sensors/fingerprint/FingerprintService.java
-index ece35c522ec7..8c20b9e1bf40 100644
+index 5ce0c8b384ef..df99478da964 100644
 --- a/services/core/java/com/android/server/biometrics/sensors/fingerprint/FingerprintService.java
 +++ b/services/core/java/com/android/server/biometrics/sensors/fingerprint/FingerprintService.java
-@@ -873,7 +873,6 @@ public class FingerprintService extends SystemService {
+@@ -885,8 +885,9 @@ public class FingerprintService extends SystemService {
+                         filteredInstances = filterAvailableHalInstances(hidlSensors, aidlSensors);
  
-             mRegistry.registerAll(() -> {
                  final List<ServiceProvider> providers = new ArrayList<>();
--                providers.addAll(getHidlProviders(hidlSensors));
-                 List<String> aidlSensors = new ArrayList<>();
-                 final String[] instances = mAidlInstanceNameSupplier.get();
-                 if (instances != null) {
-@@ -881,6 +880,8 @@ public class FingerprintService extends SystemService {
-                 }
-                 providers.addAll(getAidlProviders(
-                         Utils.filterAvailableHalInstances(getContext(), aidlSensors)));
+-                providers.addAll(getHidlProviders(filteredInstances.first));
+                 providers.addAll(getAidlProviders(filteredInstances.second));
 +                if (providers.isEmpty())
-+                    providers.addAll(getHidlProviders(hidlSensors));
++                    providers.addAll(getHidlProviders(filteredInstances.first));
+ 
                  return providers;
              });
-         }
 -- 
 2.34.1
 

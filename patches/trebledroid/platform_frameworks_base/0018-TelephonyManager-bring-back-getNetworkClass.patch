@@ -1,4 +1,4 @@
-From 1d5e701cc67c56c5bb6db982ea2eea16142d4c83 Mon Sep 17 00:00:00 2001
+From f500eec93a1e40744ed6eb4806ab617bc4e6417c Mon Sep 17 00:00:00 2001
 From: Peter Cai <peter@typeblog.net>
 Date: Wed, 16 Dec 2020 13:46:15 +0800
 Subject: [PATCH 18/45] TelephonyManager: bring back getNetworkClass()
@@ -11,7 +11,7 @@ This partially reverts commit c058cac051ab083dc7fb7ea6aa85699110b2e9bf.
  1 file changed, 58 insertions(+)
 
 diff --git a/telephony/java/android/telephony/TelephonyManager.java b/telephony/java/android/telephony/TelephonyManager.java
-index aa85332f2946..2146bbf33c80 100644
+index 551b73a1706f..62bd70374c96 100644
 --- a/telephony/java/android/telephony/TelephonyManager.java
 +++ b/telephony/java/android/telephony/TelephonyManager.java
 @@ -3204,6 +3204,64 @@ public class TelephonyManager {

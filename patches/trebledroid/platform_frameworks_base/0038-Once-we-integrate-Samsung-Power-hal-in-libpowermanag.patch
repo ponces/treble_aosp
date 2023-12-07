@@ -1,4 +1,4 @@
-From 49e602cac3f64543b0d0ec2452ae17e05348f230 Mon Sep 17 00:00:00 2001
+From f8b6f79d0cd7d84706459b9b5108864aa7b827d3 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 27 Dec 2021 17:57:11 -0500
 Subject: [PATCH 38/45] Once we integrate Samsung Power hal in libpowermanager,
@@ -11,10 +11,10 @@ Change-Id: I9084f64e505009abe9420d28b44199605cee52d8
  1 file changed, 1 insertion(+)
 
 diff --git a/services/core/jni/Android.bp b/services/core/jni/Android.bp
-index ea0da6918ecc..ccd13526cb16 100644
+index 36c13ca121e3..00e9cfa998b9 100644
 --- a/services/core/jni/Android.bp
 +++ b/services/core/jni/Android.bp
-@@ -203,6 +203,7 @@ cc_defaults {
+@@ -204,6 +204,7 @@ cc_defaults {
          "service.incremental",
          "vendor.samsung.hardware.light@2.0",
          "vendor.samsung.hardware.light@3.0",

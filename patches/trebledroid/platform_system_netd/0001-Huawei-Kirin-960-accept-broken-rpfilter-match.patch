@@ -1,4 +1,4 @@
-From 5eca866c8d670d959f76935f129c20539241bc79 Mon Sep 17 00:00:00 2001
+From 91ab1ef92af5fcfceddab678c1d2d8d7965f6247 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 2 Jul 2018 22:01:43 +0200
 Subject: [PATCH 1/4] Huawei Kirin 960:: accept broken rpfilter match

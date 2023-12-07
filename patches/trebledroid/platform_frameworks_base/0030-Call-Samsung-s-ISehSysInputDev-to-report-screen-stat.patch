@@ -1,4 +1,4 @@
-From 8c8268502b637460d0370378e93dd66bd44e7f67 Mon Sep 17 00:00:00 2001
+From 2cea79507bc6fc0d5a1def23b94aa789d2f26c67 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 14 Dec 2022 17:21:00 -0500
 Subject: [PATCH 30/45] Call Samsung's ISehSysInputDev to report screen state
@@ -23,7 +23,7 @@ index f8d19ec9903d..735959270c11 100644
      javac_shard_size: 50,
      javacflags: [
 diff --git a/services/core/java/com/android/server/display/LocalDisplayAdapter.java b/services/core/java/com/android/server/display/LocalDisplayAdapter.java
-index c7c0fab6140d..537027f2d77f 100644
+index 89d865e5ae39..9f2793a16a28 100644
 --- a/services/core/java/com/android/server/display/LocalDisplayAdapter.java
 +++ b/services/core/java/com/android/server/display/LocalDisplayAdapter.java
 @@ -33,6 +33,7 @@ import android.os.Trace;
@@ -52,7 +52,7 @@ index c7c0fab6140d..537027f2d77f 100644
  
          LocalDisplayDevice(IBinder displayToken, long physicalDisplayId,
                  SurfaceControl.StaticDisplayInfo staticDisplayInfo,
-@@ -821,17 +826,44 @@ final class LocalDisplayAdapter extends DisplayAdapter {
+@@ -825,17 +830,44 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                              }
                              mSidekickActive = false;
                          }

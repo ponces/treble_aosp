@@ -1,4 +1,4 @@
-From 245a139f6031dace8d8fef4fbe95468ab34c49e9 Mon Sep 17 00:00:00 2001
+From 67b3854a3467be5f5b47c782643a16905c87dc9e Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Sun, 26 Feb 2023 22:13:35 +0000
 Subject: [PATCH 3/9] monet: Use Style.SPRITZ by default
@@ -9,10 +9,10 @@ Change-Id: Ia44ba56c8daa07033b290de89bb300bda9d39d86
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/packages/SystemUI/src/com/android/systemui/theme/ThemeOverlayController.java b/packages/SystemUI/src/com/android/systemui/theme/ThemeOverlayController.java
-index b78329cfa5aa..56bef4733ed5 100644
+index 5a9f5d5a72d2..c93693170126 100644
 --- a/packages/SystemUI/src/com/android/systemui/theme/ThemeOverlayController.java
 +++ b/packages/SystemUI/src/com/android/systemui/theme/ThemeOverlayController.java
-@@ -145,7 +145,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
+@@ -147,7 +147,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
      private float mContrast = 0;
      // Theme variant: Vibrant, Tonal, Expressive, etc
      @VisibleForTesting
@@ -21,7 +21,7 @@ index b78329cfa5aa..56bef4733ed5 100644
      // Accent colors overlay
      private FabricatedOverlay mSecondaryOverlay;
      // Neutral system colors overlay
-@@ -800,11 +800,11 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
+@@ -803,11 +803,11 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
                  style = Style.valueOf(
                          object.getString(ThemeOverlayApplier.OVERLAY_CATEGORY_THEME_STYLE));
                  if (!validStyles.contains(style)) {

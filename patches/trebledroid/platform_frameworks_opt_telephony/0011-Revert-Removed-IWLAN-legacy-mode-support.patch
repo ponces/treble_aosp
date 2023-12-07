@@ -1,4 +1,4 @@
-From d349626689ae331e9598c5a6f62e0c54e8932a3f Mon Sep 17 00:00:00 2001
+From 7d165eeed4ceda1dee1f7c516538ec3f1d859fb7 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Fri, 20 Oct 2023 09:11:55 +0000
 Subject: [PATCH 11/11] Revert "Removed IWLAN legacy mode support"
@@ -14,10 +14,10 @@ Change-Id: I1fd5a803ea3b01f902ff14e1ee6225312b2d3206
  4 files changed, 190 insertions(+), 37 deletions(-)
 
 diff --git a/src/java/com/android/internal/telephony/ServiceStateTracker.java b/src/java/com/android/internal/telephony/ServiceStateTracker.java
-index 50eea7f695..33a04fb830 100644
+index 8a4967085f..a668285bbe 100644
 --- a/src/java/com/android/internal/telephony/ServiceStateTracker.java
 +++ b/src/java/com/android/internal/telephony/ServiceStateTracker.java
-@@ -659,7 +659,7 @@ public class ServiceStateTracker extends Handler {
+@@ -665,7 +665,7 @@ public class ServiceStateTracker extends Handler {
  
          mAccessNetworksManager = mPhone.getAccessNetworksManager();
          mOutOfServiceSS = new ServiceState();
@@ -26,7 +26,7 @@ index 50eea7f695..33a04fb830 100644
  
          for (int transportType : mAccessNetworksManager.getAvailableTransports()) {
              mRegStateManagers.append(transportType, new NetworkRegistrationManager(
-@@ -776,9 +776,9 @@ public class ServiceStateTracker extends Handler {
+@@ -782,9 +782,9 @@ public class ServiceStateTracker extends Handler {
          }
  
          mSS = new ServiceState();
@@ -38,7 +38,7 @@ index 50eea7f695..33a04fb830 100644
          mLastCellInfoReqTime = 0;
          mLastCellInfoList = null;
          mStartedGprsRegCheck = false;
-@@ -3308,7 +3308,7 @@ public class ServiceStateTracker extends Handler {
+@@ -3314,7 +3314,7 @@ public class ServiceStateTracker extends Handler {
                  nri = mNewSS.getNetworkRegistrationInfo(
                          NetworkRegistrationInfo.DOMAIN_PS,
                          AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
@@ -47,7 +47,7 @@ index 50eea7f695..33a04fb830 100644
                  // Add the IWLAN registration info back to service state.
                  if (nri != null) {
                      mNewSS.addNetworkRegistrationInfo(nri);
-@@ -3325,7 +3325,7 @@ public class ServiceStateTracker extends Handler {
+@@ -3331,7 +3331,7 @@ public class ServiceStateTracker extends Handler {
                  nri = mNewSS.getNetworkRegistrationInfo(
                          NetworkRegistrationInfo.DOMAIN_PS,
                          AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
@@ -56,7 +56,7 @@ index 50eea7f695..33a04fb830 100644
                  // Add the IWLAN registration info back to service state.
                  if (nri != null) {
                      mNewSS.addNetworkRegistrationInfo(nri);
-@@ -3452,10 +3452,14 @@ public class ServiceStateTracker extends Handler {
+@@ -3459,10 +3459,14 @@ public class ServiceStateTracker extends Handler {
                  mSS.getState() == ServiceState.STATE_POWER_OFF
                          && mNewSS.getState() != ServiceState.STATE_POWER_OFF;
  
@@ -75,7 +75,7 @@ index 50eea7f695..33a04fb830 100644
          boolean anyDataRegChanged = false;
          boolean anyDataRatChanged = false;
          boolean hasAlphaRawChanged =
-@@ -3641,7 +3645,7 @@ public class ServiceStateTracker extends Handler {
+@@ -3648,7 +3652,7 @@ public class ServiceStateTracker extends Handler {
          ServiceState oldMergedSS = new ServiceState(mPhone.getServiceState());
          mSS = new ServiceState(mNewSS);
  
@@ -84,7 +84,7 @@ index 50eea7f695..33a04fb830 100644
  
          mCellIdentity = primaryCellIdentity;
          if (mSS.getState() == ServiceState.STATE_IN_SERVICE && primaryCellIdentity != null) {
-@@ -5503,7 +5507,8 @@ public class ServiceStateTracker extends Handler {
+@@ -5517,7 +5521,8 @@ public class ServiceStateTracker extends Handler {
      }
  
      /**
@@ -94,7 +94,7 @@ index 50eea7f695..33a04fb830 100644
       */
      private void processIwlanRegistrationInfo() {
          if (mCi.getRadioState() == TelephonyManager.RADIO_POWER_OFF) {
-@@ -5517,7 +5522,7 @@ public class ServiceStateTracker extends Handler {
+@@ -5531,7 +5536,7 @@ public class ServiceStateTracker extends Handler {
              }
              // operator info should be kept in SS
              String operator = mNewSS.getOperatorAlphaLong();
@@ -103,7 +103,7 @@ index 50eea7f695..33a04fb830 100644
              if (resetIwlanRatVal) {
                  mNewSS.setDataRegState(ServiceState.STATE_IN_SERVICE);
                  NetworkRegistrationInfo nri = new NetworkRegistrationInfo.Builder()
-@@ -5527,6 +5532,17 @@ public class ServiceStateTracker extends Handler {
+@@ -5541,6 +5546,17 @@ public class ServiceStateTracker extends Handler {
                          .setRegistrationState(NetworkRegistrationInfo.REGISTRATION_STATE_HOME)
                          .build();
                  mNewSS.addNetworkRegistrationInfo(nri);
@@ -121,7 +121,7 @@ index 50eea7f695..33a04fb830 100644
                  mNewSS.setOperatorAlphaLong(operator);
                  // Since it's in airplane mode, cellular must be out of service. The only possible
                  // transport for data to go through is the IWLAN transport. Setting this to true
-@@ -5536,6 +5552,31 @@ public class ServiceStateTracker extends Handler {
+@@ -5550,6 +5566,31 @@ public class ServiceStateTracker extends Handler {
              }
              return;
          }
@@ -152,7 +152,7 @@ index 50eea7f695..33a04fb830 100644
 +        }
      }
  
-     /**
+     private void updateNtnCapability() {
 diff --git a/src/java/com/android/internal/telephony/data/AccessNetworksManager.java b/src/java/com/android/internal/telephony/data/AccessNetworksManager.java
 index 267f70b389..73f4c7b847 100644
 --- a/src/java/com/android/internal/telephony/data/AccessNetworksManager.java
@@ -340,7 +340,7 @@ index 267f70b389..73f4c7b847 100644
          pw.increaseIndent();
          mLocalLog.dump(fd, pw, args);
 diff --git a/src/java/com/android/internal/telephony/data/DataNetworkController.java b/src/java/com/android/internal/telephony/data/DataNetworkController.java
-index 127400bb05..28ada4ab7a 100644
+index 57a0f5af43..e8fc500ce0 100644
 --- a/src/java/com/android/internal/telephony/data/DataNetworkController.java
 +++ b/src/java/com/android/internal/telephony/data/DataNetworkController.java
 @@ -984,10 +984,12 @@ public class DataNetworkController extends Handler {
@@ -361,10 +361,10 @@ index 127400bb05..28ada4ab7a 100644
          mPhone.getContext().getSystemService(TelephonyRegistryManager.class)
                  .addOnSubscriptionsChangedListener(new OnSubscriptionsChangedListener() {
 diff --git a/src/java/com/android/internal/telephony/imsphone/ImsPhone.java b/src/java/com/android/internal/telephony/imsphone/ImsPhone.java
-index 4b150cc533..47f107e50e 100644
+index 3ab9fd7872..f24aedafec 100644
 --- a/src/java/com/android/internal/telephony/imsphone/ImsPhone.java
 +++ b/src/java/com/android/internal/telephony/imsphone/ImsPhone.java
-@@ -483,7 +483,11 @@ public class ImsPhone extends ImsPhoneBase {
+@@ -484,7 +484,11 @@ public class ImsPhone extends ImsPhoneBase {
          mCT.registerPhoneStateListener(mExternalCallTracker);
          mExternalCallTracker.setCallPuller(mCT);
  
@@ -377,7 +377,7 @@ index 4b150cc533..47f107e50e 100644
  
          mPhoneId = mDefaultPhone.getPhoneId();
  
-@@ -2405,7 +2409,7 @@ public class ImsPhone extends ImsPhoneBase {
+@@ -2406,7 +2410,7 @@ public class ImsPhone extends ImsPhoneBase {
      /**
       * Update roaming state and WFC mode in the following situations:
       *     1) voice is in service.
@@ -386,7 +386,7 @@ index 4b150cc533..47f107e50e 100644
       * @param ss non-null ServiceState
       */
      private void updateRoamingState(ServiceState ss) {
-@@ -2426,7 +2430,15 @@ public class ImsPhone extends ImsPhoneBase {
+@@ -2427,7 +2431,15 @@ public class ImsPhone extends ImsPhoneBase {
              logi("updateRoamingState: we are not IN_SERVICE, ignoring roaming change.");
              return;
          }
@@ -403,7 +403,7 @@ index 4b150cc533..47f107e50e 100644
          if (mCT.getState() == PhoneConstants.State.IDLE) {
              if (DBG) logd("updateRoamingState now: " + newRoamingState);
              mLastKnownRoamingState = newRoamingState;
-@@ -2445,6 +2457,30 @@ public class ImsPhone extends ImsPhoneBase {
+@@ -2446,6 +2458,30 @@ public class ImsPhone extends ImsPhoneBase {
          }
      }
  
