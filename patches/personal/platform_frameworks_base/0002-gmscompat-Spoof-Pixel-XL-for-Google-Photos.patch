@@ -1,4 +1,4 @@
-From 3469f6ed369f6abfa818aa1afbfae217c722ec88 Mon Sep 17 00:00:00 2001
+From ade9ca686c83e48d51e2f42558599e1c771b9df3 Mon Sep 17 00:00:00 2001
 From: vladsendrix <83285656+vladsendrix@users.noreply.github.com>
 Date: Fri, 31 Dec 2021 03:18:04 +0100
 Subject: [PATCH 2/9] gmscompat: Spoof Pixel XL for Google Photos
@@ -9,19 +9,19 @@ Change-Id: I905e40625b07ebf500cbb3ce1deadedee2e624c5
  1 file changed, 14 insertions(+)
 
 diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
-index f80728c92d3e..5f3de467129e 100644
+index 232b24bd..c91b74b8 100644
 --- a/core/java/com/android/internal/gmscompat/AttestationHooks.java
 +++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
-@@ -41,6 +41,7 @@ public final class AttestationHooks {
+@@ -38,6 +38,7 @@ public final class AttestationHooks {
  
      private static final String PACKAGE_GMS = "com.google.android.gms";
      private static final String PACKAGE_FINSKY = "com.android.vending";
 +    private static final String PACKAGE_PHOTOS = "com.google.android.apps.photos";
      private static final String PROCESS_UNSTABLE = "com.google.android.gms.unstable";
-     
-     private static final String GMSSPOOF_PATH = SystemProperties.get("ro.system.gms.spoof_file");
-@@ -126,6 +127,15 @@ public final class AttestationHooks {
-         setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N);
+ 
+     private static final String[] sCertifiedProps =
+@@ -116,6 +117,15 @@ public final class AttestationHooks {
+         setVersionField("DEVICE_INITIAL_SDK_INT", sCertifiedProps[7].isEmpty() ? Build.VERSION_CODES.N : sCertifiedProps[7]);
      }
  
 +    private static void spoofGooglePhotos() {
@@ -36,7 +36,7 @@ index f80728c92d3e..5f3de467129e 100644
      public static void initApplicationBeforeOnCreate(Application app) {
          if (PACKAGE_GMS.equals(app.getPackageName()) &&
                  PROCESS_UNSTABLE.equals(Application.getProcessName())) {
-@@ -136,6 +146,10 @@ public final class AttestationHooks {
+@@ -126,6 +136,10 @@ public final class AttestationHooks {
          if (PACKAGE_FINSKY.equals(app.getPackageName())) {
              sIsFinsky = true;
          }
