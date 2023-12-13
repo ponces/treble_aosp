@@ -1,4 +1,4 @@
-From 7870ab4dfeb836edfdb5adf8932d925683c5d64d Mon Sep 17 00:00:00 2001
+From fda171873bc569760cba77d33fc9d9ff363cbd5a Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 9 Nov 2023 12:33:55 +0100
 Subject: [PATCH 1/9] gmscompat: Change attestation and instrumentation to pass
@@ -10,11 +10,11 @@ Adapted by @iceows for his own AOSP A13 GSI.
 Adapted by @ponces based on the work of @chiteroman to pass newest Play Integrity API.
 ---
  core/java/android/app/Instrumentation.java    |   4 +
- .../internal/gmscompat/AttestationHooks.java  | 147 ++++++++++++++++++
+ .../internal/gmscompat/AttestationHooks.java  | 161 ++++++++++++++++++
  core/res/res/values/arrays.xml                |  15 ++
  core/res/res/values/symbols.xml               |   3 +
  .../keystore2/AndroidKeyStoreSpi.java         |   3 +
- 5 files changed, 172 insertions(+)
+ 5 files changed, 186 insertions(+)
  create mode 100644 core/java/com/android/internal/gmscompat/AttestationHooks.java
 
 diff --git a/core/java/android/app/Instrumentation.java b/core/java/android/app/Instrumentation.java
@@ -48,10 +48,10 @@ index e31486f18dbf..56ff16f6c358 100644
  
 diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 new file mode 100644
-index 000000000000..3d2dab3fe461
+index 000000000000..81fe1731d862
 --- /dev/null
 +++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
-@@ -0,0 +1,147 @@
+@@ -0,0 +1,161 @@
 +/*
 + * Copyright (C) 2021 The Android Open Source Project
 + *
@@ -74,6 +74,7 @@ index 000000000000..3d2dab3fe461
 +import android.content.res.Resources;
 +import android.os.Build;
 +import android.os.Build.VERSION;
++import android.os.SystemProperties;
 +import android.util.JsonReader;
 +import android.util.Log;
 +
@@ -87,6 +88,8 @@ index 000000000000..3d2dab3fe461
 +import java.io.InputStreamReader;
 +import java.io.IOException;
 +import java.lang.reflect.Field;
++import java.net.URL;
++import java.net.URLConnection;
 +import java.util.Arrays;
 +
 +/** @hide */
@@ -97,6 +100,8 @@ index 000000000000..3d2dab3fe461
 +    private static final String PACKAGE_GMS = "com.google.android.gms";
 +    private static final String PACKAGE_FINSKY = "com.android.vending";
 +    private static final String PROCESS_UNSTABLE = "com.google.android.gms.unstable";
++
++    private static final String GMSSPOOF_PATH = SystemProperties.get("ro.system.gms.spoof_file");
 +
 +    private static final String[] sCertifiedProps =
 +            Resources.getSystem().getStringArray(R.array.config_certifiedBuildProperties);
@@ -120,7 +125,7 @@ index 000000000000..3d2dab3fe461
 +
 +    private static void setVersionField(String key, Object value) {
 +        try {
-+            Log.i(TAG, "Spoofing Build." + key + " with value \"" + value + "\"");
++            Log.i(TAG, "Spoofing Build.VERSION." + key + " with value \"" + value + "\"");
 +            Field field = Build.VERSION.class.getDeclaredField(key);
 +            field.setAccessible(true);
 +            field.set(null, value);
@@ -131,36 +136,45 @@ index 000000000000..3d2dab3fe461
 +    }
 +
 +    private static void spoofBuildGms() {
-+        try {
-+            spoofBuildGmsFile();
-+        } catch (Exception e) {
-+            Log.e(TAG, "Failed to spoof with a file, spoofing using the overlay", e);
-+            spoofBuildGmsLegacy();
-+        }
++        new Thread(new Runnable() {
++            @Override
++            public void run() {
++                try {
++                    spoofBuildGmsFile();
++                } catch (Exception e) {
++                    Log.e(TAG, "Failed to spoof with a file, spoofing using the overlay", e);
++                    spoofBuildGmsLegacy();
++                }
++            }
++        }).start();
 +    }
 +
 +    private static void spoofBuildGmsFile() throws Exception {
++        InputStream stream = null;
 +        File spoofFile = new File("/data/local/tmp/spoof.json");
 +        if (spoofFile.exists()) {
-+            Log.i(TAG, "Spoofing using a file at " + spoofFile.getAbsolutePath());
-+            InputStream stream = new DataInputStream(new FileInputStream(spoofFile));
-+            JsonReader reader = new JsonReader(new InputStreamReader(stream, "UTF-8"));
-+            reader.beginObject();
-+            while (reader.hasNext()) {
-+                String token = reader.nextName();
-+                String value = reader.nextString();
-+                if (token.equals("SECURITY_PATCH")) {
-+                    setVersionField(token, value);
-+                } else if (token.equals("DEVICE_INITIAL_SDK_INT") || token.equals("FIRST_API_LEVEL")) {
-+                    setVersionField("DEVICE_INITIAL_SDK_INT", Integer.parseInt(value));
-+                } else {
-+                    setBuildField(token, value);
-+                }
-+            }
-+            reader.endObject();
++            Log.d(TAG, "Getting spoof file from " + spoofFile.getAbsolutePath());
++            stream = new DataInputStream(new FileInputStream(spoofFile));
 +        } else {
-+            throw new FileNotFoundException();
++            Log.d(TAG, "Getting spoof file from " + GMSSPOOF_PATH);
++            URLConnection con = new URL(GMSSPOOF_PATH).openConnection();
++            con.setUseCaches(false);
++            stream = con.getInputStream();
 +        }
++        JsonReader reader = new JsonReader(new InputStreamReader(stream, "UTF-8"));
++        reader.beginObject();
++        while (reader.hasNext()) {
++            String token = reader.nextName();
++            String value = reader.nextString();
++            if (token.equals("SECURITY_PATCH")) {
++                setVersionField(token, value);
++            } else if (token.equals("DEVICE_INITIAL_SDK_INT") || token.equals("FIRST_API_LEVEL")) {
++                setVersionField("DEVICE_INITIAL_SDK_INT", Integer.parseInt(value));
++            } else {
++                setBuildField(token, value);
++            }
++        }
++        reader.endObject();
 +    }
 +
 +    private static void spoofBuildGmsLegacy() {
