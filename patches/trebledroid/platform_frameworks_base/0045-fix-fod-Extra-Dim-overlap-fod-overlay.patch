@@ -1,7 +1,7 @@
 From e2f079e9b30c1b103a86ee37e4e607cdf26c0ad9 Mon Sep 17 00:00:00 2001
 From: MrHereAndThere <38396158+boydaihungst@users.noreply.github.com>
 Date: Fri, 17 Nov 2023 09:22:29 +0700
-Subject: [PATCH 45/45] fix(fod): Extra Dim overlap fod overlay
+Subject: [PATCH 45/46] fix(fod): Extra Dim overlap fod overlay
 
 Extra Dim will set display panel brightness to lowest value possible, which will also effect FOD overlay.
 ---

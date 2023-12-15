@@ -1,4 +1,4 @@
-From aaeff66f60268291f87912f634113b58ebd4ec35 Mon Sep 17 00:00:00 2001
+From 677726b407cc46a8b7ea33ca0a95fc973b720693 Mon Sep 17 00:00:00 2001
 From: Chris Crump <chriscrawford893@gmail.com>
 Date: Tue, 1 Nov 2022 17:27:48 -0400
 Subject: [PATCH 9/9] feat: Add Face Unlock with ParanoidSense (1/2)
@@ -137,7 +137,7 @@ index 924aac4e70be..8cc77c16edac 100644
          pw.println("  bouncerShowing: $bouncerShowing")
          pw.println("  altBouncerShowing: $altBouncerShowing")
 diff --git a/services/core/Android.bp b/services/core/Android.bp
-index 18a9fe12ecb7..0b8fe87d2a86 100644
+index 6cba27c50972..8cb2d1084c23 100644
 --- a/services/core/Android.bp
 +++ b/services/core/Android.bp
 @@ -194,6 +194,7 @@ java_library_static {
@@ -145,9 +145,9 @@ index 18a9fe12ecb7..0b8fe87d2a86 100644
          "vendor.oppo.hardware.biometrics.fingerprint-V2.1-java",
          "vendor.xiaomi.hardware.fingerprintextension-V1.0-java",
 +        "vendor.aospa.biometrics.face",
-     ],
-     javac_shard_size: 50,
-     javacflags: [
+ 
+         //AIDL
+         "vendor.samsung.hardware.biometrics.fingerprint-V1-java",
 diff --git a/services/core/java/com/android/server/biometrics/log/BiometricLogger.java b/services/core/java/com/android/server/biometrics/log/BiometricLogger.java
 index 87037af11a84..e8b042cd032c 100644
 --- a/services/core/java/com/android/server/biometrics/log/BiometricLogger.java
