@@ -1,9 +1,9 @@
-From 64466ace8a814bf446fb0f208921500513ac413d Mon Sep 17 00:00:00 2001
+From 57050cac2b46541a40abe32cc61ded72f0ec353a Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
-Date: Sat, 9 Dec 2023 23:35:20 +0000
+Date: Fri, 5 Jan 2024 13:26:36 +0000
 Subject: [PATCH] Revert "Add support for toggling taskbar"
 
-This reverts commit e1dcd0d8278d2ab5dd68127d38c0965e89b80182.
+This reverts commit 5a0709789f1665a9f3b3c843865c90d5dda53c7f.
 ---
  Android.bp                                    |  3 +--
  .../launcher3/taskbar/TaskbarManager.java     | 23 ++-----------------
@@ -26,7 +26,7 @@ index efec9d78b3..32ae1cad6e 100644
      sdk_version: "current",
      min_sdk_version: min_launcher3_sdk_version,
 diff --git a/quickstep/src/com/android/launcher3/taskbar/TaskbarManager.java b/quickstep/src/com/android/launcher3/taskbar/TaskbarManager.java
-index 5c7d7613f7..b115ca8032 100644
+index 7b44e71702..b115ca8032 100644
 --- a/quickstep/src/com/android/launcher3/taskbar/TaskbarManager.java
 +++ b/quickstep/src/com/android/launcher3/taskbar/TaskbarManager.java
 @@ -69,8 +69,6 @@ import com.android.systemui.shared.system.QuickStepContract;
@@ -38,7 +38,7 @@ index 5c7d7613f7..b115ca8032 100644
  import java.io.PrintWriter;
  import java.util.StringJoiner;
  
-@@ -106,12 +104,8 @@ public class TaskbarManager {
+@@ -106,9 +104,6 @@ public class TaskbarManager {
      private static final Uri NAV_BAR_KIDS_MODE = Settings.Secure.getUriFor(
              Settings.Secure.NAV_BAR_KIDS_MODE);
  
@@ -47,15 +47,20 @@ index 5c7d7613f7..b115ca8032 100644
 -
      private final Context mContext;
      private final TaskbarNavButtonController mNavButtonController;
--    private final SettingsCache.OnChangeListener mEnableTaskBarListener;
      private final ComponentCallbacks mComponentCallbacks;
+@@ -137,7 +132,6 @@ public class TaskbarManager {
+      */
+     private final OnIDPChangeListener mIdpChangeListener = c -> recreateTaskbar();
+     private final SettingsCache.OnChangeListener mOnSettingsChangeListener = c -> recreateTaskbar();
+-    private final SettingsCache.OnChangeListener mEnableTaskBarListener;
  
-     private final SimpleBroadcastReceiver mShutdownReceiver =
-@@ -217,16 +211,6 @@ public class TaskbarManager {
-         mNavButtonController = new TaskbarNavButtonController(service,
-                 SystemUiProxy.INSTANCE.get(mContext), new Handler(),
-                 AssistUtils.newInstance(mContext));
--        mEnableTaskBarListener = isTaskBarEnabled -> {
+     private boolean mUserUnlocked = false;
+ 
+@@ -272,18 +266,6 @@ public class TaskbarManager {
+                 .register(USER_SETUP_COMPLETE_URI, mOnSettingsChangeListener);
+         SettingsCache.INSTANCE.get(mContext)
+                 .register(NAV_BAR_KIDS_MODE, mOnSettingsChangeListener);
+-        mEnableTaskBarListener = c -> {
 -            // Create the illusion of this taking effect immediately
 -            // Also needed because TaskbarManager inits before SystemUiProxy on start
 -            boolean enabled = LineageSettings.System.getInt(mContext.getContentResolver(),
@@ -65,13 +70,6 @@ index 5c7d7613f7..b115ca8032 100644
 -            // Restart launcher
 -            System.exit(0);
 -        };
-         mComponentCallbacks = new ComponentCallbacks() {
-             private Configuration mOldConfig = mContext.getResources().getConfiguration();
- 
-@@ -282,8 +266,6 @@ public class TaskbarManager {
-                 .register(USER_SETUP_COMPLETE_URI, mOnSettingsChangeListener);
-         SettingsCache.INSTANCE.get(mContext)
-                 .register(NAV_BAR_KIDS_MODE, mOnSettingsChangeListener);
 -        SettingsCache.INSTANCE.get(mContext)
 -                .register(ENABLE_TASKBAR_URI, mEnableTaskBarListener);
          Log.d(TASKBAR_NOT_DESTROYED_TAG, "registering component callbacks from constructor.");
