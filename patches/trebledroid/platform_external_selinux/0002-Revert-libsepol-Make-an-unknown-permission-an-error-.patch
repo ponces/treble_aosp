@@ -14,7 +14,7 @@ This is required because some targets calls undefined permissions:
  1 file changed, 8 insertions(+), 4 deletions(-)
 
 diff --git a/libsepol/cil/src/cil_resolve_ast.c b/libsepol/cil/src/cil_resolve_ast.c
-index d2bfdc81..91fa1075 100644
+index d2bfdc812..91fa10759 100644
 --- a/libsepol/cil/src/cil_resolve_ast.c
 +++ b/libsepol/cil/src/cil_resolve_ast.c
 @@ -136,14 +136,18 @@ static int __cil_resolve_perms(symtab_t *class_symtab, symtab_t *common_symtab,

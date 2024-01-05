@@ -8,7 +8,7 @@ Subject: [PATCH 10/10] Allow conflict on fuseblk
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/libsepol/cil/src/cil_post.c b/libsepol/cil/src/cil_post.c
-index 1703b3b6..5428005d 100644
+index 1703b3b6d..5428005d6 100644
 --- a/libsepol/cil/src/cil_post.c
 +++ b/libsepol/cil/src/cil_post.c
 @@ -511,7 +511,7 @@ static int cil_post_genfscon_context_compare(const void *a, const void *b)

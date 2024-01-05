@@ -10,7 +10,7 @@ This fixes boot on many Samsung devices as exiting with SEPOL_EEXIST will preven
  1 file changed, 1 deletion(-)
 
 diff --git a/libsepol/cil/src/cil_build_ast.c b/libsepol/cil/src/cil_build_ast.c
-index 77e130d1..daf8b8b3 100644
+index 77e130d1e..daf8b8b30 100644
 --- a/libsepol/cil/src/cil_build_ast.c
 +++ b/libsepol/cil/src/cil_build_ast.c
 @@ -141,7 +141,6 @@ int cil_add_decl_to_symtab(struct cil_db *db, symtab_t *symtab, hashtab_key_t ke

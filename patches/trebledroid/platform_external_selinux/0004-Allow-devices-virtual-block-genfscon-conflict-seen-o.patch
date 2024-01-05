@@ -10,7 +10,7 @@ Change-Id: I06e4e9d5b82d61a8aeab595b47e2589249675895
  1 file changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/libsepol/cil/src/cil_post.c b/libsepol/cil/src/cil_post.c
-index a7c66ead..99410da0 100644
+index a7c66eadb..99410da07 100644
 --- a/libsepol/cil/src/cil_post.c
 +++ b/libsepol/cil/src/cil_post.c
 @@ -491,7 +491,23 @@ static int cil_post_genfscon_context_compare(const void *a, const void *b)

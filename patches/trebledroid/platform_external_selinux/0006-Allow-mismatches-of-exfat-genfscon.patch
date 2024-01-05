@@ -8,7 +8,7 @@ Subject: [PATCH 06/10] Allow mismatches of exfat genfscon
  1 file changed, 4 insertions(+)
 
 diff --git a/libsepol/cil/src/cil_post.c b/libsepol/cil/src/cil_post.c
-index 99410da0..7f614c03 100644
+index 99410da07..7f614c039 100644
 --- a/libsepol/cil/src/cil_post.c
 +++ b/libsepol/cil/src/cil_post.c
 @@ -502,6 +502,10 @@ static int cil_post_genfscon_context_compare(const void *a, const void *b)

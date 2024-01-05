@@ -18,7 +18,7 @@ simply ignore them.
  3 files changed, 28 insertions(+), 6 deletions(-)
 
 diff --git a/libsepol/cil/src/cil_binary.c b/libsepol/cil/src/cil_binary.c
-index 40615db2..74a52956 100644
+index 40615db29..74a529565 100644
 --- a/libsepol/cil/src/cil_binary.c
 +++ b/libsepol/cil/src/cil_binary.c
 @@ -511,13 +511,17 @@ int cil_typealias_to_policydb(policydb_t *pdb, struct cil_alias *cil_alias)
@@ -50,7 +50,7 @@ index 40615db2..74a52956 100644
  	return rc;
  }
 diff --git a/libsepol/cil/src/cil_build_ast.c b/libsepol/cil/src/cil_build_ast.c
-index 4177c9f6..118de1f5 100644
+index 4177c9f67..118de1f54 100644
 --- a/libsepol/cil/src/cil_build_ast.c
 +++ b/libsepol/cil/src/cil_build_ast.c
 @@ -116,7 +116,7 @@ int cil_add_decl_to_symtab(struct cil_db *db, symtab_t *symtab, hashtab_key_t ke
@@ -79,7 +79,7 @@ index 4177c9f6..118de1f5 100644
  		/* multiple_decls is enabled and works for this datum type, add node */
  		cil_list_append(prev->nodes, CIL_NODE, node);
 diff --git a/libsepol/cil/src/cil_resolve_ast.c b/libsepol/cil/src/cil_resolve_ast.c
-index 91fa1075..d20fb7ee 100644
+index 91fa10759..d20fb7eea 100644
 --- a/libsepol/cil/src/cil_resolve_ast.c
 +++ b/libsepol/cil/src/cil_resolve_ast.c
 @@ -522,7 +522,13 @@ static int cil_resolve_aliasactual(struct cil_tree_node *current, void *extra_ar

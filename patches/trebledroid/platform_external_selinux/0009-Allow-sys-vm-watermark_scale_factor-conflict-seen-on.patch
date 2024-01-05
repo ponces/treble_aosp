@@ -9,7 +9,7 @@ Subject: [PATCH 09/10] Allow /sys/vm/watermark_scale_factor conflict -- seen
  1 file changed, 9 insertions(+)
 
 diff --git a/libsepol/cil/src/cil_post.c b/libsepol/cil/src/cil_post.c
-index 7f614c03..1703b3b6 100644
+index 7f614c039..1703b3b6d 100644
 --- a/libsepol/cil/src/cil_post.c
 +++ b/libsepol/cil/src/cil_post.c
 @@ -502,6 +502,15 @@ static int cil_post_genfscon_context_compare(const void *a, const void *b)

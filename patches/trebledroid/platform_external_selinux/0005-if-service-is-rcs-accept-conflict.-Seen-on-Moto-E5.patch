@@ -9,7 +9,7 @@ Change-Id: I0cc2d0fad83f403f2b5d7458039b1564ce5ed9dd
  1 file changed, 12 insertions(+), 2 deletions(-)
 
 diff --git a/libselinux/src/label_backends_android.c b/libselinux/src/label_backends_android.c
-index 77f7a1eb..55a30944 100644
+index 77f7a1eba..55a30944e 100644
 --- a/libselinux/src/label_backends_android.c
 +++ b/libselinux/src/label_backends_android.c
 @@ -62,14 +62,24 @@ static int nodups_specs(struct saved_data *data)
