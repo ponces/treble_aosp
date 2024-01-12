@@ -1,0 +1,84 @@
+name: Bug report
+description: Report problems related to this AOSP GSI
+labels: [Bug]
+
+body:
+  - type: checkboxes
+    attributes:
+       label: Acknowledgements
+       description: Please check before submitting an issue. Your issue may be closed if you don't follow the checklist below!
+       options:
+          - label: I have chosen an appropriate title.
+            required: true
+          - label: All requested information has been provided properly.
+            required: true
+          - label: This is not a feature request.
+            required: true
+          - label: This issue is not a duplicate of an existing issue.
+            required: true
+          - label: The issue is solely related to this GSI.
+            required: true
+          - label: This issue occurs with the latest available build.
+            required: true
+          - label: I am not running a custom vendor on my device.
+            required: true
+          - label: This issue is not kernel related.
+            required: true
+          - label: This issue is not related to Magisk/KernelSU/APatch.
+            required: true
+
+  - type: textarea
+    attributes:
+        label: Info
+        description: Anything that can help us identify the device, build and firmware version that you are using.
+        value: |
+          - Device: 
+          - GSI version: 
+          - Vendor version:
+    validations:
+        required: true
+
+  - type: textarea
+    attributes:
+        label: Expected Behavior
+        description: Tell us what should happen.
+    validations:
+        required: true
+
+  - type: textarea
+    attributes:
+        label: Current Behavior
+        description: Tell us what happens instead of the expected behavior.
+    validations:
+        required: true
+
+  - type: textarea
+    attributes:
+        label: Possible Solution
+        description: Suggest a fix or reason for the bug (optional).
+
+  - type: textarea
+    attributes:
+        label: Steps to Reproduce
+        description: Provide a link to a live example, or an unambiguous set of steps to reproduce this bug.\nInclude code to reproduce, if relevant.
+        value: |
+          1. 
+          2. 
+          3. 
+    validations:
+        required: true
+
+  - type: textarea
+    attributes:
+        label: Logs
+        description: When possible, upload logcat logs (if device boots) or pstore logs (if device doesn't boot) while reproducing the issue.
+        placeholder: |
+          - ADB:
+              $ adb logcat -b all -d > my_issue.log
+          - pstore:
+              $ adb pull /sys/fs/pstore
+
+  - type: textarea
+    attributes:
+        label: Additional context
+        description: Add any other context about the problem here.
