@@ -1,4 +1,4 @@
-From 626a012830935f544a350cb6c05b78460e13deb2 Mon Sep 17 00:00:00 2001
+From ce6a013b02770fad97b07dec97c800ec800f1fc1 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 14 Aug 2019 23:37:10 +0200
 Subject: [PATCH 01/10] On Samsung, we need to send a hack-message to HAL to

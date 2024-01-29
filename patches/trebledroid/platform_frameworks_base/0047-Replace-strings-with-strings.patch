@@ -1,0 +1,36 @@
+From b30b71584a13de3b0ccf232aa69a6244b1ae6ace Mon Sep 17 00:00:00 2001
+From: Jonathan Scott <scottjonathan@google.com>
+Date: Wed, 19 Jul 2023 11:10:44 +0000
+Subject: [PATCH 47/49] Replace ":strings" with "strings"
+
+It looks like this is a typo and can cause parse errors with some xml
+deserialization libraries.
+
+Test: manual - set User Control Disabled Packages - restart device -
+confirm that policy is still set
+Bug: 291711966
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:4905c30a74d2037aef7e8e91912b08c4897e7dd5)
+Merged-In: Ib8eb2356ece3d9f0e85b7b8c455e58106a1d84f1
+Change-Id: Ib8eb2356ece3d9f0e85b7b8c455e58106a1d84f1
+---
+ .../android/server/devicepolicy/StringSetPolicySerializer.java | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/services/devicepolicy/java/com/android/server/devicepolicy/StringSetPolicySerializer.java b/services/devicepolicy/java/com/android/server/devicepolicy/StringSetPolicySerializer.java
+index 24d0521471f7..0265453eecc7 100644
+--- a/services/devicepolicy/java/com/android/server/devicepolicy/StringSetPolicySerializer.java
++++ b/services/devicepolicy/java/com/android/server/devicepolicy/StringSetPolicySerializer.java
+@@ -32,9 +32,8 @@ import java.util.Set;
+ 
+ // TODO(scottjonathan): Replace with generic set implementation
+ final class StringSetPolicySerializer extends PolicySerializer<Set<String>> {
+-    private static final String ATTR_VALUES = ":strings";
++    private static final String ATTR_VALUES = "strings";
+     private static final String ATTR_VALUES_SEPARATOR = ";";
+-
+     @Override
+     void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer,
+             @NonNull Set<String> value) throws IOException {
+-- 
+2.34.1
+

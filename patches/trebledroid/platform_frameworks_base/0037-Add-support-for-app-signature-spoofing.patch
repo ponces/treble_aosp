@@ -1,7 +1,7 @@
-From f0494e39fb6c96c0d0d0d0d08b8ae75b69601674 Mon Sep 17 00:00:00 2001
+From 18a002a61b570b70f8fd0cffbe5a9cbb0f6cce09 Mon Sep 17 00:00:00 2001
 From: Danny Lin <danny@kdrag0n.dev>
 Date: Sat, 16 Oct 2021 05:27:57 -0700
-Subject: [PATCH 37/46] Add support for app signature spoofing
+Subject: [PATCH 37/49] Add support for app signature spoofing
 
 This is needed by microG GmsCore to pretend to be the official Google
 Play Services package, because client apps check the package signature
@@ -58,7 +58,7 @@ index 288ab479c0fb..2124d89c6e6f 100644
      field public static final String MICROPHONE = "android.permission-group.MICROPHONE";
      field public static final String NEARBY_DEVICES = "android.permission-group.NEARBY_DEVICES";
 diff --git a/core/res/AndroidManifest.xml b/core/res/AndroidManifest.xml
-index 8c9a3ff5149f..4a55643dc503 100644
+index cbb6e74bd1ce..3df7a8000314 100644
 --- a/core/res/AndroidManifest.xml
 +++ b/core/res/AndroidManifest.xml
 @@ -4250,6 +4250,21 @@

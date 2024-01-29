@@ -1,4 +1,4 @@
-From f7e58965725f14a70f15389ac6608f1d6e896484 Mon Sep 17 00:00:00 2001
+From 4a3ff00f122888949449e48a821d2c25f6fb4b16 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 6 Oct 2023 08:25:11 -0400
 Subject: [PATCH] Revert "Remove 28.0 compat support"

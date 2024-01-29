@@ -1,4 +1,4 @@
-From e1e58862b5b53558e7bcdeb4a3f6ea52e98b3351 Mon Sep 17 00:00:00 2001
+From 4c73ac7b2d31515d099fe4ee6bd90bd1b7aa6cd0 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 23 Mar 2021 00:16:42 +0100
 Subject: [PATCH 15/23] Don't crash on unknown audio devices

@@ -1,4 +1,4 @@
-From b05ec5f9d97ea7b30bb7d58ca5f92c03a5077d8d Mon Sep 17 00:00:00 2001
+From a6f9ae921a33a393ca1003c4dbf8e8986b753e94 Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Thu, 14 Oct 2021 12:20:52 +0000
 Subject: [PATCH 4/6] build: Remove llkd
