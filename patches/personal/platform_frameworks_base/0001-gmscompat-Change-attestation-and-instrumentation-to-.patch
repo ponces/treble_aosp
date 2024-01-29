@@ -1,4 +1,4 @@
-From 4c6ae32cb264e38a61ca57e7177e17bd13d7d1dc Mon Sep 17 00:00:00 2001
+From 739f7e72cb455d95c7c53c186a0e742a7376a899 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 9 Nov 2023 12:33:55 +0100
 Subject: [PATCH 1/9] gmscompat: Change attestation and instrumentation to pass
@@ -10,15 +10,13 @@ Adapted by @iceows for his own AOSP A13 GSI.
 Adapted by @ponces based on the work of @chiteroman to pass newest Play Integrity API.
 ---
  core/java/android/app/Instrumentation.java    |   4 +
- .../internal/gmscompat/AttestationHooks.java  | 173 ++++++++++++++++++
- core/res/res/values/arrays.xml                |  15 ++
- core/res/res/values/symbols.xml               |   3 +
+ .../internal/gmscompat/AttestationHooks.java  | 100 ++++++++++++++++++
  .../keystore2/AndroidKeyStoreSpi.java         |   3 +
- 5 files changed, 198 insertions(+)
+ 3 files changed, 107 insertions(+)
  create mode 100644 core/java/com/android/internal/gmscompat/AttestationHooks.java
 
 diff --git a/core/java/android/app/Instrumentation.java b/core/java/android/app/Instrumentation.java
-index e31486f18dbf..a8136bcf346a 100644
+index e31486f18dbf..56ff16f6c358 100644
 --- a/core/java/android/app/Instrumentation.java
 +++ b/core/java/android/app/Instrumentation.java
 @@ -60,6 +60,8 @@ import android.view.WindowManagerGlobal;
@@ -34,7 +32,7 @@ index e31486f18dbf..a8136bcf346a 100644
          Application app = getFactory(context.getPackageName())
                  .instantiateApplication(cl, className);
          app.attach(context);
-+        AttestationHooks.initApplicationBeforeOnCreate(context, app);
++        AttestationHooks.initApplicationBeforeOnCreate(app);
          return app;
      }
      
@@ -42,16 +40,16 @@ index e31486f18dbf..a8136bcf346a 100644
              ClassNotFoundException {
          Application app = (Application)clazz.newInstance();
          app.attach(context);
-+        AttestationHooks.initApplicationBeforeOnCreate(context, app);
++        AttestationHooks.initApplicationBeforeOnCreate(app);
          return app;
      }
  
 diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 new file mode 100644
-index 000000000000..7dc7d6a237c8
+index 000000000000..4faa4922716d
 --- /dev/null
 +++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
-@@ -0,0 +1,173 @@
+@@ -0,0 +1,100 @@
 +/*
 + * Copyright (C) 2021 The Android Open Source Project
 + *
@@ -71,44 +69,22 @@ index 000000000000..7dc7d6a237c8
 +package com.android.internal.gmscompat;
 +
 +import android.app.Application;
-+import android.content.Context;
-+import android.content.res.Resources;
 +import android.os.Build;
 +import android.os.Build.VERSION;
-+import android.os.FileUtils;
 +import android.os.SystemProperties;
-+import android.util.JsonReader;
 +import android.util.Log;
 +
-+import com.android.internal.R;
-+
-+import java.io.DataInputStream;
-+import java.io.File;
-+import java.io.FileInputStream;
-+import java.io.FileNotFoundException;
-+import java.io.InputStream;
-+import java.io.InputStreamReader;
-+import java.io.IOException;
 +import java.lang.reflect.Field;
-+import java.net.URL;
-+import java.net.URLConnection;
-+import java.nio.file.Files;
-+import java.nio.file.StandardCopyOption;
 +import java.util.Arrays;
 +
 +/** @hide */
 +public final class AttestationHooks {
 +    private static final String TAG = "GmsCompat/Attestation";
-+    private static final boolean DEBUG = true;
++    private static final boolean DEBUG = false;
 +
 +    private static final String PACKAGE_GMS = "com.google.android.gms";
 +    private static final String PACKAGE_FINSKY = "com.android.vending";
 +    private static final String PROCESS_UNSTABLE = "com.google.android.gms.unstable";
-+
-+    private static final String GMSSPOOF_PATH = SystemProperties.get("ro.system.gms.spoof_file");
-+
-+    private static final String[] sCertifiedProps =
-+            Resources.getSystem().getStringArray(R.array.config_certifiedBuildProperties);
 +
 +    private static volatile boolean sIsGms = false;
 +    private static volatile boolean sIsFinsky = false;
@@ -139,73 +115,22 @@ index 000000000000..7dc7d6a237c8
 +        }
 +    }
 +
-+    private static void spoofBuildGms(Context context) {
-+        new Thread(new Runnable() {
-+            @Override
-+            public void run() {
-+                File spoofFile = new File("/data/local/tmp", "spoof.json");
-+                File cachedFile = new File(context.getCacheDir(), "spoof.json");
-+                try {
-+                    spoofBuildGmsFile(spoofFile);
-+                } catch (Exception e) {
-+                    Log.e(TAG, "Failed to spoof GMS using a local file, trying an OTA file");
-+                    try {
-+                        spoofBuildGmsOta(cachedFile);
-+                    } catch (Exception e2) {
-+                        Log.e(TAG, "Failed to spoof GMS using an OTA file, trying a cached file");
-+                        try {
-+                            spoofBuildGmsFile(cachedFile);
-+                        } catch (Exception e3) {
-+                            Log.e(TAG, "Failed to spoof GMS using a cached file, aborting");
-+                        }
-+                    }
-+                }
-+            }
-+        }).start();
++    private static void spoofBuildGms() {
++        setBuildField("PRODUCT", "CatS60");
++        setBuildField("DEVICE", "CatS60");
++        setBuildField("MANUFACTURER", "BullittGroupLimited");
++        setBuildField("BRAND", "Cat");
++        setBuildField("MODEL", "S60");
++        setBuildField("FINGERPRINT", "Cat/CatS60/CatS60:6.0.1/MMB29M/LTE_D0201121.0_S60_0.031.02:user/release-keys");
++        //setVersionField("SECURITY_PATCH", "2017-01-01");
++        //setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N);
 +    }
 +
-+    private static void spoofBuildGmsFile(File spoofFile) throws Exception {
-+        Log.i(TAG, "Getting spoof file from " + spoofFile.getAbsolutePath());
-+        if (spoofFile.exists()) {
-+            parseSpoofFile(spoofFile);
-+        } else {
-+            throw new FileNotFoundException();
-+        }
-+    }
-+
-+    private static void spoofBuildGmsOta(File cachedFile) throws Exception {
-+        Log.i(TAG, "Getting spoof file from " + GMSSPOOF_PATH);
-+        URLConnection con = new URL(GMSSPOOF_PATH).openConnection();
-+        con.setUseCaches(false);
-+        InputStream stream = con.getInputStream();
-+        Log.i(TAG, "Saving cached spoof file at " + cachedFile.getAbsolutePath());
-+        Files.copy(stream, cachedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-+        parseSpoofFile(cachedFile);
-+    }
-+
-+    private static void parseSpoofFile(File spoofFile) throws Exception {
-+        InputStream stream = new DataInputStream(new FileInputStream(spoofFile));
-+        JsonReader reader = new JsonReader(new InputStreamReader(stream, "UTF-8"));
-+        reader.beginObject();
-+        while (reader.hasNext()) {
-+            String token = reader.nextName();
-+            String value = reader.nextString();
-+            if (token.equals("SECURITY_PATCH")) {
-+                setVersionField(token, value);
-+            } else if (token.equals("DEVICE_INITIAL_SDK_INT") || token.equals("FIRST_API_LEVEL")) {
-+                setVersionField("DEVICE_INITIAL_SDK_INT", Integer.parseInt(value));
-+            } else {
-+                setBuildField(token, value);
-+            }
-+        }
-+        reader.endObject();
-+    }
-+
-+    public static void initApplicationBeforeOnCreate(Context context, Application app) {
++    public static void initApplicationBeforeOnCreate(Application app) {
 +        if (PACKAGE_GMS.equals(app.getPackageName()) &&
 +                PROCESS_UNSTABLE.equals(Application.getProcessName())) {
 +            sIsGms = true;
-+            spoofBuildGms(context);
++            spoofBuildGms();
 +        }
 +
 +        if (PACKAGE_FINSKY.equals(app.getPackageName())) {
@@ -225,42 +150,6 @@ index 000000000000..7dc7d6a237c8
 +        }
 +    }
 +}
-diff --git a/core/res/res/values/arrays.xml b/core/res/res/values/arrays.xml
-index 97e753e2bdeb..2320a0356e15 100644
---- a/core/res/res/values/arrays.xml
-+++ b/core/res/res/values/arrays.xml
-@@ -239,4 +239,19 @@
-     <string-array name="demo_device_provisioning_known_signers">
-         <item>@string/config_retailDemoPackageSignature</item>
-     </string-array>
-+
-+    <!-- Build properties from a GMS certified device -->
-+    <string-array name="config_certifiedBuildProperties" translatable="false">
-+      <!--
-+        <item>Build.BRAND</item>
-+        <item>Build.MANUFACTURER</item>
-+        <item>Build.ID</item>
-+        <item>Build.DEVICE</item>
-+        <item>Build.PRODUCT</item>
-+        <item>Build.MODEL</item>
-+        <item>Build.FINGERPRINT</item>
-+        <item>Build.TYPE</item>
-+        <item>Build.TAGS</item>
-+      -->
-+    </string-array>
- </resources>
-diff --git a/core/res/res/values/symbols.xml b/core/res/res/values/symbols.xml
-index bee5799938f2..ed1af0c43181 100644
---- a/core/res/res/values/symbols.xml
-+++ b/core/res/res/values/symbols.xml
-@@ -5176,4 +5176,7 @@
- 
-   <!-- Whether we order unlocking and waking -->
-   <java-symbol type="bool" name="config_orderUnlockAndWake" />
-+
-+  <!-- Build properties from a GMS certified device -->
-+  <java-symbol type="array" name="config_certifiedBuildProperties" />
- </resources>
 diff --git a/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java b/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java
 index 25f5dec9de40..b34351585c4b 100644
 --- a/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java
