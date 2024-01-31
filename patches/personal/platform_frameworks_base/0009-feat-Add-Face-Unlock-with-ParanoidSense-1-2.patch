@@ -137,7 +137,7 @@ index 924aac4e70be..8cc77c16edac 100644
          pw.println("  bouncerShowing: $bouncerShowing")
          pw.println("  altBouncerShowing: $altBouncerShowing")
 diff --git a/services/core/Android.bp b/services/core/Android.bp
-index 6cba27c50972..8cb2d1084c23 100644
+index 0e822cfd5abe..c04fe1347308 100644
 --- a/services/core/Android.bp
 +++ b/services/core/Android.bp
 @@ -194,6 +194,7 @@ java_library_static {
@@ -147,7 +147,7 @@ index 6cba27c50972..8cb2d1084c23 100644
 +        "vendor.aospa.biometrics.face",
  
          //AIDL
-         "vendor.samsung.hardware.biometrics.fingerprint-V1-java",
+         "vendor.samsung.hardware.sysinput-V1-java",
 diff --git a/services/core/java/com/android/server/biometrics/log/BiometricLogger.java b/services/core/java/com/android/server/biometrics/log/BiometricLogger.java
 index 87037af11a84..e8b042cd032c 100644
 --- a/services/core/java/com/android/server/biometrics/log/BiometricLogger.java
