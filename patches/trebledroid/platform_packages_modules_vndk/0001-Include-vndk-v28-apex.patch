@@ -9,7 +9,7 @@ Change-Id: I5689074542f13e136e5bc1292afec2a8288f9e1c
  1 file changed, 6 insertions(+)
 
 diff --git a/apex/Android.bp b/apex/Android.bp
-index da5d4b7..2989ebd 100644
+index da5d4b7c..2989ebda 100644
 --- a/apex/Android.bp
 +++ b/apex/Android.bp
 @@ -82,3 +82,9 @@ apex_vndk {

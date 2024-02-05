@@ -1,0 +1,55 @@
+From e5a10d61632c86b0cc1941c1c13c5c2b6d555303 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sat, 3 Feb 2024 07:38:33 -0500
+Subject: [PATCH 11/11] Increase SW_MAX *= 4
+
+We increase the size of SW_MAX for two reasons:
+1. SW_MACHINE_COVER which is SW_MAX is ignored, guessing an off by one
+   somwehere
+2. Samsung extends SW_ beyond standard SW_MAX. SW_FLIP goes to 0x15,
+   standard SW_MAX 0x10
+---
+ services/inputflinger/reader/EventHub.cpp       | 4 ++--
+ services/inputflinger/reader/include/EventHub.h | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/services/inputflinger/reader/EventHub.cpp b/services/inputflinger/reader/EventHub.cpp
+index 88dd11467b..0689b4b683 100644
+--- a/services/inputflinger/reader/EventHub.cpp
++++ b/services/inputflinger/reader/EventHub.cpp
+@@ -1037,7 +1037,7 @@ int32_t EventHub::getKeyCodeForKeyLocation(int32_t deviceId, int32_t locationKey
+ }
+ 
+ int32_t EventHub::getSwitchState(int32_t deviceId, int32_t sw) const {
+-    if (sw >= 0 && sw <= SW_MAX) {
++    if (sw >= 0 && sw <= (SW_MAX * 4)) {
+         std::scoped_lock _l(mLock);
+ 
+         Device* device = getDeviceLocked(deviceId);
+@@ -2349,7 +2349,7 @@ void EventHub::openDeviceLocked(const std::string& devicePath) {
+     }
+ 
+     // Check whether this device has switches.
+-    for (int i = 0; i <= SW_MAX; i++) {
++    for (int i = 0; i <= (SW_MAX * 4); i++) {
+         if (device->swBitmask.test(i)) {
+             device->classes |= InputDeviceClass::SWITCH;
+             break;
+diff --git a/services/inputflinger/reader/include/EventHub.h b/services/inputflinger/reader/include/EventHub.h
+index 024187f5b5..d1a2b1ec68 100644
+--- a/services/inputflinger/reader/include/EventHub.h
++++ b/services/inputflinger/reader/include/EventHub.h
+@@ -604,8 +604,8 @@ private:
+         BitArray<KEY_MAX> keyState;
+         BitArray<ABS_MAX> absBitmask;
+         BitArray<REL_MAX> relBitmask;
+-        BitArray<SW_MAX> swBitmask;
+-        BitArray<SW_MAX> swState;
++        BitArray<SW_MAX * 4> swBitmask;
++        BitArray<SW_MAX * 4> swState;
+         BitArray<LED_MAX> ledBitmask;
+         BitArray<FF_MAX> ffBitmask;
+         BitArray<INPUT_PROP_MAX> propBitmask;
+-- 
+2.34.1
+

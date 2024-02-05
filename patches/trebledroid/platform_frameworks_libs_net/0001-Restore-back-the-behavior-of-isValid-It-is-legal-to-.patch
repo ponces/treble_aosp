@@ -12,7 +12,7 @@ Change-Id: Ie7815c186400614f0c6b483c04aa8971af348380
  1 file changed, 10 insertions(+), 6 deletions(-)
 
 diff --git a/common/native/bpf_headers/include/bpf/BpfMap.h b/common/native/bpf_headers/include/bpf/BpfMap.h
-index 51e6d162..6d74ff3a 100644
+index 51e6d162b..6d74ff3a5 100644
 --- a/common/native/bpf_headers/include/bpf/BpfMap.h
 +++ b/common/native/bpf_headers/include/bpf/BpfMap.h
 @@ -54,21 +54,25 @@ class BpfMap {

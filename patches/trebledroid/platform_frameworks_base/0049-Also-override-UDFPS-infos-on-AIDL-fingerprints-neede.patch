@@ -1,7 +1,7 @@
 From f15609eb037dc79abf08e9e113428896bea2ba45 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 28 Jan 2024 19:16:13 -0500
-Subject: [PATCH 49/53] Also override UDFPS infos on AIDL fingerprints --
+Subject: [PATCH 49/54] Also override UDFPS infos on AIDL fingerprints --
  needed for FP on S24
 
 ---
