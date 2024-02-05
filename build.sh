@@ -16,7 +16,7 @@ BD=$HOME/builds
 initRepos() {
     if [ ! -d .repo ]; then
         echo "--> Initializing workspace"
-        repo init -u https://android.googlesource.com/platform/manifest -b android-14.0.0_r21 --git-lfs
+        repo init -u https://android.googlesource.com/platform/manifest -b android-14.0.0_r27 --git-lfs
         echo
 
         echo "--> Preparing local manifest"
