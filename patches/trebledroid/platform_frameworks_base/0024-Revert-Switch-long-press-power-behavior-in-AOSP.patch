@@ -1,7 +1,7 @@
-From 067705d8af50d92930cc6ab21319aba9a651d221 Mon Sep 17 00:00:00 2001
+From 309a02c4b99b56df2a3e344340f306b2852a3cae Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Sat, 4 Sep 2021 08:26:30 +0000
-Subject: [PATCH 24/54] Revert "Switch long-press power behavior in AOSP."
+Subject: [PATCH 24/53] Revert "Switch long-press power behavior in AOSP."
 
 This reverts commit 803c77a0a24624111944832098c6f65158051dc4.
 ---
@@ -9,10 +9,10 @@ This reverts commit 803c77a0a24624111944832098c6f65158051dc4.
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/core/res/res/values/config.xml b/core/res/res/values/config.xml
-index 4b922e2a3643..badad2c71245 100644
+index 70013911904e..92ec2b45b434 100644
 --- a/core/res/res/values/config.xml
 +++ b/core/res/res/values/config.xml
-@@ -1097,7 +1097,7 @@
+@@ -1092,7 +1092,7 @@
              4 - Go to voice assist
              5 - Go to assistant (Settings.Secure.ASSISTANT)
      -->
@@ -21,7 +21,7 @@ index 4b922e2a3643..badad2c71245 100644
  
      <!-- The time in milliseconds after which a press on power button is considered "long". -->
      <integer name="config_longPressOnPowerDurationMs">500</integer>
-@@ -1129,7 +1129,7 @@
+@@ -1124,7 +1124,7 @@
              1 - Mute toggle
              2 - Global actions menu
      -->

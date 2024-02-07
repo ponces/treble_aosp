@@ -1,7 +1,7 @@
-From 466599686d47617894f6a43666609bac181f94d3 Mon Sep 17 00:00:00 2001
+From 53a519dad5adf4e8dfa2b92b910656cb5f31b4eb Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 28 Mar 2021 18:54:47 +0200
-Subject: [PATCH 16/23] Not all sources in a route are valid. Dont ignore the
+Subject: [PATCH 16/24] Not all sources in a route are valid. Dont ignore the
  whole route because of one broken source
 
 Change-Id: If8a51740e71bef3a4738262ad7b43a337b0ec36d
@@ -10,7 +10,7 @@ Change-Id: If8a51740e71bef3a4738262ad7b43a337b0ec36d
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
-index 91fc5f57da..d2fcc13b00 100644
+index 91fc5f57da3..d2fcc13b000 100644
 --- a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 +++ b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 @@ -667,7 +667,7 @@ std::variant<status_t, RouteTraits::Element> PolicySerializer::deserialize<Route

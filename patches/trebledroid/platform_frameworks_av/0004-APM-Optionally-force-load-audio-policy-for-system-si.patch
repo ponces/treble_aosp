@@ -1,7 +1,7 @@
-From bcfca51fb74f7c14fe7c73fda8e4e76dc86e20c3 Mon Sep 17 00:00:00 2001
+From e2d486102a63b1e9fc2353f98c0917c0a20a18e5 Mon Sep 17 00:00:00 2001
 From: Peter Cai <peter@typeblog.net>
 Date: Wed, 24 Aug 2022 15:42:39 -0400
-Subject: [PATCH 04/23] APM: Optionally force-load audio policy for system-side
+Subject: [PATCH 04/24] APM: Optionally force-load audio policy for system-side
  bt audio HAL
 
 Required to support our system-side bt audio implementation, i.e.
@@ -14,7 +14,7 @@ Change-Id: I279fff541a531f922f3fa55b8f14d00237db59ff
  1 file changed, 25 insertions(+)
 
 diff --git a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
-index 5ca409cfe7..14b19e76ad 100644
+index 5ca409cfe79..14b19e76ad6 100644
 --- a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 +++ b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 @@ -25,6 +25,7 @@

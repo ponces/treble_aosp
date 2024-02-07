@@ -1,4 +1,4 @@
-From b7c6a04d46d7613e674adf1661955386c15374bd Mon Sep 17 00:00:00 2001
+From 24e008b9fa081f08cad5c58081d1188f899ae457 Mon Sep 17 00:00:00 2001
 From: maxwen <max.weninger@gmail.com>
 Date: Fri, 22 Oct 2021 14:55:26 +0200
 Subject: [PATCH 8/9] feat: Add Lockscreen Weather with OmniJaws (1/2)
@@ -24,10 +24,10 @@ Co-authored-by: Pranav Vashi <neobuddy89@gmail.com>
  create mode 100644 packages/SystemUI/src/com/android/systemui/crdroid/CurrentWeatherView.java
 
 diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
-index a55183c0f7c5..a17592468fa0 100644
+index d695c0cb3760..ac1cb32f852e 100644
 --- a/core/java/android/provider/Settings.java
 +++ b/core/java/android/provider/Settings.java
-@@ -5788,6 +5788,16 @@ public final class Settings {
+@@ -5755,6 +5755,16 @@ public final class Settings {
           * the setting value. See an example above.
           */
  
@@ -500,10 +500,10 @@ index 43683ffad432..8b660eb08740 100644
          <permission name="android.permission.ALLOW_SLIPPERY_TOUCHES"/>
          <permission name="android.permission.BATTERY_STATS"/>
 diff --git a/packages/SystemUI/AndroidManifest.xml b/packages/SystemUI/AndroidManifest.xml
-index 6bb7b2549237..5577c4377900 100644
+index 829ce87a4e8c..659abb27b965 100644
 --- a/packages/SystemUI/AndroidManifest.xml
 +++ b/packages/SystemUI/AndroidManifest.xml
-@@ -350,6 +350,10 @@
+@@ -349,6 +349,10 @@
  
      <uses-permission android:name="android.permission.MONITOR_KEYBOARD_BACKLIGHT" />
  
@@ -597,20 +597,20 @@ index fc9c917c152b..5b26e3145e13 100644
            android:id="@+id/left_aligned_notification_icon_container"
            android:layout_width="match_parent"
 diff --git a/packages/SystemUI/src/com/android/keyguard/KeyguardClockSwitchController.java b/packages/SystemUI/src/com/android/keyguard/KeyguardClockSwitchController.java
-index 94f6dba792e8..5107339822b2 100644
+index 70849b7e2acf..50dd07004f25 100644
 --- a/packages/SystemUI/src/com/android/keyguard/KeyguardClockSwitchController.java
 +++ b/packages/SystemUI/src/com/android/keyguard/KeyguardClockSwitchController.java
-@@ -25,6 +25,7 @@ import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLE
- import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
+@@ -23,6 +23,7 @@ import static com.android.keyguard.KeyguardClockSwitch.LARGE;
+ import static com.android.keyguard.KeyguardClockSwitch.SMALL;
  
  import android.annotation.Nullable;
 +import android.content.ContentResolver;
  import android.database.ContentObserver;
  import android.os.UserHandle;
  import android.provider.Settings;
-@@ -37,8 +38,10 @@ import android.widget.LinearLayout;
+@@ -34,8 +35,10 @@ import android.widget.LinearLayout;
+ 
  import androidx.annotation.NonNull;
- import androidx.annotation.VisibleForTesting;
  
 +import com.android.systemui.Dependency;
  import com.android.systemui.Dumpable;
@@ -618,8 +618,8 @@ index 94f6dba792e8..5107339822b2 100644
 +import com.android.systemui.crdroid.CurrentWeatherView;
  import com.android.systemui.dagger.qualifiers.Main;
  import com.android.systemui.dump.DumpManager;
- import com.android.systemui.flags.FeatureFlags;
-@@ -57,6 +60,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
+ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+@@ -52,6 +55,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
  import com.android.systemui.statusbar.notification.stack.AnimationProperties;
  import com.android.systemui.statusbar.phone.NotificationIconAreaController;
  import com.android.systemui.statusbar.phone.NotificationIconContainer;
@@ -627,7 +627,7 @@ index 94f6dba792e8..5107339822b2 100644
  import com.android.systemui.util.ViewController;
  import com.android.systemui.util.concurrency.DelayableExecutor;
  import com.android.systemui.util.settings.SecureSettings;
-@@ -71,9 +75,12 @@ import javax.inject.Inject;
+@@ -65,9 +69,12 @@ import javax.inject.Inject;
   * Injectable controller for {@link KeyguardClockSwitch}.
   */
  public class KeyguardClockSwitchController extends ViewController<KeyguardClockSwitch>
@@ -641,7 +641,7 @@ index 94f6dba792e8..5107339822b2 100644
      private final StatusBarStateController mStatusBarStateController;
      private final ClockRegistry mClockRegistry;
      private final KeyguardSliceViewController mKeyguardSliceViewController;
-@@ -83,6 +90,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
+@@ -77,6 +84,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      private final DumpManager mDumpManager;
      private final ClockEventController mClockEventController;
      private final LogBuffer mLogBuffer;
@@ -649,17 +649,17 @@ index 94f6dba792e8..5107339822b2 100644
  
      private FrameLayout mSmallClockFrame; // top aligned clock
      private FrameLayout mLargeClockFrame; // centered clock
-@@ -104,6 +112,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
+@@ -98,6 +106,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
  
      private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
  
 +    private CurrentWeatherView mCurrentWeatherView;
 +    private boolean mShowWeather;
 +
-     private boolean mShownOnSecondaryDisplay = false;
      private boolean mOnlyClock = false;
-     private boolean mIsActiveDreamLockscreenHosted = false;
-@@ -183,6 +194,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
+     private final DelayableExecutor mUiExecutor;
+     private boolean mCanShowDoubleLineClock = true;
+@@ -160,6 +171,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
              @Override
              public void onAvailableClocksChanged() { }
          };
@@ -668,32 +668,29 @@ index 94f6dba792e8..5107339822b2 100644
      }
  
      /**
-@@ -221,12 +234,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
+@@ -188,9 +201,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
  
          mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
          mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
 +        mCurrentWeatherView = mView.findViewById(R.id.weather_container);
  
-         if (!mOnlyClock) {
-             mDumpManager.unregisterDumpable(getClass().toString()); // unregister previous clocks
-             mDumpManager.registerDumpable(getClass().toString(), this);
-         }
- 
-+        mTunerService.addTunable(this, LOCKSCREEN_WEATHER_ENABLED);
+         mDumpManager.unregisterDumpable(getClass().toString()); // unregister previous clocks
+         mDumpManager.registerDumpable(getClass().toString(), this);
 +
-         if (mFeatureFlags.isEnabled(LOCKSCREEN_WALLPAPER_DREAM_ENABLED)) {
-             mStatusArea = mView.findViewById(R.id.keyguard_status_area);
-             collectFlow(mStatusArea, mKeyguardInteractor.isActiveDreamLockscreenHosted(),
-@@ -255,6 +271,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
++        mTunerService.addTunable(this, LOCKSCREEN_WEATHER_ENABLED);
+     }
+ 
+     @Override
+@@ -205,6 +221,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
          mKeyguardDateWeatherViewInvisibility =
                  mView.getResources().getInteger(R.integer.keyguard_date_weather_view_invisibility);
  
 +        updateWeatherView();
 +
-         if (mShownOnSecondaryDisplay) {
-             mView.setLargeClockOnSecondaryDisplay(true);
-             displayClock(LARGE, /* animate= */ false);
-@@ -311,6 +329,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
+         if (mOnlyClock) {
+             View ksv = mView.findViewById(R.id.keyguard_slice_view);
+             ksv.setVisibility(View.GONE);
+@@ -261,6 +279,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
  
      @Override
      protected void onViewDetached() {
@@ -701,7 +698,7 @@ index 94f6dba792e8..5107339822b2 100644
          mClockRegistry.unregisterClockChangeListener(mClockChangedListener);
          mClockEventController.unregisterListeners();
          setClock(null);
-@@ -322,6 +341,37 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
+@@ -272,6 +291,37 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                  mKeyguardUnlockAnimationListener);
      }
  
@@ -738,12 +735,12 @@ index 94f6dba792e8..5107339822b2 100644
 +
      void onLocaleListChanged() {
          if (mSmartspaceController.isEnabled()) {
-             removeViewsFromStatusArea();
+             if (mSmartspaceController.isDateWeatherDecoupled()) {
 diff --git a/packages/SystemUI/src/com/android/keyguard/KeyguardStatusViewController.java b/packages/SystemUI/src/com/android/keyguard/KeyguardStatusViewController.java
-index c314586e4a21..5454a9b4da81 100644
+index 6854c97c3415..5fc5612d2a12 100644
 --- a/packages/SystemUI/src/com/android/keyguard/KeyguardStatusViewController.java
 +++ b/packages/SystemUI/src/com/android/keyguard/KeyguardStatusViewController.java
-@@ -355,6 +355,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
+@@ -297,6 +297,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
              if (visible) {
                  if (DEBUG) Slog.v(TAG, "refresh statusview visible:true");
                  refreshTime();

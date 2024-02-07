@@ -1,4 +1,4 @@
-From 739f7e72cb455d95c7c53c186a0e742a7376a899 Mon Sep 17 00:00:00 2001
+From acd74066dad685ce5826151ac376c174cad32f6e Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 9 Nov 2023 12:33:55 +0100
 Subject: [PATCH 1/9] gmscompat: Change attestation and instrumentation to pass

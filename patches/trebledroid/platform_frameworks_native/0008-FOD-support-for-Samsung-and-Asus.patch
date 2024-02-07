@@ -1,4 +1,4 @@
-From ce24569804ad68e8dd2f9fb174d6449bbd76b63d Mon Sep 17 00:00:00 2001
+From a60afde74243f18635b2d03d0d8c53b3e6a69e59 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 18 Dec 2022 18:17:30 -0500
 Subject: [PATCH 08/11] FOD support for Samsung and Asus
@@ -19,7 +19,7 @@ Subject: [PATCH 08/11] FOD support for Samsung and Asus
  12 files changed, 77 insertions(+), 5 deletions(-)
 
 diff --git a/libs/gui/BLASTBufferQueue.cpp b/libs/gui/BLASTBufferQueue.cpp
-index 207fa4fd31..a162658e30 100644
+index 5c324b29cd..01b6eb5f1b 100644
 --- a/libs/gui/BLASTBufferQueue.cpp
 +++ b/libs/gui/BLASTBufferQueue.cpp
 @@ -35,12 +35,21 @@
@@ -100,18 +100,18 @@ index b6274ab9c0..f35009fe28 100644
  
      // Combinations that are only allowed with gralloc 4.1.
 diff --git a/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp b/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp
-index fc5f8ca1d3..4b81cc1df0 100644
+index 0ac0ecb727..b563132281 100644
 --- a/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp
 +++ b/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp
-@@ -26,6 +26,7 @@
+@@ -27,6 +27,7 @@
  #include "system/graphics-base-v1.0.h"
  
- #include <ui/HdrRenderTypeUtils.h>
+ #include <ui/DataspaceUtils.h>
 +#include <cutils/properties.h>
  
  // TODO(b/129481165): remove the #pragma below and fix conversion issues
  #pragma clang diagnostic push
-@@ -36,6 +37,9 @@
+@@ -37,6 +38,9 @@
  // TODO(b/129481165): remove the #pragma below and fix conversion issues
  #pragma clang diagnostic pop // ignored "-Wconversion"
  
@@ -121,7 +121,7 @@ index fc5f8ca1d3..4b81cc1df0 100644
  using aidl::android::hardware::graphics::composer3::Composition;
  
  namespace android::compositionengine {
-@@ -438,6 +442,26 @@ void OutputLayer::writeOutputDependentGeometryStateToHWC(HWC2::Layer* hwcLayer,
+@@ -432,6 +436,26 @@ void OutputLayer::writeOutputDependentGeometryStateToHWC(HWC2::Layer* hwcLayer,
                                                       ->getHeight()));
      }
  
@@ -167,10 +167,10 @@ index c0eb36dc02..782e22cbc2 100644
  } // namespace Hwc2
  } // namespace android
 diff --git a/services/surfaceflinger/DisplayHardware/AidlComposerHal.h b/services/surfaceflinger/DisplayHardware/AidlComposerHal.h
-index 8d21b491c3..349278771d 100644
+index b8ae26f879..c8dc40955c 100644
 --- a/services/surfaceflinger/DisplayHardware/AidlComposerHal.h
 +++ b/services/surfaceflinger/DisplayHardware/AidlComposerHal.h
-@@ -238,6 +238,8 @@ public:
+@@ -237,6 +237,8 @@ public:
      Error setHdrConversionStrategy(HdrConversionStrategy, Hdr*) override;
      Error setRefreshRateChangedCallbackDebugEnabled(Display, bool) override;
  
