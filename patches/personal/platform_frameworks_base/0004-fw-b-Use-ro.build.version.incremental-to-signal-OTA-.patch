@@ -1,4 +1,4 @@
-From 5551460af698623b0c88b3a346c374e8bee2f3d1 Mon Sep 17 00:00:00 2001
+From 6ef14531d237b1dee26be5958d46883f3573fe20 Mon Sep 17 00:00:00 2001
 From: dhacker29 <dhackerdvm@gmail.com>
 Date: Tue, 24 Nov 2015 01:53:47 -0500
 Subject: [PATCH 4/9] fw/b: Use ro.build.version.incremental to signal OTA
@@ -104,10 +104,10 @@ index ff80e614be58..8bf0d5ffff76 100644
      }
  
 diff --git a/services/core/java/com/android/server/pm/ShortcutService.java b/services/core/java/com/android/server/pm/ShortcutService.java
-index 01bceb190c2e..e8e6ad123c79 100644
+index c6aba2ab9cbe..1aad29efa322 100644
 --- a/services/core/java/com/android/server/pm/ShortcutService.java
 +++ b/services/core/java/com/android/server/pm/ShortcutService.java
-@@ -5175,7 +5175,7 @@ public class ShortcutService extends IShortcutService.Stub {
+@@ -5206,7 +5206,7 @@ public class ShortcutService extends IShortcutService.Stub {
  
      // Injection point.
      String injectBuildFingerprint() {

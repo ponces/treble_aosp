@@ -1,7 +1,7 @@
-From 6d63fd4b232e7ae36a5139bf5bab04eb01561315 Mon Sep 17 00:00:00 2001
+From 1d2897b0691992e63ef0ec8ee735b6c8077422d5 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Fri, 20 Oct 2023 09:26:19 +0000
-Subject: [PATCH 43/53] Revert "Removed IWLAN legacy mode support"
+Subject: [PATCH 43/54] Revert "Removed IWLAN legacy mode support"
 
 This reverts commit 2832dee607ab33eee688abea206f4adfcfc896f1.
 ---
@@ -9,7 +9,7 @@ This reverts commit 2832dee607ab33eee688abea206f4adfcfc896f1.
  1 file changed, 20 insertions(+), 10 deletions(-)
 
 diff --git a/telephony/java/android/telephony/ServiceState.java b/telephony/java/android/telephony/ServiceState.java
-index 523d0b0e55f4..96387a489dcc 100644
+index 74cfbea91e00..698a106582d3 100644
 --- a/telephony/java/android/telephony/ServiceState.java
 +++ b/telephony/java/android/telephony/ServiceState.java
 @@ -1213,8 +1213,13 @@ public class ServiceState implements Parcelable {

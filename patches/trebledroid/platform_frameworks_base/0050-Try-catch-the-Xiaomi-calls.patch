@@ -1,7 +1,7 @@
-From 64cf2fab00c9ea4cec882cf313e0889fffd69d06 Mon Sep 17 00:00:00 2001
+From 7b837155f74e2963175a6148489c9ef40fd8e4d2 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 29 Jan 2024 17:06:34 -0500
-Subject: [PATCH 49/53] Try catch the Xiaomi calls
+Subject: [PATCH 50/54] Try catch the Xiaomi calls
 
 ---
  .../src/com/android/systemui/biometrics/UdfpsView.kt   | 10 ++++++----

@@ -1,7 +1,7 @@
-From 1b91912af4d30e9085234cac35758c093609a6cb Mon Sep 17 00:00:00 2001
+From 93fdc0916dee0ee7fc4c3bf369ea3d8c11293d30 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 26 Jan 2024 06:40:49 -0500
-Subject: [PATCH 47/53] Fix Xiaomi custom vendors implementing fingerprint
+Subject: [PATCH 48/54] Fix Xiaomi custom vendors implementing fingerprint
  properly
 
 ---

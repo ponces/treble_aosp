@@ -1,7 +1,7 @@
-From 6c4688213c271d2f31af1ef6fd600676a6a85d61 Mon Sep 17 00:00:00 2001
+From f15609eb037dc79abf08e9e113428896bea2ba45 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 28 Jan 2024 19:16:13 -0500
-Subject: [PATCH 48/53] Also override UDFPS infos on AIDL fingerprints --
+Subject: [PATCH 49/54] Also override UDFPS infos on AIDL fingerprints --
  needed for FP on S24
 
 ---
@@ -34,7 +34,7 @@ index 26ca8c9940f5..dfc268c07d76 100644
                  Slog.e("PHH-Enroll", "Failed generating UDFPS props");
              }
 diff --git a/services/core/java/com/android/server/biometrics/sensors/fingerprint/aidl/FingerprintProvider.java b/services/core/java/com/android/server/biometrics/sensors/fingerprint/aidl/FingerprintProvider.java
-index 58ece898a9fe..d369387d62c6 100644
+index 5f4b89439fd0..a26fe945d940 100644
 --- a/services/core/java/com/android/server/biometrics/sensors/fingerprint/aidl/FingerprintProvider.java
 +++ b/services/core/java/com/android/server/biometrics/sensors/fingerprint/aidl/FingerprintProvider.java
 @@ -37,6 +37,7 @@ import android.hardware.biometrics.common.ComponentInfo;
@@ -45,8 +45,8 @@ index 58ece898a9fe..d369387d62c6 100644
  import android.hardware.fingerprint.Fingerprint;
  import android.hardware.fingerprint.FingerprintAuthenticateOptions;
  import android.hardware.fingerprint.FingerprintManager;
-@@ -172,9 +173,32 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
-         mAuthSessionCoordinator = mBiometricContext.getAuthSessionCoordinator();
+@@ -188,9 +189,32 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
+                 BiometricsProtoEnums.MODALITY_FINGERPRINT, new BiometricNotificationImpl());
  
          final List<SensorLocationInternal> workaroundLocations = getWorkaroundSensorProps(context);
 +android.util.Log.e("PHH-Enroll", "Poping AIDL fp provider");
@@ -78,7 +78,7 @@ index 58ece898a9fe..d369387d62c6 100644
  
              final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
              if (prop.commonProps.componentInfo != null) {
-@@ -194,7 +218,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
+@@ -210,7 +234,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                              prop.halControlsIllumination,
                              true /* resetLockoutRequiresHardwareAuthToken */,
                              !workaroundLocations.isEmpty() ? workaroundLocations :

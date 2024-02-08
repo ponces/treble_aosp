@@ -1,7 +1,7 @@
-From c3821360467fa19f36ed2a214d008759d927a77c Mon Sep 17 00:00:00 2001
+From c8c8583a915b469b6adbe8cdd3808487175d8268 Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Thu, 5 Apr 2018 10:01:19 +0800
-Subject: [PATCH 01/53] Disable vendor mismatch warning
+Subject: [PATCH 01/54] Disable vendor mismatch warning
 
 Change-Id: Ieb8fe91e2f02462f074312ed0f4885d183e9780b
 ---
@@ -9,10 +9,10 @@ Change-Id: Ieb8fe91e2f02462f074312ed0f4885d183e9780b
  1 file changed, 2 insertions(+), 14 deletions(-)
 
 diff --git a/services/core/java/com/android/server/wm/ActivityTaskManagerService.java b/services/core/java/com/android/server/wm/ActivityTaskManagerService.java
-index 47b51ac164b9..1f4bca47b683 100644
+index d7489f2c7b91..8e890a39e6de 100644
 --- a/services/core/java/com/android/server/wm/ActivityTaskManagerService.java
 +++ b/services/core/java/com/android/server/wm/ActivityTaskManagerService.java
-@@ -6081,20 +6081,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+@@ -6094,20 +6094,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                  }
  
                  if (!Build.isBuildConsistent()) {

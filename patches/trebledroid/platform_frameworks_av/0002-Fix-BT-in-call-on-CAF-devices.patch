@@ -1,7 +1,7 @@
-From 290d3729deeb4f9197f026ccbf4f90b8a91289f3 Mon Sep 17 00:00:00 2001
+From 9e557c8fdfaf876a00bd1ecd025dd3e5d3ebb2f2 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 5 Aug 2019 18:09:50 +0200
-Subject: [PATCH 02/24] Fix BT in-call on CAF devices
+Subject: [PATCH 02/23] Fix BT in-call on CAF devices
 
 See https://github.com/phhusson/treble_experimentations/issues/374
 
@@ -16,7 +16,7 @@ Change-Id: Ifea0f88276ec9a0811f3cb1973c4b06f2c82077b
  1 file changed, 93 insertions(+)
 
 diff --git a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
-index 3d5c1d2e420..5ca409cfe79 100644
+index 3d5c1d2e42..5ca409cfe7 100644
 --- a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 +++ b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 @@ -663,6 +663,98 @@ std::variant<status_t, RouteTraits::Element> PolicySerializer::deserialize<Route

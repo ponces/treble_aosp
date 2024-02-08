@@ -1,4 +1,4 @@
-From e34b2cf5529114f855b2c6f99c088f082ca3925a Mon Sep 17 00:00:00 2001
+From 671ea085bf35f02d76e16131404a32a41b9eb23e Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 14 Nov 2021 13:47:29 -0500
 Subject: [PATCH] Pie MTK IMS calls static
