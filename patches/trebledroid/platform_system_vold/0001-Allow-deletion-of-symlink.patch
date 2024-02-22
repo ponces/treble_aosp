@@ -9,7 +9,7 @@ Change-Id: I9731895f88729072297f753088583aabbe6990f4
  1 file changed, 1 insertion(+)
 
 diff --git a/FsCrypt.cpp b/FsCrypt.cpp
-index 903d36bf..74e6ad1d 100644
+index 903d36bfe..74e6ad1d3 100644
 --- a/FsCrypt.cpp
 +++ b/FsCrypt.cpp
 @@ -351,6 +351,7 @@ static bool prepare_dir_with_policy(const std::string& dir, mode_t mode, uid_t u

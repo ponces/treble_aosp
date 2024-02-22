@@ -1,4 +1,4 @@
-From 5c247a1eabc40fdefa0009cc3001b104e41b669b Mon Sep 17 00:00:00 2001
+From 22e5cb207f026503e58eeba115a6bc4e902c22ea Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 6 Oct 2023 19:01:27 -0400
 Subject: [PATCH 21/26] Disable project_quota on old devices but new enough to

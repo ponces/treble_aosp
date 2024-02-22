@@ -1,4 +1,4 @@
-From e5a10d61632c86b0cc1941c1c13c5c2b6d555303 Mon Sep 17 00:00:00 2001
+From 2f992d15791217c593921158493bcf0ef620dbf6 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sat, 3 Feb 2024 07:38:33 -0500
 Subject: [PATCH 11/11] Increase SW_MAX *= 4

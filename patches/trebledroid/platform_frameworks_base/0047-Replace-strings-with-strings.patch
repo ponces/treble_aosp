@@ -1,7 +1,7 @@
-From b30b71584a13de3b0ccf232aa69a6244b1ae6ace Mon Sep 17 00:00:00 2001
+From 55b8d29dfbdced39963226cfd29e78ace726493a Mon Sep 17 00:00:00 2001
 From: Jonathan Scott <scottjonathan@google.com>
 Date: Wed, 19 Jul 2023 11:10:44 +0000
-Subject: [PATCH 47/54] Replace ":strings" with "strings"
+Subject: [PATCH 47/56] Replace ":strings" with "strings"
 
 It looks like this is a typo and can cause parse errors with some xml
 deserialization libraries.

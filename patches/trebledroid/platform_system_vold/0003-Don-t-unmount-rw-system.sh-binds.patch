@@ -9,7 +9,7 @@ Change-Id: If9132c21defa8b09879b79a70794c5275d6852d0
  1 file changed, 1 insertion(+)
 
 diff --git a/VolumeManager.cpp b/VolumeManager.cpp
-index dc6fae98..47c8cd40 100644
+index dc6fae98d..47c8cd404 100644
 --- a/VolumeManager.cpp
 +++ b/VolumeManager.cpp
 @@ -985,6 +985,7 @@ int VolumeManager::unmountAll() {

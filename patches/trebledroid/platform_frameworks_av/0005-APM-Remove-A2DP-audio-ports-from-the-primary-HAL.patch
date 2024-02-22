@@ -1,7 +1,7 @@
-From 3a1379801d7a624c3a8114ba56c84bc613e65fe7 Mon Sep 17 00:00:00 2001
+From bd8df434d2d56f865baa412a3d6ba4dcf510c71a Mon Sep 17 00:00:00 2001
 From: Peter Cai <peter@typeblog.net>
 Date: Thu, 25 Aug 2022 13:30:29 -0400
-Subject: [PATCH 05/23] APM: Remove A2DP audio ports from the primary HAL
+Subject: [PATCH 05/25] APM: Remove A2DP audio ports from the primary HAL
 
 These ports defined in the primary HAL are intended for A2DP offloading,
 however they do not work in general on GSIs, and will interfere with
@@ -16,7 +16,7 @@ Change-Id: I3305594a17285da113167b419543543f0ef71122
  1 file changed, 22 insertions(+), 4 deletions(-)
 
 diff --git a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
-index 14b19e76ad..b30ad7e8af 100644
+index 14b19e76ad6..b30ad7e8af8 100644
 --- a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 +++ b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 @@ -26,6 +26,7 @@

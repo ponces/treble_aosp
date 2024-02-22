@@ -1,4 +1,4 @@
-From fba22d95b3e1005b94172f5caa95760ef60c8b06 Mon Sep 17 00:00:00 2001
+From 41ac1a121db31f5ef755ca5544e63d6416e48af1 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Wed, 28 Sep 2022 17:04:03 +0100
 Subject: [PATCH 03/26] Revert "Remove support for AVB 1.0."

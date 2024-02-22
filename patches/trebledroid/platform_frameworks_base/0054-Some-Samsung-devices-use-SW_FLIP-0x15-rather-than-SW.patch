@@ -1,7 +1,7 @@
-From 0eebd67270abaec4d191dc1c3127b51de23941ba Mon Sep 17 00:00:00 2001
+From a7908670c1e649044bac983781f4c7b5a9401cae Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 4 Feb 2024 18:01:07 -0500
-Subject: [PATCH 54/54] Some Samsung devices use SW_FLIP 0x15 rather than
+Subject: [PATCH 54/56] Some Samsung devices use SW_FLIP 0x15 rather than
  SW_MACHINE_COVER 0x10, so use that
 
 ---

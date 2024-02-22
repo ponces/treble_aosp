@@ -9,7 +9,7 @@ Subject: [PATCH 4/5] Exfat can be mounted with "exfat" kernel fs driver, or
  1 file changed, 8 insertions(+), 3 deletions(-)
 
 diff --git a/fs/Exfat.cpp b/fs/Exfat.cpp
-index c8b19e03..9e34347b 100644
+index c8b19e030..9e34347bb 100644
 --- a/fs/Exfat.cpp
 +++ b/fs/Exfat.cpp
 @@ -35,7 +35,9 @@ static const char* kFsckPath = "/system/bin/fsck.exfat";

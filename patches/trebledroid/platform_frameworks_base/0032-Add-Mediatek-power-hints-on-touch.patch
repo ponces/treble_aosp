@@ -1,7 +1,7 @@
-From b77ee541c94fdf037ffb500361e692288f35bd0f Mon Sep 17 00:00:00 2001
+From 455312facfcfa305a283b0bf5914e1cd15c1addb Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sat, 17 Jun 2023 08:31:55 -0400
-Subject: [PATCH 32/54] Add Mediatek power hints on touch
+Subject: [PATCH 32/56] Add Mediatek power hints on touch
 
 Mediatek has multiple HALs (which existed concurrently), so it is a bit
 of a mess.

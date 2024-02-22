@@ -1,7 +1,7 @@
-From 4c73ac7b2d31515d099fe4ee6bd90bd1b7aa6cd0 Mon Sep 17 00:00:00 2001
+From 66d3c8e8888e8da6cb7e95818a16674856c04fc2 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 23 Mar 2021 00:16:42 +0100
-Subject: [PATCH 15/23] Don't crash on unknown audio devices
+Subject: [PATCH 15/25] Don't crash on unknown audio devices
 
 Change-Id: I2df8d88f742da6a84aa8888cdf19de25444de919
 ---
@@ -9,7 +9,7 @@ Change-Id: I2df8d88f742da6a84aa8888cdf19de25444de919
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
-index 83eafc2f79..91fc5f57da 100644
+index 83eafc2f79f..91fc5f57da3 100644
 --- a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 +++ b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 @@ -867,7 +867,7 @@ std::variant<status_t, ModuleTraits::Element> PolicySerializer::deserialize<Modu

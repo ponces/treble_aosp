@@ -1,7 +1,7 @@
-From 3f28e6f7c1206b84050e1d4c40203a2954efd34e Mon Sep 17 00:00:00 2001
+From da1b48d60c978cdfea2385a496255a3d22fa65f6 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sat, 12 Sep 2020 12:32:50 +0200
-Subject: [PATCH 12/23] No longer make re-assigning legacy audio groups fatal.
+Subject: [PATCH 12/25] No longer make re-assigning legacy audio groups fatal.
  Mi9 declares AUDIO_STREAM_PATCH and AUDIO_STREAM_REROUTING which is defined
  by framework too
 
@@ -11,7 +11,7 @@ Change-Id: I794fe22d63a8af705be4f5f09b9879ecaab3eae5
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/services/audiopolicy/engine/common/src/EngineBase.cpp b/services/audiopolicy/engine/common/src/EngineBase.cpp
-index 218aff80e6..c7ea035191 100644
+index 218aff80e65..c7ea035191f 100644
 --- a/services/audiopolicy/engine/common/src/EngineBase.cpp
 +++ b/services/audiopolicy/engine/common/src/EngineBase.cpp
 @@ -245,9 +245,9 @@ engineConfig::ParsingResult EngineBase::processParsingResult(

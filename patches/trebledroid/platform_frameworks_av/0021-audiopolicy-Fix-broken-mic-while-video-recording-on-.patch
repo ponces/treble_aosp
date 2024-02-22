@@ -1,7 +1,7 @@
-From 4fa4cd9199c568b4a7bd33f034fe48ec1ab77ff9 Mon Sep 17 00:00:00 2001
+From 305aaa8780b5693a237c0c823b745b2d2dee6642 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Sun, 30 Apr 2023 23:29:04 +0100
-Subject: [PATCH 21/23] audiopolicy: Fix broken mic while video recording on
+Subject: [PATCH 21/25] audiopolicy: Fix broken mic while video recording on
  some Exynos devices This should fix
  https://github.com/phhusson/treble_experimentations/issues/2021 and
  https://github.com/phhusson/treble_experimentations/issues/2384. Credits to
@@ -12,7 +12,7 @@ Subject: [PATCH 21/23] audiopolicy: Fix broken mic while video recording on
  1 file changed, 18 insertions(+), 11 deletions(-)
 
 diff --git a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
-index fc6cc72c1c..8b3a1f0e4f 100644
+index fc6cc72c1c3..8b3a1f0e4f2 100644
 --- a/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 +++ b/services/audiopolicy/common/managerdefinitions/src/Serializer.cpp
 @@ -660,6 +660,9 @@ std::variant<status_t, RouteTraits::Element> PolicySerializer::deserialize<Route

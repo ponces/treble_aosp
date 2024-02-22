@@ -1,7 +1,7 @@
-From 91545f869a33a9a689874128f501d6835179922d Mon Sep 17 00:00:00 2001
+From 7e6a9ed0bce8027ea6b6cd43cbbf13a9026872ab Mon Sep 17 00:00:00 2001
 From: Peter Cai <peter@typeblog.net>
 Date: Wed, 1 Jun 2022 16:56:20 -0400
-Subject: [PATCH 06/54] Implement a persistent property to override the default
+Subject: [PATCH 06/56] Implement a persistent property to override the default
  primary camera (0)
 
 Change-Id: I49b45d00bf71d7932591b3516d49a680e1b6568b

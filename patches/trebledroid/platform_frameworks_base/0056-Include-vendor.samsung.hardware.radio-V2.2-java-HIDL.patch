@@ -1,0 +1,25 @@
+From ed967474f95b8bae18e1f5a31840015df987f189 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Wed, 21 Feb 2024 16:19:47 -0500
+Subject: [PATCH 56/56] Include vendor.samsung.hardware.radio-V2.2-java HIDL in
+ base libs, will be used by f/o/telephony
+
+---
+ Android.bp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Android.bp b/Android.bp
+index a4139cc2d126..0d93f543b4cd 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -219,6 +219,7 @@ java_library {
+         "android.hardware.radio-V1.4-java",
+         "android.hardware.radio-V1.5-java",
+         "android.hardware.radio-V1.6-java",
++        "vendor.samsung.hardware.radio-V2.2-java",
+         "android.hardware.radio.data-V2-java",
+         "android.hardware.radio.ims-V1-java",
+         "android.hardware.radio.messaging-V2-java",
+-- 
+2.34.1
+
