@@ -1,0 +1,308 @@
+From 2fcd04607e1e213b0e435ba6696a024958782f30 Mon Sep 17 00:00:00 2001
+From: minaripenguin <minaripenguin@users.noreply.github.com>
+Date: Sun, 8 Oct 2023 15:41:45 +0800
+Subject: [PATCH 08/10] services: Fix google apps permission denials
+
+* for some unknown reasons, google apps were throwing permission denials even if we have updated privapp permissions for most of google apps, same goes to granting permissions via DefaultPermissionGrantPolicy, which doesnt address these denials, so unless there is cleaner/appropriate fix for these denials, bypass it.
+
+attempt to resolve:
+10-08 20:39:02.675  1617  4130 W ActivityManager: Permission Denial: getTaskSnapshot() from pid=7901, uid=10213 requires android.permission.READ_FRAME_BUFFER
+--------- beginning of crash
+10-08 20:39:02.676  7901  9402 E AndroidRuntime: FATAL EXCEPTION: TaskThumbnailIconCache-1
+10-08 20:39:02.676  7901  9402 E AndroidRuntime: Process: com.google.android.apps.nexuslauncher, PID: 7901
+10-08 20:39:02.676  7901  9402 E AndroidRuntime: java.lang.SecurityException: Permission Denial: getTaskSnapshot() from pid=7901, uid=10213 requires android.permission.READ_FRAME_BUFFER
+10-08 20:39:02.676  7901  9402 E AndroidRuntime: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3057)
+Process: com.google.android.apps.nexuslauncher
+PID: 2368
+UID: 10213
+Frozen: false
+Flags: 0x34cbbe45
+Package: com.google.android.apps.nexuslauncher v907 (14)
+Foreground: No
+Process-Runtime: 95
+Build: google/rising_oriole/oriole:14/UP1A.231005.007.A1/1696738813:userdebug/release-keys
+Crash-Handler: com.android.internal.os.RuntimeInit$KillApplicationHandler
+Loading-Progress: 1.0
+Dropped-Count: 0
+
+java.lang.RuntimeException: Unable to create service com.android.quickstep.TouchInteractionService: java.lang.SecurityException: Permission Denial: getRootTaskInfo() from pid=2368, uid=10213 requires android.permission.MANAGE_ACTIVITY_TASKS
+	at android.app.ActivityThread.handleCreateService(ActivityThread.java:4664)
+	at android.app.ActivityThread.-$$Nest$mhandleCreateService(Unknown Source:0)
+	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2264)
+	at android.os.Handler.dispatchMessage(Handler.java:106)
+	at android.os.Looper.loopOnce(Looper.java:205)
+	at android.os.Looper.loop(Looper.java:294)
+	at android.app.ActivityThread.main(ActivityThread.java:8177)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:552)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:971)
+10-08 15:46:20.701  1550  2313 W InputManager: Permission Denial: monitorGestureInput() from pid=2257, uid=10213 requires android.permission.MONITOR_INPUT
+10-08 15:46:20.702  2257  2257 D AndroidRuntime: Shutting down VM
+10-08 15:46:20.702  1970  1970 I TetheringManager: registerTetheringEventCallback:com.android.systemui
+10-08 15:46:20.702  1970  1970 I TetheringManager: registerTetheringEventCallback caller:com.android.systemui
+--------- beginning of crash
+10-08 15:46:20.702  2257  2257 E AndroidRuntime: FATAL EXCEPTION: main
+10-08 15:46:20.702  2257  2257 E AndroidRuntime: Process: com.google.android.apps.nexuslauncher, PID: 2257
+10-08 15:46:20.702  2257  2257 E AndroidRuntime: java.lang.RuntimeException: Unable to create service com.android.quickstep.TouchInteractionService: java.lang.SecurityException: Requires MONITOR_INPUT permission
+10-08 15:46:20.702  2257  2257 E AndroidRuntime: 	at android.app.ActivityThread.handleCreateService(ActivityThread.java:4664)
+
+test: setprop persist.sys.default_launcher 1, reboot, check if pixel launcher works as intended on aosp
+
+Signed-off-by: minaripenguin <minaripenguin@users.noreply.github.com>
+---
+ .../server/wm/ActivityTaskManagerService.java | 92 ++++++++++++++-----
+ 1 file changed, 71 insertions(+), 21 deletions(-)
+
+diff --git a/services/core/java/com/android/server/wm/ActivityTaskManagerService.java b/services/core/java/com/android/server/wm/ActivityTaskManagerService.java
+index 8e890a39e6de..773e9412ca69 100644
+--- a/services/core/java/com/android/server/wm/ActivityTaskManagerService.java
++++ b/services/core/java/com/android/server/wm/ActivityTaskManagerService.java
+@@ -1748,7 +1748,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+     @Override
+     public void startRecentsActivity(Intent intent, long eventTime,
+             @Nullable IRecentsAnimationRunner recentsAnimationRunner) {
+-        enforceTaskPermission("startRecentsActivity()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("startRecentsActivity()");
++        }
+         final int callingPid = Binder.getCallingPid();
+         final int callingUid = Binder.getCallingUid();
+         final long origId = Binder.clearCallingIdentity();
+@@ -1967,7 +1969,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void setFocusedRootTask(int taskId) {
+-        enforceTaskPermission("setFocusedRootTask()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("setFocusedRootTask()");
++        }
+         ProtoLog.d(WM_DEBUG_FOCUS, "setFocusedRootTask: taskId=%d", taskId);
+         final long callingId = Binder.clearCallingIdentity();
+         try {
+@@ -1989,7 +1993,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void setFocusedTask(int taskId) {
+-        enforceTaskPermission("setFocusedTask()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("setFocusedTask()");
++        }
+         final long callingId = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2002,7 +2008,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void focusTopTask(int displayId) {
+-        enforceTaskPermission("focusTopTask()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("focusTopTask()");
++        }
+         final long callingId = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2106,7 +2114,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public Rect getTaskBounds(int taskId) {
+-        enforceTaskPermission("getTaskBounds()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("getTaskBounds()");
++        }
+         final long ident = Binder.clearCallingIdentity();
+         Rect rect = new Rect();
+         try {
+@@ -2401,7 +2411,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void moveTaskToRootTask(int taskId, int rootTaskId, boolean toTop) {
+-        enforceTaskPermission("moveTaskToRootTask()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("moveTaskToRootTask()");
++        }
+         synchronized (mGlobalLock) {
+             final long ident = Binder.clearCallingIdentity();
+             try {
+@@ -2437,7 +2449,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+      */
+     @Override
+     public void removeRootTasksInWindowingModes(int[] windowingModes) {
+-        enforceTaskPermission("removeRootTasksInWindowingModes()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("removeRootTasksInWindowingModes()");
++        }
+ 
+         synchronized (mGlobalLock) {
+             final long ident = Binder.clearCallingIdentity();
+@@ -2451,7 +2465,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void removeRootTasksWithActivityTypes(int[] activityTypes) {
+-        enforceTaskPermission("removeRootTasksWithActivityTypes()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("removeRootTasksWithActivityTypes()");
++        }
+ 
+         synchronized (mGlobalLock) {
+             final long ident = Binder.clearCallingIdentity();
+@@ -2477,7 +2493,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public List<RootTaskInfo> getAllRootTaskInfos() {
+-        enforceTaskPermission("getAllRootTaskInfos()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("getAllRootTaskInfos()");
++        }
+         final long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2490,7 +2508,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public RootTaskInfo getRootTaskInfo(int windowingMode, int activityType) {
+-        enforceTaskPermission("getRootTaskInfo()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("getRootTaskInfo()");
++        }
+         final long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2503,7 +2523,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public List<RootTaskInfo> getAllRootTaskInfosOnDisplay(int displayId) {
+-        enforceTaskPermission("getAllRootTaskInfosOnDisplay()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("getAllRootTaskInfosOnDisplay()");
++        }
+         final long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2517,7 +2539,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+     @Override
+     public RootTaskInfo getRootTaskInfoOnDisplay(int windowingMode, int activityType,
+             int displayId) {
+-        enforceTaskPermission("getRootTaskInfoOnDisplay()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("getRootTaskInfoOnDisplay()");
++        }
+         final long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -2530,7 +2554,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition) {
+-        enforceTaskPermission("cancelRecentsAnimation()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("cancelRecentsAnimation()");
++        }
+         final long callingUid = Binder.getCallingUid();
+         final long origId = Binder.clearCallingIdentity();
+         try {
+@@ -2547,7 +2573,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void startSystemLockTaskMode(int taskId) {
+-        enforceTaskPermission("startSystemLockTaskMode");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("startSystemLockTaskMode");
++        }
+         // This makes inner call to look as if it was initiated by system.
+         final long ident = Binder.clearCallingIdentity();
+         try {
+@@ -2573,7 +2601,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+      */
+     @Override
+     public void stopSystemLockTaskMode() throws RemoteException {
+-        enforceTaskPermission("stopSystemLockTaskMode");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("stopSystemLockTaskMode");
++        }
+         stopLockTaskModeInternal(null, true /* isSystemCaller */);
+     }
+ 
+@@ -2862,7 +2892,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void resizeTask(int taskId, Rect bounds, int resizeMode) {
+-        enforceTaskPermission("resizeTask()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("resizeTask()");
++        }
+         final long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -3066,7 +3098,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+     /** Unregister a task stack listener so that it stops receiving callbacks. */
+     @Override
+     public void unregisterTaskStackListener(ITaskStackListener listener) {
+-        enforceTaskPermission("unregisterTaskStackListener()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("unregisterTaskStackListener()");
++        }
+         mTaskChangeNotificationController.unregisterTaskStackListener(listener);
+     }
+ 
+@@ -3154,6 +3188,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+                 permission, Binder.getCallingPid(), Binder.getCallingUid());
+     }
+ 
++    private static boolean shouldBypassTaskPermission(Context context) {
++        // GMS doesn't have MANAGE_ACTIVITY_TASKS permission
++        final int callingUid = Binder.getCallingUid();
++        final String callingPackage = context.getPackageManager().getNameForUid(callingUid);
++        Slog.w(TAG, "shouldBypassTaskPermission: callingPackage:" + callingPackage);
++        return callingPackage != null && callingPackage.toLowerCase().contains("google");
++    }
++
+     /**
+      * Returns true if the app can close system dialogs. Otherwise it either throws a {@link
+      * SecurityException} or returns false with a logcat message depending on whether the app
+@@ -3756,7 +3798,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void cancelTaskWindowTransition(int taskId) {
+-        enforceTaskPermission("cancelTaskWindowTransition()");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("cancelTaskWindowTransition()");
++        }
+         final long ident = Binder.clearCallingIdentity();
+         try {
+             synchronized (mGlobalLock) {
+@@ -4053,7 +4097,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+      */
+     @Override
+     public void clearLaunchParamsForPackages(List<String> packageNames) {
+-        enforceTaskPermission("clearLaunchParamsForPackages");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("clearLaunchParamsForPackages");
++        }
+         synchronized (mGlobalLock) {
+             for (int i = 0; i < packageNames.size(); ++i) {
+                 mTaskSupervisor.mLaunchParamsPersister.removeRecordForPackage(packageNames.get(i));
+@@ -4063,7 +4109,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+     @Override
+     public void onPictureInPictureStateChanged(PictureInPictureUiState pipState) {
+-        enforceTaskPermission("onPictureInPictureStateChanged");
++        if (!shouldBypassTaskPermission(mContext)) {
++            enforceTaskPermission("onPictureInPictureStateChanged");
++        }
+         final Task rootPinnedTask = mRootWindowContainer.getDefaultTaskDisplayArea()
+                 .getRootPinnedTask();
+         if (rootPinnedTask != null && rootPinnedTask.getTopMostActivity() != null) {
+@@ -6482,7 +6530,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
+ 
+         @Override
+         public void startConfirmDeviceCredentialIntent(Intent intent, Bundle options) {
+-            enforceTaskPermission("startConfirmDeviceCredentialIntent");
++            if (!shouldBypassTaskPermission(mContext)) {
++                enforceTaskPermission("startConfirmDeviceCredentialIntent");
++            }
+ 
+             synchronized (mGlobalLock) {
+                 final long ident = Binder.clearCallingIdentity();
+-- 
+2.34.1
+
