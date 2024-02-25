@@ -1,7 +1,7 @@
 From f0eecb08e457501b01672aeacf245c408e7eef05 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 21 Feb 2024 16:21:51 -0500
-Subject: [PATCH 13/13] Initialize Samsung HIDL ISehRadio. Fixes 5G on S20
+Subject: [PATCH 13/14] Initialize Samsung HIDL ISehRadio. Fixes 5G on S20
  Ultra
 
 ---
