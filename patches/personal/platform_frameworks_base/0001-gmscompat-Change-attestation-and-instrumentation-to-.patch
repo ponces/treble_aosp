@@ -1,8 +1,8 @@
-From 120c71cc50f47a2ac93fc135ca6286c58e6bb8ad Mon Sep 17 00:00:00 2001
+From 8cb353dc7657fd01e742f5929c179af13ef2b139 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 9 Nov 2023 12:33:55 +0100
-Subject: [PATCH 01/10] gmscompat: Change attestation and instrumentation to
- pass SafetyNet and Play Integrity API.
+Subject: [PATCH 1/9] gmscompat: Change attestation and instrumentation to pass
+ SafetyNet and Play Integrity API.
 
 Original work by @kdrag0n.
 Updated by many people like @dereference23, @Stallix, @dyneteve, @neobuddy89 and @jhenrique09.
@@ -46,7 +46,7 @@ index e31486f18dbf..56ff16f6c358 100644
  
 diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 new file mode 100644
-index 000000000000..4faa4922716d
+index 000000000000..12e68b9360bc
 --- /dev/null
 +++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 @@ -0,0 +1,100 @@
@@ -116,14 +116,14 @@ index 000000000000..4faa4922716d
 +    }
 +
 +    private static void spoofBuildGms() {
-+        setBuildField("PRODUCT", "CatS60");
-+        setBuildField("DEVICE", "CatS60");
-+        setBuildField("MANUFACTURER", "BullittGroupLimited");
-+        setBuildField("BRAND", "Cat");
-+        setBuildField("MODEL", "S60");
-+        setBuildField("FINGERPRINT", "Cat/CatS60/CatS60:6.0.1/MMB29M/LTE_D0201121.0_S60_0.031.02:user/release-keys");
-+        //setVersionField("SECURITY_PATCH", "2017-01-01");
-+        //setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N);
++        setBuildField("PRODUCT", "griffin_retcn");
++        setBuildField("DEVICE", "griffin");
++        setBuildField("MANUFACTURER", "motorola");
++        setBuildField("BRAND", "motorola");
++        setBuildField("MODEL", "XT1650-05");
++        setBuildField("FINGERPRINT", "motorola/griffin_retcn/griffin:6.0.1/MCC24.246-37/42:user/release-keys");
++        setVersionField("SECURITY_PATCH", "2016-07-01");
++        setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.LOLLIPOP);
 +    }
 +
 +    public static void initApplicationBeforeOnCreate(Application app) {

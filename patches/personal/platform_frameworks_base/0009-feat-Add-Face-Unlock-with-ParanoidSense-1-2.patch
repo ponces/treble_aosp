@@ -1,7 +1,7 @@
-From f26f62cbc5194e7a404b9a555c2fded7958f2d64 Mon Sep 17 00:00:00 2001
+From 1dff9a908c5c6526fc5d57ad7903e132d0113a02 Mon Sep 17 00:00:00 2001
 From: Chris Crump <chriscrawford893@gmail.com>
 Date: Tue, 1 Nov 2022 17:27:48 -0400
-Subject: [PATCH 10/10] feat: Add Face Unlock with ParanoidSense (1/2)
+Subject: [PATCH 9/9] feat: Add Face Unlock with ParanoidSense (1/2)
 
 Based on AOSPA's implementation and adapted by @ghostrider-reborn
 

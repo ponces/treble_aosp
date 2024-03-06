@@ -1,7 +1,7 @@
-From c2ce1231113ea2bf56e225af68daa6963324bdcc Mon Sep 17 00:00:00 2001
+From 3e560ae355f87ed090dea39584aa983c8caac1c0 Mon Sep 17 00:00:00 2001
 From: Anay Wadhera <anay1018@gmail.com>
 Date: Sun, 13 Nov 2022 10:42:03 -0500
-Subject: [PATCH 05/10] SystemUI: fix SliceView layout
+Subject: [PATCH 5/9] SystemUI: fix SliceView layout
 
 Before: https://imgur.com/a/wIwyMJS
 After: https://imgur.com/a/dJPVMxS
