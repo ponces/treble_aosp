@@ -1,7 +1,7 @@
-From fcbf4a35bdaae699adc1c271ad557f853891e9e4 Mon Sep 17 00:00:00 2001
+From c825eb894992efb6ee6a51dd961ac81272f3c115 Mon Sep 17 00:00:00 2001
 From: MrHereAndThere <38396158+boydaihungst@users.noreply.github.com>
 Date: Fri, 17 Nov 2023 09:22:29 +0700
-Subject: [PATCH 45/56] fix(fod): Extra Dim overlap fod overlay
+Subject: [PATCH 45/55] fix(fod): Extra Dim overlap fod overlay
 
 Extra Dim will set display panel brightness to lowest value possible, which will also effect FOD overlay.
 ---
@@ -9,10 +9,10 @@ Extra Dim will set display panel brightness to lowest value possible, which will
  1 file changed, 18 insertions(+), 2 deletions(-)
 
 diff --git a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsController.java b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsController.java
-index 19b67b5f3def..ef5e4f617138 100644
+index aed480fd7af5..0f95ad8a8f45 100644
 --- a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsController.java
 +++ b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsController.java
-@@ -42,6 +42,7 @@ import android.hardware.fingerprint.FingerprintSensorProperties;
+@@ -41,6 +41,7 @@ import android.hardware.fingerprint.FingerprintSensorProperties;
  import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
  import android.hardware.fingerprint.IUdfpsOverlayController;
  import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
@@ -20,34 +20,34 @@ index 19b67b5f3def..ef5e4f617138 100644
  import android.hardware.input.InputManager;
  import android.os.Build;
  import android.os.Handler;
-@@ -184,6 +185,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
-     @NonNull private final UdfpsUtils mUdfpsUtils;
-     @NonNull private final InputManager mInputManager;
+@@ -182,6 +183,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
      @NonNull private final UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
+     @NonNull private final SelectedUserInteractor mSelectedUserInteractor;
+     @NonNull private final FpsUnlockTracker mFpsUnlockTracker;
 +    @NonNull private final ColorDisplayManager mColorDisplayManager;
 +    private boolean mIgnoreExtraDim;
      private final boolean mIgnoreRefreshRate;
+     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
  
-     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
-@@ -898,7 +901,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
-             @NonNull UdfpsUtils udfpsUtils,
-             @NonNull KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
-             @NonNull UdfpsKeyguardAccessibilityDelegate udfpsKeyguardAccessibilityDelegate,
--            @NonNull Provider<UdfpsKeyguardViewModels> udfpsKeyguardViewModelsProvider) {
-+            @NonNull Provider<UdfpsKeyguardViewModels> udfpsKeyguardViewModelsProvider,
+@@ -716,7 +719,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
+             @NonNull FpsUnlockTracker fpsUnlockTracker,
+             @NonNull KeyguardTransitionInteractor keyguardTransitionInteractor,
+             Lazy<DeviceEntryUdfpsTouchOverlayViewModel> deviceEntryUdfpsTouchOverlayViewModel,
+-            Lazy<DefaultUdfpsTouchOverlayViewModel> defaultUdfpsTouchOverlayViewModel) {
++            Lazy<DefaultUdfpsTouchOverlayViewModel> defaultUdfpsTouchOverlayViewModel,
 +            @NonNull ColorDisplayManager colorDisplayManager) {
          mContext = context;
          mExecution = execution;
          mVibrator = vibrator;
-@@ -945,6 +949,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
-         mUdfpsUtils = udfpsUtils;
-         mInputManager = inputManager;
-         mUdfpsKeyguardAccessibilityDelegate = udfpsKeyguardAccessibilityDelegate;
+@@ -762,6 +766,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
+         mFpsUnlockTracker = fpsUnlockTracker;
+         mFpsUnlockTracker.startTracking();
+         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
 +        mColorDisplayManager = colorDisplayManager;
  
-         mTouchProcessor = mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
-                 ? singlePointerTouchProcessor : null;
-@@ -1025,7 +1030,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
+         mTouchProcessor = singlePointerTouchProcessor;
+         mSessionTracker = sessionTracker;
+@@ -835,7 +840,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
  
      private void showUdfpsOverlay(@NonNull UdfpsControllerOverlay overlay) {
          mExecution.assertIsMainThread();
@@ -59,7 +59,7 @@ index 19b67b5f3def..ef5e4f617138 100644
          mOverlay = overlay;
          final int requestReason = overlay.getRequestReason();
          if (requestReason == REASON_AUTH_KEYGUARD
-@@ -1244,6 +1252,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
+@@ -1061,6 +1069,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
              return;
          }
          if (isOptical()) {
@@ -67,10 +67,10 @@ index 19b67b5f3def..ef5e4f617138 100644
 +                mColorDisplayManager.setReduceBrightColorsActivated(false);
 +                Log.d(TAG, "Extra dim disabled");
 +            }
-             mLatencyTracker.onActionStart(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
+             mLatencyTracker.onActionStart(ACTION_UDFPS_ILLUMINATE);
          }
-         // Refresh screen timeout and boost process priority if possible.
-@@ -1330,6 +1342,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
+         if (getBiometricSessionType() == SESSION_KEYGUARD) {
+@@ -1136,6 +1148,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
          mActivePointerId = -1;
          mAcquiredReceived = false;
          if (mOnFingerDown) {
@@ -78,9 +78,9 @@ index 19b67b5f3def..ef5e4f617138 100644
 +                mColorDisplayManager.setReduceBrightColorsActivated(true);
 +                Log.d(TAG, "Extra dim restored");
 +            }
-             if (mAlternateTouchProvider != null) {
-                 mBiometricExecutor.execute(() -> {
-                     mAlternateTouchProvider.onPointerUp(requestId);
+             mFingerprintManager.onPointerUp(requestId, mSensorProps.sensorId, pointerId, x,
+                     y, minor, major, orientation, time, gestureStart, isAod);
+             if(SystemProperties.get("ro.vendor.build.fingerprint").contains("nubia/NX669")) {
 -- 
 2.34.1
 

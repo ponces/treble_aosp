@@ -1,7 +1,7 @@
-From 85dbba620ccf9643ff3ecebf815a13d520d1f551 Mon Sep 17 00:00:00 2001
+From 19c6edf7f1e5400a14cca614bdaceedc978f1702 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Thu, 8 Nov 2018 23:04:03 +0100
-Subject: [PATCH 08/56] Re-order services so that it works even without qtaguid
+Subject: [PATCH 08/55] Re-order services so that it works even without qtaguid
 
 Change-Id: I0c0f527b3ae151d45c68f7ac6c205da3f34e74df
 ---
@@ -9,10 +9,10 @@ Change-Id: I0c0f527b3ae151d45c68f7ac6c205da3f34e74df
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/services/core/java/com/android/server/net/NetworkPolicyManagerService.java b/services/core/java/com/android/server/net/NetworkPolicyManagerService.java
-index b7082690276c..ab190a39e2e6 100644
+index 46e7041b8898..80c4b221e785 100644
 --- a/services/core/java/com/android/server/net/NetworkPolicyManagerService.java
 +++ b/services/core/java/com/android/server/net/NetworkPolicyManagerService.java
-@@ -925,6 +925,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
+@@ -937,6 +937,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
          Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "systemReady");
          final int oldPriority = Process.getThreadPriority(Process.myTid());
          try {
@@ -23,7 +23,7 @@ index b7082690276c..ab190a39e2e6 100644
              // Boost thread's priority during system server init
              Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
              if (!isBandwidthControlEnabled()) {
-@@ -932,10 +936,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
+@@ -944,10 +948,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                  return;
              }
  
@@ -33,7 +33,7 @@ index b7082690276c..ab190a39e2e6 100644
 -
              synchronized (mUidRulesFirstLock) {
                  synchronized (mNetworkPoliciesSecondLock) {
-                     updatePowerSaveWhitelistUL();
+                     updatePowerSaveAllowlistUL();
 -- 
 2.34.1
 

@@ -1,4 +1,4 @@
-From b4302826aba1f1c188eca2652aca0c721e591e9b Mon Sep 17 00:00:00 2001
+From 49d98a01d3006cc046a5c3b4b9967bd4e8f03d01 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sat, 25 Nov 2023 08:15:28 -0500
 Subject: [PATCH 09/11] Add MTK GED KPI support to fix broken Mediatek gpufreq
@@ -22,7 +22,7 @@ well)
  2 files changed, 205 insertions(+)
 
 diff --git a/libs/gui/Surface.cpp b/libs/gui/Surface.cpp
-index 53a2f64d11..1eb40aa3c1 100644
+index 07a0cfed63..1d527c089f 100644
 --- a/libs/gui/Surface.cpp
 +++ b/libs/gui/Surface.cpp
 @@ -24,6 +24,9 @@
@@ -35,7 +35,7 @@ index 53a2f64d11..1eb40aa3c1 100644
  
  #include <inttypes.h>
  
-@@ -49,6 +52,9 @@
+@@ -50,6 +53,9 @@
  #include <gui/LayerState.h>
  #include <private/gui/ComposerService.h>
  #include <private/gui/ComposerServiceAIDL.h>
@@ -43,9 +43,9 @@ index 53a2f64d11..1eb40aa3c1 100644
 +
 +#include <binder/IPCThreadState.h>
  
- namespace android {
+ #include <com_android_graphics_libgui_flags.h>
  
-@@ -72,6 +78,37 @@ bool isInterceptorRegistrationOp(int op) {
+@@ -76,6 +82,37 @@ bool isInterceptorRegistrationOp(int op) {
  }
  
  } // namespace
@@ -83,7 +83,7 @@ index 53a2f64d11..1eb40aa3c1 100644
  
  Surface::Surface(const sp<IGraphicBufferProducer>& bufferProducer, bool controlledByApp,
                   const sp<IBinder>& surfaceControlHandle)
-@@ -124,6 +161,47 @@ Surface::Surface(const sp<IGraphicBufferProducer>& bufferProducer, bool controll
+@@ -128,6 +165,47 @@ Surface::Surface(const sp<IGraphicBufferProducer>& bufferProducer, bool controll
      mSwapIntervalZero = false;
      mMaxBufferCount = NUM_BUFFER_SLOTS;
      mSurfaceControlHandle = surfaceControlHandle;
@@ -131,7 +131,7 @@ index 53a2f64d11..1eb40aa3c1 100644
  }
  
  Surface::~Surface() {
-@@ -643,6 +721,36 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer, int* fenceFd) {
+@@ -647,6 +725,36 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer, int* fenceFd) {
          }
      }
  
@@ -168,7 +168,7 @@ index 53a2f64d11..1eb40aa3c1 100644
      if (fence->isValid()) {
          *fenceFd = fence->dup();
          if (*fenceFd == -1) {
-@@ -1086,6 +1194,60 @@ void Surface::onBufferQueuedLocked(int slot, sp<Fence> fence,
+@@ -1090,6 +1198,60 @@ void Surface::onBufferQueuedLocked(int slot, sp<Fence> fence,
      }
  
      mQueueBufferCondition.broadcast();
@@ -229,7 +229,7 @@ index 53a2f64d11..1eb40aa3c1 100644
  
      if (CC_UNLIKELY(atrace_is_tag_enabled(ATRACE_TAG_GRAPHICS))) {
          static gui::FenceMonitor gpuCompletionThread("GPU completion");
-@@ -1853,6 +2015,46 @@ int Surface::connect(
+@@ -1857,6 +2019,46 @@ int Surface::connect(
  
          mConsumerRunningBehind = (output.numPendingBuffers >= 2);
      }

@@ -1,19 +1,19 @@
-From 6d0551f76ec5f4fb6569b751da59856a4e8b7999 Mon Sep 17 00:00:00 2001
+From 5675f8bf2ccab5ff902daf501c6803805f6ee355 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 2 May 2022 17:44:28 -0400
-Subject: [PATCH 2/5] Ignore cancelled fingerprint events, they are expected,
+Subject: [PATCH 2/4] Ignore cancelled fingerprint events, they are expected,
  plus add more fingerprint enroll logs
 
 ---
- .../biometrics/fingerprint/FingerprintEnrollEnrolling.java   | 5 ++++-
- .../biometrics/fingerprint/FingerprintEnrollFindSensor.java  | 1 +
- 2 files changed, 5 insertions(+), 1 deletion(-)
+ .../biometrics/fingerprint/FingerprintEnrollEnrolling.java     | 3 +++
+ .../biometrics/fingerprint/FingerprintEnrollFindSensor.java    | 1 +
+ 2 files changed, 4 insertions(+)
 
 diff --git a/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollEnrolling.java b/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollEnrolling.java
-index a62bd6723ec..e10ff1220d9 100644
+index 6e908850e89..6746a71f3f2 100644
 --- a/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollEnrolling.java
 +++ b/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollEnrolling.java
-@@ -765,6 +765,9 @@ public class FingerprintEnrollEnrolling extends BiometricsEnrollEnrolling {
+@@ -793,6 +793,9 @@ public class FingerprintEnrollEnrolling extends BiometricsEnrollEnrolling {
  
      @Override
      public void onEnrollmentError(int errMsgId, CharSequence errString) {
@@ -23,18 +23,11 @@ index a62bd6723ec..e10ff1220d9 100644
          onCancelEnrollment(errMsgId);
          dismissTouchDialogIfSfps();
      }
-@@ -1175,4 +1178,4 @@ public class FingerprintEnrollEnrolling extends BiometricsEnrollEnrolling {
-             return SettingsEnums.DIALOG_FINGERPRINT_ICON_TOUCH;
-         }
-     }
--}
-\ No newline at end of file
-+}
 diff --git a/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollFindSensor.java b/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollFindSensor.java
-index aadc9329e4c..8ab1020c6a2 100644
+index 059173c198e..c89c2d0cfd0 100644
 --- a/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollFindSensor.java
 +++ b/src/com/android/settings/biometrics/fingerprint/FingerprintEnrollFindSensor.java
-@@ -326,6 +326,7 @@ public class FingerprintEnrollFindSensor extends BiometricEnrollBase implements
+@@ -369,6 +369,7 @@ public class FingerprintEnrollFindSensor extends BiometricEnrollBase implements
  
      @Override
      public void onEnrollmentError(int errMsgId, CharSequence errString) {

@@ -1,7 +1,7 @@
-From 8720014bb39888e4070519c5c28f2a2ed16e017d Mon Sep 17 00:00:00 2001
+From b61108a238e17eff81efe0339ee442383bb6ee5a Mon Sep 17 00:00:00 2001
 From: Danny Lin <danny@kdrag0n.dev>
 Date: Sat, 16 Oct 2021 05:27:57 -0700
-Subject: [PATCH 37/56] Add support for app signature spoofing
+Subject: [PATCH 37/55] Add support for app signature spoofing
 
 This is needed by microG GmsCore to pretend to be the official Google
 Play Services package, because client apps check the package signature
@@ -38,7 +38,7 @@ Change-Id: Ied7d6ce0b83a2d2345c3abba0429998d86494a88
  4 files changed, 56 insertions(+), 3 deletions(-)
 
 diff --git a/core/api/current.txt b/core/api/current.txt
-index 288ab479c0fb..2124d89c6e6f 100644
+index 9b5316fb79b5..39365fa14073 100644
 --- a/core/api/current.txt
 +++ b/core/api/current.txt
 @@ -95,6 +95,7 @@ package android {
@@ -49,7 +49,7 @@ index 288ab479c0fb..2124d89c6e6f 100644
      field public static final String FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE";
      field public static final String FOREGROUND_SERVICE_CAMERA = "android.permission.FOREGROUND_SERVICE_CAMERA";
      field public static final String FOREGROUND_SERVICE_CONNECTED_DEVICE = "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE";
-@@ -326,6 +327,7 @@ package android {
+@@ -328,6 +329,7 @@ package android {
      field public static final String CALL_LOG = "android.permission-group.CALL_LOG";
      field public static final String CAMERA = "android.permission-group.CAMERA";
      field public static final String CONTACTS = "android.permission-group.CONTACTS";
@@ -58,10 +58,10 @@ index 288ab479c0fb..2124d89c6e6f 100644
      field public static final String MICROPHONE = "android.permission-group.MICROPHONE";
      field public static final String NEARBY_DEVICES = "android.permission-group.NEARBY_DEVICES";
 diff --git a/core/res/AndroidManifest.xml b/core/res/AndroidManifest.xml
-index cbb6e74bd1ce..3df7a8000314 100644
+index c6a241f2fa62..9373ee374ae4 100644
 --- a/core/res/AndroidManifest.xml
 +++ b/core/res/AndroidManifest.xml
-@@ -4250,6 +4250,21 @@
+@@ -4310,6 +4310,21 @@
          android:description="@string/permdesc_getPackageSize"
          android:protectionLevel="normal" />
  
@@ -84,10 +84,10 @@ index cbb6e74bd1ce..3df7a8000314 100644
           {@link android.content.pm.PackageManager#addPackageToPreferred}
           for details. -->
 diff --git a/core/res/res/values/strings.xml b/core/res/res/values/strings.xml
-index 9c018c30f9e3..966fec172070 100644
+index 4596ca74bf8f..596218ad9c52 100644
 --- a/core/res/res/values/strings.xml
 +++ b/core/res/res/values/strings.xml
-@@ -991,6 +991,18 @@
+@@ -994,6 +994,18 @@
  
      <!--  Permissions -->
  
@@ -107,10 +107,10 @@ index 9c018c30f9e3..966fec172070 100644
      <string name="permlab_statusBar">disable or modify status bar</string>
      <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
 diff --git a/services/core/java/com/android/server/pm/ComputerEngine.java b/services/core/java/com/android/server/pm/ComputerEngine.java
-index 78f1fa60b69f..fb2f7da97cda 100644
+index 3cb2420cd223..05e0e1a145f2 100644
 --- a/services/core/java/com/android/server/pm/ComputerEngine.java
 +++ b/services/core/java/com/android/server/pm/ComputerEngine.java
-@@ -1450,6 +1450,29 @@ public class ComputerEngine implements Computer {
+@@ -1463,6 +1463,29 @@ public class ComputerEngine implements Computer {
          return result;
      }
  
@@ -140,7 +140,7 @@ index 78f1fa60b69f..fb2f7da97cda 100644
      public final PackageInfo generatePackageInfo(PackageStateInternal ps,
              @PackageManager.PackageInfoFlagsBits long flags, int userId) {
          if (!mUserManager.exists(userId)) return null;
-@@ -1483,13 +1506,14 @@ public class ComputerEngine implements Computer {
+@@ -1496,13 +1519,14 @@ public class ComputerEngine implements Computer {
                      || ArrayUtils.isEmpty(p.getPermissions())) ? Collections.emptySet()
                      : mPermissionManager.getInstalledPermissions(ps.getPackageName());
              // Compute granted permissions only if package has requested permissions

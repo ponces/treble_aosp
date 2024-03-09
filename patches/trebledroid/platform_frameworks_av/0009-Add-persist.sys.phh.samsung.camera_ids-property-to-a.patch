@@ -1,7 +1,7 @@
-From 2e4bb6e6b1ff9a0e9650647bdb9c2a3ace3bae28 Mon Sep 17 00:00:00 2001
+From bace802dce1865ebe2170fb8d485dcdac788e3b5 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Thu, 14 May 2020 19:54:55 +0200
-Subject: [PATCH 09/25] Add persist.sys.phh.samsung.camera_ids property to
+Subject: [PATCH 09/24] Add persist.sys.phh.samsung.camera_ids property to
  access hidden Samsung cameras
 
 Change-Id: I2c7bf535272acc28ed2277e96c78ddd28a0b4593
@@ -11,22 +11,22 @@ Change-Id: I2c7bf535272acc28ed2277e96c78ddd28a0b4593
  2 files changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/services/camera/libcameraservice/Android.bp b/services/camera/libcameraservice/Android.bp
-index a45365ad53f..25fd8451a97 100644
+index 4883a09f37..080ccf646d 100644
 --- a/services/camera/libcameraservice/Android.bp
 +++ b/services/camera/libcameraservice/Android.bp
-@@ -175,6 +175,7 @@ cc_library_shared {
-         "android.hardware.camera.device@3.6",
-         "android.hardware.camera.device@3.7",
-         "android.hardware.camera.device-V2-ndk",
+@@ -107,6 +107,7 @@ cc_defaults {
+         "android.hardware.camera.provider@2.6",
+         "android.hardware.camera.provider@2.7",
+         "android.hardware.camera.provider-V3-ndk",
 +        "vendor.samsung.hardware.camera.provider@3.0",
-         "media_permission-aidl-cpp",
-     ],
- 
+         "libaidlcommonsupport",
+         "libbinderthreadstateutils",
+         "libcameraservice_device_independent",
 diff --git a/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp b/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp
-index 8ff5c3fb011..d498ecbee56 100644
+index d2643c1e13..71aabc14b3 100644
 --- a/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp
 +++ b/services/camera/libcameraservice/common/hidl/HidlProviderInfo.cpp
-@@ -27,6 +27,7 @@
+@@ -28,6 +28,7 @@
  #include <utils/Trace.h>
  
  #include <android/hardware/camera/device/3.7/ICameraDevice.h>
@@ -34,7 +34,7 @@ index 8ff5c3fb011..d498ecbee56 100644
  
  namespace {
  const bool kEnableLazyHal(property_get_bool("ro.camera.enableLazyHal", false));
-@@ -134,6 +135,7 @@ status_t HidlProviderInfo::initializeHidlProvider(
+@@ -136,6 +137,7 @@ status_t HidlProviderInfo::initializeHidlProvider(
              mMinorVersion = 6;
          }
      }
@@ -42,7 +42,7 @@ index 8ff5c3fb011..d498ecbee56 100644
      // We need to check again since cast2_6.isOk() succeeds even if the provider
      // version isn't actually 2.6.
      if (interface2_6 == nullptr){
-@@ -170,6 +172,9 @@ status_t HidlProviderInfo::initializeHidlProvider(
+@@ -172,6 +174,9 @@ status_t HidlProviderInfo::initializeHidlProvider(
          return mapToStatusT(status);
      }
  
@@ -52,7 +52,7 @@ index 8ff5c3fb011..d498ecbee56 100644
      hardware::Return<bool> linked = interface->linkToDeath(this, /*cookie*/ mId);
      if (!linked.isOk()) {
          ALOGE("%s: Transaction error in linking to camera provider '%s' death: %s",
-@@ -200,7 +205,7 @@ status_t HidlProviderInfo::initializeHidlProvider(
+@@ -202,7 +207,7 @@ status_t HidlProviderInfo::initializeHidlProvider(
  
      // Get initial list of camera devices, if any
      std::vector<std::string> devices;
@@ -61,7 +61,7 @@ index 8ff5c3fb011..d498ecbee56 100644
              Status idStatus,
              const hardware::hidl_vec<hardware::hidl_string>& cameraDeviceNames) {
          status = idStatus;
-@@ -217,7 +222,12 @@ status_t HidlProviderInfo::initializeHidlProvider(
+@@ -219,7 +224,12 @@ status_t HidlProviderInfo::initializeHidlProvider(
                      mProviderPublicCameraIds.push_back(id);
                  }
              }

@@ -1,4 +1,4 @@
-From ed321e9719bc351def9336b6d12cf7bed69ed9eb Mon Sep 17 00:00:00 2001
+From f97c20abdc1fd5434d092eea20ac72276545e290 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 18 Dec 2022 18:17:30 -0500
 Subject: [PATCH 08/11] FOD support for Samsung and Asus
@@ -19,10 +19,10 @@ Subject: [PATCH 08/11] FOD support for Samsung and Asus
  12 files changed, 77 insertions(+), 5 deletions(-)
 
 diff --git a/libs/gui/BLASTBufferQueue.cpp b/libs/gui/BLASTBufferQueue.cpp
-index 207fa4fd31..a162658e30 100644
+index f317a2eea0..6a55bb3f70 100644
 --- a/libs/gui/BLASTBufferQueue.cpp
 +++ b/libs/gui/BLASTBufferQueue.cpp
-@@ -35,12 +35,21 @@
+@@ -37,6 +37,7 @@
  
  #include <private/gui/ComposerService.h>
  #include <private/gui/ComposerServiceAIDL.h>
@@ -30,7 +30,8 @@ index 207fa4fd31..a162658e30 100644
  
  #include <android-base/thread_annotations.h>
  #include <chrono>
- 
+@@ -46,6 +47,14 @@
+ using namespace com::android::graphics::libgui;
  using namespace std::chrono_literals;
  
 +static bool sCheckedProps = false;
@@ -44,7 +45,7 @@ index 207fa4fd31..a162658e30 100644
  namespace {
  inline const char* boolToString(bool b) {
      return b ? "true" : "false";
-@@ -159,9 +168,16 @@ BLASTBufferQueue::BLASTBufferQueue(const std::string& name, bool updateDestinati
+@@ -181,9 +190,16 @@ BLASTBufferQueue::BLASTBufferQueue(const std::string& name, bool updateDestinati
  
      // safe default, most producers are expected to override this
      mProducer->setMaxDequeuedBufferCount(2);
@@ -88,7 +89,7 @@ index 474d381dbb..8c6a5babd4 100644
  
      // Gralloc3 implementations never understand non-BLOB with GPU_DATA_BUFFER
 diff --git a/libs/ui/Gralloc4.cpp b/libs/ui/Gralloc4.cpp
-index b6274ab9c0..f35009fe28 100644
+index 03ff58a76c..c8b055f80b 100644
 --- a/libs/ui/Gralloc4.cpp
 +++ b/libs/ui/Gralloc4.cpp
 @@ -122,7 +122,6 @@ static status_t validateBufferDescriptorInfo(IMapper::BufferDescriptorInfo* desc
@@ -100,7 +101,7 @@ index b6274ab9c0..f35009fe28 100644
  
      // Combinations that are only allowed with gralloc 4.1.
 diff --git a/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp b/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp
-index fc5f8ca1d3..4b81cc1df0 100644
+index 7fe3369f88..afd9942d5e 100644
 --- a/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp
 +++ b/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp
 @@ -26,6 +26,7 @@
@@ -121,7 +122,7 @@ index fc5f8ca1d3..4b81cc1df0 100644
  using aidl::android::hardware::graphics::composer3::Composition;
  
  namespace android::compositionengine {
-@@ -438,6 +442,26 @@ void OutputLayer::writeOutputDependentGeometryStateToHWC(HWC2::Layer* hwcLayer,
+@@ -442,6 +446,26 @@ void OutputLayer::writeOutputDependentGeometryStateToHWC(HWC2::Layer* hwcLayer,
                                                       ->getHeight()));
      }
  
@@ -149,10 +150,10 @@ index fc5f8ca1d3..4b81cc1df0 100644
            displayFrame.right, displayFrame.bottom);
  
 diff --git a/services/surfaceflinger/DisplayHardware/AidlComposerHal.cpp b/services/surfaceflinger/DisplayHardware/AidlComposerHal.cpp
-index c0eb36dc02..782e22cbc2 100644
+index 64a8ae7fcd..b7da02cdcc 100644
 --- a/services/surfaceflinger/DisplayHardware/AidlComposerHal.cpp
 +++ b/services/surfaceflinger/DisplayHardware/AidlComposerHal.cpp
-@@ -1599,5 +1599,13 @@ void AidlComposer::addDisplay(Display display) {
+@@ -1680,5 +1680,13 @@ void AidlComposer::addDisplay(Display display) {
  void AidlComposer::onHotplugConnect(Display display) {
      addDisplay(display);
  }
@@ -167,12 +168,12 @@ index c0eb36dc02..782e22cbc2 100644
  } // namespace Hwc2
  } // namespace android
 diff --git a/services/surfaceflinger/DisplayHardware/AidlComposerHal.h b/services/surfaceflinger/DisplayHardware/AidlComposerHal.h
-index 8d21b491c3..349278771d 100644
+index ea0e53a202..1e11102cad 100644
 --- a/services/surfaceflinger/DisplayHardware/AidlComposerHal.h
 +++ b/services/surfaceflinger/DisplayHardware/AidlComposerHal.h
-@@ -238,6 +238,8 @@ public:
-     Error setHdrConversionStrategy(HdrConversionStrategy, Hdr*) override;
-     Error setRefreshRateChangedCallbackDebugEnabled(Display, bool) override;
+@@ -245,6 +245,8 @@ public:
+     Error notifyExpectedPresent(Display, nsecs_t expectedPresentTime,
+                                 int32_t frameIntervalNs) override;
  
 +    // Proprietary extensions
 +    Error setLayerClass(Display display, Layer layer, uint32_t layerClass) override;
@@ -180,13 +181,13 @@ index 8d21b491c3..349278771d 100644
      // Many public functions above simply write a command into the command
      // queue to batch the calls.  validateDisplay and presentDisplay will call
 diff --git a/services/surfaceflinger/DisplayHardware/ComposerHal.h b/services/surfaceflinger/DisplayHardware/ComposerHal.h
-index cf677955bf..eb5a2bf786 100644
+index bc067a0e5d..c0fcff6a7d 100644
 --- a/services/surfaceflinger/DisplayHardware/ComposerHal.h
 +++ b/services/surfaceflinger/DisplayHardware/ComposerHal.h
-@@ -291,6 +291,9 @@ public:
-     virtual Error setHdrConversionStrategy(
-             ::aidl::android::hardware::graphics::common::HdrConversionStrategy, Hdr*) = 0;
+@@ -303,6 +303,9 @@ public:
      virtual Error setRefreshRateChangedCallbackDebugEnabled(Display, bool) = 0;
+     virtual Error notifyExpectedPresent(Display, nsecs_t expectedPresentTime,
+                                         int32_t frameIntervalNs) = 0;
 +
 +    // Proprietary extensions
 +    virtual Error setLayerClass(Display display, Layer layer, uint32_t layerClass) = 0;
@@ -194,10 +195,10 @@ index cf677955bf..eb5a2bf786 100644
  
  } // namespace Hwc2
 diff --git a/services/surfaceflinger/DisplayHardware/HWC2.cpp b/services/surfaceflinger/DisplayHardware/HWC2.cpp
-index aaf2523338..2acb79ad2f 100644
+index 24a9e22a2b..52777b1e74 100644
 --- a/services/surfaceflinger/DisplayHardware/HWC2.cpp
 +++ b/services/surfaceflinger/DisplayHardware/HWC2.cpp
-@@ -1003,6 +1003,14 @@ Error Layer::setBlockingRegion(const Region& region) {
+@@ -1014,6 +1014,14 @@ Error Layer::setBlockingRegion(const Region& region) {
      return static_cast<Error>(intError);
  }
  
@@ -213,10 +214,10 @@ index aaf2523338..2acb79ad2f 100644
  } // namespace HWC2
  } // namespace android
 diff --git a/services/surfaceflinger/DisplayHardware/HWC2.h b/services/surfaceflinger/DisplayHardware/HWC2.h
-index 23dd3e5016..a63d609df7 100644
+index f907061774..04513ae0fe 100644
 --- a/services/surfaceflinger/DisplayHardware/HWC2.h
 +++ b/services/surfaceflinger/DisplayHardware/HWC2.h
-@@ -345,6 +345,9 @@ public:
+@@ -349,6 +349,9 @@ public:
      // AIDL HAL
      [[nodiscard]] virtual hal::Error setBrightness(float brightness) = 0;
      [[nodiscard]] virtual hal::Error setBlockingRegion(const android::Region& region) = 0;
@@ -226,7 +227,7 @@ index 23dd3e5016..a63d609df7 100644
  };
  
  namespace impl {
-@@ -396,6 +399,8 @@ public:
+@@ -400,6 +403,8 @@ public:
      hal::Error setBrightness(float brightness) override;
      hal::Error setBlockingRegion(const android::Region& region) override;
  
@@ -236,10 +237,10 @@ index 23dd3e5016..a63d609df7 100644
      // These are references to data owned by HWComposer, which will outlive
      // this HWC2::Layer, so these references are guaranteed to be valid for
 diff --git a/services/surfaceflinger/DisplayHardware/HidlComposerHal.cpp b/services/surfaceflinger/DisplayHardware/HidlComposerHal.cpp
-index 9b41da5754..f16c3f17a7 100644
+index c4ff9cc6be..bd158ad5ad 100644
 --- a/services/surfaceflinger/DisplayHardware/HidlComposerHal.cpp
 +++ b/services/surfaceflinger/DisplayHardware/HidlComposerHal.cpp
-@@ -1409,6 +1409,13 @@ Error HidlComposer::getPhysicalDisplayOrientation(Display, AidlTransform*) {
+@@ -1434,6 +1434,13 @@ Error HidlComposer::getPhysicalDisplayOrientation(Display, AidlTransform*) {
                       "OptionalFeature::PhysicalDisplayOrientation is not supported on HIDL");
  }
  
@@ -254,12 +255,12 @@ index 9b41da5754..f16c3f17a7 100644
      const bool vsyncSwitchingSupported =
              isSupported(Hwc2::Composer::OptionalFeature::RefreshRateSwitching);
 diff --git a/services/surfaceflinger/DisplayHardware/HidlComposerHal.h b/services/surfaceflinger/DisplayHardware/HidlComposerHal.h
-index 0521acf9c4..1acb8b0efe 100644
+index d78bfb7c6b..c05dc69934 100644
 --- a/services/surfaceflinger/DisplayHardware/HidlComposerHal.h
 +++ b/services/surfaceflinger/DisplayHardware/HidlComposerHal.h
-@@ -346,6 +346,8 @@ public:
-                                    Hdr*) override;
+@@ -352,6 +352,8 @@ public:
      Error setRefreshRateChangedCallbackDebugEnabled(Display, bool) override;
+     Error notifyExpectedPresent(Display, nsecs_t, int32_t) override;
  
 +    // Proprietary extensions
 +    Error setLayerClass(Display display, Layer layer, uint32_t layerClass) override;

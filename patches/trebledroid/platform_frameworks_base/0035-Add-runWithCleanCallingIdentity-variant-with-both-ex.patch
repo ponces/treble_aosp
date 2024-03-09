@@ -1,18 +1,18 @@
-From bdfdfb6bc34b555f4f53dd8f9c9b6058767caba9 Mon Sep 17 00:00:00 2001
+From e10ed847555a4bb96b07d6e8802e3167ac4bd0a0 Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Sat, 12 Aug 2023 20:11:17 +0800
-Subject: [PATCH 35/56] Add runWithCleanCallingIdentity variant with both
+Subject: [PATCH 35/55] Add runWithCleanCallingIdentity variant with both
  executor and return value
 
 This complements the fixup to ImsPhoneCallTracker (in fw/o/t) for U
 
 Change-Id: If444290787025e130dce4bdeaf92372ae32793fe
 ---
- .../telephony/util/TelephonyUtils.java        | 32 ++++++++++++++++++-
- 1 file changed, 31 insertions(+), 1 deletion(-)
+ .../telephony/util/TelephonyUtils.java        | 30 +++++++++++++++++++
+ 1 file changed, 30 insertions(+)
 
 diff --git a/telephony/common/com/android/internal/telephony/util/TelephonyUtils.java b/telephony/common/com/android/internal/telephony/util/TelephonyUtils.java
-index 9a8c9655375d..454080144d35 100644
+index aed8fb8c4503..1467e7f2fc29 100644
 --- a/telephony/common/com/android/internal/telephony/util/TelephonyUtils.java
 +++ b/telephony/common/com/android/internal/telephony/util/TelephonyUtils.java
 @@ -42,7 +42,9 @@ import com.android.internal.telephony.ITelephony;
@@ -60,13 +60,6 @@ index 9a8c9655375d..454080144d35 100644
      /**
       * Filter values in bundle to only basic types.
       */
-@@ -319,4 +349,4 @@ public final class TelephonyUtils {
-         return false;
- 
-     }
--}
-\ No newline at end of file
-+}
 -- 
 2.34.1
 

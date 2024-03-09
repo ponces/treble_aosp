@@ -1,4 +1,4 @@
-From 20667b3e57d4edef357435b7eecd62edcb81f7de Mon Sep 17 00:00:00 2001
+From 84aa5841c240b73f702b6eac562fb86746758dcc Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 27 Oct 2021 14:40:26 -0400
 Subject: [PATCH] Disable vndklite handling
@@ -9,10 +9,10 @@ Change-Id: I4a132512471a68891f2efb59539267c35a3c3e56
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/modules/environment.cc b/modules/environment.cc
-index 82801f32..e05341b7 100644
+index 01e520e..e4991c2 100644
 --- a/modules/environment.cc
 +++ b/modules/environment.cc
-@@ -29,7 +29,7 @@ bool IsLegacyDevice() {
+@@ -28,7 +28,7 @@ bool IsTreblelizedDevice() {
  }
  
  bool IsVndkLiteDevice() {

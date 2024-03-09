@@ -1,4 +1,4 @@
-From b7e1b60e4de0501c254149dbfc39747975b32e36 Mon Sep 17 00:00:00 2001
+From 31254deb462767ebe1c3bb5d833b5cbec36a69b6 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 17 Jun 2021 15:48:53 +0100
 Subject: [PATCH 3/8] Add option to change eSCO Transport Unit Size
@@ -15,12 +15,12 @@ Change-Id: I3e5897c2ce983042b9a4bef9def6744ba4253bcb
  1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/system/device/src/esco_parameters.cc b/system/device/src/esco_parameters.cc
-index 48607e6d54a..3b19d7c3eaf 100644
+index 684450a80b..5bf31289bc 100644
 --- a/system/device/src/esco_parameters.cc
 +++ b/system/device/src/esco_parameters.cc
-@@ -22,7 +22,8 @@
- 
- #include "check.h"
+@@ -25,7 +25,8 @@
+ #include "hci/controller.h"
+ #include "main/shim/entry.h"
  
 -static const enh_esco_params_t default_esco_parameters[ESCO_NUM_CODECS] = {
 +#include <cutils/properties.h>
@@ -28,18 +28,18 @@ index 48607e6d54a..3b19d7c3eaf 100644
      // CVSD D1
      {
          .transmit_bandwidth = TXRX_64KBITS_RATE,
-@@ -288,6 +289,11 @@ enh_esco_params_t esco_parameters_for_codec(esco_codec_t codec, bool offload) {
-   CHECK(codec >= 0) << "codec index " << (int)codec << "< 0";
-   CHECK(codec < ESCO_NUM_CODECS)
-       << "codec index " << (int)codec << " > " << ESCO_NUM_CODECS;
+@@ -352,6 +353,11 @@ enh_esco_params_t esco_parameters_for_codec(esco_codec_t codec, bool offload) {
+     }
+   }
+ 
 +  int escoTransportUnitSize = property_get_int32("persist.sys.bt.esco_transport_unit_size", 0);
 +  if(escoTransportUnitSize) {
 +    default_esco_parameters[codec].input_transport_unit_size = escoTransportUnitSize;
 +    default_esco_parameters[codec].output_transport_unit_size = escoTransportUnitSize;
 +  }
    if (offload) {
-     return default_esco_parameters[codec];
-   }
+     if (codec == ESCO_CODEC_SWB_Q0 || codec == ESCO_CODEC_SWB_Q1 ||
+         codec == ESCO_CODEC_SWB_Q2 || codec == ESCO_CODEC_SWB_Q3) {
 -- 
 2.34.1
 

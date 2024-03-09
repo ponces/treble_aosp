@@ -1,7 +1,7 @@
-From c4c9b6e79c52cb5c3074302cbab27b735899da95 Mon Sep 17 00:00:00 2001
+From adfdea585b802fdbd55fdd9d48c7b0b4c440ded6 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 30 Oct 2023 19:25:27 -0400
-Subject: [PATCH 44/56] Add a prop to use linear backlight control
+Subject: [PATCH 44/55] Add a prop to use linear backlight control
 
 ---
  .../settings/brightness/BrightnessController.java      | 10 ++++++++--

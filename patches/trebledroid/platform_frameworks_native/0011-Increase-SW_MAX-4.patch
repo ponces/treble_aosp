@@ -1,4 +1,4 @@
-From 2f992d15791217c593921158493bcf0ef620dbf6 Mon Sep 17 00:00:00 2001
+From b4d1d8369d3f1f32fb9bd8d63254e0b673ae2b27 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sat, 3 Feb 2024 07:38:33 -0500
 Subject: [PATCH 11/11] Increase SW_MAX *= 4
@@ -14,19 +14,19 @@ We increase the size of SW_MAX for two reasons:
  2 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/services/inputflinger/reader/EventHub.cpp b/services/inputflinger/reader/EventHub.cpp
-index 88dd11467b..0689b4b683 100644
+index ad2394d791..18742c6b37 100644
 --- a/services/inputflinger/reader/EventHub.cpp
 +++ b/services/inputflinger/reader/EventHub.cpp
-@@ -1037,7 +1037,7 @@ int32_t EventHub::getKeyCodeForKeyLocation(int32_t deviceId, int32_t locationKey
+@@ -1112,7 +1112,7 @@ int32_t EventHub::getKeyCodeForKeyLocation(int32_t deviceId, int32_t locationKey
  }
  
  int32_t EventHub::getSwitchState(int32_t deviceId, int32_t sw) const {
--    if (sw >= 0 && sw <= SW_MAX) {
-+    if (sw >= 0 && sw <= (SW_MAX * 4)) {
-         std::scoped_lock _l(mLock);
- 
-         Device* device = getDeviceLocked(deviceId);
-@@ -2349,7 +2349,7 @@ void EventHub::openDeviceLocked(const std::string& devicePath) {
+-    if (sw < 0 || sw > SW_MAX) {
++    if (sw < 0 || sw > (SW_MAX*4)) {
+         return AKEY_STATE_UNKNOWN;
+     }
+     std::scoped_lock _l(mLock);
+@@ -2419,7 +2419,7 @@ void EventHub::openDeviceLocked(const std::string& devicePath) {
      }
  
      // Check whether this device has switches.
@@ -36,20 +36,20 @@ index 88dd11467b..0689b4b683 100644
              device->classes |= InputDeviceClass::SWITCH;
              break;
 diff --git a/services/inputflinger/reader/include/EventHub.h b/services/inputflinger/reader/include/EventHub.h
-index 024187f5b5..d1a2b1ec68 100644
+index 0bcab42417..5659ffb006 100644
 --- a/services/inputflinger/reader/include/EventHub.h
 +++ b/services/inputflinger/reader/include/EventHub.h
-@@ -604,8 +604,8 @@ private:
-         BitArray<KEY_MAX> keyState;
-         BitArray<ABS_MAX> absBitmask;
-         BitArray<REL_MAX> relBitmask;
--        BitArray<SW_MAX> swBitmask;
--        BitArray<SW_MAX> swState;
-+        BitArray<SW_MAX * 4> swBitmask;
-+        BitArray<SW_MAX * 4> swState;
-         BitArray<LED_MAX> ledBitmask;
-         BitArray<FF_MAX> ffBitmask;
-         BitArray<INPUT_PROP_MAX> propBitmask;
+@@ -629,8 +629,8 @@ private:
+         BitArray<KEY_CNT> keyBitmask;
+         BitArray<KEY_CNT> keyState;
+         BitArray<REL_CNT> relBitmask;
+-        BitArray<SW_CNT> swBitmask;
+-        BitArray<SW_CNT> swState;
++        BitArray<SW_CNT * 4> swBitmask;
++        BitArray<SW_CNT * 4> swState;
+         BitArray<LED_CNT> ledBitmask;
+         BitArray<FF_CNT> ffBitmask;
+         BitArray<INPUT_PROP_CNT> propBitmask;
 -- 
 2.34.1
 

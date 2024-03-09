@@ -1,7 +1,7 @@
-From 8e44908ad28d719314f39baa42e188cdbe65f9e4 Mon Sep 17 00:00:00 2001
+From 9cc241b77fa8b8c9fc87e4e2a2fda2199e917965 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 5 Oct 2021 17:59:16 -0400
-Subject: [PATCH 02/56] Fallback to stupid autobrightness if brightness values
+Subject: [PATCH 02/55] Fallback to stupid autobrightness if brightness values
  are broken
 
 This is needed because of:
@@ -14,25 +14,25 @@ Change-Id: Ieb679b34239013a5e31b34cb010b12febd9ef6d9
  1 file changed, 7 insertions(+), 2 deletions(-)
 
 diff --git a/services/core/java/com/android/server/display/DisplayDeviceConfig.java b/services/core/java/com/android/server/display/DisplayDeviceConfig.java
-index 2464eb0141b8..b0ebab8e4002 100644
+index d97127c91fbf..3dcb84dad786 100644
 --- a/services/core/java/com/android/server/display/DisplayDeviceConfig.java
 +++ b/services/core/java/com/android/server/display/DisplayDeviceConfig.java
-@@ -777,9 +777,14 @@ public class DisplayDeviceConfig {
-      * @return A configuration instance.
+@@ -897,9 +897,14 @@ public class DisplayDeviceConfig {
       */
-     public static DisplayDeviceConfig create(Context context, boolean useConfigXml) {
+     public static DisplayDeviceConfig create(Context context, boolean useConfigXml,
+             DisplayManagerFlags flags) {
 -        final DisplayDeviceConfig config;
 +        DisplayDeviceConfig config;
          if (useConfigXml) {
--            config = getConfigFromGlobalXml(context);
+-            config = getConfigFromGlobalXml(context, flags);
 +            try {
-+                config = getConfigFromGlobalXml(context);
++                config = getConfigFromGlobalXml(context, flags);
 +            } catch(Exception e) {
 +                android.util.Log.e("PHH", "Failed parsing automatic brightness values, fallbacking", e);
-+                config = getConfigFromPmValues(context);
++                config = getConfigFromPmValues(context, flags);
 +            }
          } else {
-             config = getConfigFromPmValues(context);
+             config = getConfigFromPmValues(context, flags);
          }
 -- 
 2.34.1

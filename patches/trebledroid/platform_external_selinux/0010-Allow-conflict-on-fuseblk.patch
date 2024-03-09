@@ -1,4 +1,4 @@
-From b85e5400f0d5c46ffe96fb4b40e3c22509a40c17 Mon Sep 17 00:00:00 2001
+From fa8cc9f8c1fbdd902dbb6c9708e7e91f78defae9 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 6 Oct 2023 08:49:59 -0400
 Subject: [PATCH 10/10] Allow conflict on fuseblk
@@ -8,7 +8,7 @@ Subject: [PATCH 10/10] Allow conflict on fuseblk
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/libsepol/cil/src/cil_post.c b/libsepol/cil/src/cil_post.c
-index 1703b3b6d..5428005d6 100644
+index 1703b3b6..5428005d 100644
 --- a/libsepol/cil/src/cil_post.c
 +++ b/libsepol/cil/src/cil_post.c
 @@ -511,7 +511,7 @@ static int cil_post_genfscon_context_compare(const void *a, const void *b)

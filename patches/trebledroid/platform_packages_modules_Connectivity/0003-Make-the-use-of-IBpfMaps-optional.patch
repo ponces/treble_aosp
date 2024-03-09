@@ -1,18 +1,18 @@
-From fe9eef761303dd53c41a277cd9d27e5ecdbb6e81 Mon Sep 17 00:00:00 2001
+From 17ce58f8f039894ff0e05eafcd767345b8691146 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 6 Oct 2023 09:27:33 -0400
-Subject: [PATCH 3/5] Make the use of IBpfMaps optional
+Subject: [PATCH 3/6] Make the use of IBpfMaps optional
 
 ---
- .../server/net/NetworkStatsService.java       | 29 +++++++++++--------
+ .../server/net/NetworkStatsService.java       | 29 ++++++++++---------
  .../src/com/android/server/BpfNetMaps.java    |  7 ++++-
- 2 files changed, 23 insertions(+), 13 deletions(-)
+ 2 files changed, 22 insertions(+), 14 deletions(-)
 
 diff --git a/service-t/src/com/android/server/net/NetworkStatsService.java b/service-t/src/com/android/server/net/NetworkStatsService.java
-index 877f351b5fa..79314b64549 100644
+index 40c214ed96..d59a3ec771 100644
 --- a/service-t/src/com/android/server/net/NetworkStatsService.java
 +++ b/service-t/src/com/android/server/net/NetworkStatsService.java
-@@ -412,12 +412,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
+@@ -427,12 +427,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
       * mActiveUidCounterSet to avoid accessing kernel too frequently.
       */
      private SparseIntArray mActiveUidCounterSet = new SparseIntArray();
@@ -31,7 +31,7 @@ index 877f351b5fa..79314b64549 100644
  
      /** Data layer operation counters for splicing into other structures. */
      private NetworkStats mUidOperations = new NetworkStats(0L, 10);
-@@ -603,12 +603,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
+@@ -621,19 +621,22 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
          mLocationPermissionChecker = mDeps.makeLocationPermissionChecker(mContext);
          mInterfaceMapUpdater = mDeps.makeBpfInterfaceMapUpdater(mContext, mHandler);
          mInterfaceMapUpdater.start();
@@ -41,7 +41,6 @@ index 877f351b5fa..79314b64549 100644
 -        mStatsMapB = mDeps.getStatsMapB();
 -        mAppUidStatsMap = mDeps.getAppUidStatsMap();
 -        mIfaceStatsMap = mDeps.getIfaceStatsMap();
-+
 +        try {
 +            mUidCounterSetMap = mDeps.getUidCounterSetMap();
 +            mCookieTagMap = mDeps.getCookieTagMap();
@@ -52,14 +51,21 @@ index 877f351b5fa..79314b64549 100644
 +        } catch(Throwable t) {
 +            android.util.Log.e("PHH", "Failed creating bpf maps", t);
 +        }
+         // To prevent any possible races, the flag is not allowed to change until rebooting.
+         mSupportEventLogger = mDeps.supportEventLogger(mContext);
+         if (mSupportEventLogger) {
+             mEventLogger = new NetworkStatsEventLogger();
+         } else {
+             mEventLogger = null;
+-        }
  
          // TODO: Remove bpfNetMaps creation and always start SkDestroyListener
          // Following code is for the experiment to verify the SkDestroyListener refactoring. Based
 diff --git a/service/src/com/android/server/BpfNetMaps.java b/service/src/com/android/server/BpfNetMaps.java
-index ec168dd0ab1..744df6e9b88 100644
+index ad9cfbe10e..775b3ebcb6 100644
 --- a/service/src/com/android/server/BpfNetMaps.java
 +++ b/service/src/com/android/server/BpfNetMaps.java
-@@ -345,7 +345,12 @@ public class BpfNetMaps {
+@@ -358,7 +358,12 @@ public class BpfNetMaps {
      @VisibleForTesting
      public BpfNetMaps(final Context context, final INetd netd, final Dependencies deps) {
          if (!PRE_T) {

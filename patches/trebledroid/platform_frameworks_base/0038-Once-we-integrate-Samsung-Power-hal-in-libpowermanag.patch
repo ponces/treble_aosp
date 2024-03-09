@@ -1,7 +1,7 @@
-From 2c18a98c0e3b427aa9c42b7bcddb868f3c4b4ca0 Mon Sep 17 00:00:00 2001
+From 9bed1957e94cf6d915631318b25ee8dd1c0b5fb5 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 27 Dec 2021 17:57:11 -0500
-Subject: [PATCH 38/56] Once we integrate Samsung Power hal in libpowermanager,
+Subject: [PATCH 38/55] Once we integrate Samsung Power hal in libpowermanager,
  libpowermanager and its deps require linking against
  vendor.samsung.hardware.miscpower@2.0
 
@@ -11,10 +11,10 @@ Change-Id: I9084f64e505009abe9420d28b44199605cee52d8
  1 file changed, 1 insertion(+)
 
 diff --git a/services/core/jni/Android.bp b/services/core/jni/Android.bp
-index 36c13ca121e3..00e9cfa998b9 100644
+index 8d47849d1f28..fccb133ba34d 100644
 --- a/services/core/jni/Android.bp
 +++ b/services/core/jni/Android.bp
-@@ -204,6 +204,7 @@ cc_defaults {
+@@ -209,6 +209,7 @@ cc_defaults {
          "service.incremental",
          "vendor.samsung.hardware.light@2.0",
          "vendor.samsung.hardware.light@3.0",

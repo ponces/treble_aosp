@@ -1,4 +1,4 @@
-From 4a3ff00f122888949449e48a821d2c25f6fb4b16 Mon Sep 17 00:00:00 2001
+From 6b24c854ac27f040cddfb179665c7c76e283a04a Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 6 Oct 2023 08:25:11 -0400
 Subject: [PATCH] Revert "Remove 28.0 compat support"
@@ -703,7 +703,7 @@ Change-Id: I2b0c61ced1f9651f74da85d1228d7260cc782c80
  create mode 100644 private/compat/28.0/28.0.ignore.cil
 
 diff --git a/compat/Android.bp b/compat/Android.bp
-index 04a239e02d..61acd40691 100644
+index 2c6239f70..528f0a8d8 100644
 --- a/compat/Android.bp
 +++ b/compat/Android.bp
 @@ -23,6 +23,13 @@ package {
@@ -762,8 +762,8 @@ index 04a239e02d..61acd40691 100644
  se_cil_compat_map {
      name: "plat_29.0.cil",
      stem: "29.0.cil",
-@@ -162,6 +190,14 @@ se_cil_compat_map {
-     bottom_half: [":33.0.board.compat.map{.plat_private}"],
+@@ -168,6 +196,14 @@ se_cil_compat_map {
+     version: "33.0",
  }
  
 +se_cil_compat_map {
@@ -777,8 +777,8 @@ index 04a239e02d..61acd40691 100644
  se_cil_compat_map {
      name: "system_ext_29.0.cil",
      stem: "29.0.cil",
-@@ -201,6 +237,14 @@ se_cil_compat_map {
-     system_ext_specific: true,
+@@ -213,6 +249,14 @@ se_cil_compat_map {
+     version: "33.0",
  }
  
 +se_cil_compat_map {
@@ -792,8 +792,8 @@ index 04a239e02d..61acd40691 100644
  se_cil_compat_map {
      name: "product_29.0.cil",
      stem: "29.0.cil",
-@@ -240,6 +284,12 @@ se_cil_compat_map {
-     product_specific: true,
+@@ -258,6 +302,12 @@ se_cil_compat_map {
+     version: "33.0",
  }
  
 +se_cil_compat_map {
@@ -805,8 +805,8 @@ index 04a239e02d..61acd40691 100644
  se_cil_compat_map {
      name: "29.0.ignore.cil",
      bottom_half: [":29.0.board.ignore.map{.plat_private}"],
-@@ -323,6 +373,11 @@ se_cil_compat_map {
-     product_specific: true,
+@@ -357,6 +407,11 @@ se_cil_compat_map {
+     version: "33.0",
  }
  
 +se_compat_cil {
@@ -817,8 +817,8 @@ index 04a239e02d..61acd40691 100644
  se_compat_cil {
      name: "29.0.compat.cil",
      srcs: [":29.0.board.compat.cil{.plat_private}"],
-@@ -348,6 +403,13 @@ se_compat_cil {
-     srcs: [":33.0.board.compat.cil{.plat_private}"],
+@@ -387,6 +442,13 @@ se_compat_cil {
+     version: "33.0",
  }
  
 +se_compat_cil {
@@ -833,7 +833,7 @@ index 04a239e02d..61acd40691 100644
      srcs: [":29.0.board.compat.cil{.system_ext_private}"],
 diff --git a/prebuilts/api/28.0/private/access_vectors b/prebuilts/api/28.0/private/access_vectors
 new file mode 100644
-index 0000000000..898c884cdc
+index 000000000..898c884cd
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/access_vectors
 @@ -0,0 +1,726 @@
@@ -1565,7 +1565,7 @@ index 0000000000..898c884cdc
 +}
 diff --git a/prebuilts/api/28.0/private/adbd.te b/prebuilts/api/28.0/private/adbd.te
 new file mode 100644
-index 0000000000..77c0d73775
+index 000000000..77c0d7377
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/adbd.te
 @@ -0,0 +1,148 @@
@@ -1719,7 +1719,7 @@ index 0000000000..77c0d73775
 +neverallow adbd { domain userdebug_or_eng(`-su') }:process dyntransition;
 diff --git a/prebuilts/api/28.0/private/app.te b/prebuilts/api/28.0/private/app.te
 new file mode 100644
-index 0000000000..f3e1e2a09c
+index 000000000..f3e1e2a09
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/app.te
 @@ -0,0 +1,7 @@
@@ -1732,7 +1732,7 @@ index 0000000000..f3e1e2a09c
 +        relabelfrom relabelto setattr shutdown };
 diff --git a/prebuilts/api/28.0/private/app_neverallows.te b/prebuilts/api/28.0/private/app_neverallows.te
 new file mode 100644
-index 0000000000..8d9ccd6720
+index 000000000..8d9ccd672
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/app_neverallows.te
 @@ -0,0 +1,262 @@
@@ -2000,7 +2000,7 @@ index 0000000000..8d9ccd6720
 +neverallow all_untrusted_apps mediaextractor_update_service:service_manager find;
 diff --git a/prebuilts/api/28.0/private/asan_extract.te b/prebuilts/api/28.0/private/asan_extract.te
 new file mode 100644
-index 0000000000..1c20d78ecd
+index 000000000..1c20d78ec
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/asan_extract.te
 @@ -0,0 +1,8 @@
@@ -2014,7 +2014,7 @@ index 0000000000..1c20d78ecd
 +')
 diff --git a/prebuilts/api/28.0/private/atrace.te b/prebuilts/api/28.0/private/atrace.te
 new file mode 100644
-index 0000000000..630935da02
+index 000000000..630935da0
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/atrace.te
 @@ -0,0 +1,46 @@
@@ -2066,7 +2066,7 @@ index 0000000000..630935da02
 +')
 diff --git a/prebuilts/api/28.0/private/audioserver.te b/prebuilts/api/28.0/private/audioserver.te
 new file mode 100644
-index 0000000000..1d4223fe0b
+index 000000000..1d4223fe0
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/audioserver.te
 @@ -0,0 +1,88 @@
@@ -2160,14 +2160,14 @@ index 0000000000..1d4223fe0b
 +neverallow audioserver domain:{ tcp_socket udp_socket rawip_socket } *;
 diff --git a/prebuilts/api/28.0/private/binder_in_vendor_violators.te b/prebuilts/api/28.0/private/binder_in_vendor_violators.te
 new file mode 100644
-index 0000000000..4a1218e1da
+index 000000000..4a1218e1d
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/binder_in_vendor_violators.te
 @@ -0,0 +1 @@
 +allow binder_in_vendor_violators binder_device:chr_file rw_file_perms;
 diff --git a/prebuilts/api/28.0/private/binderservicedomain.te b/prebuilts/api/28.0/private/binderservicedomain.te
 new file mode 100644
-index 0000000000..0891ee5b21
+index 000000000..0891ee5b2
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/binderservicedomain.te
 @@ -0,0 +1,22 @@
@@ -2195,7 +2195,7 @@ index 0000000000..0891ee5b21
 +use_keystore(binderservicedomain)
 diff --git a/prebuilts/api/28.0/private/blank_screen.te b/prebuilts/api/28.0/private/blank_screen.te
 new file mode 100644
-index 0000000000..43d273bd0f
+index 000000000..43d273bd0
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/blank_screen.te
 @@ -0,0 +1,6 @@
@@ -2207,7 +2207,7 @@ index 0000000000..43d273bd0f
 +hal_client_domain(blank_screen, hal_light)
 diff --git a/prebuilts/api/28.0/private/blkid.te b/prebuilts/api/28.0/private/blkid.te
 new file mode 100644
-index 0000000000..090912b821
+index 000000000..090912b82
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/blkid.te
 @@ -0,0 +1,22 @@
@@ -2235,7 +2235,7 @@ index 0000000000..090912b821
 +neverallow blkid { file_type fs_type -blkid_exec -shell_exec }:file entrypoint;
 diff --git a/prebuilts/api/28.0/private/blkid_untrusted.te b/prebuilts/api/28.0/private/blkid_untrusted.te
 new file mode 100644
-index 0000000000..125677157e
+index 000000000..125677157
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/blkid_untrusted.te
 @@ -0,0 +1,37 @@
@@ -2278,7 +2278,7 @@ index 0000000000..125677157e
 +neverallow blkid_untrusted { file_type fs_type -blkid_exec -shell_exec }:file entrypoint;
 diff --git a/prebuilts/api/28.0/private/bluetooth.te b/prebuilts/api/28.0/private/bluetooth.te
 new file mode 100644
-index 0000000000..d4198553ef
+index 000000000..d4198553e
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/bluetooth.te
 @@ -0,0 +1,80 @@
@@ -2364,7 +2364,7 @@ index 0000000000..d4198553ef
 +neverallow bluetooth self:global_capability2_class_set ~{ wake_alarm block_suspend };
 diff --git a/prebuilts/api/28.0/private/bluetoothdomain.te b/prebuilts/api/28.0/private/bluetoothdomain.te
 new file mode 100644
-index 0000000000..fe4f0e663e
+index 000000000..fe4f0e663
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/bluetoothdomain.te
 @@ -0,0 +1,2 @@
@@ -2372,7 +2372,7 @@ index 0000000000..fe4f0e663e
 +allow bluetoothdomain bluetooth:unix_stream_socket { getopt setopt getattr read write ioctl shutdown };
 diff --git a/prebuilts/api/28.0/private/bootanim.te b/prebuilts/api/28.0/private/bootanim.te
 new file mode 100644
-index 0000000000..20ff1934b7
+index 000000000..20ff1934b
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/bootanim.te
 @@ -0,0 +1,6 @@
@@ -2384,7 +2384,7 @@ index 0000000000..20ff1934b7
 +dontaudit bootanim unlabeled:dir search;
 diff --git a/prebuilts/api/28.0/private/bootstat.te b/prebuilts/api/28.0/private/bootstat.te
 new file mode 100644
-index 0000000000..806144cf6d
+index 000000000..806144cf6
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/bootstat.te
 @@ -0,0 +1,3 @@
@@ -2393,7 +2393,7 @@ index 0000000000..806144cf6d
 +init_daemon_domain(bootstat)
 diff --git a/prebuilts/api/28.0/private/bpfloader.te b/prebuilts/api/28.0/private/bpfloader.te
 new file mode 100644
-index 0000000000..4e8ec2b46e
+index 000000000..4e8ec2b46
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/bpfloader.te
 @@ -0,0 +1,30 @@
@@ -2429,7 +2429,7 @@ index 0000000000..4e8ec2b46e
 +dontaudit bpfloader self:capability sys_admin;
 diff --git a/prebuilts/api/28.0/private/bufferhubd.te b/prebuilts/api/28.0/private/bufferhubd.te
 new file mode 100644
-index 0000000000..012eb20270
+index 000000000..012eb2027
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/bufferhubd.te
 @@ -0,0 +1,3 @@
@@ -2438,7 +2438,7 @@ index 0000000000..012eb20270
 +init_daemon_domain(bufferhubd)
 diff --git a/prebuilts/api/28.0/private/bug_map b/prebuilts/api/28.0/private/bug_map
 new file mode 100644
-index 0000000000..5c551c83da
+index 000000000..5c551c83d
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/bug_map
 @@ -0,0 +1,45 @@
@@ -2489,7 +2489,7 @@ index 0000000000..5c551c83da
 +zygote untrusted_app_25 process 77925912
 diff --git a/prebuilts/api/28.0/private/cameraserver.te b/prebuilts/api/28.0/private/cameraserver.te
 new file mode 100644
-index 0000000000..c16c13260d
+index 000000000..c16c13260
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/cameraserver.te
 @@ -0,0 +1,3 @@
@@ -2498,21 +2498,21 @@ index 0000000000..c16c13260d
 +init_daemon_domain(cameraserver)
 diff --git a/prebuilts/api/28.0/private/charger.te b/prebuilts/api/28.0/private/charger.te
 new file mode 100644
-index 0000000000..65109deff1
+index 000000000..65109deff
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/charger.te
 @@ -0,0 +1 @@
 +typeattribute charger coredomain;
 diff --git a/prebuilts/api/28.0/private/clatd.te b/prebuilts/api/28.0/private/clatd.te
 new file mode 100644
-index 0000000000..5ba0fc5cdc
+index 000000000..5ba0fc5cd
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/clatd.te
 @@ -0,0 +1 @@
 +typeattribute clatd coredomain;
 diff --git a/prebuilts/api/28.0/private/coredomain.te b/prebuilts/api/28.0/private/coredomain.te
 new file mode 100644
-index 0000000000..23224c323b
+index 000000000..23224c323
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/coredomain.te
 @@ -0,0 +1,15 @@
@@ -2533,7 +2533,7 @@ index 0000000000..23224c323b
 +')
 diff --git a/prebuilts/api/28.0/private/cppreopts.te b/prebuilts/api/28.0/private/cppreopts.te
 new file mode 100644
-index 0000000000..34f0d669b3
+index 000000000..34f0d669b
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/cppreopts.te
 @@ -0,0 +1,6 @@
@@ -2545,7 +2545,7 @@ index 0000000000..34f0d669b3
 +domain_auto_trans(cppreopts, preopt2cachename_exec, preopt2cachename);
 diff --git a/prebuilts/api/28.0/private/crash_dump.te b/prebuilts/api/28.0/private/crash_dump.te
 new file mode 100644
-index 0000000000..c3d2ed5bd0
+index 000000000..c3d2ed5bd
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/crash_dump.te
 @@ -0,0 +1,14 @@
@@ -2565,14 +2565,14 @@ index 0000000000..c3d2ed5bd0
 +}:process { ptrace signal sigchld sigstop sigkill };
 diff --git a/prebuilts/api/28.0/private/dex2oat.te b/prebuilts/api/28.0/private/dex2oat.te
 new file mode 100644
-index 0000000000..fd45484f4d
+index 000000000..fd45484f4
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/dex2oat.te
 @@ -0,0 +1 @@
 +typeattribute dex2oat coredomain;
 diff --git a/prebuilts/api/28.0/private/dexoptanalyzer.te b/prebuilts/api/28.0/private/dexoptanalyzer.te
 new file mode 100644
-index 0000000000..dfc81b8509
+index 000000000..dfc81b850
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/dexoptanalyzer.te
 @@ -0,0 +1,30 @@
@@ -2608,7 +2608,7 @@ index 0000000000..dfc81b8509
 +allow dexoptanalyzer system_data_file:lnk_file { getattr };
 diff --git a/prebuilts/api/28.0/private/dhcp.te b/prebuilts/api/28.0/private/dhcp.te
 new file mode 100644
-index 0000000000..b2f8ac7c74
+index 000000000..b2f8ac7c7
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/dhcp.te
 @@ -0,0 +1,4 @@
@@ -2618,14 +2618,14 @@ index 0000000000..b2f8ac7c74
 +type_transition dhcp system_data_file:{ dir file } dhcp_data_file;
 diff --git a/prebuilts/api/28.0/private/dnsmasq.te b/prebuilts/api/28.0/private/dnsmasq.te
 new file mode 100644
-index 0000000000..96084b490a
+index 000000000..96084b490
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/dnsmasq.te
 @@ -0,0 +1 @@
 +typeattribute dnsmasq coredomain;
 diff --git a/prebuilts/api/28.0/private/domain.te b/prebuilts/api/28.0/private/domain.te
 new file mode 100644
-index 0000000000..5053c287ba
+index 000000000..5053c287b
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/domain.te
 @@ -0,0 +1,118 @@
@@ -2749,7 +2749,7 @@ index 0000000000..5053c287ba
 +')
 diff --git a/prebuilts/api/28.0/private/drmserver.te b/prebuilts/api/28.0/private/drmserver.te
 new file mode 100644
-index 0000000000..afe4f0aae8
+index 000000000..afe4f0aae
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/drmserver.te
 @@ -0,0 +1,7 @@
@@ -2762,7 +2762,7 @@ index 0000000000..afe4f0aae8
 +typeattribute drmserver_socket coredomain_socket;
 diff --git a/prebuilts/api/28.0/private/dumpstate.te b/prebuilts/api/28.0/private/dumpstate.te
 new file mode 100644
-index 0000000000..2c2a62f538
+index 000000000..2c2a62f53
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/dumpstate.te
 @@ -0,0 +1,47 @@
@@ -2815,7 +2815,7 @@ index 0000000000..2c2a62f538
 +dontaudit dumpstate update_engine:binder call;
 diff --git a/prebuilts/api/28.0/private/ephemeral_app.te b/prebuilts/api/28.0/private/ephemeral_app.te
 new file mode 100644
-index 0000000000..75a6317651
+index 000000000..75a631765
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/ephemeral_app.te
 @@ -0,0 +1,81 @@
@@ -2902,7 +2902,7 @@ index 0000000000..75a6317651
 +neverallow ephemeral_app proc_net:file no_rw_file_perms;
 diff --git a/prebuilts/api/28.0/private/file.te b/prebuilts/api/28.0/private/file.te
 new file mode 100644
-index 0000000000..58ee0def82
+index 000000000..58ee0def8
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/file.te
 @@ -0,0 +1,16 @@
@@ -2924,7 +2924,7 @@ index 0000000000..58ee0def82
 +type perfetto_traces_data_file, file_type, data_file_type, core_data_file_type;
 diff --git a/prebuilts/api/28.0/private/file_contexts b/prebuilts/api/28.0/private/file_contexts
 new file mode 100644
-index 0000000000..564e45c2fb
+index 000000000..564e45c2f
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/file_contexts
 @@ -0,0 +1,541 @@
@@ -3471,7 +3471,7 @@ index 0000000000..564e45c2fb
 +/mnt/vendor(/.*)?          u:object_r:mnt_vendor_file:s0
 diff --git a/prebuilts/api/28.0/private/file_contexts_asan b/prebuilts/api/28.0/private/file_contexts_asan
 new file mode 100644
-index 0000000000..17ee9d7959
+index 000000000..17ee9d795
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/file_contexts_asan
 @@ -0,0 +1,11 @@
@@ -3488,7 +3488,7 @@ index 0000000000..17ee9d7959
 +/system/bin/asan/app_process64 u:object_r:zygote_exec:s0
 diff --git a/prebuilts/api/28.0/private/fingerprintd.te b/prebuilts/api/28.0/private/fingerprintd.te
 new file mode 100644
-index 0000000000..eb73ef8ccf
+index 000000000..eb73ef8cc
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/fingerprintd.te
 @@ -0,0 +1,3 @@
@@ -3497,7 +3497,7 @@ index 0000000000..eb73ef8ccf
 +init_daemon_domain(fingerprintd)
 diff --git a/prebuilts/api/28.0/private/fs_use b/prebuilts/api/28.0/private/fs_use
 new file mode 100644
-index 0000000000..c4d25a2b9f
+index 000000000..c4d25a2b9
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/fs_use
 @@ -0,0 +1,22 @@
@@ -3525,7 +3525,7 @@ index 0000000000..c4d25a2b9f
 +fs_use_trans mqueue u:object_r:mqueue:s0;
 diff --git a/prebuilts/api/28.0/private/fsck.te b/prebuilts/api/28.0/private/fsck.te
 new file mode 100644
-index 0000000000..f8e09b645d
+index 000000000..f8e09b645
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/fsck.te
 @@ -0,0 +1,5 @@
@@ -3536,14 +3536,14 @@ index 0000000000..f8e09b645d
 +allow fsck metadata_block_device:blk_file rw_file_perms;
 diff --git a/prebuilts/api/28.0/private/fsck_untrusted.te b/prebuilts/api/28.0/private/fsck_untrusted.te
 new file mode 100644
-index 0000000000..9a57bf0277
+index 000000000..9a57bf027
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/fsck_untrusted.te
 @@ -0,0 +1 @@
 +typeattribute fsck_untrusted coredomain;
 diff --git a/prebuilts/api/28.0/private/gatekeeperd.te b/prebuilts/api/28.0/private/gatekeeperd.te
 new file mode 100644
-index 0000000000..5e4d0a2e9d
+index 000000000..5e4d0a2e9
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/gatekeeperd.te
 @@ -0,0 +1,3 @@
@@ -3552,7 +3552,7 @@ index 0000000000..5e4d0a2e9d
 +init_daemon_domain(gatekeeperd)
 diff --git a/prebuilts/api/28.0/private/genfs_contexts b/prebuilts/api/28.0/private/genfs_contexts
 new file mode 100644
-index 0000000000..7e2ea50922
+index 000000000..7e2ea5092
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/genfs_contexts
 @@ -0,0 +1,244 @@
@@ -3802,7 +3802,7 @@ index 0000000000..7e2ea50922
 +genfscon bpf / u:object_r:fs_bpf:s0
 diff --git a/prebuilts/api/28.0/private/hal_allocator_default.te b/prebuilts/api/28.0/private/hal_allocator_default.te
 new file mode 100644
-index 0000000000..49ef1781bb
+index 000000000..49ef1781b
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/hal_allocator_default.te
 @@ -0,0 +1,5 @@
@@ -3813,7 +3813,7 @@ index 0000000000..49ef1781bb
 +init_daemon_domain(hal_allocator_default)
 diff --git a/prebuilts/api/28.0/private/halclientdomain.te b/prebuilts/api/28.0/private/halclientdomain.te
 new file mode 100644
-index 0000000000..9dcd3ee384
+index 000000000..9dcd3ee38
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/halclientdomain.te
 @@ -0,0 +1,13 @@
@@ -3832,7 +3832,7 @@ index 0000000000..9dcd3ee384
 +allow halclientdomain hidl_manager_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/private/halserverdomain.te b/prebuilts/api/28.0/private/halserverdomain.te
 new file mode 100644
-index 0000000000..f36e0e7d8f
+index 000000000..f36e0e7d8
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/halserverdomain.te
 @@ -0,0 +1,12 @@
@@ -3850,7 +3850,7 @@ index 0000000000..f36e0e7d8f
 +get_prop(halserverdomain, hwservicemanager_prop)
 diff --git a/prebuilts/api/28.0/private/healthd.te b/prebuilts/api/28.0/private/healthd.te
 new file mode 100644
-index 0000000000..20d0791739
+index 000000000..20d079173
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/healthd.te
 @@ -0,0 +1,6 @@
@@ -3862,7 +3862,7 @@ index 0000000000..20d0791739
 +hal_server_domain(healthd, hal_health)
 diff --git a/prebuilts/api/28.0/private/hwservice_contexts b/prebuilts/api/28.0/private/hwservice_contexts
 new file mode 100644
-index 0000000000..c75c0a5766
+index 000000000..c75c0a576
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/hwservice_contexts
 @@ -0,0 +1,71 @@
@@ -3939,7 +3939,7 @@ index 0000000000..c75c0a5766
 +*                                                               u:object_r:default_android_hwservice:s0
 diff --git a/prebuilts/api/28.0/private/hwservicemanager.te b/prebuilts/api/28.0/private/hwservicemanager.te
 new file mode 100644
-index 0000000000..0705cc711a
+index 000000000..0705cc711
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/hwservicemanager.te
 @@ -0,0 +1,8 @@
@@ -3953,14 +3953,14 @@ index 0000000000..0705cc711a
 +set_prop(hwservicemanager, ctl_interface_start_prop)
 diff --git a/prebuilts/api/28.0/private/idmap.te b/prebuilts/api/28.0/private/idmap.te
 new file mode 100644
-index 0000000000..73abf35529
+index 000000000..73abf3552
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/idmap.te
 @@ -0,0 +1 @@
 +typeattribute idmap coredomain;
 diff --git a/prebuilts/api/28.0/private/incident.te b/prebuilts/api/28.0/private/incident.te
 new file mode 100644
-index 0000000000..1844898ea5
+index 000000000..1844898ea
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/incident.te
 @@ -0,0 +1,30 @@
@@ -3996,7 +3996,7 @@ index 0000000000..1844898ea5
 +neverallow { domain -su -shell -incident } incident_exec:file { execute execute_no_trans };
 diff --git a/prebuilts/api/28.0/private/incident_helper.te b/prebuilts/api/28.0/private/incident_helper.te
 new file mode 100644
-index 0000000000..e1e3fc826b
+index 000000000..e1e3fc826
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/incident_helper.te
 @@ -0,0 +1,14 @@
@@ -4016,7 +4016,7 @@ index 0000000000..e1e3fc826b
 +neverallow { domain -incidentd -incident_helper -shell } incident_helper_exec:file { execute execute_no_trans };
 diff --git a/prebuilts/api/28.0/private/incidentd.te b/prebuilts/api/28.0/private/incidentd.te
 new file mode 100644
-index 0000000000..4ae928e79b
+index 000000000..4ae928e79
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/incidentd.te
 @@ -0,0 +1,165 @@
@@ -4187,7 +4187,7 @@ index 0000000000..4ae928e79b
 +neverallow { domain -incidentd -init -vold } incident_data_file:dir create_dir_perms;
 diff --git a/prebuilts/api/28.0/private/init.te b/prebuilts/api/28.0/private/init.te
 new file mode 100644
-index 0000000000..e9959d3d27
+index 000000000..e9959d3d2
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/init.te
 @@ -0,0 +1,22 @@
@@ -4215,7 +4215,7 @@ index 0000000000..e9959d3d27
 +')
 diff --git a/prebuilts/api/28.0/private/initial_sid_contexts b/prebuilts/api/28.0/private/initial_sid_contexts
 new file mode 100644
-index 0000000000..98190510f2
+index 000000000..98190510f
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/initial_sid_contexts
 @@ -0,0 +1,27 @@
@@ -4248,7 +4248,7 @@ index 0000000000..98190510f2
 +sid devnull u:object_r:null_device:s0
 diff --git a/prebuilts/api/28.0/private/initial_sids b/prebuilts/api/28.0/private/initial_sids
 new file mode 100644
-index 0000000000..91ac816ba7
+index 000000000..91ac816ba
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/initial_sids
 @@ -0,0 +1,35 @@
@@ -4289,7 +4289,7 @@ index 0000000000..91ac816ba7
 +# FLASK
 diff --git a/prebuilts/api/28.0/private/inputflinger.te b/prebuilts/api/28.0/private/inputflinger.te
 new file mode 100644
-index 0000000000..9696b491b7
+index 000000000..9696b491b
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/inputflinger.te
 @@ -0,0 +1,3 @@
@@ -4298,7 +4298,7 @@ index 0000000000..9696b491b7
 +init_daemon_domain(inputflinger)
 diff --git a/prebuilts/api/28.0/private/install_recovery.te b/prebuilts/api/28.0/private/install_recovery.te
 new file mode 100644
-index 0000000000..b79d683a6d
+index 000000000..b79d683a6
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/install_recovery.te
 @@ -0,0 +1,3 @@
@@ -4307,7 +4307,7 @@ index 0000000000..b79d683a6d
 +init_daemon_domain(install_recovery)
 diff --git a/prebuilts/api/28.0/private/installd.te b/prebuilts/api/28.0/private/installd.te
 new file mode 100644
-index 0000000000..055371631f
+index 000000000..055371631
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/installd.te
 @@ -0,0 +1,22 @@
@@ -4335,7 +4335,7 @@ index 0000000000..055371631f
 +allow installd dumpstate:fifo_file r_file_perms;
 diff --git a/prebuilts/api/28.0/private/isolated_app.te b/prebuilts/api/28.0/private/isolated_app.te
 new file mode 100644
-index 0000000000..6af6040d7b
+index 000000000..6af6040d7
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/isolated_app.te
 @@ -0,0 +1,119 @@
@@ -4460,7 +4460,7 @@ index 0000000000..6af6040d7b
 +}:file no_rw_file_perms;
 diff --git a/prebuilts/api/28.0/private/kernel.te b/prebuilts/api/28.0/private/kernel.te
 new file mode 100644
-index 0000000000..a4e6ebe360
+index 000000000..a4e6ebe36
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/kernel.te
 @@ -0,0 +1,3 @@
@@ -4469,7 +4469,7 @@ index 0000000000..a4e6ebe360
 +domain_auto_trans(kernel, init_exec, init)
 diff --git a/prebuilts/api/28.0/private/keys.conf b/prebuilts/api/28.0/private/keys.conf
 new file mode 100644
-index 0000000000..7bb3ad55ef
+index 000000000..7bb3ad55e
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/keys.conf
 @@ -0,0 +1,24 @@
@@ -4499,7 +4499,7 @@ index 0000000000..7bb3ad55ef
 +USERDEBUG : $DEFAULT_SYSTEM_DEV_CERTIFICATE/testkey.x509.pem
 diff --git a/prebuilts/api/28.0/private/keystore.te b/prebuilts/api/28.0/private/keystore.te
 new file mode 100644
-index 0000000000..7f71028ba3
+index 000000000..7f71028ba
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/keystore.te
 @@ -0,0 +1,19 @@
@@ -4524,7 +4524,7 @@ index 0000000000..7f71028ba3
 +get_prop(keystore, device_logging_prop)
 diff --git a/prebuilts/api/28.0/private/lmkd.te b/prebuilts/api/28.0/private/lmkd.te
 new file mode 100644
-index 0000000000..a07ce879cc
+index 000000000..a07ce879c
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/lmkd.te
 @@ -0,0 +1,3 @@
@@ -4533,7 +4533,7 @@ index 0000000000..a07ce879cc
 +init_daemon_domain(lmkd)
 diff --git a/prebuilts/api/28.0/private/logd.te b/prebuilts/api/28.0/private/logd.te
 new file mode 100644
-index 0000000000..4338e40054
+index 000000000..4338e4005
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/logd.te
 @@ -0,0 +1,39 @@
@@ -4578,7 +4578,7 @@ index 0000000000..4338e40054
 +} runtime_event_log_tags_file:file no_rw_file_perms;
 diff --git a/prebuilts/api/28.0/private/logpersist.te b/prebuilts/api/28.0/private/logpersist.te
 new file mode 100644
-index 0000000000..8cdbd2dd01
+index 000000000..8cdbd2dd0
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/logpersist.te
 @@ -0,0 +1,24 @@
@@ -4608,7 +4608,7 @@ index 0000000000..8cdbd2dd01
 +neverallow { domain -init userdebug_or_eng(`-logpersist -logd') } misc_logd_file:dir { add_name link relabelfrom remove_name rename reparent rmdir write };
 diff --git a/prebuilts/api/28.0/private/mac_permissions.xml b/prebuilts/api/28.0/private/mac_permissions.xml
 new file mode 100644
-index 0000000000..1fcd2a409d
+index 000000000..1fcd2a409
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/mac_permissions.xml
 @@ -0,0 +1,59 @@
@@ -4673,7 +4673,7 @@ index 0000000000..1fcd2a409d
 +</policy>
 diff --git a/prebuilts/api/28.0/private/mdnsd.te b/prebuilts/api/28.0/private/mdnsd.te
 new file mode 100644
-index 0000000000..96259e2986
+index 000000000..96259e298
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/mdnsd.te
 @@ -0,0 +1,12 @@
@@ -4691,7 +4691,7 @@ index 0000000000..96259e2986
 +r_dir_file(mdnsd, proc_net)
 diff --git a/prebuilts/api/28.0/private/mediadrmserver.te b/prebuilts/api/28.0/private/mediadrmserver.te
 new file mode 100644
-index 0000000000..d5270e28ef
+index 000000000..d5270e28e
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/mediadrmserver.te
 @@ -0,0 +1,7 @@
@@ -4704,7 +4704,7 @@ index 0000000000..d5270e28ef
 +auditallow mediadrmserver hal_graphics_allocator_server:binder call;
 diff --git a/prebuilts/api/28.0/private/mediaextractor.te b/prebuilts/api/28.0/private/mediaextractor.te
 new file mode 100644
-index 0000000000..c1a85219c3
+index 000000000..c1a85219c
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/mediaextractor.te
 @@ -0,0 +1,3 @@
@@ -4713,7 +4713,7 @@ index 0000000000..c1a85219c3
 +init_daemon_domain(mediaextractor)
 diff --git a/prebuilts/api/28.0/private/mediametrics.te b/prebuilts/api/28.0/private/mediametrics.te
 new file mode 100644
-index 0000000000..f8b2fa5cdc
+index 000000000..f8b2fa5cd
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/mediametrics.te
 @@ -0,0 +1,3 @@
@@ -4722,7 +4722,7 @@ index 0000000000..f8b2fa5cdc
 +init_daemon_domain(mediametrics)
 diff --git a/prebuilts/api/28.0/private/mediaprovider.te b/prebuilts/api/28.0/private/mediaprovider.te
 new file mode 100644
-index 0000000000..f5c9f690e4
+index 000000000..f5c9f690e
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/mediaprovider.te
 @@ -0,0 +1,43 @@
@@ -4771,7 +4771,7 @@ index 0000000000..f5c9f690e4
 +set_prop(mediaprovider, exported_ffs_prop)
 diff --git a/prebuilts/api/28.0/private/mediaserver.te b/prebuilts/api/28.0/private/mediaserver.te
 new file mode 100644
-index 0000000000..a5fa9e10e2
+index 000000000..a5fa9e10e
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/mediaserver.te
 @@ -0,0 +1,11 @@
@@ -4788,7 +4788,7 @@ index 0000000000..a5fa9e10e2
 +allow mediaserver hal_omx_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/private/mls b/prebuilts/api/28.0/private/mls
 new file mode 100644
-index 0000000000..3b8ee3f47f
+index 000000000..3b8ee3f47
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/mls
 @@ -0,0 +1,100 @@
@@ -4894,7 +4894,7 @@ index 0000000000..3b8ee3f47f
 +#	(l1 eq l2 or t1 == mlstrustedsubject or t2 == mlstrustedsubject);
 diff --git a/prebuilts/api/28.0/private/mls_decl b/prebuilts/api/28.0/private/mls_decl
 new file mode 100644
-index 0000000000..dd53bea7e8
+index 000000000..dd53bea7e
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/mls_decl
 @@ -0,0 +1,10 @@
@@ -4910,7 +4910,7 @@ index 0000000000..dd53bea7e8
 +gen_levels(mls_num_sens,mls_num_cats)
 diff --git a/prebuilts/api/28.0/private/mls_macros b/prebuilts/api/28.0/private/mls_macros
 new file mode 100644
-index 0000000000..83e05425b2
+index 000000000..83e05425b
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/mls_macros
 @@ -0,0 +1,54 @@
@@ -4970,14 +4970,14 @@ index 0000000000..83e05425b2
 +define(`mls_systemhigh',`s`'decr(mls_num_sens):c0.c`'decr(mls_num_cats)')
 diff --git a/prebuilts/api/28.0/private/modprobe.te b/prebuilts/api/28.0/private/modprobe.te
 new file mode 100644
-index 0000000000..98586756f9
+index 000000000..98586756f
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/modprobe.te
 @@ -0,0 +1 @@
 +typeattribute modprobe coredomain;
 diff --git a/prebuilts/api/28.0/private/mtp.te b/prebuilts/api/28.0/private/mtp.te
 new file mode 100644
-index 0000000000..732e111ed0
+index 000000000..732e111ed
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/mtp.te
 @@ -0,0 +1,3 @@
@@ -4986,7 +4986,7 @@ index 0000000000..732e111ed0
 +init_daemon_domain(mtp)
 diff --git a/prebuilts/api/28.0/private/net.te b/prebuilts/api/28.0/private/net.te
 new file mode 100644
-index 0000000000..f16daf94cf
+index 000000000..f16daf94c
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/net.te
 @@ -0,0 +1,24 @@
@@ -5016,7 +5016,7 @@ index 0000000000..f16daf94cf
 +unix_socket_connect(netdomain, mdnsd, mdnsd)
 diff --git a/prebuilts/api/28.0/private/netd.te b/prebuilts/api/28.0/private/netd.te
 new file mode 100644
-index 0000000000..281105d04f
+index 000000000..281105d04
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/netd.te
 @@ -0,0 +1,15 @@
@@ -5037,7 +5037,7 @@ index 0000000000..281105d04f
 +allow netd bpfloader:bpf prog_run;
 diff --git a/prebuilts/api/28.0/private/netutils_wrapper.te b/prebuilts/api/28.0/private/netutils_wrapper.te
 new file mode 100644
-index 0000000000..ea58814e1a
+index 000000000..ea58814e1
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/netutils_wrapper.te
 @@ -0,0 +1,41 @@
@@ -5084,7 +5084,7 @@ index 0000000000..ea58814e1a
 +neverallow netutils_wrapper self:global_capability_class_set ~{ net_admin net_raw };
 diff --git a/prebuilts/api/28.0/private/nfc.te b/prebuilts/api/28.0/private/nfc.te
 new file mode 100644
-index 0000000000..5e85672918
+index 000000000..5e8567291
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/nfc.te
 @@ -0,0 +1,34 @@
@@ -5124,7 +5124,7 @@ index 0000000000..5e85672918
 +allow nfc shell_data_file:file read;
 diff --git a/prebuilts/api/28.0/private/otapreopt_chroot.te b/prebuilts/api/28.0/private/otapreopt_chroot.te
 new file mode 100644
-index 0000000000..1f69931c8b
+index 000000000..1f69931c8
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/otapreopt_chroot.te
 @@ -0,0 +1,4 @@
@@ -5134,7 +5134,7 @@ index 0000000000..1f69931c8b
 +domain_auto_trans(otapreopt_chroot, postinstall_file, postinstall_dexopt)
 diff --git a/prebuilts/api/28.0/private/otapreopt_slot.te b/prebuilts/api/28.0/private/otapreopt_slot.te
 new file mode 100644
-index 0000000000..98b93d4065
+index 000000000..98b93d406
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/otapreopt_slot.te
 @@ -0,0 +1,5 @@
@@ -5145,7 +5145,7 @@ index 0000000000..98b93d4065
 +init_daemon_domain(otapreopt_slot)
 diff --git a/prebuilts/api/28.0/private/perfetto.te b/prebuilts/api/28.0/private/perfetto.te
 new file mode 100644
-index 0000000000..67725bfcae
+index 000000000..67725bfca
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/perfetto.te
 @@ -0,0 +1,68 @@
@@ -5219,7 +5219,7 @@ index 0000000000..67725bfcae
 +neverallow perfetto { data_file_type -zoneinfo_data_file -perfetto_traces_data_file }:file ~write;
 diff --git a/prebuilts/api/28.0/private/performanced.te b/prebuilts/api/28.0/private/performanced.te
 new file mode 100644
-index 0000000000..792826e022
+index 000000000..792826e02
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/performanced.te
 @@ -0,0 +1,3 @@
@@ -5228,7 +5228,7 @@ index 0000000000..792826e022
 +init_daemon_domain(performanced)
 diff --git a/prebuilts/api/28.0/private/perfprofd.te b/prebuilts/api/28.0/private/perfprofd.te
 new file mode 100644
-index 0000000000..4da5410321
+index 000000000..4da541032
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/perfprofd.te
 @@ -0,0 +1,8 @@
@@ -5242,7 +5242,7 @@ index 0000000000..4da5410321
 +neverallow perfprofd { domain userdebug_or_eng(`-servicemanager -statsd -su -system_server') }:binder call;
 diff --git a/prebuilts/api/28.0/private/platform_app.te b/prebuilts/api/28.0/private/platform_app.te
 new file mode 100644
-index 0000000000..6d6ec9832d
+index 000000000..6d6ec9832
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/platform_app.te
 @@ -0,0 +1,85 @@
@@ -5333,7 +5333,7 @@ index 0000000000..6d6ec9832d
 +neverallow platform_app fuse_device:chr_file *;
 diff --git a/prebuilts/api/28.0/private/policy_capabilities b/prebuilts/api/28.0/private/policy_capabilities
 new file mode 100644
-index 0000000000..2df2c34b9b
+index 000000000..2df2c34b9
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/policy_capabilities
 @@ -0,0 +1,12 @@
@@ -5351,7 +5351,7 @@ index 0000000000..2df2c34b9b
 +policycap extended_socket_class;
 diff --git a/prebuilts/api/28.0/private/port_contexts b/prebuilts/api/28.0/private/port_contexts
 new file mode 100644
-index 0000000000..c60089e02f
+index 000000000..c60089e02
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/port_contexts
 @@ -0,0 +1,2 @@
@@ -5359,7 +5359,7 @@ index 0000000000..c60089e02f
 +# portcon tcp 80 u:object_r:http_port:s0
 diff --git a/prebuilts/api/28.0/private/postinstall.te b/prebuilts/api/28.0/private/postinstall.te
 new file mode 100644
-index 0000000000..363e362dda
+index 000000000..363e362dd
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/postinstall.te
 @@ -0,0 +1,3 @@
@@ -5368,7 +5368,7 @@ index 0000000000..363e362dda
 +domain_auto_trans(postinstall, otapreopt_chroot_exec, otapreopt_chroot)
 diff --git a/prebuilts/api/28.0/private/postinstall_dexopt.te b/prebuilts/api/28.0/private/postinstall_dexopt.te
 new file mode 100644
-index 0000000000..ff5fe8735d
+index 000000000..ff5fe8735
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/postinstall_dexopt.te
 @@ -0,0 +1,5 @@
@@ -5379,7 +5379,7 @@ index 0000000000..ff5fe8735d
 +domain_auto_trans(postinstall_dexopt, postinstall_file, dex2oat)
 diff --git a/prebuilts/api/28.0/private/ppp.te b/prebuilts/api/28.0/private/ppp.te
 new file mode 100644
-index 0000000000..968b221b68
+index 000000000..968b221b6
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/ppp.te
 @@ -0,0 +1,3 @@
@@ -5388,14 +5388,14 @@ index 0000000000..968b221b68
 +domain_auto_trans(mtp, ppp_exec, ppp)
 diff --git a/prebuilts/api/28.0/private/preopt2cachename.te b/prebuilts/api/28.0/private/preopt2cachename.te
 new file mode 100644
-index 0000000000..d10f76766c
+index 000000000..d10f76766
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/preopt2cachename.te
 @@ -0,0 +1 @@
 +typeattribute preopt2cachename coredomain;
 diff --git a/prebuilts/api/28.0/private/priv_app.te b/prebuilts/api/28.0/private/priv_app.te
 new file mode 100644
-index 0000000000..9ff8d0910c
+index 000000000..9ff8d0910
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/priv_app.te
 @@ -0,0 +1,206 @@
@@ -5607,14 +5607,14 @@ index 0000000000..9ff8d0910c
 +neverallow priv_app trace_data_file:file { no_w_file_perms open };
 diff --git a/prebuilts/api/28.0/private/profman.te b/prebuilts/api/28.0/private/profman.te
 new file mode 100644
-index 0000000000..f61d05efe7
+index 000000000..f61d05efe
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/profman.te
 @@ -0,0 +1 @@
 +typeattribute profman coredomain;
 diff --git a/prebuilts/api/28.0/private/property_contexts b/prebuilts/api/28.0/private/property_contexts
 new file mode 100644
-index 0000000000..32be0b3772
+index 000000000..32be0b377
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/property_contexts
 @@ -0,0 +1,147 @@
@@ -5767,7 +5767,7 @@ index 0000000000..32be0b3772
 +vendor.                 u:object_r:vendor_default_prop:s0
 diff --git a/prebuilts/api/28.0/private/racoon.te b/prebuilts/api/28.0/private/racoon.te
 new file mode 100644
-index 0000000000..42ea7c9e48
+index 000000000..42ea7c9e4
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/racoon.te
 @@ -0,0 +1,3 @@
@@ -5776,7 +5776,7 @@ index 0000000000..42ea7c9e48
 +init_daemon_domain(racoon)
 diff --git a/prebuilts/api/28.0/private/radio.te b/prebuilts/api/28.0/private/radio.te
 new file mode 100644
-index 0000000000..b4f539048f
+index 000000000..b4f539048
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/radio.te
 @@ -0,0 +1,5 @@
@@ -5787,14 +5787,14 @@ index 0000000000..b4f539048f
 +read_runtime_log_tags(radio)
 diff --git a/prebuilts/api/28.0/private/recovery.te b/prebuilts/api/28.0/private/recovery.te
 new file mode 100644
-index 0000000000..2a7fdc7e1d
+index 000000000..2a7fdc7e1
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/recovery.te
 @@ -0,0 +1 @@
 +typeattribute recovery coredomain;
 diff --git a/prebuilts/api/28.0/private/recovery_persist.te b/prebuilts/api/28.0/private/recovery_persist.te
 new file mode 100644
-index 0000000000..1fdd7583d7
+index 000000000..1fdd7583d
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/recovery_persist.te
 @@ -0,0 +1,7 @@
@@ -5807,7 +5807,7 @@ index 0000000000..1fdd7583d7
 +neverallow recovery_persist { file_type -recovery_data_file -recovery_persist_tmpfs userdebug_or_eng(`-coredump_file') }:file write;
 diff --git a/prebuilts/api/28.0/private/recovery_refresh.te b/prebuilts/api/28.0/private/recovery_refresh.te
 new file mode 100644
-index 0000000000..327098dadb
+index 000000000..327098dad
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/recovery_refresh.te
 @@ -0,0 +1,7 @@
@@ -5820,14 +5820,14 @@ index 0000000000..327098dadb
 +neverallow recovery_refresh { file_type -recovery_refresh_tmpfs userdebug_or_eng(`-coredump_file') }:file write;
 diff --git a/prebuilts/api/28.0/private/roles_decl b/prebuilts/api/28.0/private/roles_decl
 new file mode 100644
-index 0000000000..c84fcba0ff
+index 000000000..c84fcba0f
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/roles_decl
 @@ -0,0 +1 @@
 +role r;
 diff --git a/prebuilts/api/28.0/private/runas.te b/prebuilts/api/28.0/private/runas.te
 new file mode 100644
-index 0000000000..ef31aac347
+index 000000000..ef31aac34
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/runas.te
 @@ -0,0 +1,4 @@
@@ -5837,7 +5837,7 @@ index 0000000000..ef31aac347
 +domain_auto_trans(shell, runas_exec, runas)
 diff --git a/prebuilts/api/28.0/private/sdcardd.te b/prebuilts/api/28.0/private/sdcardd.te
 new file mode 100644
-index 0000000000..126d643490
+index 000000000..126d64349
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/sdcardd.te
 @@ -0,0 +1,3 @@
@@ -5846,7 +5846,7 @@ index 0000000000..126d643490
 +type_transition sdcardd system_data_file:{ dir file } media_rw_data_file;
 diff --git a/prebuilts/api/28.0/private/seapp_contexts b/prebuilts/api/28.0/private/seapp_contexts
 new file mode 100644
-index 0000000000..c21d49f2af
+index 000000000..c21d49f2a
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/seapp_contexts
 @@ -0,0 +1,118 @@
@@ -5970,7 +5970,7 @@ index 0000000000..c21d49f2af
 +user=_app domain=untrusted_app_25 type=app_data_file levelFrom=user
 diff --git a/prebuilts/api/28.0/private/secure_element.te b/prebuilts/api/28.0/private/secure_element.te
 new file mode 100644
-index 0000000000..57f512bbd2
+index 000000000..57f512bbd
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/secure_element.te
 @@ -0,0 +1,14 @@
@@ -5990,7 +5990,7 @@ index 0000000000..57f512bbd2
 +allow secure_element shell_data_file:file read;
 diff --git a/prebuilts/api/28.0/private/security_classes b/prebuilts/api/28.0/private/security_classes
 new file mode 100644
-index 0000000000..251b721686
+index 000000000..251b72168
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/security_classes
 @@ -0,0 +1,146 @@
@@ -6142,7 +6142,7 @@ index 0000000000..251b721686
 +# FLASK
 diff --git a/prebuilts/api/28.0/private/service.te b/prebuilts/api/28.0/private/service.te
 new file mode 100644
-index 0000000000..3fec8825a7
+index 000000000..3fec8825a
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/service.te
 @@ -0,0 +1,2 @@
@@ -6150,7 +6150,7 @@ index 0000000000..3fec8825a7
 +type statscompanion_service, system_server_service, service_manager_type;
 diff --git a/prebuilts/api/28.0/private/service_contexts b/prebuilts/api/28.0/private/service_contexts
 new file mode 100644
-index 0000000000..5ec45a23ef
+index 000000000..5ec45a23e
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/service_contexts
 @@ -0,0 +1,188 @@
@@ -6344,7 +6344,7 @@ index 0000000000..5ec45a23ef
 +*                                         u:object_r:default_android_service:s0
 diff --git a/prebuilts/api/28.0/private/servicemanager.te b/prebuilts/api/28.0/private/servicemanager.te
 new file mode 100644
-index 0000000000..9f675a2bed
+index 000000000..9f675a2be
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/servicemanager.te
 @@ -0,0 +1,5 @@
@@ -6355,14 +6355,14 @@ index 0000000000..9f675a2bed
 +read_runtime_log_tags(servicemanager)
 diff --git a/prebuilts/api/28.0/private/sgdisk.te b/prebuilts/api/28.0/private/sgdisk.te
 new file mode 100644
-index 0000000000..a17342e010
+index 000000000..a17342e01
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/sgdisk.te
 @@ -0,0 +1 @@
 +typeattribute sgdisk coredomain;
 diff --git a/prebuilts/api/28.0/private/shared_relro.te b/prebuilts/api/28.0/private/shared_relro.te
 new file mode 100644
-index 0000000000..02f7206829
+index 000000000..02f720682
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/shared_relro.te
 @@ -0,0 +1,5 @@
@@ -6373,7 +6373,7 @@ index 0000000000..02f7206829
 +app_domain(shared_relro)
 diff --git a/prebuilts/api/28.0/private/shell.te b/prebuilts/api/28.0/private/shell.te
 new file mode 100644
-index 0000000000..130a130159
+index 000000000..130a13015
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/shell.te
 @@ -0,0 +1,53 @@
@@ -6432,14 +6432,14 @@ index 0000000000..130a130159
 +allow shell perfetto_traces_data_file:file r_file_perms;
 diff --git a/prebuilts/api/28.0/private/slideshow.te b/prebuilts/api/28.0/private/slideshow.te
 new file mode 100644
-index 0000000000..7dfa994ea7
+index 000000000..7dfa994ea
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/slideshow.te
 @@ -0,0 +1 @@
 +typeattribute slideshow coredomain;
 diff --git a/prebuilts/api/28.0/private/stats.te b/prebuilts/api/28.0/private/stats.te
 new file mode 100644
-index 0000000000..019dfc82cd
+index 000000000..019dfc82c
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/stats.te
 @@ -0,0 +1,24 @@
@@ -6469,7 +6469,7 @@ index 0000000000..019dfc82cd
 +allow stats statsd:fifo_file write;
 diff --git a/prebuilts/api/28.0/private/statsd.te b/prebuilts/api/28.0/private/statsd.te
 new file mode 100644
-index 0000000000..74b89c2427
+index 000000000..74b89c242
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/statsd.te
 @@ -0,0 +1,116 @@
@@ -6591,7 +6591,7 @@ index 0000000000..74b89c2427
 +neverallow { domain -statsd -system_server -init -vold } stats_data_file:dir *;
 diff --git a/prebuilts/api/28.0/private/storaged.te b/prebuilts/api/28.0/private/storaged.te
 new file mode 100644
-index 0000000000..8ad872f610
+index 000000000..8ad872f61
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/storaged.te
 @@ -0,0 +1,61 @@
@@ -6658,7 +6658,7 @@ index 0000000000..8ad872f610
 +neverallow storaged self:capability_class_set *;
 diff --git a/prebuilts/api/28.0/private/su.te b/prebuilts/api/28.0/private/su.te
 new file mode 100644
-index 0000000000..16e47bbbf6
+index 000000000..16e47bbbf
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/su.te
 @@ -0,0 +1,23 @@
@@ -6687,7 +6687,7 @@ index 0000000000..16e47bbbf6
 +')
 diff --git a/prebuilts/api/28.0/private/surfaceflinger.te b/prebuilts/api/28.0/private/surfaceflinger.te
 new file mode 100644
-index 0000000000..e2f1a0721b
+index 000000000..e2f1a0721
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/surfaceflinger.te
 @@ -0,0 +1,121 @@
@@ -6814,7 +6814,7 @@ index 0000000000..e2f1a0721b
 +dontaudit surfaceflinger unlabeled:dir search;
 diff --git a/prebuilts/api/28.0/private/system_app.te b/prebuilts/api/28.0/private/system_app.te
 new file mode 100644
-index 0000000000..eb7e050522
+index 000000000..eb7e05052
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/system_app.te
 @@ -0,0 +1,129 @@
@@ -6949,7 +6949,7 @@ index 0000000000..eb7e050522
 +neverallow system_app fuse_device:chr_file *;
 diff --git a/prebuilts/api/28.0/private/system_server.te b/prebuilts/api/28.0/private/system_server.te
 new file mode 100644
-index 0000000000..2927e0bca5
+index 000000000..2927e0bca
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/system_server.te
 @@ -0,0 +1,868 @@
@@ -7823,7 +7823,7 @@ index 0000000000..2927e0bca5
 +neverallow system_server system_server:global_capability_class_set sys_resource;
 diff --git a/prebuilts/api/28.0/private/technical_debt.cil b/prebuilts/api/28.0/private/technical_debt.cil
 new file mode 100644
-index 0000000000..7f9d315edf
+index 000000000..7f9d315ed
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/technical_debt.cil
 @@ -0,0 +1,38 @@
@@ -7867,7 +7867,7 @@ index 0000000000..7f9d315edf
 +(typeattributeset hal_neuralnetworks_client ((and (appdomain) ((not (isolated_app))))))
 diff --git a/prebuilts/api/28.0/private/thermalserviced.te b/prebuilts/api/28.0/private/thermalserviced.te
 new file mode 100644
-index 0000000000..8fa08e0662
+index 000000000..8fa08e066
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/thermalserviced.te
 @@ -0,0 +1,3 @@
@@ -7876,7 +7876,7 @@ index 0000000000..8fa08e0662
 +init_daemon_domain(thermalserviced)
 diff --git a/prebuilts/api/28.0/private/tombstoned.te b/prebuilts/api/28.0/private/tombstoned.te
 new file mode 100644
-index 0000000000..305f9d0067
+index 000000000..305f9d006
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/tombstoned.te
 @@ -0,0 +1,3 @@
@@ -7885,7 +7885,7 @@ index 0000000000..305f9d0067
 +init_daemon_domain(tombstoned)
 diff --git a/prebuilts/api/28.0/private/toolbox.te b/prebuilts/api/28.0/private/toolbox.te
 new file mode 100644
-index 0000000000..a2b958dba3
+index 000000000..a2b958dba
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/toolbox.te
 @@ -0,0 +1,3 @@
@@ -7894,7 +7894,7 @@ index 0000000000..a2b958dba3
 +init_daemon_domain(toolbox)
 diff --git a/prebuilts/api/28.0/private/traced.te b/prebuilts/api/28.0/private/traced.te
 new file mode 100644
-index 0000000000..49edc51749
+index 000000000..49edc5174
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/traced.te
 @@ -0,0 +1,60 @@
@@ -7960,7 +7960,7 @@ index 0000000000..49edc51749
 +neverallow * traced:process dyntransition;
 diff --git a/prebuilts/api/28.0/private/traced_probes.te b/prebuilts/api/28.0/private/traced_probes.te
 new file mode 100644
-index 0000000000..e32e2e6974
+index 000000000..e32e2e697
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/traced_probes.te
 @@ -0,0 +1,99 @@
@@ -8065,7 +8065,7 @@ index 0000000000..e32e2e6974
 +neverallow * traced_probes:process dyntransition;
 diff --git a/prebuilts/api/28.0/private/traceur_app.te b/prebuilts/api/28.0/private/traceur_app.te
 new file mode 100644
-index 0000000000..a3c435ce53
+index 000000000..a3c435ce5
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/traceur_app.te
 @@ -0,0 +1,15 @@
@@ -8086,7 +8086,7 @@ index 0000000000..a3c435ce53
 +dontaudit traceur_app debugfs_tracing_debug:file audit_access;
 diff --git a/prebuilts/api/28.0/private/tzdatacheck.te b/prebuilts/api/28.0/private/tzdatacheck.te
 new file mode 100644
-index 0000000000..502735cad0
+index 000000000..502735cad
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/tzdatacheck.te
 @@ -0,0 +1,3 @@
@@ -8095,7 +8095,7 @@ index 0000000000..502735cad0
 +init_daemon_domain(tzdatacheck)
 diff --git a/prebuilts/api/28.0/private/ueventd.te b/prebuilts/api/28.0/private/ueventd.te
 new file mode 100644
-index 0000000000..1bd67735e9
+index 000000000..1bd67735e
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/ueventd.te
 @@ -0,0 +1,3 @@
@@ -8104,7 +8104,7 @@ index 0000000000..1bd67735e9
 +tmpfs_domain(ueventd)
 diff --git a/prebuilts/api/28.0/private/uncrypt.te b/prebuilts/api/28.0/private/uncrypt.te
 new file mode 100644
-index 0000000000..e4e9224d9d
+index 000000000..e4e9224d9
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/uncrypt.te
 @@ -0,0 +1,3 @@
@@ -8113,7 +8113,7 @@ index 0000000000..e4e9224d9d
 +init_daemon_domain(uncrypt)
 diff --git a/prebuilts/api/28.0/private/untrusted_app.te b/prebuilts/api/28.0/private/untrusted_app.te
 new file mode 100644
-index 0000000000..c15fa2244b
+index 000000000..c15fa2244
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/untrusted_app.te
 @@ -0,0 +1,25 @@
@@ -8144,7 +8144,7 @@ index 0000000000..c15fa2244b
 +bluetooth_domain(untrusted_app)
 diff --git a/prebuilts/api/28.0/private/untrusted_app_25.te b/prebuilts/api/28.0/private/untrusted_app_25.te
 new file mode 100644
-index 0000000000..ba2c1e1c7d
+index 000000000..ba2c1e1c7
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/untrusted_app_25.te
 @@ -0,0 +1,42 @@
@@ -8192,7 +8192,7 @@ index 0000000000..ba2c1e1c7d
 +allow untrusted_app_25 proc_tty_drivers:file r_file_perms;
 diff --git a/prebuilts/api/28.0/private/untrusted_app_27.te b/prebuilts/api/28.0/private/untrusted_app_27.te
 new file mode 100644
-index 0000000000..79c776287f
+index 000000000..79c776287
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/untrusted_app_27.te
 @@ -0,0 +1,28 @@
@@ -8226,7 +8226,7 @@ index 0000000000..79c776287f
 +bluetooth_domain(untrusted_app_27)
 diff --git a/prebuilts/api/28.0/private/untrusted_app_all.te b/prebuilts/api/28.0/private/untrusted_app_all.te
 new file mode 100644
-index 0000000000..6cf1668275
+index 000000000..6cf166827
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/untrusted_app_all.te
 @@ -0,0 +1,140 @@
@@ -8372,7 +8372,7 @@ index 0000000000..6cf1668275
 +dontaudit untrusted_app_all proc_uptime:file read;
 diff --git a/prebuilts/api/28.0/private/untrusted_v2_app.te b/prebuilts/api/28.0/private/untrusted_v2_app.te
 new file mode 100644
-index 0000000000..8f4bceb2c6
+index 000000000..8f4bceb2c
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/untrusted_v2_app.te
 @@ -0,0 +1,47 @@
@@ -8425,7 +8425,7 @@ index 0000000000..8f4bceb2c6
 +unix_socket_connect(untrusted_v2_app, traced_producer, traced)
 diff --git a/prebuilts/api/28.0/private/update_engine.te b/prebuilts/api/28.0/private/update_engine.te
 new file mode 100644
-index 0000000000..5af7db6817
+index 000000000..5af7db681
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/update_engine.te
 @@ -0,0 +1,3 @@
@@ -8434,7 +8434,7 @@ index 0000000000..5af7db6817
 +init_daemon_domain(update_engine);
 diff --git a/prebuilts/api/28.0/private/update_engine_common.te b/prebuilts/api/28.0/private/update_engine_common.te
 new file mode 100644
-index 0000000000..a7fb584717
+index 000000000..a7fb58471
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/update_engine_common.te
 @@ -0,0 +1,5 @@
@@ -8445,7 +8445,7 @@ index 0000000000..a7fb584717
 +domain_auto_trans(update_engine_common, postinstall_file, postinstall)
 diff --git a/prebuilts/api/28.0/private/update_verifier.te b/prebuilts/api/28.0/private/update_verifier.te
 new file mode 100644
-index 0000000000..1b934d9805
+index 000000000..1b934d980
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/update_verifier.te
 @@ -0,0 +1,3 @@
@@ -8454,7 +8454,7 @@ index 0000000000..1b934d9805
 +init_daemon_domain(update_verifier)
 diff --git a/prebuilts/api/28.0/private/usbd.te b/prebuilts/api/28.0/private/usbd.te
 new file mode 100644
-index 0000000000..13a0ad7a6f
+index 000000000..13a0ad7a6
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/usbd.te
 @@ -0,0 +1,12 @@
@@ -8472,14 +8472,14 @@ index 0000000000..13a0ad7a6f
 +set_prop(usbd, ctl_default_prop)
 diff --git a/prebuilts/api/28.0/private/users b/prebuilts/api/28.0/private/users
 new file mode 100644
-index 0000000000..51b7b57e67
+index 000000000..51b7b57e6
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/users
 @@ -0,0 +1 @@
 +user u roles { r } level s0 range s0 - mls_systemhigh;
 diff --git a/prebuilts/api/28.0/private/vdc.te b/prebuilts/api/28.0/private/vdc.te
 new file mode 100644
-index 0000000000..bc7409eee5
+index 000000000..bc7409eee
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/vdc.te
 @@ -0,0 +1,3 @@
@@ -8488,7 +8488,7 @@ index 0000000000..bc7409eee5
 +init_daemon_domain(vdc)
 diff --git a/prebuilts/api/28.0/private/vendor_init.te b/prebuilts/api/28.0/private/vendor_init.te
 new file mode 100644
-index 0000000000..50efc22d69
+index 000000000..50efc22d6
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/vendor_init.te
 @@ -0,0 +1,4 @@
@@ -8498,7 +8498,7 @@ index 0000000000..50efc22d69
 +dontaudit vendor_init sysfs:dir write;
 diff --git a/prebuilts/api/28.0/private/virtual_touchpad.te b/prebuilts/api/28.0/private/virtual_touchpad.te
 new file mode 100644
-index 0000000000..e735172fed
+index 000000000..e735172fe
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/virtual_touchpad.te
 @@ -0,0 +1,3 @@
@@ -8507,7 +8507,7 @@ index 0000000000..e735172fed
 +init_daemon_domain(virtual_touchpad)
 diff --git a/prebuilts/api/28.0/private/vold.te b/prebuilts/api/28.0/private/vold.te
 new file mode 100644
-index 0000000000..a6d1001d1d
+index 000000000..a6d1001d1
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/vold.te
 @@ -0,0 +1,19 @@
@@ -8532,7 +8532,7 @@ index 0000000000..a6d1001d1d
 +type_transition vold mnt_media_rw_file:dir mnt_media_rw_stub_file;
 diff --git a/prebuilts/api/28.0/private/vold_prepare_subdirs.te b/prebuilts/api/28.0/private/vold_prepare_subdirs.te
 new file mode 100644
-index 0000000000..0a115584ac
+index 000000000..0a115584a
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/vold_prepare_subdirs.te
 @@ -0,0 +1,26 @@
@@ -8564,7 +8564,7 @@ index 0000000000..0a115584ac
 +}:file { getattr unlink };
 diff --git a/prebuilts/api/28.0/private/vr_hwc.te b/prebuilts/api/28.0/private/vr_hwc.te
 new file mode 100644
-index 0000000000..053c03d986
+index 000000000..053c03d98
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/vr_hwc.te
 @@ -0,0 +1,6 @@
@@ -8576,7 +8576,7 @@ index 0000000000..053c03d986
 +hal_server_domain(vr_hwc, hal_graphics_composer)
 diff --git a/prebuilts/api/28.0/private/wait_for_keymaster.te b/prebuilts/api/28.0/private/wait_for_keymaster.te
 new file mode 100644
-index 0000000000..8b8dd2927b
+index 000000000..8b8dd2927
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/wait_for_keymaster.te
 @@ -0,0 +1,9 @@
@@ -8591,14 +8591,14 @@ index 0000000000..8b8dd2927b
 +allow wait_for_keymaster kmsg_device:chr_file w_file_perms;
 diff --git a/prebuilts/api/28.0/private/watchdogd.te b/prebuilts/api/28.0/private/watchdogd.te
 new file mode 100644
-index 0000000000..36dd30fd77
+index 000000000..36dd30fd7
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/watchdogd.te
 @@ -0,0 +1 @@
 +typeattribute watchdogd coredomain;
 diff --git a/prebuilts/api/28.0/private/webview_zygote.te b/prebuilts/api/28.0/private/webview_zygote.te
 new file mode 100644
-index 0000000000..55b268a303
+index 000000000..55b268a30
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/webview_zygote.te
 @@ -0,0 +1,140 @@
@@ -8744,7 +8744,7 @@ index 0000000000..55b268a303
 +}:file create_file_perms;
 diff --git a/prebuilts/api/28.0/private/wificond.te b/prebuilts/api/28.0/private/wificond.te
 new file mode 100644
-index 0000000000..cc76447458
+index 000000000..cc7644745
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/wificond.te
 @@ -0,0 +1,4 @@
@@ -8754,7 +8754,7 @@ index 0000000000..cc76447458
 +hal_client_domain(wificond, hal_wifi_offload)
 diff --git a/prebuilts/api/28.0/private/wpantund.te b/prebuilts/api/28.0/private/wpantund.te
 new file mode 100644
-index 0000000000..e91662cb7f
+index 000000000..e91662cb7
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/wpantund.te
 @@ -0,0 +1,3 @@
@@ -8763,7 +8763,7 @@ index 0000000000..e91662cb7f
 +init_daemon_domain(wpantund)
 diff --git a/prebuilts/api/28.0/private/zygote.te b/prebuilts/api/28.0/private/zygote.te
 new file mode 100644
-index 0000000000..2dcbdf1aa1
+index 000000000..2dcbdf1aa
 --- /dev/null
 +++ b/prebuilts/api/28.0/private/zygote.te
 @@ -0,0 +1,140 @@
@@ -8909,7 +8909,7 @@ index 0000000000..2dcbdf1aa1
 +}:file create_file_perms;
 diff --git a/prebuilts/api/28.0/public/adbd.te b/prebuilts/api/28.0/public/adbd.te
 new file mode 100644
-index 0000000000..95854c01e7
+index 000000000..95854c01e
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/adbd.te
 @@ -0,0 +1,4 @@
@@ -8919,7 +8919,7 @@ index 0000000000..95854c01e7
 +type adbd_exec, exec_type, file_type;
 diff --git a/prebuilts/api/28.0/public/app.te b/prebuilts/api/28.0/public/app.te
 new file mode 100644
-index 0000000000..55308da514
+index 000000000..55308da51
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/app.te
 @@ -0,0 +1,572 @@
@@ -9497,7 +9497,7 @@ index 0000000000..55308da514
 +neverallow appdomain proc_uid_cpupower:file *;
 diff --git a/prebuilts/api/28.0/public/asan_extract.te b/prebuilts/api/28.0/public/asan_extract.te
 new file mode 100644
-index 0000000000..15c5a09fd8
+index 000000000..15c5a09fd
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/asan_extract.te
 @@ -0,0 +1,36 @@
@@ -9539,7 +9539,7 @@ index 0000000000..15c5a09fd8
 +')
 diff --git a/prebuilts/api/28.0/public/attributes b/prebuilts/api/28.0/public/attributes
 new file mode 100644
-index 0000000000..0c7ca2ed7d
+index 000000000..0c7ca2ed7
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/attributes
 @@ -0,0 +1,311 @@
@@ -9856,7 +9856,7 @@ index 0000000000..0c7ca2ed7d
 +attribute wifi_keystore_service_server;
 diff --git a/prebuilts/api/28.0/public/audioserver.te b/prebuilts/api/28.0/public/audioserver.te
 new file mode 100644
-index 0000000000..9a72858219
+index 000000000..9a7285821
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/audioserver.te
 @@ -0,0 +1,2 @@
@@ -9864,7 +9864,7 @@ index 0000000000..9a72858219
 +type audioserver, domain;
 diff --git a/prebuilts/api/28.0/public/blkid.te b/prebuilts/api/28.0/public/blkid.te
 new file mode 100644
-index 0000000000..dabe014520
+index 000000000..dabe01452
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/blkid.te
 @@ -0,0 +1,2 @@
@@ -9872,7 +9872,7 @@ index 0000000000..dabe014520
 +type blkid, domain;
 diff --git a/prebuilts/api/28.0/public/blkid_untrusted.te b/prebuilts/api/28.0/public/blkid_untrusted.te
 new file mode 100644
-index 0000000000..4be4c0cb23
+index 000000000..4be4c0cb2
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/blkid_untrusted.te
 @@ -0,0 +1,2 @@
@@ -9880,7 +9880,7 @@ index 0000000000..4be4c0cb23
 +type blkid_untrusted, domain;
 diff --git a/prebuilts/api/28.0/public/bluetooth.te b/prebuilts/api/28.0/public/bluetooth.te
 new file mode 100644
-index 0000000000..9b3442aa5b
+index 000000000..9b3442aa5
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/bluetooth.te
 @@ -0,0 +1,2 @@
@@ -9888,7 +9888,7 @@ index 0000000000..9b3442aa5b
 +type bluetooth, domain;
 diff --git a/prebuilts/api/28.0/public/bootanim.te b/prebuilts/api/28.0/public/bootanim.te
 new file mode 100644
-index 0000000000..5cce7f9e40
+index 000000000..5cce7f9e4
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/bootanim.te
 @@ -0,0 +1,41 @@
@@ -9935,7 +9935,7 @@ index 0000000000..5cce7f9e40
 +get_prop(bootanim, bootloader_boot_reason_prop)
 diff --git a/prebuilts/api/28.0/public/bootstat.te b/prebuilts/api/28.0/public/bootstat.te
 new file mode 100644
-index 0000000000..7ba0238152
+index 000000000..7ba023815
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/bootstat.te
 @@ -0,0 +1,57 @@
@@ -9998,7 +9998,7 @@ index 0000000000..7ba0238152
 +} system_boot_reason_prop:property_service set;
 diff --git a/prebuilts/api/28.0/public/bufferhubd.te b/prebuilts/api/28.0/public/bufferhubd.te
 new file mode 100644
-index 0000000000..274c2716b3
+index 000000000..274c2716b
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/bufferhubd.te
 @@ -0,0 +1,20 @@
@@ -10024,7 +10024,7 @@ index 0000000000..274c2716b3
 +allow bufferhubd mediacodec:fd use;
 diff --git a/prebuilts/api/28.0/public/cameraserver.te b/prebuilts/api/28.0/public/cameraserver.te
 new file mode 100644
-index 0000000000..3fdca537e0
+index 000000000..3fdca537e
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/cameraserver.te
 @@ -0,0 +1,65 @@
@@ -10095,7 +10095,7 @@ index 0000000000..3fdca537e0
 +')
 diff --git a/prebuilts/api/28.0/public/charger.te b/prebuilts/api/28.0/public/charger.te
 new file mode 100644
-index 0000000000..7145548a50
+index 000000000..7145548a5
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/charger.te
 @@ -0,0 +1,45 @@
@@ -10146,7 +10146,7 @@ index 0000000000..7145548a50
 +set_prop(charger, exported3_system_prop)
 diff --git a/prebuilts/api/28.0/public/clatd.te b/prebuilts/api/28.0/public/clatd.te
 new file mode 100644
-index 0000000000..ee44abf7c6
+index 000000000..ee44abf7c
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/clatd.te
 @@ -0,0 +1,33 @@
@@ -10185,7 +10185,7 @@ index 0000000000..ee44abf7c6
 +allow clatd tun_device:chr_file rw_file_perms;
 diff --git a/prebuilts/api/28.0/public/cppreopts.te b/prebuilts/api/28.0/public/cppreopts.te
 new file mode 100644
-index 0000000000..fb9855eeaa
+index 000000000..fb9855eea
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/cppreopts.te
 @@ -0,0 +1,22 @@
@@ -10213,7 +10213,7 @@ index 0000000000..fb9855eeaa
 +allow cppreopts toolbox_exec:file rx_file_perms;
 diff --git a/prebuilts/api/28.0/public/crash_dump.te b/prebuilts/api/28.0/public/crash_dump.te
 new file mode 100644
-index 0000000000..cd1e5a8e43
+index 000000000..cd1e5a8e4
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/crash_dump.te
 @@ -0,0 +1,65 @@
@@ -10284,7 +10284,7 @@ index 0000000000..cd1e5a8e43
 +neverallow domain crash_dump_exec:file execute_no_trans;
 diff --git a/prebuilts/api/28.0/public/device.te b/prebuilts/api/28.0/public/device.te
 new file mode 100644
-index 0000000000..231c839383
+index 000000000..231c83938
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/device.te
 @@ -0,0 +1,106 @@
@@ -10396,7 +10396,7 @@ index 0000000000..231c839383
 +type misc_block_device, dev_type;
 diff --git a/prebuilts/api/28.0/public/dex2oat.te b/prebuilts/api/28.0/public/dex2oat.te
 new file mode 100644
-index 0000000000..608ba7987f
+index 000000000..608ba7987
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/dex2oat.te
 @@ -0,0 +1,66 @@
@@ -10468,7 +10468,7 @@ index 0000000000..608ba7987f
 +neverallow dex2oat app_data_file:notdevfile_class_set open;
 diff --git a/prebuilts/api/28.0/public/dhcp.te b/prebuilts/api/28.0/public/dhcp.te
 new file mode 100644
-index 0000000000..1f1ef2b48c
+index 000000000..1f1ef2b48
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/dhcp.te
 @@ -0,0 +1,30 @@
@@ -10504,14 +10504,14 @@ index 0000000000..1f1ef2b48c
 +allow dhcp netd:{ netlink_kobject_uevent_socket netlink_route_socket netlink_nflog_socket } { read write };
 diff --git a/prebuilts/api/28.0/public/display_service_server.te b/prebuilts/api/28.0/public/display_service_server.te
 new file mode 100644
-index 0000000000..c5839fa544
+index 000000000..c5839fa54
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/display_service_server.te
 @@ -0,0 +1 @@
 +add_hwservice(display_service_server, fwk_display_hwservice)
 diff --git a/prebuilts/api/28.0/public/dnsmasq.te b/prebuilts/api/28.0/public/dnsmasq.te
 new file mode 100644
-index 0000000000..3aaefd3e6e
+index 000000000..3aaefd3e6
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/dnsmasq.te
 @@ -0,0 +1,25 @@
@@ -10542,7 +10542,7 @@ index 0000000000..3aaefd3e6e
 +allow dnsmasq netd:udp_socket { read write };
 diff --git a/prebuilts/api/28.0/public/domain.te b/prebuilts/api/28.0/public/domain.te
 new file mode 100644
-index 0000000000..2533aecbd5
+index 000000000..2533aecbd
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/domain.te
 @@ -0,0 +1,1399 @@
@@ -11947,7 +11947,7 @@ index 0000000000..2533aecbd5
 +} mnt_vendor_file:dir *;
 diff --git a/prebuilts/api/28.0/public/drmserver.te b/prebuilts/api/28.0/public/drmserver.te
 new file mode 100644
-index 0000000000..f752c13ee8
+index 000000000..f752c13ee
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/drmserver.te
 @@ -0,0 +1,58 @@
@@ -12011,7 +12011,7 @@ index 0000000000..f752c13ee8
 +r_dir_file(drmserver, system_file)
 diff --git a/prebuilts/api/28.0/public/dumpstate.te b/prebuilts/api/28.0/public/dumpstate.te
 new file mode 100644
-index 0000000000..03fc737eb3
+index 000000000..03fc737eb
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/dumpstate.te
 @@ -0,0 +1,289 @@
@@ -12306,7 +12306,7 @@ index 0000000000..03fc737eb3
 +} dumpstate_service:service_manager find;
 diff --git a/prebuilts/api/28.0/public/e2fs.te b/prebuilts/api/28.0/public/e2fs.te
 new file mode 100644
-index 0000000000..6fcd0c2fb8
+index 000000000..6fcd0c2fb
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/e2fs.te
 @@ -0,0 +1,22 @@
@@ -12334,7 +12334,7 @@ index 0000000000..6fcd0c2fb8
 +allow e2fs file_contexts_file:file { getattr open read };
 diff --git a/prebuilts/api/28.0/public/ephemeral_app.te b/prebuilts/api/28.0/public/ephemeral_app.te
 new file mode 100644
-index 0000000000..dc39a22b59
+index 000000000..dc39a22b5
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/ephemeral_app.te
 @@ -0,0 +1,14 @@
@@ -12354,7 +12354,7 @@ index 0000000000..dc39a22b59
 +type ephemeral_app, domain;
 diff --git a/prebuilts/api/28.0/public/file.te b/prebuilts/api/28.0/public/file.te
 new file mode 100644
-index 0000000000..ccfec1529b
+index 000000000..ccfec1529
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/file.te
 @@ -0,0 +1,411 @@
@@ -12771,7 +12771,7 @@ index 0000000000..ccfec1529b
 +neverallow fs_type file_type:filesystem associate;
 diff --git a/prebuilts/api/28.0/public/fingerprintd.te b/prebuilts/api/28.0/public/fingerprintd.te
 new file mode 100644
-index 0000000000..2dc1107214
+index 000000000..2dc110721
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/fingerprintd.te
 @@ -0,0 +1,26 @@
@@ -12803,7 +12803,7 @@ index 0000000000..2dc1107214
 +allow fingerprintd ion_device:chr_file r_file_perms;
 diff --git a/prebuilts/api/28.0/public/fsck.te b/prebuilts/api/28.0/public/fsck.te
 new file mode 100644
-index 0000000000..c5219d8ab6
+index 000000000..c5219d8ab
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/fsck.te
 @@ -0,0 +1,57 @@
@@ -12866,7 +12866,7 @@ index 0000000000..c5219d8ab6
 +neverallow fsck { file_type fs_type -fsck_exec }:file entrypoint;
 diff --git a/prebuilts/api/28.0/public/fsck_untrusted.te b/prebuilts/api/28.0/public/fsck_untrusted.te
 new file mode 100644
-index 0000000000..8510c94247
+index 000000000..8510c9424
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/fsck_untrusted.te
 @@ -0,0 +1,49 @@
@@ -12921,7 +12921,7 @@ index 0000000000..8510c94247
 +neverallow fsck_untrusted { file_type fs_type -fsck_exec }:file entrypoint;
 diff --git a/prebuilts/api/28.0/public/gatekeeperd.te b/prebuilts/api/28.0/public/gatekeeperd.te
 new file mode 100644
-index 0000000000..2fc36279de
+index 000000000..2fc36279d
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/gatekeeperd.te
 @@ -0,0 +1,39 @@
@@ -12966,7 +12966,7 @@ index 0000000000..2fc36279de
 +r_dir_file(gatekeeperd, cgroup)
 diff --git a/prebuilts/api/28.0/public/global_macros b/prebuilts/api/28.0/public/global_macros
 new file mode 100644
-index 0000000000..5dab5ab0c7
+index 000000000..5dab5ab0c
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/global_macros
 @@ -0,0 +1,50 @@
@@ -13022,7 +13022,7 @@ index 0000000000..5dab5ab0c7
 +define(`create_stream_socket_perms', `{ create rw_stream_socket_perms }')
 diff --git a/prebuilts/api/28.0/public/hal_allocator.te b/prebuilts/api/28.0/public/hal_allocator.te
 new file mode 100644
-index 0000000000..646cebdebe
+index 000000000..646cebdeb
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_allocator.te
 @@ -0,0 +1,6 @@
@@ -13034,7 +13034,7 @@ index 0000000000..646cebdebe
 +allow hal_allocator_client hidl_memory_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_audio.te b/prebuilts/api/28.0/public/hal_audio.te
 new file mode 100644
-index 0000000000..037066ea8b
+index 000000000..037066ea8
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_audio.te
 @@ -0,0 +1,38 @@
@@ -13078,7 +13078,7 @@ index 0000000000..037066ea8b
 +get_prop(hal_audio, bluetooth_a2dp_offload_prop)
 diff --git a/prebuilts/api/28.0/public/hal_audiocontrol.te b/prebuilts/api/28.0/public/hal_audiocontrol.te
 new file mode 100644
-index 0000000000..438db531f1
+index 000000000..438db531f
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_audiocontrol.te
 @@ -0,0 +1,7 @@
@@ -13091,7 +13091,7 @@ index 0000000000..438db531f1
 +allow hal_audiocontrol_client hal_audiocontrol_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_authsecret.te b/prebuilts/api/28.0/public/hal_authsecret.te
 new file mode 100644
-index 0000000000..81b0c04451
+index 000000000..81b0c0445
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_authsecret.te
 @@ -0,0 +1,5 @@
@@ -13102,7 +13102,7 @@ index 0000000000..81b0c04451
 +allow hal_authsecret_client hal_authsecret_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_bluetooth.te b/prebuilts/api/28.0/public/hal_bluetooth.te
 new file mode 100644
-index 0000000000..373dbec6bf
+index 000000000..373dbec6b
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_bluetooth.te
 @@ -0,0 +1,32 @@
@@ -13140,7 +13140,7 @@ index 0000000000..373dbec6bf
 +allow hal_bluetooth self:global_capability_class_set sys_nice;
 diff --git a/prebuilts/api/28.0/public/hal_bootctl.te b/prebuilts/api/28.0/public/hal_bootctl.te
 new file mode 100644
-index 0000000000..181de4a9cf
+index 000000000..181de4a9c
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_bootctl.te
 @@ -0,0 +1,8 @@
@@ -13154,7 +13154,7 @@ index 0000000000..181de4a9cf
 +dontaudit hal_bootctl self:capability sys_rawio;
 diff --git a/prebuilts/api/28.0/public/hal_broadcastradio.te b/prebuilts/api/28.0/public/hal_broadcastradio.te
 new file mode 100644
-index 0000000000..24d4908e14
+index 000000000..24d4908e1
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_broadcastradio.te
 @@ -0,0 +1,4 @@
@@ -13164,7 +13164,7 @@ index 0000000000..24d4908e14
 +allow hal_broadcastradio_client hal_broadcastradio_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_camera.te b/prebuilts/api/28.0/public/hal_camera.te
 new file mode 100644
-index 0000000000..8fe744214b
+index 000000000..8fe744214
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_camera.te
 @@ -0,0 +1,33 @@
@@ -13203,7 +13203,7 @@ index 0000000000..8fe744214b
 +neverallow { halserverdomain -hal_camera_server } camera_device:chr_file *;
 diff --git a/prebuilts/api/28.0/public/hal_cas.te b/prebuilts/api/28.0/public/hal_cas.te
 new file mode 100644
-index 0000000000..7f65358581
+index 000000000..7f6535858
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_cas.te
 @@ -0,0 +1,35 @@
@@ -13244,7 +13244,7 @@ index 0000000000..7f65358581
 +neverallowxperm hal_cas_server domain:{ rawip_socket tcp_socket udp_socket } ioctl priv_sock_ioctls;
 diff --git a/prebuilts/api/28.0/public/hal_configstore.te b/prebuilts/api/28.0/public/hal_configstore.te
 new file mode 100644
-index 0000000000..c8051e142f
+index 000000000..c8051e142
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_configstore.te
 @@ -0,0 +1,71 @@
@@ -13321,7 +13321,7 @@ index 0000000000..c8051e142f
 +neverallow hal_configstore_server *:dir_file_class_set { relabelfrom relabelto };
 diff --git a/prebuilts/api/28.0/public/hal_confirmationui.te b/prebuilts/api/28.0/public/hal_confirmationui.te
 new file mode 100644
-index 0000000000..228e864965
+index 000000000..228e86496
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_confirmationui.te
 @@ -0,0 +1,5 @@
@@ -13332,7 +13332,7 @@ index 0000000000..228e864965
 +allow hal_confirmationui_client hal_confirmationui_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_contexthub.te b/prebuilts/api/28.0/public/hal_contexthub.te
 new file mode 100644
-index 0000000000..f11bfc816e
+index 000000000..f11bfc816
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_contexthub.te
 @@ -0,0 +1,6 @@
@@ -13344,7 +13344,7 @@ index 0000000000..f11bfc816e
 +allow hal_contexthub_client hal_contexthub_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_drm.te b/prebuilts/api/28.0/public/hal_drm.te
 new file mode 100644
-index 0000000000..a46dd9116e
+index 000000000..a46dd9116
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_drm.te
 @@ -0,0 +1,53 @@
@@ -13403,7 +13403,7 @@ index 0000000000..a46dd9116e
 +neverallowxperm hal_drm_server domain:{ rawip_socket tcp_socket udp_socket } ioctl priv_sock_ioctls;
 diff --git a/prebuilts/api/28.0/public/hal_dumpstate.te b/prebuilts/api/28.0/public/hal_dumpstate.te
 new file mode 100644
-index 0000000000..2853567e0c
+index 000000000..2853567e0
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_dumpstate.te
 @@ -0,0 +1,11 @@
@@ -13420,7 +13420,7 @@ index 0000000000..2853567e0c
 +allow hal_dumpstate proc_interrupts:file r_file_perms;
 diff --git a/prebuilts/api/28.0/public/hal_evs.te b/prebuilts/api/28.0/public/hal_evs.te
 new file mode 100644
-index 0000000000..b42a5602ce
+index 000000000..b42a5602c
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_evs.te
 @@ -0,0 +1,4 @@
@@ -13430,7 +13430,7 @@ index 0000000000..b42a5602ce
 +binder_call(hal_evs_server, hal_evs_client)
 diff --git a/prebuilts/api/28.0/public/hal_fingerprint.te b/prebuilts/api/28.0/public/hal_fingerprint.te
 new file mode 100644
-index 0000000000..d62ccff6fe
+index 000000000..d62ccff6f
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_fingerprint.te
 @@ -0,0 +1,15 @@
@@ -13451,7 +13451,7 @@ index 0000000000..d62ccff6fe
 +r_dir_file(hal_fingerprint, sysfs)
 diff --git a/prebuilts/api/28.0/public/hal_gatekeeper.te b/prebuilts/api/28.0/public/hal_gatekeeper.te
 new file mode 100644
-index 0000000000..123acf5674
+index 000000000..123acf567
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_gatekeeper.te
 @@ -0,0 +1,8 @@
@@ -13465,7 +13465,7 @@ index 0000000000..123acf5674
 +allow hal_gatekeeper ion_device:chr_file r_file_perms;
 diff --git a/prebuilts/api/28.0/public/hal_gnss.te b/prebuilts/api/28.0/public/hal_gnss.te
 new file mode 100644
-index 0000000000..b59cd1d5a6
+index 000000000..b59cd1d5a
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_gnss.te
 @@ -0,0 +1,6 @@
@@ -13477,7 +13477,7 @@ index 0000000000..b59cd1d5a6
 +allow hal_gnss_client hal_gnss_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_graphics_allocator.te b/prebuilts/api/28.0/public/hal_graphics_allocator.te
 new file mode 100644
-index 0000000000..e2b04ae83c
+index 000000000..e2b04ae83
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_graphics_allocator.te
 @@ -0,0 +1,13 @@
@@ -13496,7 +13496,7 @@ index 0000000000..e2b04ae83c
 +allow hal_graphics_allocator self:global_capability_class_set sys_nice;
 diff --git a/prebuilts/api/28.0/public/hal_graphics_composer.te b/prebuilts/api/28.0/public/hal_graphics_composer.te
 new file mode 100644
-index 0000000000..2df4612496
+index 000000000..2df461249
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_graphics_composer.te
 @@ -0,0 +1,26 @@
@@ -13528,7 +13528,7 @@ index 0000000000..2df4612496
 +allow hal_graphics_composer self:global_capability_class_set sys_nice;
 diff --git a/prebuilts/api/28.0/public/hal_health.te b/prebuilts/api/28.0/public/hal_health.te
 new file mode 100644
-index 0000000000..c0a0f804cb
+index 000000000..c0a0f804c
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_health.te
 @@ -0,0 +1,30 @@
@@ -13564,7 +13564,7 @@ index 0000000000..c0a0f804cb
 +allow hal_health_server kmsg_device:chr_file w_file_perms;
 diff --git a/prebuilts/api/28.0/public/hal_ir.te b/prebuilts/api/28.0/public/hal_ir.te
 new file mode 100644
-index 0000000000..b1bfdd804b
+index 000000000..b1bfdd804
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_ir.te
 @@ -0,0 +1,6 @@
@@ -13576,7 +13576,7 @@ index 0000000000..b1bfdd804b
 +allow hal_ir_client hal_ir_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_keymaster.te b/prebuilts/api/28.0/public/hal_keymaster.te
 new file mode 100644
-index 0000000000..dc5f6d01d1
+index 000000000..dc5f6d01d
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_keymaster.te
 @@ -0,0 +1,8 @@
@@ -13590,7 +13590,7 @@ index 0000000000..dc5f6d01d1
 +allow hal_keymaster ion_device:chr_file r_file_perms;
 diff --git a/prebuilts/api/28.0/public/hal_light.te b/prebuilts/api/28.0/public/hal_light.te
 new file mode 100644
-index 0000000000..5b93dd115f
+index 000000000..5b93dd115
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_light.te
 @@ -0,0 +1,10 @@
@@ -13606,7 +13606,7 @@ index 0000000000..5b93dd115f
 +allow hal_light sysfs_leds:dir r_dir_perms;
 diff --git a/prebuilts/api/28.0/public/hal_lowpan.te b/prebuilts/api/28.0/public/hal_lowpan.te
 new file mode 100644
-index 0000000000..af491b159d
+index 000000000..af491b159
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_lowpan.te
 @@ -0,0 +1,21 @@
@@ -13633,7 +13633,7 @@ index 0000000000..af491b159d
 +neverallow { domain -hal_lowpan_server -init -ueventd } lowpan_device:chr_file ~getattr;
 diff --git a/prebuilts/api/28.0/public/hal_memtrack.te b/prebuilts/api/28.0/public/hal_memtrack.te
 new file mode 100644
-index 0000000000..b2cc9cd1ec
+index 000000000..b2cc9cd1e
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_memtrack.te
 @@ -0,0 +1,5 @@
@@ -13644,7 +13644,7 @@ index 0000000000..b2cc9cd1ec
 +allow hal_memtrack_client hal_memtrack_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_neuralnetworks.te b/prebuilts/api/28.0/public/hal_neuralnetworks.te
 new file mode 100644
-index 0000000000..c697ac2f26
+index 000000000..c697ac2f2
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_neuralnetworks.te
 @@ -0,0 +1,8 @@
@@ -13658,7 +13658,7 @@ index 0000000000..c697ac2f26
 +allow hal_neuralnetworks hal_allocator:fd use;
 diff --git a/prebuilts/api/28.0/public/hal_neverallows.te b/prebuilts/api/28.0/public/hal_neverallows.te
 new file mode 100644
-index 0000000000..0f05d8ad3f
+index 000000000..0f05d8ad3
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_neverallows.te
 @@ -0,0 +1,59 @@
@@ -13723,7 +13723,7 @@ index 0000000000..0f05d8ad3f
 +neverallow * halserverdomain:process dyntransition;
 diff --git a/prebuilts/api/28.0/public/hal_nfc.te b/prebuilts/api/28.0/public/hal_nfc.te
 new file mode 100644
-index 0000000000..3bcdf5ee10
+index 000000000..3bcdf5ee1
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_nfc.te
 @@ -0,0 +1,12 @@
@@ -13741,7 +13741,7 @@ index 0000000000..3bcdf5ee10
 +allow hal_nfc nfc_device:chr_file rw_file_perms;
 diff --git a/prebuilts/api/28.0/public/hal_oemlock.te b/prebuilts/api/28.0/public/hal_oemlock.te
 new file mode 100644
-index 0000000000..3fb5a18713
+index 000000000..3fb5a1871
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_oemlock.te
 @@ -0,0 +1,5 @@
@@ -13752,7 +13752,7 @@ index 0000000000..3fb5a18713
 +allow hal_oemlock_client hal_oemlock_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_power.te b/prebuilts/api/28.0/public/hal_power.te
 new file mode 100644
-index 0000000000..fcba3d25da
+index 000000000..fcba3d25d
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_power.te
 @@ -0,0 +1,6 @@
@@ -13764,7 +13764,7 @@ index 0000000000..fcba3d25da
 +allow hal_power_client hal_power_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_secure_element.te b/prebuilts/api/28.0/public/hal_secure_element.te
 new file mode 100644
-index 0000000000..e3046d12ec
+index 000000000..e3046d12e
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_secure_element.te
 @@ -0,0 +1,6 @@
@@ -13776,7 +13776,7 @@ index 0000000000..e3046d12ec
 +allow hal_secure_element_client hal_secure_element_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_sensors.te b/prebuilts/api/28.0/public/hal_sensors.te
 new file mode 100644
-index 0000000000..9d7cbe9139
+index 000000000..9d7cbe913
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_sensors.te
 @@ -0,0 +1,15 @@
@@ -13797,7 +13797,7 @@ index 0000000000..9d7cbe9139
 +allow hal_sensors self:global_capability_class_set sys_nice;
 diff --git a/prebuilts/api/28.0/public/hal_telephony.te b/prebuilts/api/28.0/public/hal_telephony.te
 new file mode 100644
-index 0000000000..5f8cc41ca1
+index 000000000..5f8cc41ca
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_telephony.te
 @@ -0,0 +1,46 @@
@@ -13849,7 +13849,7 @@ index 0000000000..5f8cc41ca1
 +allow hal_telephony_server self:socket create_socket_perms_no_ioctl;
 diff --git a/prebuilts/api/28.0/public/hal_tetheroffload.te b/prebuilts/api/28.0/public/hal_tetheroffload.te
 new file mode 100644
-index 0000000000..48d67a29b5
+index 000000000..48d67a29b
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_tetheroffload.te
 @@ -0,0 +1,8 @@
@@ -13863,7 +13863,7 @@ index 0000000000..48d67a29b5
 +allow hal_tetheroffload_server hal_tetheroffload_client:netlink_netfilter_socket { getattr read setopt write };
 diff --git a/prebuilts/api/28.0/public/hal_thermal.te b/prebuilts/api/28.0/public/hal_thermal.te
 new file mode 100644
-index 0000000000..b1764f114c
+index 000000000..b1764f114
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_thermal.te
 @@ -0,0 +1,6 @@
@@ -13875,7 +13875,7 @@ index 0000000000..b1764f114c
 +allow hal_thermal_client hal_thermal_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_tv_cec.te b/prebuilts/api/28.0/public/hal_tv_cec.te
 new file mode 100644
-index 0000000000..7719cae920
+index 000000000..7719cae92
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_tv_cec.te
 @@ -0,0 +1,6 @@
@@ -13887,7 +13887,7 @@ index 0000000000..7719cae920
 +allow hal_tv_cec_client hal_tv_cec_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_tv_input.te b/prebuilts/api/28.0/public/hal_tv_input.te
 new file mode 100644
-index 0000000000..31a006740d
+index 000000000..31a006740
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_tv_input.te
 @@ -0,0 +1,6 @@
@@ -13899,7 +13899,7 @@ index 0000000000..31a006740d
 +allow hal_tv_input_client hal_tv_input_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_usb.te b/prebuilts/api/28.0/public/hal_usb.te
 new file mode 100644
-index 0000000000..f63f156d2a
+index 000000000..f63f156d2
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_usb.te
 @@ -0,0 +1,17 @@
@@ -13922,7 +13922,7 @@ index 0000000000..f63f156d2a
 +allow hal_usb sysfs:file getattr;
 diff --git a/prebuilts/api/28.0/public/hal_usb_gadget.te b/prebuilts/api/28.0/public/hal_usb_gadget.te
 new file mode 100644
-index 0000000000..dcee9837b6
+index 000000000..dcee9837b
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_usb_gadget.te
 @@ -0,0 +1,13 @@
@@ -13941,7 +13941,7 @@ index 0000000000..dcee9837b6
 +allow hal_usb_gadget_server functionfs:file read;
 diff --git a/prebuilts/api/28.0/public/hal_vehicle.te b/prebuilts/api/28.0/public/hal_vehicle.te
 new file mode 100644
-index 0000000000..a59f8d2bd5
+index 000000000..a59f8d2bd
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_vehicle.te
 @@ -0,0 +1,7 @@
@@ -13954,7 +13954,7 @@ index 0000000000..a59f8d2bd5
 +allow hal_vehicle_client hal_vehicle_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_vibrator.te b/prebuilts/api/28.0/public/hal_vibrator.te
 new file mode 100644
-index 0000000000..9ce34cac25
+index 000000000..9ce34cac2
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_vibrator.te
 @@ -0,0 +1,9 @@
@@ -13969,7 +13969,7 @@ index 0000000000..9ce34cac25
 +allow hal_vibrator sysfs_vibrator:dir search;
 diff --git a/prebuilts/api/28.0/public/hal_vr.te b/prebuilts/api/28.0/public/hal_vr.te
 new file mode 100644
-index 0000000000..3cb392d144
+index 000000000..3cb392d14
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_vr.te
 @@ -0,0 +1,6 @@
@@ -13981,7 +13981,7 @@ index 0000000000..3cb392d144
 +allow hal_vr_client hal_vr_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_weaver.te b/prebuilts/api/28.0/public/hal_weaver.te
 new file mode 100644
-index 0000000000..b80ba292c6
+index 000000000..b80ba292c
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_weaver.te
 @@ -0,0 +1,5 @@
@@ -13992,7 +13992,7 @@ index 0000000000..b80ba292c6
 +allow hal_weaver_client hal_weaver_hwservice:hwservice_manager find;
 diff --git a/prebuilts/api/28.0/public/hal_wifi.te b/prebuilts/api/28.0/public/hal_wifi.te
 new file mode 100644
-index 0000000000..7cea7c7401
+index 000000000..7cea7c740
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_wifi.te
 @@ -0,0 +1,32 @@
@@ -14030,7 +14030,7 @@ index 0000000000..7cea7c7401
 +')
 diff --git a/prebuilts/api/28.0/public/hal_wifi_hostapd.te b/prebuilts/api/28.0/public/hal_wifi_hostapd.te
 new file mode 100644
-index 0000000000..03a554674d
+index 000000000..03a554674
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_wifi_hostapd.te
 @@ -0,0 +1,28 @@
@@ -14064,7 +14064,7 @@ index 0000000000..03a554674d
 +neverallow hal_wifi_hostapd_server sdcard_type:file *;
 diff --git a/prebuilts/api/28.0/public/hal_wifi_offload.te b/prebuilts/api/28.0/public/hal_wifi_offload.te
 new file mode 100644
-index 0000000000..dc0cf5a731
+index 000000000..dc0cf5a73
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_wifi_offload.te
 @@ -0,0 +1,9 @@
@@ -14079,7 +14079,7 @@ index 0000000000..dc0cf5a731
 +r_dir_file(hal_wifi_offload, sysfs_type)
 diff --git a/prebuilts/api/28.0/public/hal_wifi_supplicant.te b/prebuilts/api/28.0/public/hal_wifi_supplicant.te
 new file mode 100644
-index 0000000000..3778515432
+index 000000000..377851543
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hal_wifi_supplicant.te
 @@ -0,0 +1,29 @@
@@ -14114,7 +14114,7 @@ index 0000000000..3778515432
 +neverallow hal_wifi_supplicant_server sdcard_type:file *;
 diff --git a/prebuilts/api/28.0/public/healthd.te b/prebuilts/api/28.0/public/healthd.te
 new file mode 100644
-index 0000000000..8a1d3ec29a
+index 000000000..8a1d3ec29
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/healthd.te
 @@ -0,0 +1,58 @@
@@ -14178,7 +14178,7 @@ index 0000000000..8a1d3ec29a
 +set_prop(healthd, exported3_system_prop)
 diff --git a/prebuilts/api/28.0/public/hwservice.te b/prebuilts/api/28.0/public/hwservice.te
 new file mode 100644
-index 0000000000..5fba86ac30
+index 000000000..5fba86ac3
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hwservice.te
 @@ -0,0 +1,62 @@
@@ -14246,7 +14246,7 @@ index 0000000000..5fba86ac30
 +type thermalcallback_hwservice, hwservice_manager_type;
 diff --git a/prebuilts/api/28.0/public/hwservicemanager.te b/prebuilts/api/28.0/public/hwservicemanager.te
 new file mode 100644
-index 0000000000..1ffd2a67ec
+index 000000000..1ffd2a67e
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/hwservicemanager.te
 @@ -0,0 +1,22 @@
@@ -14274,7 +14274,7 @@ index 0000000000..1ffd2a67ec
 +selinux_check_access(hwservicemanager)
 diff --git a/prebuilts/api/28.0/public/idmap.te b/prebuilts/api/28.0/public/idmap.te
 new file mode 100644
-index 0000000000..3f336a32df
+index 000000000..3f336a32d
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/idmap.te
 @@ -0,0 +1,20 @@
@@ -14300,7 +14300,7 @@ index 0000000000..3f336a32df
 +r_dir_file(idmap, vendor_overlay_file)
 diff --git a/prebuilts/api/28.0/public/incident.te b/prebuilts/api/28.0/public/incident.te
 new file mode 100644
-index 0000000000..5c41dcebf7
+index 000000000..5c41dcebf
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/incident.te
 @@ -0,0 +1,7 @@
@@ -14313,7 +14313,7 @@ index 0000000000..5c41dcebf7
 +type incident, domain;
 diff --git a/prebuilts/api/28.0/public/incident_helper.te b/prebuilts/api/28.0/public/incident_helper.te
 new file mode 100644
-index 0000000000..bca1018694
+index 000000000..bca101869
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/incident_helper.te
 @@ -0,0 +1,5 @@
@@ -14324,7 +14324,7 @@ index 0000000000..bca1018694
 +type incident_helper, domain;
 diff --git a/prebuilts/api/28.0/public/incidentd.te b/prebuilts/api/28.0/public/incidentd.te
 new file mode 100644
-index 0000000000..00b710a486
+index 000000000..00b710a48
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/incidentd.te
 @@ -0,0 +1,2 @@
@@ -14332,7 +14332,7 @@ index 0000000000..00b710a486
 +type incidentd, domain;
 diff --git a/prebuilts/api/28.0/public/init.te b/prebuilts/api/28.0/public/init.te
 new file mode 100644
-index 0000000000..dafc06f99b
+index 000000000..dafc06f99
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/init.te
 @@ -0,0 +1,509 @@
@@ -14847,7 +14847,7 @@ index 0000000000..dafc06f99b
 +neverallow init sysfs:file { open read write };
 diff --git a/prebuilts/api/28.0/public/inputflinger.te b/prebuilts/api/28.0/public/inputflinger.te
 new file mode 100644
-index 0000000000..e5f12a0c15
+index 000000000..e5f12a0c1
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/inputflinger.te
 @@ -0,0 +1,16 @@
@@ -14869,7 +14869,7 @@ index 0000000000..e5f12a0c15
 +r_dir_file(inputflinger, cgroup)
 diff --git a/prebuilts/api/28.0/public/install_recovery.te b/prebuilts/api/28.0/public/install_recovery.te
 new file mode 100644
-index 0000000000..ab688386e5
+index 000000000..ab688386e
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/install_recovery.te
 @@ -0,0 +1,27 @@
@@ -14902,7 +14902,7 @@ index 0000000000..ab688386e5
 +allow install_recovery proc_drop_caches:file w_file_perms;
 diff --git a/prebuilts/api/28.0/public/installd.te b/prebuilts/api/28.0/public/installd.te
 new file mode 100644
-index 0000000000..6aba962ddb
+index 000000000..6aba962dd
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/installd.te
 @@ -0,0 +1,160 @@
@@ -15068,7 +15068,7 @@ index 0000000000..6aba962ddb
 +neverallow installd { domain -system_server -servicemanager userdebug_or_eng(`-su') }:binder call;
 diff --git a/prebuilts/api/28.0/public/ioctl_defines b/prebuilts/api/28.0/public/ioctl_defines
 new file mode 100644
-index 0000000000..4097fb935b
+index 000000000..4097fb935
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/ioctl_defines
 @@ -0,0 +1,2694 @@
@@ -17768,7 +17768,7 @@ index 0000000000..4097fb935b
 +define(`PPPIOCGIFNAME',      `0x7488')
 diff --git a/prebuilts/api/28.0/public/ioctl_macros b/prebuilts/api/28.0/public/ioctl_macros
 new file mode 100644
-index 0000000000..f7081d5762
+index 000000000..f7081d576
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/ioctl_macros
 @@ -0,0 +1,68 @@
@@ -17842,7 +17842,7 @@ index 0000000000..f7081d5762
 +}')
 diff --git a/prebuilts/api/28.0/public/isolated_app.te b/prebuilts/api/28.0/public/isolated_app.te
 new file mode 100644
-index 0000000000..a907dacc2a
+index 000000000..a907dacc2
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/isolated_app.te
 @@ -0,0 +1,9 @@
@@ -17857,7 +17857,7 @@ index 0000000000..a907dacc2a
 +type isolated_app, domain;
 diff --git a/prebuilts/api/28.0/public/kernel.te b/prebuilts/api/28.0/public/kernel.te
 new file mode 100644
-index 0000000000..b7a351cc87
+index 000000000..b7a351cc8
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/kernel.te
 @@ -0,0 +1,105 @@
@@ -17968,7 +17968,7 @@ index 0000000000..b7a351cc87
 +neverallow kernel self:global_capability_class_set { dac_override dac_read_search };
 diff --git a/prebuilts/api/28.0/public/keystore.te b/prebuilts/api/28.0/public/keystore.te
 new file mode 100644
-index 0000000000..49355bd952
+index 000000000..49355bd95
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/keystore.te
 @@ -0,0 +1,35 @@
@@ -18009,7 +18009,7 @@ index 0000000000..49355bd952
 +neverallow * keystore:process ptrace;
 diff --git a/prebuilts/api/28.0/public/lmkd.te b/prebuilts/api/28.0/public/lmkd.te
 new file mode 100644
-index 0000000000..5b4a235a03
+index 000000000..5b4a235a0
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/lmkd.te
 @@ -0,0 +1,52 @@
@@ -18067,7 +18067,7 @@ index 0000000000..5b4a235a03
 +neverallow * lmkd:process noatsecure;
 diff --git a/prebuilts/api/28.0/public/logd.te b/prebuilts/api/28.0/public/logd.te
 new file mode 100644
-index 0000000000..817a7059fc
+index 000000000..817a7059f
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/logd.te
 @@ -0,0 +1,73 @@
@@ -18146,7 +18146,7 @@ index 0000000000..817a7059fc
 +} runtime_event_log_tags_file:file no_w_file_perms;
 diff --git a/prebuilts/api/28.0/public/logpersist.te b/prebuilts/api/28.0/public/logpersist.te
 new file mode 100644
-index 0000000000..7536cb84d8
+index 000000000..7536cb84d
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/logpersist.te
 @@ -0,0 +1,26 @@
@@ -18178,7 +18178,7 @@ index 0000000000..7536cb84d8
 +neverallow * logpersist:process dyntransition;
 diff --git a/prebuilts/api/28.0/public/mdnsd.te b/prebuilts/api/28.0/public/mdnsd.te
 new file mode 100644
-index 0000000000..ef7b065d87
+index 000000000..ef7b065d8
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/mdnsd.te
 @@ -0,0 +1,2 @@
@@ -18186,7 +18186,7 @@ index 0000000000..ef7b065d87
 +type mdnsd, domain;
 diff --git a/prebuilts/api/28.0/public/mediacodec.te b/prebuilts/api/28.0/public/mediacodec.te
 new file mode 100644
-index 0000000000..e5b4a7d352
+index 000000000..e5b4a7d35
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/mediacodec.te
 @@ -0,0 +1,70 @@
@@ -18262,7 +18262,7 @@ index 0000000000..e5b4a7d352
 +neverallow mediacodec domain:{ tcp_socket udp_socket rawip_socket } *;
 diff --git a/prebuilts/api/28.0/public/mediadrmserver.te b/prebuilts/api/28.0/public/mediadrmserver.te
 new file mode 100644
-index 0000000000..123cb29a5c
+index 000000000..123cb29a5
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/mediadrmserver.te
 @@ -0,0 +1,31 @@
@@ -18299,7 +18299,7 @@ index 0000000000..123cb29a5c
 +neverallowxperm mediadrmserver domain:{ rawip_socket tcp_socket udp_socket } ioctl priv_sock_ioctls;
 diff --git a/prebuilts/api/28.0/public/mediaextractor.te b/prebuilts/api/28.0/public/mediaextractor.te
 new file mode 100644
-index 0000000000..b0554626fa
+index 000000000..b0554626f
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/mediaextractor.te
 @@ -0,0 +1,74 @@
@@ -18379,7 +18379,7 @@ index 0000000000..b0554626fa
 +}:file open;
 diff --git a/prebuilts/api/28.0/public/mediametrics.te b/prebuilts/api/28.0/public/mediametrics.te
 new file mode 100644
-index 0000000000..ada90cca3a
+index 000000000..ada90cca3
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/mediametrics.te
 @@ -0,0 +1,41 @@
@@ -18426,7 +18426,7 @@ index 0000000000..ada90cca3a
 +neverallow mediametrics domain:{ tcp_socket udp_socket rawip_socket } *;
 diff --git a/prebuilts/api/28.0/public/mediaprovider.te b/prebuilts/api/28.0/public/mediaprovider.te
 new file mode 100644
-index 0000000000..24170a5cf1
+index 000000000..24170a5cf
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/mediaprovider.te
 @@ -0,0 +1,6 @@
@@ -18438,7 +18438,7 @@ index 0000000000..24170a5cf1
 +type mediaprovider, domain;
 diff --git a/prebuilts/api/28.0/public/mediaserver.te b/prebuilts/api/28.0/public/mediaserver.te
 new file mode 100644
-index 0000000000..f0c94edc0b
+index 000000000..f0c94edc0
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/mediaserver.te
 @@ -0,0 +1,147 @@
@@ -18591,7 +18591,7 @@ index 0000000000..f0c94edc0b
 +neverallowxperm mediaserver domain:{ rawip_socket tcp_socket udp_socket } ioctl priv_sock_ioctls;
 diff --git a/prebuilts/api/28.0/public/modprobe.te b/prebuilts/api/28.0/public/modprobe.te
 new file mode 100644
-index 0000000000..119040921d
+index 000000000..119040921
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/modprobe.te
 @@ -0,0 +1,9 @@
@@ -18606,7 +18606,7 @@ index 0000000000..119040921d
 +')
 diff --git a/prebuilts/api/28.0/public/mtp.te b/prebuilts/api/28.0/public/mtp.te
 new file mode 100644
-index 0000000000..7256bcf557
+index 000000000..7256bcf55
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/mtp.te
 @@ -0,0 +1,11 @@
@@ -18623,7 +18623,7 @@ index 0000000000..7256bcf557
 +allow mtp vpn_data_file:dir search;
 diff --git a/prebuilts/api/28.0/public/net.te b/prebuilts/api/28.0/public/net.te
 new file mode 100644
-index 0000000000..7e00ed845c
+index 000000000..7e00ed845
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/net.te
 @@ -0,0 +1,4 @@
@@ -18633,7 +18633,7 @@ index 0000000000..7e00ed845c
 +type port, port_type;
 diff --git a/prebuilts/api/28.0/public/netd.te b/prebuilts/api/28.0/public/netd.te
 new file mode 100644
-index 0000000000..1fb3d482ae
+index 000000000..1fb3d482a
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/netd.te
 @@ -0,0 +1,148 @@
@@ -18787,7 +18787,7 @@ index 0000000000..1fb3d482ae
 +neverallow { domain -netd -init } netd_stable_secret_prop:property_service set;
 diff --git a/prebuilts/api/28.0/public/netutils_wrapper.te b/prebuilts/api/28.0/public/netutils_wrapper.te
 new file mode 100644
-index 0000000000..c844762c8c
+index 000000000..c844762c8
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/netutils_wrapper.te
 @@ -0,0 +1,4 @@
@@ -18797,7 +18797,7 @@ index 0000000000..c844762c8c
 +neverallow domain netutils_wrapper_exec:file execute_no_trans;
 diff --git a/prebuilts/api/28.0/public/neverallow_macros b/prebuilts/api/28.0/public/neverallow_macros
 new file mode 100644
-index 0000000000..e2b6ed1af1
+index 000000000..e2b6ed1af
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/neverallow_macros
 @@ -0,0 +1,15 @@
@@ -18818,7 +18818,7 @@ index 0000000000..e2b6ed1af1
 +')
 diff --git a/prebuilts/api/28.0/public/nfc.te b/prebuilts/api/28.0/public/nfc.te
 new file mode 100644
-index 0000000000..e3a03e7968
+index 000000000..e3a03e796
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/nfc.te
 @@ -0,0 +1,2 @@
@@ -18826,7 +18826,7 @@ index 0000000000..e3a03e7968
 +type nfc, domain;
 diff --git a/prebuilts/api/28.0/public/otapreopt_chroot.te b/prebuilts/api/28.0/public/otapreopt_chroot.te
 new file mode 100644
-index 0000000000..894363ab1f
+index 000000000..894363ab1
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/otapreopt_chroot.te
 @@ -0,0 +1,20 @@
@@ -18852,7 +18852,7 @@ index 0000000000..894363ab1f
 +allow otapreopt_chroot update_engine:fifo_file write;
 diff --git a/prebuilts/api/28.0/public/otapreopt_slot.te b/prebuilts/api/28.0/public/otapreopt_slot.te
 new file mode 100644
-index 0000000000..6551864c34
+index 000000000..6551864c3
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/otapreopt_slot.te
 @@ -0,0 +1,27 @@
@@ -18885,7 +18885,7 @@ index 0000000000..6551864c34
 +allow otapreopt_slot toolbox_exec:file rx_file_perms;
 diff --git a/prebuilts/api/28.0/public/performanced.te b/prebuilts/api/28.0/public/performanced.te
 new file mode 100644
-index 0000000000..248d345d15
+index 000000000..248d345d1
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/performanced.te
 @@ -0,0 +1,30 @@
@@ -18921,7 +18921,7 @@ index 0000000000..248d345d15
 +r_dir_file(performanced, cgroup)
 diff --git a/prebuilts/api/28.0/public/perfprofd.te b/prebuilts/api/28.0/public/perfprofd.te
 new file mode 100644
-index 0000000000..f067af5d4a
+index 000000000..f067af5d4
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/perfprofd.te
 @@ -0,0 +1,119 @@
@@ -19046,7 +19046,7 @@ index 0000000000..f067af5d4a
 +')
 diff --git a/prebuilts/api/28.0/public/platform_app.te b/prebuilts/api/28.0/public/platform_app.te
 new file mode 100644
-index 0000000000..9b1faf0f6a
+index 000000000..9b1faf0f6
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/platform_app.te
 @@ -0,0 +1,5 @@
@@ -19057,7 +19057,7 @@ index 0000000000..9b1faf0f6a
 +type platform_app, domain;
 diff --git a/prebuilts/api/28.0/public/postinstall.te b/prebuilts/api/28.0/public/postinstall.te
 new file mode 100644
-index 0000000000..7fd4dc6118
+index 000000000..7fd4dc611
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/postinstall.te
 @@ -0,0 +1,36 @@
@@ -19099,7 +19099,7 @@ index 0000000000..7fd4dc6118
 +neverallow { domain -update_engine -recovery } postinstall:process { transition dyntransition };
 diff --git a/prebuilts/api/28.0/public/postinstall_dexopt.te b/prebuilts/api/28.0/public/postinstall_dexopt.te
 new file mode 100644
-index 0000000000..ffd8bc5747
+index 000000000..ffd8bc574
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/postinstall_dexopt.te
 @@ -0,0 +1,59 @@
@@ -19164,7 +19164,7 @@ index 0000000000..ffd8bc5747
 +allow postinstall_dexopt cpuctl_device:dir search;
 diff --git a/prebuilts/api/28.0/public/ppp.te b/prebuilts/api/28.0/public/ppp.te
 new file mode 100644
-index 0000000000..9340dee87d
+index 000000000..9340dee87
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/ppp.te
 @@ -0,0 +1,23 @@
@@ -19193,7 +19193,7 @@ index 0000000000..9340dee87d
 +allow ppp mtp:fd use;
 diff --git a/prebuilts/api/28.0/public/preopt2cachename.te b/prebuilts/api/28.0/public/preopt2cachename.te
 new file mode 100644
-index 0000000000..49df647250
+index 000000000..49df64725
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/preopt2cachename.te
 @@ -0,0 +1,13 @@
@@ -19212,7 +19212,7 @@ index 0000000000..49df647250
 +allow preopt2cachename proc_net:file r_file_perms;
 diff --git a/prebuilts/api/28.0/public/priv_app.te b/prebuilts/api/28.0/public/priv_app.te
 new file mode 100644
-index 0000000000..0761fc30f8
+index 000000000..0761fc30f
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/priv_app.te
 @@ -0,0 +1,5 @@
@@ -19223,7 +19223,7 @@ index 0000000000..0761fc30f8
 +type priv_app, domain;
 diff --git a/prebuilts/api/28.0/public/profman.te b/prebuilts/api/28.0/public/profman.te
 new file mode 100644
-index 0000000000..4296d1b172
+index 000000000..4296d1b17
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/profman.te
 @@ -0,0 +1,29 @@
@@ -19258,7 +19258,7 @@ index 0000000000..4296d1b172
 +neverallow profman app_data_file:notdevfile_class_set open;
 diff --git a/prebuilts/api/28.0/public/property.te b/prebuilts/api/28.0/public/property.te
 new file mode 100644
-index 0000000000..a4f0d87a1e
+index 000000000..a4f0d87a1
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/property.te
 @@ -0,0 +1,414 @@
@@ -19678,7 +19678,7 @@ index 0000000000..a4f0d87a1e
 +')
 diff --git a/prebuilts/api/28.0/public/property_contexts b/prebuilts/api/28.0/public/property_contexts
 new file mode 100644
-index 0000000000..58a04d2be3
+index 000000000..58a04d2be
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/property_contexts
 @@ -0,0 +1,310 @@
@@ -19994,7 +19994,7 @@ index 0000000000..58a04d2be3
 +sys.shutdown.requested u:object_r:exported_system_prop:s0 exact string
 diff --git a/prebuilts/api/28.0/public/racoon.te b/prebuilts/api/28.0/public/racoon.te
 new file mode 100644
-index 0000000000..c759217a06
+index 000000000..c759217a0
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/racoon.te
 @@ -0,0 +1,33 @@
@@ -20033,7 +20033,7 @@ index 0000000000..c759217a06
 +};
 diff --git a/prebuilts/api/28.0/public/radio.te b/prebuilts/api/28.0/public/radio.te
 new file mode 100644
-index 0000000000..8fb5ad638b
+index 000000000..8fb5ad638
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/radio.te
 @@ -0,0 +1,41 @@
@@ -20080,7 +20080,7 @@ index 0000000000..8fb5ad638b
 +hal_client_domain(radio, hal_telephony)
 diff --git a/prebuilts/api/28.0/public/recovery.te b/prebuilts/api/28.0/public/recovery.te
 new file mode 100644
-index 0000000000..57ad2028be
+index 000000000..57ad2028b
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/recovery.te
 @@ -0,0 +1,161 @@
@@ -20247,7 +20247,7 @@ index 0000000000..57ad2028be
 +}:dir no_w_dir_perms;
 diff --git a/prebuilts/api/28.0/public/recovery_persist.te b/prebuilts/api/28.0/public/recovery_persist.te
 new file mode 100644
-index 0000000000..59dff8c620
+index 000000000..59dff8c62
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/recovery_persist.te
 @@ -0,0 +1,26 @@
@@ -20279,7 +20279,7 @@ index 0000000000..59dff8c620
 +neverallow recovery_persist { app_data_file system_data_file }:dir_file_class_set write;
 diff --git a/prebuilts/api/28.0/public/recovery_refresh.te b/prebuilts/api/28.0/public/recovery_refresh.te
 new file mode 100644
-index 0000000000..602ed51d7c
+index 000000000..602ed51d7
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/recovery_refresh.te
 @@ -0,0 +1,24 @@
@@ -20309,14 +20309,14 @@ index 0000000000..602ed51d7c
 +neverallow recovery_refresh { app_data_file system_data_file }:dir_file_class_set write;
 diff --git a/prebuilts/api/28.0/public/roles b/prebuilts/api/28.0/public/roles
 new file mode 100644
-index 0000000000..ca9293439a
+index 000000000..ca9293439
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/roles
 @@ -0,0 +1 @@
 +role r types domain;
 diff --git a/prebuilts/api/28.0/public/runas.te b/prebuilts/api/28.0/public/runas.te
 new file mode 100644
-index 0000000000..053a87f6be
+index 000000000..053a87f6b
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/runas.te
 @@ -0,0 +1,42 @@
@@ -20364,7 +20364,7 @@ index 0000000000..053a87f6be
 +neverallow runas self:global_capability2_class_set *;
 diff --git a/prebuilts/api/28.0/public/sdcardd.te b/prebuilts/api/28.0/public/sdcardd.te
 new file mode 100644
-index 0000000000..4a88f54d01
+index 000000000..4a88f54d0
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/sdcardd.te
 @@ -0,0 +1,43 @@
@@ -20413,7 +20413,7 @@ index 0000000000..4a88f54d01
 +neverallow init sdcardd:process { transition dyntransition };
 diff --git a/prebuilts/api/28.0/public/secure_element.te b/prebuilts/api/28.0/public/secure_element.te
 new file mode 100644
-index 0000000000..4ce6714f6e
+index 000000000..4ce6714f6
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/secure_element.te
 @@ -0,0 +1,2 @@
@@ -20421,7 +20421,7 @@ index 0000000000..4ce6714f6e
 +type secure_element, domain;
 diff --git a/prebuilts/api/28.0/public/service.te b/prebuilts/api/28.0/public/service.te
 new file mode 100644
-index 0000000000..3526049f25
+index 000000000..3526049f2
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/service.te
 @@ -0,0 +1,161 @@
@@ -20588,7 +20588,7 @@ index 0000000000..3526049f25
 +type wpantund_service, system_api_service, service_manager_type;
 diff --git a/prebuilts/api/28.0/public/servicemanager.te b/prebuilts/api/28.0/public/servicemanager.te
 new file mode 100644
-index 0000000000..87e3a22179
+index 000000000..87e3a2217
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/servicemanager.te
 @@ -0,0 +1,25 @@
@@ -20619,7 +20619,7 @@ index 0000000000..87e3a22179
 +selinux_check_access(servicemanager)
 diff --git a/prebuilts/api/28.0/public/sgdisk.te b/prebuilts/api/28.0/public/sgdisk.te
 new file mode 100644
-index 0000000000..ca3096cefc
+index 000000000..ca3096cef
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/sgdisk.te
 @@ -0,0 +1,22 @@
@@ -20647,7 +20647,7 @@ index 0000000000..ca3096cefc
 +neverallow sgdisk { file_type fs_type -sgdisk_exec }:file entrypoint;
 diff --git a/prebuilts/api/28.0/public/shared_relro.te b/prebuilts/api/28.0/public/shared_relro.te
 new file mode 100644
-index 0000000000..8fe1fead5e
+index 000000000..8fe1fead5
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/shared_relro.te
 @@ -0,0 +1,10 @@
@@ -20663,7 +20663,7 @@ index 0000000000..8fe1fead5e
 +allow shared_relro webviewupdate_service:service_manager find;
 diff --git a/prebuilts/api/28.0/public/shell.te b/prebuilts/api/28.0/public/shell.te
 new file mode 100644
-index 0000000000..307e10342f
+index 000000000..307e10342
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/shell.te
 @@ -0,0 +1,226 @@
@@ -20895,7 +20895,7 @@ index 0000000000..307e10342f
 +neverallow shell dev_type:blk_file ~getattr;
 diff --git a/prebuilts/api/28.0/public/slideshow.te b/prebuilts/api/28.0/public/slideshow.te
 new file mode 100644
-index 0000000000..8ded68655c
+index 000000000..8ded68655
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/slideshow.te
 @@ -0,0 +1,13 @@
@@ -20914,7 +20914,7 @@ index 0000000000..8ded68655c
 +allow slideshow tty_device:chr_file rw_file_perms;
 diff --git a/prebuilts/api/28.0/public/su.te b/prebuilts/api/28.0/public/su.te
 new file mode 100644
-index 0000000000..0312945484
+index 000000000..031294548
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/su.te
 @@ -0,0 +1,100 @@
@@ -21020,7 +21020,7 @@ index 0000000000..0312945484
 +')
 diff --git a/prebuilts/api/28.0/public/surfaceflinger.te b/prebuilts/api/28.0/public/surfaceflinger.te
 new file mode 100644
-index 0000000000..ae00287d82
+index 000000000..ae00287d8
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/surfaceflinger.te
 @@ -0,0 +1,2 @@
@@ -21028,7 +21028,7 @@ index 0000000000..ae00287d82
 +type surfaceflinger, domain;
 diff --git a/prebuilts/api/28.0/public/system_app.te b/prebuilts/api/28.0/public/system_app.te
 new file mode 100644
-index 0000000000..023058ee0f
+index 000000000..023058ee0
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/system_app.te
 @@ -0,0 +1,7 @@
@@ -21041,7 +21041,7 @@ index 0000000000..023058ee0f
 +type system_app, domain;
 diff --git a/prebuilts/api/28.0/public/system_server.te b/prebuilts/api/28.0/public/system_server.te
 new file mode 100644
-index 0000000000..805d6175d6
+index 000000000..805d6175d
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/system_server.te
 @@ -0,0 +1,5 @@
@@ -21052,7 +21052,7 @@ index 0000000000..805d6175d6
 +type system_server, domain;
 diff --git a/prebuilts/api/28.0/public/te_macros b/prebuilts/api/28.0/public/te_macros
 new file mode 100644
-index 0000000000..9cfe47c848
+index 000000000..9cfe47c84
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/te_macros
 @@ -0,0 +1,597 @@
@@ -21655,7 +21655,7 @@ index 0000000000..9cfe47c848
 +')
 diff --git a/prebuilts/api/28.0/public/tee.te b/prebuilts/api/28.0/public/tee.te
 new file mode 100644
-index 0000000000..06627c33ac
+index 000000000..06627c33a
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/tee.te
 @@ -0,0 +1,10 @@
@@ -21671,7 +21671,7 @@ index 0000000000..06627c33ac
 +allow tee fingerprint_vendor_data_file:file create_file_perms;
 diff --git a/prebuilts/api/28.0/public/thermalserviced.te b/prebuilts/api/28.0/public/thermalserviced.te
 new file mode 100644
-index 0000000000..00e0071320
+index 000000000..00e007132
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/thermalserviced.te
 @@ -0,0 +1,13 @@
@@ -21690,7 +21690,7 @@ index 0000000000..00e0071320
 +binder_call(thermalserviced, platform_app)
 diff --git a/prebuilts/api/28.0/public/tombstoned.te b/prebuilts/api/28.0/public/tombstoned.te
 new file mode 100644
-index 0000000000..0e585b662c
+index 000000000..0e585b662
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/tombstoned.te
 @@ -0,0 +1,22 @@
@@ -21718,7 +21718,7 @@ index 0000000000..0e585b662c
 +allow tombstoned anr_data_file:file { create getattr open link unlink };
 diff --git a/prebuilts/api/28.0/public/toolbox.te b/prebuilts/api/28.0/public/toolbox.te
 new file mode 100644
-index 0000000000..59c3a9c73c
+index 000000000..59c3a9c73
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/toolbox.te
 @@ -0,0 +1,24 @@
@@ -21748,14 +21748,14 @@ index 0000000000..59c3a9c73c
 +neverallow toolbox { file_type fs_type -toolbox_exec}:file entrypoint;
 diff --git a/prebuilts/api/28.0/public/traced_probes.te b/prebuilts/api/28.0/public/traced_probes.te
 new file mode 100644
-index 0000000000..3e587c8efb
+index 000000000..3e587c8ef
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/traced_probes.te
 @@ -0,0 +1 @@
 +type traced_probes, domain, coredomain, mlstrustedsubject;
 diff --git a/prebuilts/api/28.0/public/traceur_app.te b/prebuilts/api/28.0/public/traceur_app.te
 new file mode 100644
-index 0000000000..7113fa7ce9
+index 000000000..7113fa7ce
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/traceur_app.te
 @@ -0,0 +1,21 @@
@@ -21782,7 +21782,7 @@ index 0000000000..7113fa7ce9
 +dontaudit traceur_app domain:binder call;
 diff --git a/prebuilts/api/28.0/public/tzdatacheck.te b/prebuilts/api/28.0/public/tzdatacheck.te
 new file mode 100644
-index 0000000000..6f60c8e2a4
+index 000000000..6f60c8e2a
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/tzdatacheck.te
 @@ -0,0 +1,18 @@
@@ -21806,7 +21806,7 @@ index 0000000000..6f60c8e2a4
 +neverallow { domain -system_server -init -tzdatacheck } zoneinfo_data_file:dir no_w_dir_perms;
 diff --git a/prebuilts/api/28.0/public/ueventd.te b/prebuilts/api/28.0/public/ueventd.te
 new file mode 100644
-index 0000000000..9b9eacb252
+index 000000000..9b9eacb25
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/ueventd.te
 @@ -0,0 +1,57 @@
@@ -21869,7 +21869,7 @@ index 0000000000..9b9eacb252
 +neverallow ueventd { kmem_device port_device }:chr_file ~{ getattr create setattr unlink relabelto };
 diff --git a/prebuilts/api/28.0/public/uncrypt.te b/prebuilts/api/28.0/public/uncrypt.te
 new file mode 100644
-index 0000000000..1e48b831d6
+index 000000000..1e48b831d
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/uncrypt.te
 @@ -0,0 +1,45 @@
@@ -21920,7 +21920,7 @@ index 0000000000..1e48b831d6
 +r_dir_file(uncrypt, sysfs_dt_firmware_android)
 diff --git a/prebuilts/api/28.0/public/untrusted_app.te b/prebuilts/api/28.0/public/untrusted_app.te
 new file mode 100644
-index 0000000000..5289bf96b9
+index 000000000..5289bf96b
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/untrusted_app.te
 @@ -0,0 +1,21 @@
@@ -21947,7 +21947,7 @@ index 0000000000..5289bf96b9
 +type untrusted_app_25, domain;
 diff --git a/prebuilts/api/28.0/public/untrusted_v2_app.te b/prebuilts/api/28.0/public/untrusted_v2_app.te
 new file mode 100644
-index 0000000000..ac82f15310
+index 000000000..ac82f1531
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/untrusted_v2_app.te
 @@ -0,0 +1,5 @@
@@ -21958,7 +21958,7 @@ index 0000000000..ac82f15310
 +type untrusted_v2_app, domain;
 diff --git a/prebuilts/api/28.0/public/update_engine.te b/prebuilts/api/28.0/public/update_engine.te
 new file mode 100644
-index 0000000000..ca73c7e893
+index 000000000..ca73c7e89
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/update_engine.te
 @@ -0,0 +1,58 @@
@@ -22022,7 +22022,7 @@ index 0000000000..ca73c7e893
 +allow update_engine system_file:dir r_dir_perms;
 diff --git a/prebuilts/api/28.0/public/update_engine_common.te b/prebuilts/api/28.0/public/update_engine_common.te
 new file mode 100644
-index 0000000000..eb4cdc1943
+index 000000000..eb4cdc194
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/update_engine_common.te
 @@ -0,0 +1,45 @@
@@ -22073,7 +22073,7 @@ index 0000000000..eb4cdc1943
 +r_dir_file(update_engine_common, sysfs_dt_firmware_android)
 diff --git a/prebuilts/api/28.0/public/update_verifier.te b/prebuilts/api/28.0/public/update_verifier.te
 new file mode 100644
-index 0000000000..5d20eca822
+index 000000000..5d20eca82
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/update_verifier.te
 @@ -0,0 +1,31 @@
@@ -22110,7 +22110,7 @@ index 0000000000..5d20eca822
 +hal_client_domain(update_verifier, hal_bootctl)
 diff --git a/prebuilts/api/28.0/public/usbd.te b/prebuilts/api/28.0/public/usbd.te
 new file mode 100644
-index 0000000000..a98724b69d
+index 000000000..a98724b69
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/usbd.te
 @@ -0,0 +1,2 @@
@@ -22118,7 +22118,7 @@ index 0000000000..a98724b69d
 +type usbd_exec, exec_type, file_type;
 diff --git a/prebuilts/api/28.0/public/vdc.te b/prebuilts/api/28.0/public/vdc.te
 new file mode 100644
-index 0000000000..424bdea02a
+index 000000000..424bdea02
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/vdc.te
 @@ -0,0 +1,20 @@
@@ -22144,7 +22144,7 @@ index 0000000000..424bdea02a
 +allow vdc vold_service:service_manager find;
 diff --git a/prebuilts/api/28.0/public/vendor_init.te b/prebuilts/api/28.0/public/vendor_init.te
 new file mode 100644
-index 0000000000..4e4b313652
+index 000000000..4e4b31365
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/vendor_init.te
 @@ -0,0 +1,198 @@
@@ -22348,7 +22348,7 @@ index 0000000000..4e4b313652
 +get_prop(vendor_init, exported3_system_prop)
 diff --git a/prebuilts/api/28.0/public/vendor_shell.te b/prebuilts/api/28.0/public/vendor_shell.te
 new file mode 100644
-index 0000000000..7d30acba4b
+index 000000000..7d30acba4
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/vendor_shell.te
 @@ -0,0 +1,19 @@
@@ -22373,7 +22373,7 @@ index 0000000000..7d30acba4b
 +allow vendor_shell input_device:chr_file rw_file_perms;
 diff --git a/prebuilts/api/28.0/public/vendor_toolbox.te b/prebuilts/api/28.0/public/vendor_toolbox.te
 new file mode 100644
-index 0000000000..63f938de12
+index 000000000..63f938de1
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/vendor_toolbox.te
 @@ -0,0 +1,16 @@
@@ -22395,7 +22395,7 @@ index 0000000000..63f938de12
 +')
 diff --git a/prebuilts/api/28.0/public/virtual_touchpad.te b/prebuilts/api/28.0/public/virtual_touchpad.te
 new file mode 100644
-index 0000000000..c2800e3efe
+index 000000000..c2800e3ef
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/virtual_touchpad.te
 @@ -0,0 +1,16 @@
@@ -22417,14 +22417,14 @@ index 0000000000..c2800e3efe
 +allow virtual_touchpad permission_service:service_manager find;
 diff --git a/prebuilts/api/28.0/public/vndservice.te b/prebuilts/api/28.0/public/vndservice.te
 new file mode 100644
-index 0000000000..0d309bf715
+index 000000000..0d309bf71
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/vndservice.te
 @@ -0,0 +1 @@
 +type default_android_vndservice, vndservice_manager_type;
 diff --git a/prebuilts/api/28.0/public/vndservicemanager.te b/prebuilts/api/28.0/public/vndservicemanager.te
 new file mode 100644
-index 0000000000..6b9f73dc00
+index 000000000..6b9f73dc0
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/vndservicemanager.te
 @@ -0,0 +1,2 @@
@@ -22432,7 +22432,7 @@ index 0000000000..6b9f73dc00
 +type vndservicemanager, domain;
 diff --git a/prebuilts/api/28.0/public/vold.te b/prebuilts/api/28.0/public/vold.te
 new file mode 100644
-index 0000000000..131f555d4f
+index 000000000..131f555d4
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/vold.te
 @@ -0,0 +1,269 @@
@@ -22707,7 +22707,7 @@ index 0000000000..131f555d4f
 +neverallow vold *:rawip_socket *;
 diff --git a/prebuilts/api/28.0/public/vold_prepare_subdirs.te b/prebuilts/api/28.0/public/vold_prepare_subdirs.te
 new file mode 100644
-index 0000000000..6405d2dcba
+index 000000000..6405d2dcb
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/vold_prepare_subdirs.te
 @@ -0,0 +1,6 @@
@@ -22719,7 +22719,7 @@ index 0000000000..6405d2dcba
 +typeattribute vold_prepare_subdirs coredomain;
 diff --git a/prebuilts/api/28.0/public/vr_hwc.te b/prebuilts/api/28.0/public/vr_hwc.te
 new file mode 100644
-index 0000000000..c05dd638ad
+index 000000000..c05dd638a
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/vr_hwc.te
 @@ -0,0 +1,31 @@
@@ -22756,7 +22756,7 @@ index 0000000000..c05dd638ad
 +allow vr_hwc permission_service:service_manager find;
 diff --git a/prebuilts/api/28.0/public/watchdogd.te b/prebuilts/api/28.0/public/watchdogd.te
 new file mode 100644
-index 0000000000..00292a9a99
+index 000000000..00292a9a9
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/watchdogd.te
 @@ -0,0 +1,4 @@
@@ -22766,7 +22766,7 @@ index 0000000000..00292a9a99
 +allow watchdogd kmsg_device:chr_file rw_file_perms;
 diff --git a/prebuilts/api/28.0/public/webview_zygote.te b/prebuilts/api/28.0/public/webview_zygote.te
 new file mode 100644
-index 0000000000..5d19b32265
+index 000000000..5d19b3226
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/webview_zygote.te
 @@ -0,0 +1,5 @@
@@ -22777,7 +22777,7 @@ index 0000000000..5d19b32265
 +type webview_zygote_exec, exec_type, file_type;
 diff --git a/prebuilts/api/28.0/public/wificond.te b/prebuilts/api/28.0/public/wificond.te
 new file mode 100644
-index 0000000000..9e4dc7d324
+index 000000000..9e4dc7d32
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/wificond.te
 @@ -0,0 +1,31 @@
@@ -22814,7 +22814,7 @@ index 0000000000..9e4dc7d324
 +allow wificond dumpstate:fifo_file write;
 diff --git a/prebuilts/api/28.0/public/wpantund.te b/prebuilts/api/28.0/public/wpantund.te
 new file mode 100644
-index 0000000000..b317236510
+index 000000000..b31723651
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/wpantund.te
 @@ -0,0 +1,29 @@
@@ -22849,7 +22849,7 @@ index 0000000000..b317236510
 +allow wpantund self:tun_socket create;
 diff --git a/prebuilts/api/28.0/public/zygote.te b/prebuilts/api/28.0/public/zygote.te
 new file mode 100644
-index 0000000000..83c42efb0e
+index 000000000..83c42efb0
 --- /dev/null
 +++ b/prebuilts/api/28.0/public/zygote.te
 @@ -0,0 +1,3 @@
@@ -22858,7 +22858,7 @@ index 0000000000..83c42efb0e
 +type zygote_exec, exec_type, file_type;
 diff --git a/prebuilts/api/29.0/private/compat/28.0/28.0.cil b/prebuilts/api/29.0/private/compat/28.0/28.0.cil
 new file mode 100644
-index 0000000000..338cbd0273
+index 000000000..338cbd027
 --- /dev/null
 +++ b/prebuilts/api/29.0/private/compat/28.0/28.0.cil
 @@ -0,0 +1,1742 @@
@@ -24606,7 +24606,7 @@ index 0000000000..338cbd0273
 +(typeattributeset zygote_socket_28_0 (zygote_socket))
 diff --git a/prebuilts/api/29.0/private/compat/28.0/28.0.ignore.cil b/prebuilts/api/29.0/private/compat/28.0/28.0.ignore.cil
 new file mode 100644
-index 0000000000..ed3671f114
+index 000000000..ed3671f11
 --- /dev/null
 +++ b/prebuilts/api/29.0/private/compat/28.0/28.0.ignore.cil
 @@ -0,0 +1,151 @@
@@ -24763,7 +24763,7 @@ index 0000000000..ed3671f114
 +    watchdogd_tmpfs))
 diff --git a/prebuilts/api/30.0/private/compat/28.0/28.0.cil b/prebuilts/api/30.0/private/compat/28.0/28.0.cil
 new file mode 100644
-index 0000000000..321e9387ed
+index 000000000..321e9387e
 --- /dev/null
 +++ b/prebuilts/api/30.0/private/compat/28.0/28.0.cil
 @@ -0,0 +1,1744 @@
@@ -26513,7 +26513,7 @@ index 0000000000..321e9387ed
 +(typeattributeset zygote_socket_28_0 (zygote_socket))
 diff --git a/prebuilts/api/30.0/private/compat/28.0/28.0.compat.cil b/prebuilts/api/30.0/private/compat/28.0/28.0.compat.cil
 new file mode 100644
-index 0000000000..30af58c422
+index 000000000..30af58c42
 --- /dev/null
 +++ b/prebuilts/api/30.0/private/compat/28.0/28.0.compat.cil
 @@ -0,0 +1,5 @@
@@ -26524,7 +26524,7 @@ index 0000000000..30af58c422
 +(allow vendordomain self (netlink_route_socket (nlmsg_readpriv)))
 diff --git a/prebuilts/api/30.0/private/compat/28.0/28.0.ignore.cil b/prebuilts/api/30.0/private/compat/28.0/28.0.ignore.cil
 new file mode 100644
-index 0000000000..d24d12d257
+index 000000000..d24d12d25
 --- /dev/null
 +++ b/prebuilts/api/30.0/private/compat/28.0/28.0.ignore.cil
 @@ -0,0 +1,159 @@
@@ -26689,7 +26689,7 @@ index 0000000000..d24d12d257
 +    watchdogd_tmpfs))
 diff --git a/prebuilts/api/31.0/private/compat/28.0/28.0.cil b/prebuilts/api/31.0/private/compat/28.0/28.0.cil
 new file mode 100644
-index 0000000000..321e9387ed
+index 000000000..321e9387e
 --- /dev/null
 +++ b/prebuilts/api/31.0/private/compat/28.0/28.0.cil
 @@ -0,0 +1,1744 @@
@@ -28439,7 +28439,7 @@ index 0000000000..321e9387ed
 +(typeattributeset zygote_socket_28_0 (zygote_socket))
 diff --git a/prebuilts/api/31.0/private/compat/28.0/28.0.compat.cil b/prebuilts/api/31.0/private/compat/28.0/28.0.compat.cil
 new file mode 100644
-index 0000000000..2e85b23fca
+index 000000000..2e85b23fc
 --- /dev/null
 +++ b/prebuilts/api/31.0/private/compat/28.0/28.0.compat.cil
 @@ -0,0 +1,11 @@
@@ -28456,7 +28456,7 @@ index 0000000000..2e85b23fca
 +(allow mlsvendorcompat privapp_data_file (file (ioctl read write create getattr setattr lock append map unlink rename open watch watch_reads)))
 diff --git a/prebuilts/api/31.0/private/compat/28.0/28.0.ignore.cil b/prebuilts/api/31.0/private/compat/28.0/28.0.ignore.cil
 new file mode 100644
-index 0000000000..e7ddf48057
+index 000000000..e7ddf4805
 --- /dev/null
 +++ b/prebuilts/api/31.0/private/compat/28.0/28.0.ignore.cil
 @@ -0,0 +1,160 @@
@@ -28622,7 +28622,7 @@ index 0000000000..e7ddf48057
 +    watchdogd_tmpfs))
 diff --git a/prebuilts/api/32.0/private/compat/28.0/28.0.cil b/prebuilts/api/32.0/private/compat/28.0/28.0.cil
 new file mode 100644
-index 0000000000..321e9387ed
+index 000000000..321e9387e
 --- /dev/null
 +++ b/prebuilts/api/32.0/private/compat/28.0/28.0.cil
 @@ -0,0 +1,1744 @@
@@ -30372,7 +30372,7 @@ index 0000000000..321e9387ed
 +(typeattributeset zygote_socket_28_0 (zygote_socket))
 diff --git a/prebuilts/api/32.0/private/compat/28.0/28.0.compat.cil b/prebuilts/api/32.0/private/compat/28.0/28.0.compat.cil
 new file mode 100644
-index 0000000000..2e85b23fca
+index 000000000..2e85b23fc
 --- /dev/null
 +++ b/prebuilts/api/32.0/private/compat/28.0/28.0.compat.cil
 @@ -0,0 +1,11 @@
@@ -30389,7 +30389,7 @@ index 0000000000..2e85b23fca
 +(allow mlsvendorcompat privapp_data_file (file (ioctl read write create getattr setattr lock append map unlink rename open watch watch_reads)))
 diff --git a/prebuilts/api/32.0/private/compat/28.0/28.0.ignore.cil b/prebuilts/api/32.0/private/compat/28.0/28.0.ignore.cil
 new file mode 100644
-index 0000000000..e7ddf48057
+index 000000000..e7ddf4805
 --- /dev/null
 +++ b/prebuilts/api/32.0/private/compat/28.0/28.0.ignore.cil
 @@ -0,0 +1,160 @@
@@ -30555,7 +30555,7 @@ index 0000000000..e7ddf48057
 +    watchdogd_tmpfs))
 diff --git a/prebuilts/api/33.0/private/compat/28.0/28.0.cil b/prebuilts/api/33.0/private/compat/28.0/28.0.cil
 new file mode 100644
-index 0000000000..321e9387ed
+index 000000000..321e9387e
 --- /dev/null
 +++ b/prebuilts/api/33.0/private/compat/28.0/28.0.cil
 @@ -0,0 +1,1744 @@
@@ -32305,7 +32305,7 @@ index 0000000000..321e9387ed
 +(typeattributeset zygote_socket_28_0 (zygote_socket))
 diff --git a/prebuilts/api/33.0/private/compat/28.0/28.0.compat.cil b/prebuilts/api/33.0/private/compat/28.0/28.0.compat.cil
 new file mode 100644
-index 0000000000..2e85b23fca
+index 000000000..2e85b23fc
 --- /dev/null
 +++ b/prebuilts/api/33.0/private/compat/28.0/28.0.compat.cil
 @@ -0,0 +1,11 @@
@@ -32322,7 +32322,7 @@ index 0000000000..2e85b23fca
 +(allow mlsvendorcompat privapp_data_file (file (ioctl read write create getattr setattr lock append map unlink rename open watch watch_reads)))
 diff --git a/prebuilts/api/33.0/private/compat/28.0/28.0.ignore.cil b/prebuilts/api/33.0/private/compat/28.0/28.0.ignore.cil
 new file mode 100644
-index 0000000000..e7ddf48057
+index 000000000..e7ddf4805
 --- /dev/null
 +++ b/prebuilts/api/33.0/private/compat/28.0/28.0.ignore.cil
 @@ -0,0 +1,160 @@
@@ -32488,7 +32488,7 @@ index 0000000000..e7ddf48057
 +    watchdogd_tmpfs))
 diff --git a/private/compat/28.0/28.0.cil b/private/compat/28.0/28.0.cil
 new file mode 100644
-index 0000000000..d79d2f8c96
+index 000000000..d79d2f8c9
 --- /dev/null
 +++ b/private/compat/28.0/28.0.cil
 @@ -0,0 +1,1745 @@
@@ -34239,7 +34239,7 @@ index 0000000000..d79d2f8c96
 +(typeattributeset zygote_socket_28_0 (zygote_socket))
 diff --git a/private/compat/28.0/28.0.compat.cil b/private/compat/28.0/28.0.compat.cil
 new file mode 100644
-index 0000000000..783950ce53
+index 000000000..783950ce5
 --- /dev/null
 +++ b/private/compat/28.0/28.0.compat.cil
 @@ -0,0 +1,15 @@
@@ -34260,7 +34260,7 @@ index 0000000000..783950ce53
 +(allow mlsvendorcompat privapp_data_file (file (ioctl read write create getattr setattr lock append map unlink rename open watch watch_reads)))
 diff --git a/private/compat/28.0/28.0.ignore.cil b/private/compat/28.0/28.0.ignore.cil
 new file mode 100644
-index 0000000000..7213f95428
+index 000000000..7213f9542
 --- /dev/null
 +++ b/private/compat/28.0/28.0.ignore.cil
 @@ -0,0 +1,160 @@

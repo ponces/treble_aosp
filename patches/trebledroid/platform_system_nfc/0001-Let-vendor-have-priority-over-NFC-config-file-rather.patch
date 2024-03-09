@@ -1,4 +1,4 @@
-From d1ebd2dbb8e521c7dcff2c4ca42c4e4044c28c6a Mon Sep 17 00:00:00 2001
+From a80b3c0b76ab20318bddaba2c344e0406caebbfd Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 21 Dec 2020 19:36:54 +0100
 Subject: [PATCH] Let vendor have priority over NFC config file, rather than
@@ -12,7 +12,7 @@ Change-Id: Iaee468f3b8e5c8ec90ca7e856a6526d1cbcaa33e
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/adaptation/nfc_config.cc b/src/adaptation/nfc_config.cc
-index f635fd502..15d42cabf 100644
+index f635fd50..15d42cab 100644
 --- a/src/adaptation/nfc_config.cc
 +++ b/src/adaptation/nfc_config.cc
 @@ -30,7 +30,7 @@ using namespace ::android::base;

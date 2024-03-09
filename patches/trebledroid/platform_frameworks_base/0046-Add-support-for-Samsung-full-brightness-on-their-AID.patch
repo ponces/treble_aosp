@@ -1,7 +1,7 @@
-From 985bf0b7a6fbcf0487d0a7ed7bc61cabe0118121 Mon Sep 17 00:00:00 2001
+From d9bb806c09d660e94c356ff328b5b4e75e4468da Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 10 Dec 2023 18:04:49 -0500
-Subject: [PATCH 46/56] Add support for Samsung full brightness on their AIDL
+Subject: [PATCH 46/55] Add support for Samsung full brightness on their AIDL
  HAL
 
 ---
@@ -10,10 +10,10 @@ Subject: [PATCH 46/56] Add support for Samsung full brightness on their AIDL
  2 files changed, 44 insertions(+)
 
 diff --git a/services/core/Android.bp b/services/core/Android.bp
-index 18a9fe12ecb7..6cba27c50972 100644
+index cdddee133247..232fa6cb0831 100644
 --- a/services/core/Android.bp
 +++ b/services/core/Android.bp
-@@ -194,6 +194,10 @@ java_library_static {
+@@ -212,6 +212,10 @@ java_library_static {
          "vendor.oplus.hardware.biometrics.fingerprint-V2.1-java",
          "vendor.oppo.hardware.biometrics.fingerprint-V2.1-java",
          "vendor.xiaomi.hardware.fingerprintextension-V1.0-java",
@@ -25,7 +25,7 @@ index 18a9fe12ecb7..6cba27c50972 100644
      javac_shard_size: 50,
      javacflags: [
 diff --git a/services/core/java/com/android/server/lights/LightsService.java b/services/core/java/com/android/server/lights/LightsService.java
-index 8fa9c4f3a698..390c6ac6c50f 100644
+index 67f6932921f6..0379eadfa383 100644
 --- a/services/core/java/com/android/server/lights/LightsService.java
 +++ b/services/core/java/com/android/server/lights/LightsService.java
 @@ -44,8 +44,10 @@ import com.android.internal.util.DumpUtils;
@@ -59,7 +59,7 @@ index 8fa9c4f3a698..390c6ac6c50f 100644
      @VisibleForTesting
      final LightsManagerBinderService mManagerService;
  
-@@ -297,6 +305,17 @@ public class LightsService extends SystemService {
+@@ -300,6 +308,17 @@ public class LightsService extends SystemService {
                  int brightnessInt = BrightnessSynchronizer.brightnessFloatToInt(brightness);
  
                  if(mHwLight.id == 0) {
@@ -77,7 +77,7 @@ index 8fa9c4f3a698..390c6ac6c50f 100644
                      String fp = SystemProperties.get("ro.vendor.build.fingerprint", "hello");
                      if(fp.matches(".*astarqlte.*")) {
                          int newBrightness = brightnessInt;
-@@ -499,6 +518,27 @@ public class LightsService extends SystemService {
+@@ -502,6 +521,27 @@ public class LightsService extends SystemService {
          mH = new Handler(looper);
          mVintfLights = service.get() != null ? service : null;
  

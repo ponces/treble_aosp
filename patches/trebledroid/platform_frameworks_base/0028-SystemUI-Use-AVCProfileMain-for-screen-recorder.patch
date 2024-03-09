@@ -1,7 +1,7 @@
-From 773e80f8da2663ce4014f430b7382e6cef2af5ba Mon Sep 17 00:00:00 2001
+From 3b769f8decb96efcaa716b81a94f800a7cac939d Mon Sep 17 00:00:00 2001
 From: Arne Coucheron <arco68@gmail.com>
 Date: Thu, 5 Nov 2020 05:38:44 +0100
-Subject: [PATCH 28/56] SystemUI: Use AVCProfileMain for screen recorder
+Subject: [PATCH 28/55] SystemUI: Use AVCProfileMain for screen recorder
 
 Some devices don't support the High profile very well.
 Use Main profile, which is more compatible, so they
@@ -13,7 +13,7 @@ Change-Id: Iac23480e080edf4300e6f411c3394c0b41030daa
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenMediaRecorder.java b/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenMediaRecorder.java
-index b80a01212ca0..7a9b94b5a483 100644
+index 3aab3bf62809..98a519bfb133 100644
 --- a/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenMediaRecorder.java
 +++ b/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenMediaRecorder.java
 @@ -149,7 +149,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
