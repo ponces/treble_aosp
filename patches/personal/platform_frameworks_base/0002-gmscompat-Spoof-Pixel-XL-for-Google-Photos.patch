@@ -1,4 +1,4 @@
-From 18ab30a87e9fed1557c4bc495e6b29c18b433382 Mon Sep 17 00:00:00 2001
+From 56790f05821ab62841e1ac1062e4dfaccc1ef335 Mon Sep 17 00:00:00 2001
 From: vladsendrix <83285656+vladsendrix@users.noreply.github.com>
 Date: Fri, 31 Dec 2021 03:18:04 +0100
 Subject: [PATCH 2/9] gmscompat: Spoof Pixel XL for Google Photos

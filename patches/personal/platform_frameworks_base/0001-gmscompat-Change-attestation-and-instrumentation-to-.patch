@@ -1,4 +1,4 @@
-From 8cb353dc7657fd01e742f5929c179af13ef2b139 Mon Sep 17 00:00:00 2001
+From e64e80d8f57ca12791ec196868eacf12086acfaa Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 9 Nov 2023 12:33:55 +0100
 Subject: [PATCH 1/9] gmscompat: Change attestation and instrumentation to pass
@@ -16,10 +16,10 @@ Adapted by @ponces based on the work of @chiteroman to pass newest Play Integrit
  create mode 100644 core/java/com/android/internal/gmscompat/AttestationHooks.java
 
 diff --git a/core/java/android/app/Instrumentation.java b/core/java/android/app/Instrumentation.java
-index e31486f18dbf..56ff16f6c358 100644
+index 2162e3a77f15..af1c752b1733 100644
 --- a/core/java/android/app/Instrumentation.java
 +++ b/core/java/android/app/Instrumentation.java
-@@ -60,6 +60,8 @@ import android.view.WindowManagerGlobal;
+@@ -62,6 +62,8 @@ import android.view.WindowManagerGlobal;
  
  import com.android.internal.content.ReferrerIntent;
  
@@ -28,7 +28,7 @@ index e31486f18dbf..56ff16f6c358 100644
  import java.io.File;
  import java.lang.annotation.Retention;
  import java.lang.annotation.RetentionPolicy;
-@@ -1281,6 +1283,7 @@ public class Instrumentation {
+@@ -1344,6 +1346,7 @@ public class Instrumentation {
          Application app = getFactory(context.getPackageName())
                  .instantiateApplication(cl, className);
          app.attach(context);
@@ -36,7 +36,7 @@ index e31486f18dbf..56ff16f6c358 100644
          return app;
      }
      
-@@ -1298,6 +1301,7 @@ public class Instrumentation {
+@@ -1361,6 +1364,7 @@ public class Instrumentation {
              ClassNotFoundException {
          Application app = (Application)clazz.newInstance();
          app.attach(context);
@@ -151,10 +151,10 @@ index 000000000000..12e68b9360bc
 +    }
 +}
 diff --git a/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java b/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java
-index 25f5dec9de40..b34351585c4b 100644
+index 2d8c5a380c6b..caadbef6516c 100644
 --- a/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java
 +++ b/keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java
-@@ -45,6 +45,7 @@ import android.system.keystore2.ResponseCode;
+@@ -48,6 +48,7 @@ import android.system.keystore2.ResponseCode;
  import android.util.Log;
  
  import com.android.internal.annotations.VisibleForTesting;
@@ -162,7 +162,7 @@ index 25f5dec9de40..b34351585c4b 100644
  
  import java.io.ByteArrayInputStream;
  import java.io.IOException;
-@@ -174,6 +175,8 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
+@@ -178,6 +179,8 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
  
      @Override
      public Certificate[] engineGetCertificateChain(String alias) {

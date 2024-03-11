@@ -1,4 +1,4 @@
-From 1dff9a908c5c6526fc5d57ad7903e132d0113a02 Mon Sep 17 00:00:00 2001
+From e7b61899a149938ab88fdba81af8ea1cc5e4ff96 Mon Sep 17 00:00:00 2001
 From: Chris Crump <chriscrawford893@gmail.com>
 Date: Tue, 1 Nov 2022 17:27:48 -0400
 Subject: [PATCH 9/9] feat: Add Face Unlock with ParanoidSense (1/2)
@@ -13,8 +13,7 @@ Change-Id: I05fa784d9f7f978be9f5944900a97ad7df19f59e
  .../phone/BiometricUnlockController.java      |    2 +-
  .../phone/KeyguardBypassController.kt         |   11 +-
  services/core/Android.bp                      |    1 +
- .../biometrics/log/BiometricLogger.java       |    3 +-
- .../biometrics/sensors/face/FaceService.java  |   27 +-
+ .../biometrics/sensors/face/FaceService.java  |   34 +-
  .../face/sense/BiometricTestSessionImpl.java  |  227 ++++
  .../face/sense/FaceAuthenticationClient.java  |  228 ++++
  .../sensors/face/sense/FaceEnrollClient.java  |  132 ++
@@ -30,7 +29,7 @@ Change-Id: I05fa784d9f7f978be9f5944900a97ad7df19f59e
  .../sensors/face/sense/SenseProvider.java     | 1101 +++++++++++++++++
  .../sensors/face/sense/SenseUtils.java        |   61 +
  .../sensors/face/sense/TestHal.java           |  144 +++
- 21 files changed, 2654 insertions(+), 8 deletions(-)
+ 20 files changed, 2650 insertions(+), 16 deletions(-)
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/sense/BiometricTestSessionImpl.java
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/sense/FaceAuthenticationClient.java
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/sense/FaceEnrollClient.java
@@ -48,10 +47,10 @@ Change-Id: I05fa784d9f7f978be9f5944900a97ad7df19f59e
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/sense/TestHal.java
 
 diff --git a/packages/SystemUI/src/com/android/systemui/privacy/AppOpsPrivacyItemMonitor.kt b/packages/SystemUI/src/com/android/systemui/privacy/AppOpsPrivacyItemMonitor.kt
-index 88b8676ae1c0..9c3e9edf73d0 100644
+index fedbdec113f8..cc4ce05a4282 100644
 --- a/packages/SystemUI/src/com/android/systemui/privacy/AppOpsPrivacyItemMonitor.kt
 +++ b/packages/SystemUI/src/com/android/systemui/privacy/AppOpsPrivacyItemMonitor.kt
-@@ -92,6 +92,10 @@ class AppOpsPrivacyItemMonitor @Inject constructor(
+@@ -95,6 +95,10 @@ class AppOpsPrivacyItemMonitor @Inject constructor(
                  if (code in OPS_LOCATION && !locationAvailable) {
                      return
                  }
@@ -62,7 +61,7 @@ index 88b8676ae1c0..9c3e9edf73d0 100644
                  if (userTracker.userProfiles.any { it.id == UserHandle.getUserId(uid) } ||
                          code in USER_INDEPENDENT_OPS) {
                      logger.logUpdatedItemFromAppOps(code, uid, packageName, active)
-@@ -215,6 +219,10 @@ class AppOpsPrivacyItemMonitor @Inject constructor(
+@@ -219,6 +223,10 @@ class AppOpsPrivacyItemMonitor @Inject constructor(
              AppOpsManager.OP_RECORD_AUDIO -> PrivacyType.TYPE_MICROPHONE
              else -> return null
          }
@@ -74,10 +73,10 @@ index 88b8676ae1c0..9c3e9edf73d0 100644
          return PrivacyItem(type, app, appOpItem.timeStartedElapsed, appOpItem.isDisabled)
      }
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/BiometricUnlockController.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/BiometricUnlockController.java
-index 3e99bc31441a..4f4ecb03a397 100644
+index 97fc35a062f4..1d4069ae3b3c 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/BiometricUnlockController.java
 +++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/BiometricUnlockController.java
-@@ -621,7 +621,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
+@@ -618,7 +618,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
          final boolean unlockingAllowed =
                  mUpdateMonitor.isUnlockingWithBiometricAllowed(isStrongBiometric);
          final boolean deviceDreaming = mUpdateMonitor.isDreaming();
@@ -87,10 +86,10 @@ index 3e99bc31441a..4f4ecb03a397 100644
  
          logCalculateModeForPassiveAuth(unlockingAllowed, deviceInteractive, isKeyguardShowing,
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBypassController.kt b/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBypassController.kt
-index 924aac4e70be..8cc77c16edac 100644
+index a3d316b611a7..866bc590d33f 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBypassController.kt
 +++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBypassController.kt
-@@ -99,6 +99,8 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
+@@ -107,6 +107,8 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
              notifyListeners()
          }
  
@@ -99,16 +98,16 @@ index 924aac4e70be..8cc77c16edac 100644
      var bouncerShowing: Boolean = false
      var altBouncerShowing: Boolean = false
      var launchingAffordance: Boolean = false
-@@ -157,7 +159,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
-         val dismissByDefault = if (context.resources.getBoolean(
-                         com.android.internal.R.bool.config_faceAuthDismissesKeyguard)) 1 else 0
+@@ -163,7 +165,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
+                 com.android.internal.R.bool.config_faceAuthDismissesKeyguard)) 1 else 0
+ 
          tunerService.addTunable({ key, _ ->
 -            bypassEnabled = tunerService.getValue(key, dismissByDefault) != 0
 +            bypassEnabledBiometric = tunerService.getValue(key, dismissByDefault) != 0
          }, Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD)
+ 
          lockscreenUserManager.addUserChangedListener(
-                 object : NotificationLockscreenUserManager.UserChangedListener {
-@@ -178,8 +180,8 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
+@@ -200,8 +202,8 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
          biometricSourceType: BiometricSourceType,
          isStrongBiometric: Boolean
      ): Boolean {
@@ -119,7 +118,7 @@ index 924aac4e70be..8cc77c16edac 100644
              if (!can && (isPulseExpanding || qsExpanded)) {
                  pendingUnlock = PendingUnlock(biometricSourceType, isStrongBiometric)
              }
-@@ -203,7 +205,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
+@@ -225,7 +227,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
       * If keyguard can be dismissed because of bypass.
       */
      fun canBypass(): Boolean {
@@ -128,7 +127,7 @@ index 924aac4e70be..8cc77c16edac 100644
              return when {
                  bouncerShowing -> true
                  altBouncerShowing -> true
-@@ -236,6 +238,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
+@@ -258,6 +260,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
              pw.println("  mPendingUnlock: $pendingUnlock")
          }
          pw.println("  bypassEnabled: $bypassEnabled")
@@ -137,10 +136,10 @@ index 924aac4e70be..8cc77c16edac 100644
          pw.println("  bouncerShowing: $bouncerShowing")
          pw.println("  altBouncerShowing: $altBouncerShowing")
 diff --git a/services/core/Android.bp b/services/core/Android.bp
-index 0e822cfd5abe..c04fe1347308 100644
+index 3be9ab693335..ad201d14a0bc 100644
 --- a/services/core/Android.bp
 +++ b/services/core/Android.bp
-@@ -194,6 +194,7 @@ java_library_static {
+@@ -212,6 +212,7 @@ java_library_static {
          "vendor.oplus.hardware.biometrics.fingerprint-V2.1-java",
          "vendor.oppo.hardware.biometrics.fingerprint-V2.1-java",
          "vendor.xiaomi.hardware.fingerprintextension-V1.0-java",
@@ -148,22 +147,8 @@ index 0e822cfd5abe..c04fe1347308 100644
  
          //AIDL
          "vendor.samsung.hardware.sysinput-V1-java",
-diff --git a/services/core/java/com/android/server/biometrics/log/BiometricLogger.java b/services/core/java/com/android/server/biometrics/log/BiometricLogger.java
-index 87037af11a84..e8b042cd032c 100644
---- a/services/core/java/com/android/server/biometrics/log/BiometricLogger.java
-+++ b/services/core/java/com/android/server/biometrics/log/BiometricLogger.java
-@@ -206,7 +206,8 @@ public class BiometricLogger {
-             return;
-         }
- 
--        mAuthenticationStatsCollector.authenticate(targetUserId, authenticated);
-+        if (mAuthenticationStatsCollector != null)
-+            mAuthenticationStatsCollector.authenticate(targetUserId, authenticated);
- 
-         int authState = FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__UNKNOWN;
-         if (!authenticated) {
 diff --git a/services/core/java/com/android/server/biometrics/sensors/face/FaceService.java b/services/core/java/com/android/server/biometrics/sensors/face/FaceService.java
-index 6f26e7b3e4b4..ec8ffd96618d 100644
+index 578d9dc2aede..4955f0240bc0 100644
 --- a/services/core/java/com/android/server/biometrics/sensors/face/FaceService.java
 +++ b/services/core/java/com/android/server/biometrics/sensors/face/FaceService.java
 @@ -25,6 +25,7 @@ import android.annotation.Nullable;
@@ -182,16 +167,16 @@ index 6f26e7b3e4b4..ec8ffd96618d 100644
  import android.hardware.face.FaceSensorPropertiesInternal;
  import android.hardware.face.FaceServiceReceiver;
  import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
-@@ -66,6 +68,8 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
+@@ -67,6 +69,8 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
  import com.android.server.biometrics.sensors.LockoutTracker;
  import com.android.server.biometrics.sensors.face.aidl.FaceProvider;
  import com.android.server.biometrics.sensors.face.hidl.Face10;
 +import com.android.server.biometrics.sensors.face.sense.SenseProvider;
 +import com.android.server.biometrics.sensors.face.sense.SenseUtils;
  
- import java.io.FileDescriptor;
- import java.io.PrintWriter;
-@@ -670,6 +674,24 @@ public class FaceService extends SystemService {
+ import com.google.android.collect.Lists;
+ 
+@@ -682,24 +686,32 @@ public class FaceService extends SystemService {
              return providers;
          }
  
@@ -216,18 +201,21 @@ index 6f26e7b3e4b4..ec8ffd96618d 100644
          @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
          public void registerAuthenticators(
                  @NonNull List<FaceSensorPropertiesInternal> hidlSensors) {
-@@ -677,12 +699,13 @@ public class FaceService extends SystemService {
+             super.registerAuthenticators_enforcePermission();
  
              mRegistry.registerAll(() -> {
+-                List<String> aidlSensors = new ArrayList<>();
+-                final String[] instances = ServiceManager.getDeclaredInstances(IFace.DESCRIPTOR);
+-                if (instances != null) {
+-                    aidlSensors.addAll(Lists.newArrayList(instances));
+-                }
+-
+-                final Pair<List<FaceSensorPropertiesInternal>, List<String>>
+-                        filteredInstances = filterAvailableHalInstances(hidlSensors, aidlSensors);
+-
                  final List<ServiceProvider> providers = new ArrayList<>();
--                for (FaceSensorPropertiesInternal hidlSensor : hidlSensors) {
-+                /*for (FaceSensorPropertiesInternal hidlSensor : hidlSensors) {
-                     providers.add(
-                             Face10.newInstance(getContext(), mBiometricStateCallback,
-                                     hidlSensor, mLockoutResetDispatcher));
-                 }
--                providers.addAll(getAidlProviders());
-+                providers.addAll(getAidlProviders());*/
+-                providers.addAll(getHidlProviders(filteredInstances.first));
+-                providers.addAll(getAidlProviders(filteredInstances.second));
 +                providers.addAll(getSenseProviders());
                  return providers;
              });

@@ -1,4 +1,4 @@
-From 934caf7429259ee32d036c7251eba28a4c12ca98 Mon Sep 17 00:00:00 2001
+From 51a197e9e2f963962e40375f75e333b912388d44 Mon Sep 17 00:00:00 2001
 From: Pranav Vashi <neobuddy89@gmail.com>
 Date: Sat, 16 Oct 2021 00:12:03 +0530
 Subject: [PATCH 2/3] build: Always use release-keys
@@ -9,10 +9,10 @@ Change-Id: Iff4d88d6bd4c7f4f6b9270dea24a2673c8535d9e
  1 file changed, 1 insertion(+), 5 deletions(-)
 
 diff --git a/core/sysprop.mk b/core/sysprop.mk
-index 4adec48daa..fbe2f30a6f 100644
+index 1b2ee8f862..96c54e0de6 100644
 --- a/core/sysprop.mk
 +++ b/core/sysprop.mk
-@@ -175,11 +175,7 @@ endif
+@@ -177,11 +177,7 @@ endif
  # non-default dev keys (usually private keys from a vendor directory).
  # Both of these tags will be removed and replaced with "release-keys"
  # when the target-files is signed in a post-build step.
