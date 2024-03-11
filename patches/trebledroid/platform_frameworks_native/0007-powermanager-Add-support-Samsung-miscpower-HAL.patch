@@ -1,4 +1,4 @@
-From 996cb841580604dc78f40d7f3ee3f01b6d8137e4 Mon Sep 17 00:00:00 2001
+From e530843ac0424a589b387221ba90fbafd9bc4f83 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Mon, 27 Dec 2021 18:00:43 -0500
 Subject: [PATCH 07/11] powermanager: Add support Samsung miscpower HAL
@@ -20,11 +20,11 @@ Change-Id: I182a91ccb0a89f9d0d7d41f36eccab218b553bbc
  include/powermanager/PowerHalLoader.h         |  3 +
  include/powermanager/PowerHalWrapper.h        | 36 +++++++++-
  services/powermanager/Android.bp              |  2 +
- services/powermanager/PowerHalController.cpp  | 11 ++-
+ services/powermanager/PowerHalController.cpp  | 13 +++-
  services/powermanager/PowerHalLoader.cpp      | 17 ++++-
  services/powermanager/PowerHalWrapper.cpp     | 70 +++++++++++++++++++
  .../CompositionEngine/Android.bp              |  1 +
- 7 files changed, 135 insertions(+), 5 deletions(-)
+ 7 files changed, 136 insertions(+), 6 deletions(-)
 
 diff --git a/include/powermanager/PowerHalLoader.h b/include/powermanager/PowerHalLoader.h
 index cbbfa597ba..c27a833a07 100644
@@ -55,7 +55,7 @@ index cbbfa597ba..c27a833a07 100644
      static sp<hardware::power::V1_0::IPower> loadHidlV1_0Locked()
              EXCLUSIVE_LOCKS_REQUIRED(gHalMutex);
 diff --git a/include/powermanager/PowerHalWrapper.h b/include/powermanager/PowerHalWrapper.h
-index 4e4a1b000d..492de55aab 100644
+index 4e4a1b000d..0411f9f8cf 100644
 --- a/include/powermanager/PowerHalWrapper.h
 +++ b/include/powermanager/PowerHalWrapper.h
 @@ -26,6 +26,7 @@
@@ -99,17 +99,17 @@ index 4e4a1b000d..492de55aab 100644
 +    : mHandleSeh(std::move(hal1)),
 +        mHandle11(std::move(hal2)),
 +        mHandle10(std::move(hal3)) {}
-+    virtual ~HidlHalWrapperSeh() = default;
++    ~HidlHalWrapperSeh() = default;
 +
-+    virtual HalResult<void> setBoost(hardware::power::Boost boost, int32_t durationMs) override;
-+    virtual HalResult<void> setMode(hardware::power::Mode mode, bool enabled) override;
-+    virtual HalResult<sp<hardware::power::IPowerHintSession>> createHintSession(
++    HalResult<void> setBoost(aidl::android::hardware::power::Boost boost, int32_t durationMs) override;
++    HalResult<void> setMode(aidl::android::hardware::power::Mode mode, bool enabled) override;
++    HalResult<std::shared_ptr<aidl::android::hardware::power::IPowerHintSession>> createHintSession(
 +            int32_t tgid, int32_t uid, const std::vector<int32_t>& threadIds,
 +            int64_t durationNanos) override;
-+    virtual HalResult<int64_t> getHintSessionPreferredRate() override;
++    HalResult<int64_t> getHintSessionPreferredRate() override;
 +
 +protected:
-+    virtual HalResult<void> sendPowerHint(hardware::power::V1_0::PowerHint hintId, uint32_t data);
++    HalResult<void> sendPowerHint(hardware::power::V1_0::PowerHint hintId, uint32_t data);
 +
 +private:
 +    sp<vendor::samsung::hardware::miscpower::V2_0::ISehMiscPower> mHandleSeh;
@@ -143,7 +143,7 @@ index 1f72e8ba2c..d7eea4dfc7 100644
  
      cflags: [
 diff --git a/services/powermanager/PowerHalController.cpp b/services/powermanager/PowerHalController.cpp
-index 9a23c848c9..6a8ee50d86 100644
+index 9a23c848c9..4949d49db7 100644
 --- a/services/powermanager/PowerHalController.cpp
 +++ b/services/powermanager/PowerHalController.cpp
 @@ -20,6 +20,7 @@
@@ -154,11 +154,16 @@ index 9a23c848c9..6a8ee50d86 100644
  #include <powermanager/PowerHalController.h>
  #include <powermanager/PowerHalLoader.h>
  #include <utils/Log.h>
-@@ -37,15 +38,21 @@ std::unique_ptr<HalWrapper> HalConnector::connect() {
-                 PowerHalLoader::loadAidl()) {
-         return std::make_unique<AidlHalWrapper>(halAidl);
-     }
+@@ -33,19 +34,25 @@ namespace power {
+ // -------------------------------------------------------------------------------------------------
+ 
+ std::unique_ptr<HalWrapper> HalConnector::connect() {
 +    sp<vendor::samsung::hardware::miscpower::V2_0::ISehMiscPower> halHidlSeh = PowerHalLoader::loadHidlSeh();
+     if (std::shared_ptr<aidl::android::hardware::power::IPower> halAidl =
+                 PowerHalLoader::loadAidl()) {
+-        return std::make_unique<AidlHalWrapper>(halAidl);
++        return std::make_unique<AidlHalWrapper>(halAidl, halHidlSeh);
+     }
      // If V1_0 isn't defined, none of them are
 -    if (sp<V1_0::IPower> halHidlV1_0 = PowerHalLoader::loadHidlV1_0()) {
 +    sp<V1_0::IPower> halHidlV1_0 = PowerHalLoader::loadHidlV1_0();
@@ -224,14 +229,14 @@ index 22144615da..5823fa697d 100644
  
  // -------------------------------------------------------------------------------------------------
 diff --git a/services/powermanager/PowerHalWrapper.cpp b/services/powermanager/PowerHalWrapper.cpp
-index 76afbfc646..134e821a1b 100644
+index 76afbfc646..1d40252d7d 100644
 --- a/services/powermanager/PowerHalWrapper.cpp
 +++ b/services/powermanager/PowerHalWrapper.cpp
 @@ -221,6 +221,10 @@ HalResult<void> AidlHalWrapper::setMode(Aidl::Mode mode, bool enabled) {
      std::unique_lock<std::mutex> lock(mModeMutex);
      size_t idx = static_cast<size_t>(mode);
  
-+    if (mHandleSeh != nullptr && mode == Mode::INTERACTIVE) {
++    if (mHandleSeh != nullptr && mode == Aidl::Mode::INTERACTIVE) {
 +        mHandleSeh->setInteractiveAsync(enabled, false);
 +    }
 +
@@ -242,8 +247,8 @@ index 76afbfc646..134e821a1b 100644
      return HalResult<int64_t>::fromStatus(result, rate);
  }
  
-+HalResult<void> HidlHalWrapperSeh::setBoost(Boost boost, int32_t durationMs) {
-+    if (boost == Boost::INTERACTION) {
++HalResult<void> HidlHalWrapperSeh::setBoost(Aidl::Boost boost, int32_t durationMs) {
++    if (boost == Aidl::Boost::INTERACTION) {
 +        return sendPowerHint(V1_0::PowerHint::INTERACTION, durationMs);
 +    } else {
 +        ALOGV("Skipped setBoost %s because Power HAL AIDL not available", toString(boost).c_str());
@@ -251,20 +256,20 @@ index 76afbfc646..134e821a1b 100644
 +    }
 +}
 +
-+HalResult<void> HidlHalWrapperSeh::setMode(Mode mode, bool enabled) {
++HalResult<void> HidlHalWrapperSeh::setMode(Aidl::Mode mode, bool enabled) {
 +    uint32_t data = enabled ? 1 : 0;
 +    switch (mode) {
-+        case Mode::LAUNCH:
++        case Aidl::Mode::LAUNCH:
 +            return sendPowerHint(V1_0::PowerHint::LAUNCH, data);
-+        case Mode::LOW_POWER:
++        case Aidl::Mode::LOW_POWER:
 +            return sendPowerHint(V1_0::PowerHint::LOW_POWER, data);
-+        case Mode::SUSTAINED_PERFORMANCE:
++        case Aidl::Mode::SUSTAINED_PERFORMANCE:
 +            return sendPowerHint(V1_0::PowerHint::SUSTAINED_PERFORMANCE, data);
-+        case Mode::VR:
++        case Aidl::Mode::VR:
 +            return sendPowerHint(V1_0::PowerHint::VR_MODE, data);
-+        case Mode::INTERACTIVE:
++        case Aidl::Mode::INTERACTIVE:
 +            return setInteractive(enabled);
-+        case Mode::DOUBLE_TAP_TO_WAKE:
++        case Aidl::Mode::DOUBLE_TAP_TO_WAKE:
 +            return setFeature(V1_0::Feature::POWER_FEATURE_DOUBLE_TAP_TO_WAKE, enabled);
 +        default:
 +            ALOGV("Skipped setMode %s because Power HAL AIDL not available",
@@ -296,11 +301,11 @@ index 76afbfc646..134e821a1b 100644
 +    return HalResult<void>::fromReturn(ret);
 +}
 +
-+HalResult<sp<Aidl::IPowerHintSession>> HidlHalWrapperSeh::createHintSession(
++HalResult<std::shared_ptr<Aidl::IPowerHintSession>> HidlHalWrapperSeh::createHintSession(
 +        int32_t, int32_t, const std::vector<int32_t>& threadIds, int64_t) {
 +    ALOGV("Skipped createHintSession(task num=%zu) because Power HAL not available",
 +          threadIds.size());
-+    return HalResult<sp<Aidl::IPowerHintSession>>::unsupported();
++    return HalResult<std::shared_ptr<Aidl::IPowerHintSession>>::unsupported();
 +}
 +
 +HalResult<int64_t> HidlHalWrapperSeh::getHintSessionPreferredRate() {

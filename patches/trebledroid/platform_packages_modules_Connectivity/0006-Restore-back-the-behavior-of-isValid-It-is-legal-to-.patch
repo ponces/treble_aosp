@@ -1,4 +1,4 @@
-From cbfbd94cdd025e26082edf961eafaaff39efd915 Mon Sep 17 00:00:00 2001
+From aa7737b0ec8a34497013262b9797df0f7931d9e4 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 26 Oct 2022 18:02:18 -0400
 Subject: [PATCH 6/6] Restore back the behavior of isValid(): It is legal to
@@ -12,7 +12,7 @@ Change-Id: Ie7815c186400614f0c6b483c04aa8971af348380
  1 file changed, 12 insertions(+), 9 deletions(-)
 
 diff --git a/staticlibs/native/bpf_headers/include/bpf/BpfMap.h b/staticlibs/native/bpf_headers/include/bpf/BpfMap.h
-index 3fede3c0ed..deb70bac71 100644
+index 3fede3c0ed..8e6a2ed4ba 100644
 --- a/staticlibs/native/bpf_headers/include/bpf/BpfMap.h
 +++ b/staticlibs/native/bpf_headers/include/bpf/BpfMap.h
 @@ -58,21 +58,24 @@ class BpfMapRO {
@@ -24,7 +24,7 @@ index 3fede3c0ed..deb70bac71 100644
 +    }
 +
 +  public:
-+    bool isOk(bool writable = false) {
++    bool isOk(bool writable = false) const {
 +        if (!mMapFd.ok()) return false;
          if (isAtLeastKernelVersion(4, 14, 0)) {
              int flags = bpfGetFdMapFlags(mMapFd);

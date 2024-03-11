@@ -1,4 +1,4 @@
-From 4afc9674fac81178ddd9dfdb6afa6857deda3694 Mon Sep 17 00:00:00 2001
+From 1ba034d319ab5f749b746c0b6f80e0a8aad6da2a Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Thu, 25 Jan 2024 15:20:10 -0500
 Subject: [PATCH 24/24] When setting ro.apex.updatable, actually set the value

@@ -1,4 +1,4 @@
-From 42c0b241e6836cad57357fe4f6cbdc206c211676 Mon Sep 17 00:00:00 2001
+From 96688d2b5c1fcb834ed6436aa4d7f6c5c80dc070 Mon Sep 17 00:00:00 2001
 From: Peter Cai <peter@typeblog.net>
 Date: Wed, 24 Aug 2022 15:45:18 -0400
 Subject: [PATCH 2/8] audio_hal_interface: Optionally use sysbta HAL
@@ -69,7 +69,7 @@ index 0dd9575acb..d28e8e46fb 100644
   private:
    IBluetoothTransportInstance* transport_;
 diff --git a/system/audio_hal_interface/hal_version_manager.cc b/system/audio_hal_interface/hal_version_manager.cc
-index 275bbb067e..489df090e7 100644
+index 275bbb067e..885e34f188 100644
 --- a/system/audio_hal_interface/hal_version_manager.cc
 +++ b/system/audio_hal_interface/hal_version_manager.cc
 @@ -25,6 +25,7 @@
@@ -86,7 +86,7 @@ index 275bbb067e..489df090e7 100644
      std::string() + IBluetoothAudioProviderFactory::descriptor + "/default";
 +static const std::string kSystemAudioProviderFactoryInterface =
 +    std::string() + IBluetoothAudioProviderFactory::descriptor + "/sysbta";
-+static inline const std::string audioProviderFactoryInterface() {
++static inline const std::string& audioProviderFactoryInterface() {
 +  return osi_property_get_bool("persist.bluetooth.system_audio_hal.enabled", false)
 +    ? kSystemAudioProviderFactoryInterface : kDefaultAudioProviderFactoryInterface;
 +}
@@ -98,7 +98,7 @@ index 275bbb067e..489df090e7 100644
    auto provider_factory = IBluetoothAudioProviderFactory::fromBinder(
        ::ndk::SpAIBinder(AServiceManager_waitForService(
 -          kDefaultAudioProviderFactoryInterface.c_str())));
-+              audioProviderFactoryInterface.c_str())));
++              audioProviderFactoryInterface().c_str())));
  
    if (provider_factory == nullptr) {
      LOG_ERROR("Can't get aidl version from unknown factory");
@@ -107,7 +107,7 @@ index 275bbb067e..489df090e7 100644
    hal_transport_ = BluetoothAudioHalTransport::UNKNOWN;
    if (AServiceManager_checkService(
 -          kDefaultAudioProviderFactoryInterface.c_str()) != nullptr) {
-+          audioProviderFactoryInterface.c_str()) != nullptr) {
++          audioProviderFactoryInterface().c_str()) != nullptr) {
      hal_version_ = GetAidlInterfaceVersion();
      hal_transport_ = BluetoothAudioHalTransport::AIDL;
      return;

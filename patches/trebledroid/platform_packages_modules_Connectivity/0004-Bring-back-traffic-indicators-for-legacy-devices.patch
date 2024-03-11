@@ -1,4 +1,4 @@
-From f7549d0b68bba1b7712cad30ed21f2e0db2252e0 Mon Sep 17 00:00:00 2001
+From 7ce288f4657c9580a9408ca7e0483c4e7f7c4826 Mon Sep 17 00:00:00 2001
 From: koron393 <koron393@gmail.com>
 Date: Fri, 20 Jan 2023 05:41:13 +0900
 Subject: [PATCH 4/6] Bring back traffic indicators for legacy devices
@@ -12,11 +12,11 @@ This fixes traffic indicator on BPF-less kernel.
 Change-Id: I65c626c1c5832d81805c45c53b021236fe09030b
 Signed-off-by: koron393 <koron393@gmail.com>
 ---
- ...android_server_net_NetworkStatsService.cpp | 97 ++++++++++++++++++-
- 1 file changed, 94 insertions(+), 3 deletions(-)
+ ...android_server_net_NetworkStatsService.cpp | 84 ++++++++++++++++++-
+ 1 file changed, 81 insertions(+), 3 deletions(-)
 
 diff --git a/service-t/jni/com_android_server_net_NetworkStatsService.cpp b/service-t/jni/com_android_server_net_NetworkStatsService.cpp
-index bdbb655e5c..f876fc58d1 100644
+index bdbb655e5c..2d8d673515 100644
 --- a/service-t/jni/com_android_server_net_NetworkStatsService.cpp
 +++ b/service-t/jni/com_android_server_net_NetworkStatsService.cpp
 @@ -39,6 +39,9 @@ using android::bpf::NetworkTraceHandler;
@@ -29,11 +29,11 @@ index bdbb655e5c..f876fc58d1 100644
  // NOTE: keep these in sync with TrafficStats.java
  static const uint64_t UNKNOWN = -1;
  
-@@ -64,13 +67,93 @@ static uint64_t getStatsType(StatsValue* stats, StatsType type) {
+@@ -64,13 +67,80 @@ static uint64_t getStatsType(StatsValue* stats, StatsType type) {
      }
  }
  
-+static int parseIfaceStats(const char* iface, Stats* stats) {
++static int parseIfaceStats(const char* iface, StatsValue* stats) {
 +    FILE *fp = fopen(QTAGUID_IFACE_STATS, "r");
 +    if (fp == NULL) {
 +        return -1;
@@ -41,7 +41,6 @@ index bdbb655e5c..f876fc58d1 100644
 +
 +    char buffer[384];
 +    char cur_iface[32];
-+    bool foundTcp = false;
 +    uint64_t rxBytes, rxPackets, txBytes, txPackets, tcpRxPackets, tcpTxPackets;
 +
 +    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
@@ -50,25 +49,13 @@ index bdbb655e5c..f876fc58d1 100644
 +                "%*u %" SCNu64 " %*u %*u %*u %*u", cur_iface, &rxBytes,
 +                &rxPackets, &txBytes, &txPackets, &tcpRxPackets, &tcpTxPackets);
 +        if (matched >= 5) {
-+            if (matched == 7) {
-+                foundTcp = true;
-+            }
 +            if (!iface || !strcmp(iface, cur_iface)) {
 +                stats->rxBytes += rxBytes;
 +                stats->rxPackets += rxPackets;
 +                stats->txBytes += txBytes;
 +                stats->txPackets += txPackets;
-+                if (matched == 7) {
-+                    stats->tcpRxPackets += tcpRxPackets;
-+                    stats->tcpTxPackets += tcpTxPackets;
-+                }
 +            }
 +        }
-+    }
-+
-+    if (!foundTcp) {
-+        stats->tcpRxPackets = UNKNOWN;
-+        stats->tcpTxPackets = UNKNOWN;
 +    }
 +
 +    if (fclose(fp) != 0) {
@@ -77,7 +64,7 @@ index bdbb655e5c..f876fc58d1 100644
 +    return 0;
 +}
 +
-+static int parseUidStats(const uint32_t uid, Stats* stats) {
++static int parseUidStats(const uint32_t uid, StatsValue* stats) {
 +    FILE *fp = fopen(QTAGUID_UID_STATS, "r");
 +    if (fp == NULL) {
 +        return -1;
@@ -124,7 +111,7 @@ index bdbb655e5c..f876fc58d1 100644
      }
  }
  
-@@ -85,7 +168,11 @@ static jlong nativeGetIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint t
+@@ -85,7 +155,11 @@ static jlong nativeGetIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint t
      if (bpfGetIfaceStats(iface8.c_str(), &stats) == 0) {
          return getStatsType(&stats, (StatsType) type);
      } else {
@@ -137,7 +124,7 @@ index bdbb655e5c..f876fc58d1 100644
      }
  }
  
-@@ -104,7 +191,11 @@ static jlong nativeGetUidStat(JNIEnv* env, jclass clazz, jint uid, jint type) {
+@@ -104,7 +178,11 @@ static jlong nativeGetUidStat(JNIEnv* env, jclass clazz, jint uid, jint type) {
      if (bpfGetUidStats(uid, &stats) == 0) {
          return getStatsType(&stats, (StatsType) type);
      } else {
