@@ -1,4 +1,4 @@
-From e7b61899a149938ab88fdba81af8ea1cc5e4ff96 Mon Sep 17 00:00:00 2001
+From 39a824fd35780e5bbc4c5c135a7c6328f75a024e Mon Sep 17 00:00:00 2001
 From: Chris Crump <chriscrawford893@gmail.com>
 Date: Tue, 1 Nov 2022 17:27:48 -0400
 Subject: [PATCH 9/9] feat: Add Face Unlock with ParanoidSense (1/2)
@@ -26,10 +26,10 @@ Change-Id: I05fa784d9f7f978be9f5944900a97ad7df19f59e
  .../face/sense/FaceRevokeChallengeClient.java |   55 +
  .../face/sense/FaceSetFeatureClient.java      |   93 ++
  .../sense/FaceUpdateActiveUserClient.java     |   84 ++
- .../sensors/face/sense/SenseProvider.java     | 1101 +++++++++++++++++
+ .../sensors/face/sense/SenseProvider.java     | 1108 +++++++++++++++++
  .../sensors/face/sense/SenseUtils.java        |   61 +
  .../sensors/face/sense/TestHal.java           |  144 +++
- 20 files changed, 2650 insertions(+), 16 deletions(-)
+ 20 files changed, 2657 insertions(+), 16 deletions(-)
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/sense/BiometricTestSessionImpl.java
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/sense/FaceAuthenticationClient.java
  create mode 100644 services/core/java/com/android/server/biometrics/sensors/face/sense/FaceEnrollClient.java
@@ -1598,10 +1598,10 @@ index 000000000000..08c075067082
 +}
 diff --git a/services/core/java/com/android/server/biometrics/sensors/face/sense/SenseProvider.java b/services/core/java/com/android/server/biometrics/sensors/face/sense/SenseProvider.java
 new file mode 100644
-index 000000000000..34d009d6933a
+index 000000000000..d728380ade3f
 --- /dev/null
 +++ b/services/core/java/com/android/server/biometrics/sensors/face/sense/SenseProvider.java
-@@ -0,0 +1,1101 @@
+@@ -0,0 +1,1108 @@
 +/*
 + * Copyright (C) 2020 The Android Open Source Project
 + * Copyright (C) 2023 Paranoid Android
@@ -1657,6 +1657,7 @@ index 000000000000..34d009d6933a
 +import android.view.Surface;
 +
 +import com.android.internal.annotations.VisibleForTesting;
++import com.android.server.biometrics.AuthenticationStatsBroadcastReceiver;
 +import com.android.server.biometrics.AuthenticationStatsCollector;
 +import com.android.server.biometrics.SensorServiceStateProto;
 +import com.android.server.biometrics.SensorStateProto;
@@ -1667,7 +1668,6 @@ index 000000000000..34d009d6933a
 +import com.android.server.biometrics.sensors.AcquisitionClient;
 +import com.android.server.biometrics.sensors.AuthenticationConsumer;
 +import com.android.server.biometrics.sensors.BaseClientMonitor;
-+import com.android.server.biometrics.sensors.BiometricNotificationImpl;
 +import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 +import com.android.server.biometrics.sensors.BiometricScheduler;
 +import com.android.server.biometrics.sensors.BiometricStateCallback;
@@ -1733,7 +1733,8 @@ index 000000000000..34d009d6933a
 +    @Nullable private IBiometricsFace mDaemon;
 +    @NonNull private final HalResultController mHalResultController;
 +    @NonNull private final BiometricContext mBiometricContext;
-+    @NonNull private final AuthenticationStatsCollector mAuthenticationStatsCollector;
++    @Nullable
++    private AuthenticationStatsCollector mAuthenticationStatsCollector;
 +    SparseArray<ISenseService> mServices;
 +    // for requests that do not use biometric prompt
 +    @NonNull private final AtomicLong mRequestCounter = new AtomicLong(0);
@@ -1975,8 +1976,14 @@ index 000000000000..34d009d6933a
 +        });
 +        mCurrentUserId = ActivityManager.getCurrentUser();
 +
-+        mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
-+                BiometricsProtoEnums.MODALITY_FACE, new BiometricNotificationImpl());
++        AuthenticationStatsBroadcastReceiver mBroadcastReceiver =
++                new AuthenticationStatsBroadcastReceiver(
++                        mContext,
++                        BiometricsProtoEnums.MODALITY_FACE,
++                        (AuthenticationStatsCollector collector) -> {
++                            Slog.d(TAG, "Initializing AuthenticationStatsCollector");
++                            mAuthenticationStatsCollector = collector;
++                        });
 +
 +        try {
 +            ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);

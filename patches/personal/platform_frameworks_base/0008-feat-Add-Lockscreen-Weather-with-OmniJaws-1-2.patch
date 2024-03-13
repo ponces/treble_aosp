@@ -753,7 +753,7 @@ index 2a54a4eee657..c944082e6b4e 100644
      };
 diff --git a/packages/SystemUI/src/com/android/systemui/crdroid/CurrentWeatherView.java b/packages/SystemUI/src/com/android/systemui/crdroid/CurrentWeatherView.java
 new file mode 100644
-index 000000000000..89eaa69ef137
+index 000000000000..9e4eb16ed50f
 --- /dev/null
 +++ b/packages/SystemUI/src/com/android/systemui/crdroid/CurrentWeatherView.java
 @@ -0,0 +1,163 @@
@@ -787,7 +787,7 @@ index 000000000000..89eaa69ef137
 +import android.widget.TextView;
 +
 +import com.android.internal.util.crdroid.OmniJawsClient;
-+import com.android.systemui.R;
++import com.android.systemui.res.R;
 +
 +public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.OmniJawsObserver {
 +

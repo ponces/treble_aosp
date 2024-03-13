@@ -68,7 +68,7 @@ buildTrebleApp() {
 
 buildVanillaVariant() {
     echo "--> Building treble_arm64_bvN"
-    lunch treble_arm64_bvN-userdebug
+    lunch treble_arm64_bvN-ap1a-userdebug
     make -j$(nproc --all) installclean
     make -j$(nproc --all) systemimage
     mv $OUT/system.img $BD/system-treble_arm64_bvN.img
@@ -77,7 +77,7 @@ buildVanillaVariant() {
 
 buildGappsVariant() {
     echo "--> Building treble_arm64_bgN"
-    lunch treble_arm64_bgN-userdebug
+    lunch treble_arm64_bgN-ap1a-userdebug
     make -j$(nproc --all) installclean
     make -j$(nproc --all) systemimage
     mv $OUT/system.img $BD/system-treble_arm64_bgN.img
