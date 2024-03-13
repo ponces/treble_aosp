@@ -12,9 +12,6 @@
   <remove-project name="device/google/contexthub" />
   <remove-project name="device/google/coral-kernel" />
   <remove-project name="device/google/coral-sepolicy" />
-  <remove-project name="device/google/cuttlefish" />
-  <remove-project name="device/google/cuttlefish_prebuilts" />
-  <remove-project name="device/google/cuttlefish_vmm" />
   <remove-project name="device/google/felix" />
   <remove-project name="device/google/felix-kernel" />
   <remove-project name="device/google/felix-sepolicy" />
