@@ -1,4 +1,4 @@
-From 39791d0c6756043373680225e17eea9aeead90dc Mon Sep 17 00:00:00 2001
+From 6ebc7f7fa1e61eb88f7213b89df33364a224a53c Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 21 Feb 2024 16:21:51 -0500
 Subject: [PATCH 09/10] Initialize Samsung HIDL ISehRadio. Fixes 5G on S20
@@ -45,7 +45,7 @@ index 29033f63c8..8d12f1e498 100644
                          break;
                      case HAL_SERVICE_SIM:
 diff --git a/src/java/com/android/internal/telephony/RadioNetworkProxy.java b/src/java/com/android/internal/telephony/RadioNetworkProxy.java
-index 4b544485ff..4b670964cf 100644
+index b8f5164680..ac7ab2cb3c 100644
 --- a/src/java/com/android/internal/telephony/RadioNetworkProxy.java
 +++ b/src/java/com/android/internal/telephony/RadioNetworkProxy.java
 @@ -32,6 +32,7 @@ import java.util.ArrayList;
@@ -76,7 +76,7 @@ index 4b544485ff..4b670964cf 100644
          HalVersion version = halVersion;
          try {
              version = RIL.getServiceHalVersion(network.getInterfaceVersion());
-@@ -162,7 +167,7 @@ public class RadioNetworkProxy extends RadioServiceProxy {
+@@ -165,7 +170,7 @@ public class RadioNetworkProxy extends RadioServiceProxy {
              };
  
              var samsungResponse = new ISehRadioNetworkResponse.Stub() {
@@ -85,7 +85,7 @@ index 4b544485ff..4b670964cf 100644
                      android.util.Log.e("PHH-Radio", v);
                  }
                  public void emergencyControlResponse(SehRadioResponseInfo info) {}
-@@ -204,7 +209,7 @@ public class RadioNetworkProxy extends RadioServiceProxy {
+@@ -207,7 +212,7 @@ public class RadioNetworkProxy extends RadioServiceProxy {
              var samsungHal =
                  ISehRadioNetwork.Stub.asInterface(
                          android.os.ServiceManager.waitForDeclaredService(
@@ -94,7 +94,7 @@ index 4b544485ff..4b670964cf 100644
              samsungHal.setResponseFunctions(samsungResponse, samsungIndication);
              var conf = new SehVendorConfiguration[1];
              conf[0] = new SehVendorConfiguration();
-@@ -797,6 +802,117 @@ public class RadioNetworkProxy extends RadioServiceProxy {
+@@ -800,6 +805,117 @@ public class RadioNetworkProxy extends RadioServiceProxy {
          }
      }
  

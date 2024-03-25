@@ -1,4 +1,4 @@
-From c085cf3eed3c1ae28f355d5365903689e6b9624b Mon Sep 17 00:00:00 2001
+From e71372b285a28a1defe70ab50b47f2bb476fd57c Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 21 Feb 2024 12:50:28 -0500
 Subject: [PATCH 08/10] Initialize Samsung AIDL ISehRadioNetwork. Fixes 5G on
@@ -7,8 +7,8 @@ Subject: [PATCH 08/10] Initialize Samsung AIDL ISehRadioNetwork. Fixes 5G on
 ---
  Android.bp                                    |   1 +
  .../com/android/internal/telephony/RIL.java   |   2 +-
- .../internal/telephony/RadioNetworkProxy.java | 140 +++++++++++++++++-
- 3 files changed, 141 insertions(+), 2 deletions(-)
+ .../internal/telephony/RadioNetworkProxy.java | 143 +++++++++++++++++-
+ 3 files changed, 144 insertions(+), 2 deletions(-)
 
 diff --git a/Android.bp b/Android.bp
 index 121236aa4d..b0631fd537 100644
@@ -36,7 +36,7 @@ index 5177adb3b9..29033f63c8 100644
                          break;
                      case HAL_SERVICE_SIM:
 diff --git a/src/java/com/android/internal/telephony/RadioNetworkProxy.java b/src/java/com/android/internal/telephony/RadioNetworkProxy.java
-index 4acc71acee..4b544485ff 100644
+index 4acc71acee..b8f5164680 100644
 --- a/src/java/com/android/internal/telephony/RadioNetworkProxy.java
 +++ b/src/java/com/android/internal/telephony/RadioNetworkProxy.java
 @@ -32,6 +32,20 @@ import java.util.ArrayList;
@@ -69,7 +69,7 @@ index 4acc71acee..4b544485ff 100644
          HalVersion version = halVersion;
          try {
              version = RIL.getServiceHalVersion(network.getInterfaceVersion());
-@@ -78,6 +92,130 @@ public class RadioNetworkProxy extends RadioServiceProxy {
+@@ -78,6 +92,133 @@ public class RadioNetworkProxy extends RadioServiceProxy {
          mNetworkProxy = network;
          mIsAidl = true;
  
@@ -118,6 +118,9 @@ index 4acc71acee..4b544485ff 100644
 +                }
 +                public void nrIconTypeChanged(int type, int nrIconType) {
 +                    l("nrIconTypeChanged " + nrIconType);
++                }
++                public void nrNetworkTypeAdded(int type, int nrNetworkType) {
++                    l("nrNetworkTypeAdded " + nrNetworkType);
 +                }
 +                public void roamingNetworkScanIsRequested(int type, byte[] scanData) {
 +                    l("roamingNetworkScanIsRequested");
