@@ -1,4 +1,4 @@
-From 173192c65ae846e992bd93b32230974f52a326be Mon Sep 17 00:00:00 2001
+From f886a9cdff1c08957410303355707b10151faf08 Mon Sep 17 00:00:00 2001
 From: danielzhang130 <37479705+danielzhang130@users.noreply.github.com>
 Date: Mon, 25 Mar 2024 03:57:56 -0400
 Subject: [PATCH 3/3] Fix bpf boot issue for kernel < 4.19 (#2)
@@ -41,7 +41,7 @@ index 036a9b9..7b18055 100644
      // Create all the pin subdirectories
      // (this must be done first to allow selinux_context and pin_subdir functionality,
 diff --git a/libbpf_android/Loader.cpp b/libbpf_android/Loader.cpp
-index 7cd383e..141c2cb 100644
+index 7cd383e..a08c7a5 100644
 --- a/libbpf_android/Loader.cpp
 +++ b/libbpf_android/Loader.cpp
 @@ -795,7 +795,8 @@ static int createMaps(const char* elfPath, ifstream& elfFile, vector<unique_fd>&
@@ -49,7 +49,7 @@ index 7cd383e..141c2cb 100644
                .map_flags = md[i].map_flags,
              };
 -            strlcpy(req.map_name, mapNames[i].c_str(), sizeof(req.map_name));
-+            if (isAtLeastKernelVersion(4, 14, 0)) 
++            if (isAtLeastKernelVersion(4, 14, 0))
 +                strlcpy(req.map_name, mapNames[i].c_str(), sizeof(req.map_name));
              fd.reset(bpf(BPF_MAP_CREATE, req));
              saved_errno = errno;
@@ -59,7 +59,7 @@ index 7cd383e..141c2cb 100644
                .expected_attach_type = cs[i].expected_attach_type,
              };
 -            strlcpy(req.prog_name, cs[i].name.c_str(), sizeof(req.prog_name));
-+            if (isAtLeastKernelVersion(4, 14, 0)) 
++            if (isAtLeastKernelVersion(4, 14, 0))
 +                strlcpy(req.prog_name, cs[i].name.c_str(), sizeof(req.prog_name));
              fd.reset(bpf(BPF_PROG_LOAD, req));
  

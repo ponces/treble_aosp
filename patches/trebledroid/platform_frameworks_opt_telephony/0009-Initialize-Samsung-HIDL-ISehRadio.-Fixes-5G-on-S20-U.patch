@@ -1,4 +1,4 @@
-From 6ebc7f7fa1e61eb88f7213b89df33364a224a53c Mon Sep 17 00:00:00 2001
+From c1307444000d5a8b91dbf45b199b43fecadf30d3 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 21 Feb 2024 16:21:51 -0500
 Subject: [PATCH 09/10] Initialize Samsung HIDL ISehRadio. Fixes 5G on S20
@@ -45,7 +45,7 @@ index 29033f63c8..8d12f1e498 100644
                          break;
                      case HAL_SERVICE_SIM:
 diff --git a/src/java/com/android/internal/telephony/RadioNetworkProxy.java b/src/java/com/android/internal/telephony/RadioNetworkProxy.java
-index b8f5164680..ac7ab2cb3c 100644
+index b8f5164680..ff937454cd 100644
 --- a/src/java/com/android/internal/telephony/RadioNetworkProxy.java
 +++ b/src/java/com/android/internal/telephony/RadioNetworkProxy.java
 @@ -32,6 +32,7 @@ import java.util.ArrayList;
@@ -140,7 +140,7 @@ index b8f5164680..ac7ab2cb3c 100644
 +public void getCsgListResponse() {}
 +public void selectCsgManualResponse(RadioResponseInfo info) {}
 +public void setMobileDataSettingResponse(RadioResponseInfo info) {}
-+public void sendRequestRawResponse(RadioResponseInfo info, ArrayList<Byte> data) {} 
++public void sendRequestRawResponse(RadioResponseInfo info, ArrayList<Byte> data) {}
 +public void sendRequestStringsResponse(RadioResponseInfo info, ArrayList<String> data) {}
 +public void setNrModeResponse(RadioResponseInfo info) {}
 +public void getNrModeResponse(RadioResponseInfo info, int nrMode) {}

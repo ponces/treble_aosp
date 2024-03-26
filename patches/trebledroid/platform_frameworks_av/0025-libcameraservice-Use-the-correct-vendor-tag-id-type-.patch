@@ -1,0 +1,48 @@
+From afc4c7a1679bc9697b3c4e2e4ec6c3d7bc57d22b Mon Sep 17 00:00:00 2001
+From: danielml <daniel@danielml.dev>
+Date: Tue, 26 Mar 2024 11:49:00 +0100
+Subject: [PATCH 25/25] libcameraservice: Use the correct vendor tag id type on
+ filterParameters
+
+This fixes an overflow caused by using the `int` type, thus breaking
+the camera on cases where the actual vendor tag id is bigger than the
+maximum value `int` can hold.
+
+Test: Open camera, make sure that preview shows correctly and that
+      there are no vendor tag errors in logs.
+Change-Id: Ia00e9e3fcc737bfaf0a917f11690f15d686441ba
+Signed-off-by: danielml <daniel@danielml.dev>
+---
+ .../camera/libcameraservice/utils/SessionConfigurationUtils.cpp | 2 +-
+ .../camera/libcameraservice/utils/SessionConfigurationUtils.h   | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/services/camera/libcameraservice/utils/SessionConfigurationUtils.cpp b/services/camera/libcameraservice/utils/SessionConfigurationUtils.cpp
+index 2b03d33eca..cbe43b1a83 100644
+--- a/services/camera/libcameraservice/utils/SessionConfigurationUtils.cpp
++++ b/services/camera/libcameraservice/utils/SessionConfigurationUtils.cpp
+@@ -1160,7 +1160,7 @@ status_t mapRequestTemplateToAidl(camera_request_template_t templateId,
+ }
+ 
+ void filterParameters(const CameraMetadata& src, const CameraMetadata& deviceInfo,
+-        int vendorTagId, CameraMetadata& dst) {
++        metadata_vendor_id_t vendorTagId, CameraMetadata& dst) {
+     const CameraMetadata params(src);
+     camera_metadata_ro_entry_t availableSessionKeys = deviceInfo.find(
+             ANDROID_REQUEST_AVAILABLE_SESSION_KEYS);
+diff --git a/services/camera/libcameraservice/utils/SessionConfigurationUtils.h b/services/camera/libcameraservice/utils/SessionConfigurationUtils.h
+index 29e3eca9af..5b2ea5c06f 100644
+--- a/services/camera/libcameraservice/utils/SessionConfigurationUtils.h
++++ b/services/camera/libcameraservice/utils/SessionConfigurationUtils.h
+@@ -177,7 +177,7 @@ status_t mapRequestTemplateToAidl(camera_request_template_t templateId,
+         aidl::android::hardware::camera::device::RequestTemplate* tempId /*out*/);
+ 
+ void filterParameters(const CameraMetadata& src, const CameraMetadata& deviceInfo,
+-        int vendorTagId, CameraMetadata& dst);
++        metadata_vendor_id_t vendorTagId, CameraMetadata& dst);
+ 
+ constexpr int32_t MAX_SURFACES_PER_STREAM = 4;
+ 
+-- 
+2.34.1
+
