@@ -1,0 +1,138 @@
+From b6f12f7dc86b1ecbdb91a24c4ada69d6820095b1 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Tue, 26 Mar 2024 16:32:07 +0000
+Subject: [PATCH] Revert "Add support for toggling taskbar"
+
+This reverts commit 5a0709789f1665a9f3b3c843865c90d5dda53c7f.
+---
+ Android.bp                                    |  1 -
+ .../launcher3/taskbar/TaskbarManager.java     | 23 ++-----------------
+ .../com/android/quickstep/SystemUiProxy.java  | 12 ----------
+ src/com/android/launcher3/DeviceProfile.java  |  6 +----
+ 4 files changed, 3 insertions(+), 39 deletions(-)
+
+diff --git a/Android.bp b/Android.bp
+index 34fe2c123c..8fe14a0e02 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -185,7 +185,6 @@ android_library {
+         "animationlib",
+         "com_android_launcher3_flags_lib",
+         "com_android_wm_shell_flags_lib",
+-        "org.lineageos.platform"
+     ],
+     sdk_version: "current",
+     min_sdk_version: min_launcher3_sdk_version,
+diff --git a/quickstep/src/com/android/launcher3/taskbar/TaskbarManager.java b/quickstep/src/com/android/launcher3/taskbar/TaskbarManager.java
+index d696695175..bbac11625d 100644
+--- a/quickstep/src/com/android/launcher3/taskbar/TaskbarManager.java
++++ b/quickstep/src/com/android/launcher3/taskbar/TaskbarManager.java
+@@ -73,8 +73,6 @@ import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
+ import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider;
+ import com.android.wm.shell.Flags;
+ 
+-import lineageos.providers.LineageSettings;
+-
+ import java.io.PrintWriter;
+ import java.util.StringJoiner;
+ 
+@@ -107,9 +105,6 @@ public class TaskbarManager {
+     private static final Uri NAV_BAR_KIDS_MODE = Settings.Secure.getUriFor(
+             Settings.Secure.NAV_BAR_KIDS_MODE);
+ 
+-    private static final Uri ENABLE_TASKBAR_URI = LineageSettings.System.getUriFor(
+-            LineageSettings.System.ENABLE_TASKBAR);
+-
+     private final Context mContext;
+     private final @Nullable Context mNavigationBarPanelContext;
+     private WindowManager mWindowManager;
+@@ -142,7 +137,6 @@ public class TaskbarManager {
+      */
+     private final OnIDPChangeListener mIdpChangeListener = c -> recreateTaskbar();
+     private final SettingsCache.OnChangeListener mOnSettingsChangeListener = c -> recreateTaskbar();
+-    private final SettingsCache.OnChangeListener mEnableTaskBarListener;
+ 
+     private boolean mUserUnlocked = false;
+ 
+@@ -281,18 +275,6 @@ public class TaskbarManager {
+                 .register(USER_SETUP_COMPLETE_URI, mOnSettingsChangeListener);
+         SettingsCache.INSTANCE.get(mContext)
+                 .register(NAV_BAR_KIDS_MODE, mOnSettingsChangeListener);
+-        mEnableTaskBarListener = c -> {
+-            // Create the illusion of this taking effect immediately
+-            // Also needed because TaskbarManager inits before SystemUiProxy on start
+-            boolean enabled = LineageSettings.System.getInt(mContext.getContentResolver(),
+-                    LineageSettings.System.ENABLE_TASKBAR, 0) == 1;
+-            SystemUiProxy.INSTANCE.get(mContext).setTaskbarEnabled(enabled);
+-
+-            // Restart launcher
+-            System.exit(0);
+-        };
+-        SettingsCache.INSTANCE.get(mContext)
+-                .register(ENABLE_TASKBAR_URI, mEnableTaskBarListener);
+         Log.d(TASKBAR_NOT_DESTROYED_TAG, "registering component callbacks from constructor.");
+         mContext.registerComponentCallbacks(mComponentCallbacks);
+         mShutdownReceiver.register(mContext, Intent.ACTION_SHUTDOWN);
+@@ -450,10 +432,9 @@ public class TaskbarManager {
+                 + " [dp != null (i.e. mUserUnlocked)]=" + (dp != null)
+                 + " FLAG_HIDE_NAVBAR_WINDOW=" + ENABLE_TASKBAR_NAVBAR_UNIFICATION
+                 + " dp.isTaskbarPresent=" + (dp == null ? "null" : dp.isTaskbarPresent));
+-            SystemUiProxy sysui = SystemUiProxy.INSTANCE.get(mContext);
+-            sysui.setTaskbarEnabled(isTaskbarEnabled);
+             if (!isTaskbarEnabled) {
+-                sysui.notifyTaskbarStatus(/* visible */ false, /* stashed */ false);
++                SystemUiProxy.INSTANCE.get(mContext)
++                    .notifyTaskbarStatus(/* visible */ false, /* stashed */ false);
+                 return;
+             }
+ 
+diff --git a/quickstep/src/com/android/quickstep/SystemUiProxy.java b/quickstep/src/com/android/quickstep/SystemUiProxy.java
+index 0cb04bfb23..a8c680958f 100644
+--- a/quickstep/src/com/android/quickstep/SystemUiProxy.java
++++ b/quickstep/src/com/android/quickstep/SystemUiProxy.java
+@@ -475,18 +475,6 @@ public class SystemUiProxy implements ISystemUiProxy {
+         }
+     }
+ 
+-    @Override
+-    public void setTaskbarEnabled(boolean enabled) {
+-        if (mSystemUiProxy != null) {
+-            try {
+-                mSystemUiProxy.setTaskbarEnabled(enabled);
+-            } catch (RemoteException e) {
+-                Log.w(TAG, "Failed call setTaskbarEnabled with arg: " +
+-                        enabled, e);
+-            }
+-        }
+-    }
+-
+     @Override
+     public void notifyTaskbarStatus(boolean visible, boolean stashed) {
+         if (mSystemUiProxy != null) {
+diff --git a/src/com/android/launcher3/DeviceProfile.java b/src/com/android/launcher3/DeviceProfile.java
+index 9943c6e192..1ca7da9d44 100644
+--- a/src/com/android/launcher3/DeviceProfile.java
++++ b/src/com/android/launcher3/DeviceProfile.java
+@@ -70,8 +70,6 @@ import com.android.launcher3.util.IconSizeSteps;
+ import com.android.launcher3.util.ResourceHelper;
+ import com.android.launcher3.util.WindowBounds;
+ 
+-import lineageos.providers.LineageSettings;
+-
+ import java.io.PrintWriter;
+ import java.util.Locale;
+ import java.util.function.Consumer;
+@@ -348,9 +346,7 @@ public class DeviceProfile {
+         isTablet = info.isTablet(windowBounds);
+         isPhone = !isTablet;
+         isTwoPanels = isTablet && isMultiDisplay;
+-        boolean isTaskBarEnabled = LineageSettings.System.getInt(context.getContentResolver(),
+-                LineageSettings.System.ENABLE_TASKBAR, isTablet ? 1 : 0) == 1;
+-        isTaskbarPresent = isTaskBarEnabled && ApiWrapper.TASKBAR_DRAWN_IN_PROCESS;
++        isTaskbarPresent = isTablet && ApiWrapper.TASKBAR_DRAWN_IN_PROCESS;
+ 
+         // Some more constants.
+         context = getContext(context, info, isVerticalBarLayout() || (isTablet && isLandscape)
+-- 
+2.34.1
+
