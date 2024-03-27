@@ -1,7 +1,7 @@
 From 8632082a603ba7106b2e07f9b1442e14789646a9 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 26 Oct 2022 18:11:10 -0400
-Subject: [PATCH 2/6] Dont delete UID from BpfMap on BPF-less kernel
+Subject: [PATCH 02/13] Dont delete UID from BpfMap on BPF-less kernel
 
 Change-Id: I93b5b8237f6655cb47e0b0584c54cad73a51e7b2
 ---

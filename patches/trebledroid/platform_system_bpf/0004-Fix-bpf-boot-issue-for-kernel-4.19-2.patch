@@ -1,15 +1,14 @@
-From f886a9cdff1c08957410303355707b10151faf08 Mon Sep 17 00:00:00 2001
+From 251fd99e6458644f258dff7eb2450a3dc74b78c5 Mon Sep 17 00:00:00 2001
 From: danielzhang130 <37479705+danielzhang130@users.noreply.github.com>
 Date: Mon, 25 Mar 2024 03:57:56 -0400
-Subject: [PATCH 3/3] Fix bpf boot issue for kernel < 4.19 (#2)
+Subject: [PATCH 4/4] Fix bpf boot issue for kernel < 4.19 (#2)
 
 Cherry-picked commit 22836357eca318f1721628038f67e1735560d039 from packages_modules_Connectivity
 
 Change-Id: I36a8eb859775325b1568515e776a58e421da3976
 ---
- bpfloader/BpfLoader.cpp   | 7 +++----
- libbpf_android/Loader.cpp | 6 ++++--
- 2 files changed, 7 insertions(+), 6 deletions(-)
+ bpfloader/BpfLoader.cpp | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
 
 diff --git a/bpfloader/BpfLoader.cpp b/bpfloader/BpfLoader.cpp
 index 036a9b9..7b18055 100644
@@ -40,30 +39,6 @@ index 036a9b9..7b18055 100644
  
      // Create all the pin subdirectories
      // (this must be done first to allow selinux_context and pin_subdir functionality,
-diff --git a/libbpf_android/Loader.cpp b/libbpf_android/Loader.cpp
-index 7cd383e..a08c7a5 100644
---- a/libbpf_android/Loader.cpp
-+++ b/libbpf_android/Loader.cpp
-@@ -795,7 +795,8 @@ static int createMaps(const char* elfPath, ifstream& elfFile, vector<unique_fd>&
-               .max_entries = max_entries,
-               .map_flags = md[i].map_flags,
-             };
--            strlcpy(req.map_name, mapNames[i].c_str(), sizeof(req.map_name));
-+            if (isAtLeastKernelVersion(4, 14, 0))
-+                strlcpy(req.map_name, mapNames[i].c_str(), sizeof(req.map_name));
-             fd.reset(bpf(BPF_MAP_CREATE, req));
-             saved_errno = errno;
-             ALOGD("bpf_create_map name %s, ret: %d", mapNames[i].c_str(), fd.get());
-@@ -1047,7 +1048,8 @@ static int loadCodeSections(const char* elfPath, vector<codeSection>& cs, const
-               .log_size = static_cast<__u32>(log_buf.size()),
-               .expected_attach_type = cs[i].expected_attach_type,
-             };
--            strlcpy(req.prog_name, cs[i].name.c_str(), sizeof(req.prog_name));
-+            if (isAtLeastKernelVersion(4, 14, 0))
-+                strlcpy(req.prog_name, cs[i].name.c_str(), sizeof(req.prog_name));
-             fd.reset(bpf(BPF_PROG_LOAD, req));
- 
-             ALOGD("BPF_PROG_LOAD call for %s (%s) returned fd: %d (%s)", elfPath,
 -- 
 2.34.1
 

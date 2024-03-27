@@ -1,7 +1,7 @@
 From 72b267d143e3b07c08e9b21ad90c82896c3e7f16 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 6 Oct 2023 09:27:33 -0400
-Subject: [PATCH 3/6] Make the use of IBpfMaps optional
+Subject: [PATCH 03/13] Make the use of IBpfMaps optional
 
 ---
  .../server/net/NetworkStatsService.java       | 28 +++++++++++--------

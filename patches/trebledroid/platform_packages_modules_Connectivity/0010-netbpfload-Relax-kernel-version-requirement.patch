@@ -1,0 +1,28 @@
+From 5698341f442697c7542808515010a24549d3e749 Mon Sep 17 00:00:00 2001
+From: Nanhumly <admin@warbler.cc>
+Date: Sun, 10 Mar 2024 15:35:32 +0000
+Subject: [PATCH 10/13] netbpfload: Relax kernel version requirement
+
+Change-Id: Ic875fd15b407c0cb387fc51ee5a9dc6e132db2d1
+Signed-off-by: Nanhumly <admin@warbler.cc>
+---
+ netbpfload/NetBpfLoad.cpp | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/netbpfload/NetBpfLoad.cpp b/netbpfload/NetBpfLoad.cpp
+index 6152287e45..ed5193dab7 100644
+--- a/netbpfload/NetBpfLoad.cpp
++++ b/netbpfload/NetBpfLoad.cpp
+@@ -177,8 +177,7 @@ int main(int argc, char** argv, char * const envp[]) {
+     const bool isAtLeastU = (device_api_level >= __ANDROID_API_U__);
+ 
+     if (!android::bpf::isAtLeastKernelVersion(4, 19, 0)) {
+-        ALOGE("Android U QPR2 requires kernel 4.19.");
+-        return 1;
++        ALOGW("Android U QPR2 requires kernel 4.19.");
+     }
+ 
+     if (android::bpf::isUserspace32bit() && android::bpf::isAtLeastKernelVersion(6, 2, 0)) {
+-- 
+2.34.1
+

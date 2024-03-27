@@ -1,0 +1,45 @@
+From 110d777311b9851a8e007860d15c0dc714c3d82d Mon Sep 17 00:00:00 2001
+From: Peter Cai <peter@typeblog.net>
+Date: Sat, 16 Mar 2024 15:27:27 -0400
+Subject: [PATCH 07/13] Revert "drop support for V gsi on pixel 5 R base
+ kernel"
+
+This reverts commit bbbd18a71368a80f689b924dcf82062c2ee351b2.
+---
+ ..._android_server_connectivity_ClatCoordinator.cpp | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/service/jni/com_android_server_connectivity_ClatCoordinator.cpp b/service/jni/com_android_server_connectivity_ClatCoordinator.cpp
+index c125bd6479..787ef8fd69 100644
+--- a/service/jni/com_android_server_connectivity_ClatCoordinator.cpp
++++ b/service/jni/com_android_server_connectivity_ClatCoordinator.cpp
+@@ -90,6 +90,11 @@ static void verifyPerms(const char * const path,
+ 
+ #undef ALOGF
+ 
++bool isGsiImage() {
++    // this implementation matches 2 other places in the codebase (same function name too)
++    return !access("/system/system_ext/etc/init/init.gsi.rc", F_OK);
++}
++
+ static const char* kClatdDir = "/apex/com.android.tethering/bin/for-system";
+ static const char* kClatdBin = "/apex/com.android.tethering/bin/for-system/clatd";
+ 
+@@ -130,6 +135,14 @@ static void verifyClatPerms() {
+ 
+ #undef V2
+ 
++    // HACK: Some old vendor kernels lack ~5.10 backport of 'bpffs selinux genfscon' support.
++    // This is *NOT* supported, but let's allow, at least for now, U+ GSI to boot on them.
++    // (without this hack pixel5 R vendor + U gsi breaks)
++    if (isGsiImage() && !bpf::isAtLeastKernelVersion(5, 10, 0)) {
++        ALOGE("GSI with *BAD* pre-5.10 kernel lacking bpffs selinux genfscon support.");
++        return;
++    }
++
+     if (fatal) abort();
+ }
+ 
+-- 
+2.34.1
+

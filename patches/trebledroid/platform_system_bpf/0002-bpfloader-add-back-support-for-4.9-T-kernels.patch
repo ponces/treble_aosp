@@ -1,26 +1,30 @@
-From 9a18025009838a7248a7e930795b7c645eef04b4 Mon Sep 17 00:00:00 2001
-From: danielzhang130 <37479705+danielzhang130@users.noreply.github.com>
-Date: Tue, 20 Feb 2024 17:51:30 -0500
-Subject: [PATCH 2/3] Revert "bpfloader - remove dead code" (#1)
+From 2403a0eb4ec170d7963e06f8316e513476a66a24 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Maciej=20=C5=BBenczykowski?= <maze@google.com>
+Date: Mon, 11 Mar 2024 12:40:06 +0000
+Subject: [PATCH 2/4] bpfloader: add back support for 4.9-T kernels
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-This reverts commit 90a866ed34d844a97559e0178b75d0ef2d8fbfe5.
+This effectively reverts aosp/2268766
 
-Change-Id: I4988a2dc3958b7c9f87391d168762f57459373d0
+Test: TreeHugger
+Signed-off-by: Maciej Żenczykowski <maze@google.com>
+Change-Id: I42da5c56fe4b69635b9678ff57ade7788c17f7c8
 ---
- libbpf_android/Loader.cpp | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+ libbpf_android/Loader.cpp | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
 diff --git a/libbpf_android/Loader.cpp b/libbpf_android/Loader.cpp
-index 229dd93..7cd383e 100644
+index 229dd93..9691c3a 100644
 --- a/libbpf_android/Loader.cpp
 +++ b/libbpf_android/Loader.cpp
-@@ -573,6 +573,15 @@ static int getSymNameByIdx(ifstream& elfFile, int index, string& name) {
+@@ -573,6 +573,14 @@ static int getSymNameByIdx(ifstream& elfFile, int index, string& name) {
  
  static bool mapMatchesExpectations(const unique_fd& fd, const string& mapName,
                                     const struct bpf_map_def& mapDef, const enum bpf_map_type type) {
 +    // bpfGetFd... family of functions require at minimum a 4.14 kernel,
-+    // so on 4.9 kernels just pretend the map matches our expectations.
-+    // This isn't really a problem as we only really support 4.14+ anyway...
++    // so on 4.9-T kernels just pretend the map matches our expectations.
 +    // Additionally we'll get almost equivalent test coverage on newer devices/kernels.
 +    // This is because the primary failure mode we're trying to detect here
 +    // is either a source code misconfiguration (which is likely kernel independent)
@@ -30,7 +34,7 @@ index 229dd93..7cd383e 100644
      // Assuming fd is a valid Bpf Map file descriptor then
      // all the following should always succeed on a 4.14+ kernel.
      // If they somehow do fail, they'll return -1 (and set errno),
-@@ -711,6 +720,16 @@ static int createMaps(const char* elfPath, ifstream& elfFile, vector<unique_fd>&
+@@ -711,6 +719,16 @@ static int createMaps(const char* elfPath, ifstream& elfFile, vector<unique_fd>&
          }
  
          enum bpf_map_type type = md[i].type;
@@ -38,7 +42,7 @@ index 229dd93..7cd383e 100644
 +            // On Linux Kernels older than 4.14 this map type doesn't exist, but it can kind
 +            // of be approximated: ARRAY has the same userspace api, though it is not usable
 +            // by the same ebpf programs.  However, that's okay because the bpf_redirect_map()
-+            // helper doesn't exist on 4.9 anyway (so the bpf program would fail to load,
++            // helper doesn't exist on 4.9-T anyway (so the bpf program would fail to load,
 +            // and thus needs to be tagged as 4.14+ either way), so there's nothing useful you
 +            // could do with a DEVMAP anyway (that isn't already provided by an ARRAY)...
 +            // Hence using an ARRAY instead of a DEVMAP simply makes life easier for userspace.

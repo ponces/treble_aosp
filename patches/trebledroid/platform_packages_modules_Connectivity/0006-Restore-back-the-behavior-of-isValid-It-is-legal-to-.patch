@@ -1,7 +1,7 @@
 From 9450ea678723c62c75be13c8ccbc04c788cc50da Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 26 Oct 2022 18:02:18 -0400
-Subject: [PATCH 6/6] Restore back the behavior of isValid(): It is legal to
+Subject: [PATCH 06/13] Restore back the behavior of isValid(): It is legal to
  have non-working BpfMap
 
 Dont abort a whole process (system_server...) just because we cant access bpf map.
