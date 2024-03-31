@@ -1,7 +1,7 @@
-From b55de4680e2a63db488eace80f6bd45eca4c0d19 Mon Sep 17 00:00:00 2001
+From 7c87a8ce4e5043f14135aedf01de8e21ba2cf183 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Fri, 20 Oct 2023 09:11:55 +0000
-Subject: [PATCH 07/10] Revert "Removed IWLAN legacy mode support"
+Subject: [PATCH 13/16] Revert "Removed IWLAN legacy mode support"
 
 This reverts commit d8d3ed41243ba1fc4b5a5a2a6e30be3f6a404a9d.
 

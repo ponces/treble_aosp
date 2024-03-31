@@ -1,0 +1,41 @@
+From 21058edc46d62c00a7065a5c7c5529b57c17e975 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Sun, 31 Mar 2024 17:18:05 -0400
+Subject: [PATCH 25/25] If AVB fails, ignore/disable AVB
+
+DO NOT INCLUDE THIS PATCH If you want to run GSIs on a locked bootloader
+
+This is needed on Honor View 10 which declares "avb" in fstab while
+being AVB1.0
+---
+ init/first_stage_mount.cpp | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/init/first_stage_mount.cpp b/init/first_stage_mount.cpp
+index 43f58ba78..593bf7f95 100644
+--- a/init/first_stage_mount.cpp
++++ b/init/first_stage_mount.cpp
+@@ -267,7 +267,19 @@ bool FirstStageMountVBootV2::DoFirstStageMount() {
+         return true;
+     }
+ 
+-    if (!MountPartitions()) return false;
++    if (!MountPartitions()) {
++        // Cheat and disable avb
++        for(auto& part: fstab_) {
++            part.avb_keys = "";
++            part.fs_mgr_flags.avb = false;
++            LOG(ERROR) << "Failed Mouting partitions with avb. Retrying without it.";
++            if (!MountPartitions()) {
++                LOG(ERROR) << "... still failed";
++                return false;
++            }
++        }
++
++    }
+ 
+     return true;
+ }
+-- 
+2.34.1
+

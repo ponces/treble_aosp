@@ -1,7 +1,7 @@
 From 49955d0ca66ae3843f43b5bc49cbe8aa9ddcae74 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Tue, 6 Jun 2023 16:17:11 +0100
-Subject: [PATCH 15/24] Disable quotas on legacy devices with encryption
+Subject: [PATCH 15/25] Disable quotas on legacy devices with encryption
  disabled
 
 Source: https://t.me/phhtreblebuilders/20521 and https://t.me/phhtreblebuilders/20546

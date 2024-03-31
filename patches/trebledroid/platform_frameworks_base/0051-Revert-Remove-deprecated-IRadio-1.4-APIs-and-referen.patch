@@ -1,0 +1,88 @@
+From 56dbc7a37f530a09b2751c3f4d6ee80a6fd46f68 Mon Sep 17 00:00:00 2001
+From: Alberto Ponces <ponces26@gmail.com>
+Date: Sun, 31 Mar 2024 23:38:19 +0000
+Subject: [PATCH 51/51] Revert "Remove deprecated IRadio <1.4 APIs and
+ references"
+
+This reverts commit 4d53aa0caec7029bf6c9b5789c1708bc4bb71b76.
+---
+ .../android/telephony/TelephonyManager.java   | 23 +++++++++++++++++++
+ .../internal/telephony/ITelephony.aidl        | 11 +++++++++
+ .../internal/telephony/RILConstants.java      |  5 ++++
+ 3 files changed, 39 insertions(+)
+
+diff --git a/telephony/java/android/telephony/TelephonyManager.java b/telephony/java/android/telephony/TelephonyManager.java
+index bd5255d4a21a..859326ee0ca4 100644
+--- a/telephony/java/android/telephony/TelephonyManager.java
++++ b/telephony/java/android/telephony/TelephonyManager.java
+@@ -11472,6 +11472,29 @@ public class TelephonyManager {
+         return false;
+     }
+ 
++    /**
++     * Returns the result and response from RIL for oem request
++     *
++     * @param oemReq the data is sent to ril.
++     * @param oemResp the respose data from RIL.
++     * @return negative value request was not handled or get error
++     *         0 request was handled succesfully, but no response data
++     *         positive value success, data length of response
++     * @hide
++     * @deprecated OEM needs a vendor-extension hal and their apps should use that instead
++     */
++    @Deprecated
++    public int invokeOemRilRequestRaw(byte[] oemReq, byte[] oemResp) {
++        try {
++            ITelephony telephony = getITelephony();
++            if (telephony != null)
++                return telephony.invokeOemRilRequestRaw(oemReq, oemResp);
++        } catch (RemoteException ex) {
++        } catch (NullPointerException ex) {
++        }
++        return -1;
++    }
++
+     /**
+      * @deprecated Use {@link android.telephony.ims.ImsMmTelManager#setVtSettingEnabled(boolean)}
+      * instead.
+diff --git a/telephony/java/com/android/internal/telephony/ITelephony.aidl b/telephony/java/com/android/internal/telephony/ITelephony.aidl
+index 397fb2d6db96..192ead0fb163 100644
+--- a/telephony/java/com/android/internal/telephony/ITelephony.aidl
++++ b/telephony/java/com/android/internal/telephony/ITelephony.aidl
+@@ -1194,6 +1194,17 @@ interface ITelephony {
+             in List<String> gsmNonRoamingList, in List<String> cdmaRoamingList,
+             in List<String> cdmaNonRoamingList);
+ 
++    /**
++     * Returns the result and response from RIL for oem request
++     *
++     * @param oemReq the data is sent to ril.
++     * @param oemResp the respose data from RIL.
++     * @return negative value request was not handled or get error
++     *         0 request was handled succesfully, but no response data
++     *         positive value success, data length of response
++     */
++    int invokeOemRilRequestRaw(in byte[] oemReq, out byte[] oemResp);
++
+     /**
+      * Check if any mobile Radios need to be shutdown.
+      *
+diff --git a/telephony/java/com/android/internal/telephony/RILConstants.java b/telephony/java/com/android/internal/telephony/RILConstants.java
+index 50590177f791..69ea593a3a00 100644
+--- a/telephony/java/com/android/internal/telephony/RILConstants.java
++++ b/telephony/java/com/android/internal/telephony/RILConstants.java
+@@ -298,6 +298,11 @@ public interface RILConstants {
+     int SETUP_DATA_AUTH_CHAP      = 2;
+     int SETUP_DATA_AUTH_PAP_CHAP  = 3;
+ 
++    /* LCE service related constants. */
++    int LCE_NOT_AVAILABLE = -1;
++    int LCE_STOPPED = 0;
++    int LCE_ACTIVE = 1;
++
+     /**
+      * No restriction at all including voice/SMS/USSD/SS/AV64
+      * and packet data.
+-- 
+2.34.1
+
