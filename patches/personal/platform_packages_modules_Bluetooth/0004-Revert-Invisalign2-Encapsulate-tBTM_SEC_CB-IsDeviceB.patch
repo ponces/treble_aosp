@@ -1,0 +1,88 @@
+From 6bbd2f328eb055e2796f5524593bb75fad6f1f04 Mon Sep 17 00:00:00 2001
+From: Dmitry Muhomor <muhomor.dmitry@gmail.com>
+Date: Thu, 21 Mar 2024 16:07:26 +0200
+Subject: [PATCH 04/11] Revert "[Invisalign2] Encapsulate
+ tBTM_SEC_CB::IsDeviceBonded"
+
+This reverts commit ed2401a9d1e6f181c0068df2e11c41362392b671.
+---
+ system/stack/btm/btm_sec.cc    | 14 ++++++++++++--
+ system/stack/btm/btm_sec_cb.cc | 14 --------------
+ system/stack/btm/btm_sec_cb.h  |  2 --
+ 3 files changed, 12 insertions(+), 18 deletions(-)
+
+diff --git a/system/stack/btm/btm_sec.cc b/system/stack/btm/btm_sec.cc
+index 2f525792e6..d9cbf966b2 100644
+--- a/system/stack/btm/btm_sec.cc
++++ b/system/stack/btm/btm_sec.cc
+@@ -4898,13 +4898,23 @@ void btm_sec_clear_ble_keys(tBTM_SEC_DEV_REC* p_dev_rec) {
+  * Function         btm_sec_is_a_bonded_dev
+  *
+  * Description       Is the specified device is a bonded device
+- *                   (either on BR/EDR or LE)
+  *
+  * Returns          true - dev is bonded
+  *
+  ******************************************************************************/
+ bool btm_sec_is_a_bonded_dev(const RawAddress& bda) {
+-  return btm_sec_cb.IsDeviceBonded(bda);
++  tBTM_SEC_DEV_REC* p_dev_rec = btm_find_dev(bda);
++  bool is_bonded = false;
++
++  if (p_dev_rec &&
++      ((p_dev_rec->sec_rec.ble_keys.key_type &&
++        (p_dev_rec->sec_rec.sec_flags & BTM_SEC_LE_LINK_KEY_KNOWN)) ||
++       (p_dev_rec->sec_rec.sec_flags & BTM_SEC_LINK_KEY_KNOWN))) {
++    is_bonded = true;
++  }
++  LOG_DEBUG("Device record bonded check peer:%s is_bonded:%s",
++            ADDRESS_TO_LOGGABLE_CSTR(bda), logbool(is_bonded).c_str());
++  return is_bonded;
+ }
+ 
+ /*******************************************************************************
+diff --git a/system/stack/btm/btm_sec_cb.cc b/system/stack/btm/btm_sec_cb.cc
+index 7fee5aa6e9..7e990de6e2 100644
+--- a/system/stack/btm/btm_sec_cb.cc
++++ b/system/stack/btm/btm_sec_cb.cc
+@@ -189,20 +189,6 @@ bool tBTM_SEC_CB::IsLinkKeyKnown(const RawAddress bd_addr,
+   return false;
+ }
+ 
+-bool tBTM_SEC_CB::IsDeviceBonded(const RawAddress bd_addr) {
+-  tBTM_SEC_DEV_REC* p_dev_rec = btm_find_dev(bd_addr);
+-  bool is_bonded = false;
+-
+-  if (p_dev_rec && ((p_dev_rec->sec_rec.ble_keys.key_type &&
+-                     p_dev_rec->sec_rec.is_le_link_key_known()) ||
+-                    p_dev_rec->sec_rec.is_link_key_known())) {
+-    is_bonded = true;
+-  }
+-  LOG_DEBUG("Device record bonded check peer:%s is_bonded:%s",
+-            ADDRESS_TO_LOGGABLE_CSTR(bd_addr), logbool(is_bonded).c_str());
+-  return is_bonded;
+-}
+-
+ #define BTM_NO_AVAIL_SEC_SERVICES ((uint16_t)0xffff)
+ bool tBTM_SEC_CB::AddService(bool is_originator, const char* p_name,
+                              uint8_t service_id, uint16_t sec_level,
+diff --git a/system/stack/btm/btm_sec_cb.h b/system/stack/btm/btm_sec_cb.h
+index f709392a7b..57cfdd79d8 100644
+--- a/system/stack/btm/btm_sec_cb.h
++++ b/system/stack/btm/btm_sec_cb.h
+@@ -85,12 +85,10 @@ class tBTM_SEC_CB {
+ 
+   tBTM_SEC_SERV_REC* find_first_serv_rec(bool is_originator, uint16_t psm);
+ 
+-  bool IsDeviceBonded(const RawAddress bd_addr);
+   bool IsDeviceEncrypted(const RawAddress bd_addr, tBT_TRANSPORT transport);
+   bool IsDeviceAuthenticated(const RawAddress bd_addr, tBT_TRANSPORT transport);
+   bool IsLinkKeyAuthenticated(const RawAddress bd_addr,
+                               tBT_TRANSPORT transport);
+-
+   bool IsLinkKeyKnown(const RawAddress bd_addr, tBT_TRANSPORT transport);
+ 
+   tBTM_SEC_REC* getSecRec(const RawAddress bd_addr);
+-- 
+2.34.1
+

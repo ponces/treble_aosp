@@ -1,0 +1,26 @@
+From 638a19c794a871ad175127c29cd346ff9d0a722c Mon Sep 17 00:00:00 2001
+From: Dmitry Muhomor <muhomor.dmitry@gmail.com>
+Date: Thu, 21 Mar 2024 16:12:37 +0200
+Subject: [PATCH 01/11] Revert "Copy the keys when re-pairing with a new
+ RPA/IRK"
+
+This reverts commit f475f3c1bc301c30ab10f013e30f61bdd74eb452.
+---
+ system/stack/btm/btm_dev.cc | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/system/stack/btm/btm_dev.cc b/system/stack/btm/btm_dev.cc
+index ead44de7ff..02b7f3b8e4 100644
+--- a/system/stack/btm/btm_dev.cc
++++ b/system/stack/btm/btm_dev.cc
+@@ -453,7 +453,6 @@ void btm_consolidate_dev(tBTM_SEC_DEV_REC* p_target_rec) {
+     if (p_dev_rec->bd_addr == p_target_rec->bd_addr) {
+       memcpy(p_target_rec, p_dev_rec, sizeof(tBTM_SEC_DEV_REC));
+       p_target_rec->ble = temp_rec.ble;
+-      p_target_rec->sec_rec.ble_keys = temp_rec.sec_rec.ble_keys;
+       p_target_rec->ble_hci_handle = temp_rec.ble_hci_handle;
+       p_target_rec->sec_rec.enc_key_size = temp_rec.sec_rec.enc_key_size;
+       p_target_rec->conn_params = temp_rec.conn_params;
+-- 
+2.34.1
+
