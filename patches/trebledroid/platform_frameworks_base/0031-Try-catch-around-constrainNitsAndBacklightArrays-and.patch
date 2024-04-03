@@ -1,4 +1,4 @@
-From 1decc4c97995159562c0a1366fd86a41456ea520 Mon Sep 17 00:00:00 2001
+From a9a1a2e4fc8d53a581509310f6e7efc2f5d94d0c Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Fri, 2 Jun 2023 19:19:31 -0400
 Subject: [PATCH 31/51] Try catch around constrainNitsAndBacklightArrays, and

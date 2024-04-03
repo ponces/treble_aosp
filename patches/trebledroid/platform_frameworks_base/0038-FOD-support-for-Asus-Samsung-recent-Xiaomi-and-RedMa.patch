@@ -1,4 +1,4 @@
-From 390fe4c95b00ef1c2948a5855397376bcfd82b28 Mon Sep 17 00:00:00 2001
+From f908f25dde7b5e7de2c26f3d74ccc4428c981094 Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Sun, 18 Dec 2022 18:20:40 -0500
 Subject: [PATCH 38/51] FOD support for Asus, Samsung recent Xiaomi and
