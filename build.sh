@@ -66,46 +66,48 @@ buildTrebleApp() {
     echo
 }
 
-buildVanillaVariant() {
-    echo "--> Building treble_arm64_bvN"
-    lunch treble_arm64_bvN-ap1a-userdebug
+buildVariant() {
+    echo "--> Building $1"
+    lunch "$1"-ap1a-userdebug
     make -j$(nproc --all) installclean
     make -j$(nproc --all) systemimage
-    mv $OUT/system.img $BD/system-treble_arm64_bvN.img
+    mv $OUT/system.img $BD/system-"$1".img
     echo
 }
 
-buildGappsVariant() {
-    echo "--> Building treble_arm64_bgN"
-    lunch treble_arm64_bgN-ap1a-userdebug
-    make -j$(nproc --all) installclean
-    make -j$(nproc --all) systemimage
-    mv $OUT/system.img $BD/system-treble_arm64_bgN.img
-    echo
-}
-
-buildVndkliteVariants() {
-    echo "--> Building treble_arm64_bvN-vndklite"
+buildVndkliteVariant() {
+    echo "--> Building $1-vndklite"
+    [[ "$1" == *"a64"* ]] && arch="32" || arch="64"
     cd treble_adapter
-    sudo bash lite-adapter.sh 64 $BD/system-treble_arm64_bvN.img
-    mv s.img $BD/system-treble_arm64_bvN-vndklite.img
-    sudo rm -rf d tmp
-
-    echo "--> Building treble_arm64_bgN-vndklite"
-    sudo bash lite-adapter.sh 64 $BD/system-treble_arm64_bgN.img
-    mv s.img $BD/system-treble_arm64_bgN-vndklite.img
+    sudo bash lite-adapter.sh "$arch" $BD/system-"$1".img
+    mv s.img $BD/system-"$1"-vndklite.img
     sudo rm -rf d tmp
     cd ..
     echo
 }
 
+buildVariants() {
+    buildVariant treble_a64_bvN
+    buildVariant treble_a64_bgN
+    buildVariant treble_arm64_bvN
+    buildVariant treble_arm64_bgN
+    buildVndkliteVariant treble_a64_bvN
+    buildVndkliteVariant treble_a64_bgN
+    buildVndkliteVariant treble_arm64_bvN
+    buildVndkliteVariant treble_arm64_bgN
+}
+
 generatePackages() {
     echo "--> Generating packages"
     buildDate="$(date +%Y%m%d)"
-    xz -cv $BD/system-treble_arm64_bvN.img -T0 > $BD/aosp-arm64-ab-vanilla-14.0-$buildDate.img.xz
-    xz -cv $BD/system-treble_arm64_bvN-vndklite.img -T0 > $BD/aosp-arm64-ab-vanilla-vndklite-14.0-$buildDate.img.xz
-    xz -cv $BD/system-treble_arm64_bgN.img -T0 > $BD/aosp-arm64-ab-gapps-14.0-$buildDate.img.xz
-    xz -cv $BD/system-treble_arm64_bgN-vndklite.img -T0 > $BD/aosp-arm64-ab-gapps-vndklite-14.0-$buildDate.img.xz
+    find $BD/ -name "system-treble_*.img" | while read file; do
+        filename="$(basename $file)"
+        [[ "$filename" == *"_a64_"* ]] && arch="arm32_binder64" || arch="arm64"
+        [[ "$filename" == *"_bvN"* ]] && variant="vanilla" || variant="gapps"
+        [[ "$filename" == *"-vndklite.img" ]] && vndk="-vndklite" || vndk=""
+        name="aosp-${arch}-ab-${variant}${vndk}-14.0-$buildDate"
+        xz -cv "$file" -T0 > $BD/"$name".img.xz
+    done
     rm -rf $BD/system-*.img
     echo
 }
@@ -119,15 +121,10 @@ generateOta() {
     find $BD/ -name "aosp-*-14.0-$buildDate.img.xz" | sort | {
         while read file; do
             filename="$(basename $file)"
-            if [[ $filename == *"vanilla-vndklite"* ]]; then
-                name="treble_arm64_bvN-vndklite"
-            elif [[ $filename == *"gapps-vndklite"* ]]; then
-                name="treble_arm64_bgN-vndklite"
-            elif [[ $filename == *"vanilla"* ]]; then
-                name="treble_arm64_bvN"
-            else
-                name="treble_arm64_bgN"
-            fi
+            [[ "$filename" == *"-arm32_"* ]] && arch="a64" || arch="arm64"
+            [[ "$filename" == *"-vanilla-"* ]] && variant="v" || variant="g"
+            [[ "$filename" == *"-vndklite-"* ]] && vndk="-vndklite" || vndk=""
+            name="treble_${arch}_b${variant}N${vndk}"
             size=$(wc -c $file | awk '{print $1}')
             url="https://github.com/ponces/treble_aosp/releases/download/$version/$filename"
             json="${json} {\"name\": \"$name\",\"size\": \"$size\",\"url\": \"$url\"},"
@@ -145,9 +142,7 @@ syncRepos
 applyPatches
 setupEnv
 buildTrebleApp
-buildVanillaVariant
-buildGappsVariant
-buildVndkliteVariants
+buildVariants
 generatePackages
 generateOta
 
