@@ -1,7 +1,7 @@
 From 73f9671edecbdee831761aea079edcef7c086f79 Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Fri, 1 Mar 2024 10:49:00 +0000
-Subject: [PATCH 2/2] Add "android.permission.MONITOR_INPUT" to manifest
+Subject: [PATCH] Add "android.permission.MONITOR_INPUT" to manifest
 
 Attempt to resolve:
 11-18 07:16:36.964  9447  9447 E AndroidRuntime: FATAL EXCEPTION: main
