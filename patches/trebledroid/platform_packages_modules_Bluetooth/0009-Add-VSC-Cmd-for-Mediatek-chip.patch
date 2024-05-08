@@ -1,4 +1,4 @@
-From 6eed0e5d02d2ffb0ff1f6d4b6325e435eb52bf4c Mon Sep 17 00:00:00 2001
+From 7fd1b7888f65cc8d596e39d550d6f9be012eceed Mon Sep 17 00:00:00 2001
 From: "weifan.zhang" <weifan.zhang@mediatek.corp-partner.google.com>
 Date: Thu, 1 Feb 2024 13:44:37 +0800
 Subject: [PATCH 9/9] Add VSC Cmd for Mediatek chip

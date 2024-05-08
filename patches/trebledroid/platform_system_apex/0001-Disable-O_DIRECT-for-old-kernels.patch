@@ -1,0 +1,54 @@
+From 4d3925eb9d2d2ce31012df8a9e320f77fdbff888 Mon Sep 17 00:00:00 2001
+From: Pierre-Hugues Husson <phh@phh.me>
+Date: Tue, 7 May 2024 19:28:41 -0400
+Subject: [PATCH] Disable O_DIRECT for old kernels
+
+On old kernels, mounting over O_DIRECT over FBE ext4 leads to corrupted
+reads.
+"Old kernel" is hard to define, some 4.19 and 4.14 got the fix.
+The penalty for not using o_direct is a bit of performance/ram hit, so
+live with it
+
+Co-authored-by: Alberto Ponces <ponces26@gmail.com>
+Change-Id: I710e870bc467000547b00958b0818aaf0ddca072
+---
+ apexd/apexd_loop.cpp | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/apexd/apexd_loop.cpp b/apexd/apexd_loop.cpp
+index 1ae573d8..b613c7c9 100644
+--- a/apexd/apexd_loop.cpp
++++ b/apexd/apexd_loop.cpp
+@@ -35,6 +35,7 @@
+ #include <sys/statfs.h>
+ #include <sys/sysmacros.h>
+ #include <sys/types.h>
++#include <sys/utsname.h>
+ #include <unistd.h>
+ #include <utils/Trace.h>
+ 
+@@ -351,7 +352,20 @@ Result<void> ConfigureLoopDevice(const int device_fd, const std::string& target,
+    * condition is now met.
+    */
+   bool use_buffered_io = false;
+-  unique_fd target_fd(open(target.c_str(), O_RDONLY | O_CLOEXEC | O_DIRECT));
++  bool enable_odirect = false;
++  struct utsname uts;
++  unsigned int major, minor;
++  if (uname(&uts) == 0 && sscanf(uts.release, "%u.%u", &major, &minor) == 2) {
++    if(major > 4) enable_odirect = true;
++    if(major == 4 && minor > 19) enable_odirect = true;
++  }
++  unique_fd target_fd;
++  if (enable_odirect) {
++    target_fd = unique_fd(open(target.c_str(), O_RDONLY | O_CLOEXEC | O_DIRECT));
++  } else {
++    target_fd = unique_fd(open(target.c_str(), O_RDONLY | O_CLOEXEC));
++  }
++  //unique_fd target_fd(open(target.c_str(), O_RDONLY | O_CLOEXEC));
+   if (target_fd.get() == -1) {
+     struct statfs stbuf;
+     int saved_errno = errno;
+-- 
+2.34.1
+
