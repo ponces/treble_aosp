@@ -16,7 +16,7 @@ BD=$HOME/builds
 initRepos() {
     if [ ! -d .repo ]; then
         echo "--> Initializing workspace"
-        repo init -u https://android.googlesource.com/platform/manifest -b android-14.0.0_r31 --git-lfs
+        repo init -u https://android.googlesource.com/platform/manifest -b android-14.0.0_r37 --git-lfs
         echo
 
         echo "--> Preparing local manifest"
@@ -102,9 +102,9 @@ generatePackages() {
     buildDate="$(date +%Y%m%d)"
     find $BD/ -name "system-treble_*.img" | while read file; do
         filename="$(basename $file)"
-        [[ "$filename" == *"_a64_"* ]] && arch="arm32_binder64" || arch="arm64"
+        [[ "$filename" == *"_a64"* ]] && arch="arm32_binder64" || arch="arm64"
         [[ "$filename" == *"_bvN"* ]] && variant="vanilla" || variant="gapps"
-        [[ "$filename" == *"-vndklite.img" ]] && vndk="-vndklite" || vndk=""
+        [[ "$filename" == *"-vndklite" ]] && vndk="-vndklite" || vndk=""
         name="aosp-${arch}-ab-${variant}${vndk}-14.0-$buildDate"
         xz -cv "$file" -T0 > $BD/"$name".img.xz
     done
@@ -121,9 +121,9 @@ generateOta() {
     find $BD/ -name "aosp-*-14.0-$buildDate.img.xz" | sort | {
         while read file; do
             filename="$(basename $file)"
-            [[ "$filename" == *"-arm32_"* ]] && arch="a64" || arch="arm64"
-            [[ "$filename" == *"-vanilla-"* ]] && variant="v" || variant="g"
-            [[ "$filename" == *"-vndklite-"* ]] && vndk="-vndklite" || vndk=""
+            [[ "$filename" == *"-arm32"* ]] && arch="a64" || arch="arm64"
+            [[ "$filename" == *"-vanilla"* ]] && variant="v" || variant="g"
+            [[ "$filename" == *"-vndklite"* ]] && vndk="-vndklite" || vndk=""
             name="treble_${arch}_b${variant}N${vndk}"
             size=$(wc -c $file | awk '{print $1}')
             url="https://github.com/ponces/treble_aosp/releases/download/$version/$filename"
