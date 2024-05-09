@@ -104,7 +104,7 @@ generatePackages() {
         filename="$(basename $file)"
         [[ "$filename" == *"_a64"* ]] && arch="arm32_binder64" || arch="arm64"
         [[ "$filename" == *"_bvN"* ]] && variant="vanilla" || variant="gapps"
-        [[ "$filename" == *"-vndklite" ]] && vndk="-vndklite" || vndk=""
+        [[ "$filename" == *"-vndklite"* ]] && vndk="-vndklite" || vndk=""
         name="aosp-${arch}-ab-${variant}${vndk}-14.0-$buildDate"
         xz -cv "$file" -T0 > $BD/"$name".img.xz
     done
