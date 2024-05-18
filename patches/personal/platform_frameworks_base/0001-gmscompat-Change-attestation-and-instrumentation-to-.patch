@@ -1,4 +1,4 @@
-From e64e80d8f57ca12791ec196868eacf12086acfaa Mon Sep 17 00:00:00 2001
+From 1ffd2b652dd02693c9f9f0ddedc1e617d9d5f5ba Mon Sep 17 00:00:00 2001
 From: Alberto Ponces <ponces26@gmail.com>
 Date: Thu, 9 Nov 2023 12:33:55 +0100
 Subject: [PATCH 1/9] gmscompat: Change attestation and instrumentation to pass
@@ -46,7 +46,7 @@ index 2162e3a77f15..af1c752b1733 100644
  
 diff --git a/core/java/com/android/internal/gmscompat/AttestationHooks.java b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 new file mode 100644
-index 000000000000..12e68b9360bc
+index 000000000000..c913c4f3570e
 --- /dev/null
 +++ b/core/java/com/android/internal/gmscompat/AttestationHooks.java
 @@ -0,0 +1,100 @@
@@ -116,14 +116,14 @@ index 000000000000..12e68b9360bc
 +    }
 +
 +    private static void spoofBuildGms() {
-+        setBuildField("PRODUCT", "griffin_retcn");
-+        setBuildField("DEVICE", "griffin");
++        setBuildField("PRODUCT", "clark_retus");
++        setBuildField("DEVICE", "clark");
 +        setBuildField("MANUFACTURER", "motorola");
 +        setBuildField("BRAND", "motorola");
-+        setBuildField("MODEL", "XT1650-05");
-+        setBuildField("FINGERPRINT", "motorola/griffin_retcn/griffin:6.0.1/MCC24.246-37/42:user/release-keys");
-+        setVersionField("SECURITY_PATCH", "2016-07-01");
-+        setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.LOLLIPOP);
++        setBuildField("MODEL", "XT1575");
++        setBuildField("FINGERPRINT", "motorola/clark_retus/clark:6.0/MPHS24.49-18-8/4:user/release-keys");
++        setVersionField("SECURITY_PATCH", "2016-09-01");
++        setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N_MR1);
 +    }
 +
 +    public static void initApplicationBeforeOnCreate(Application app) {
