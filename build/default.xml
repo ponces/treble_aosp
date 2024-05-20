@@ -24,4 +24,5 @@
   <remove-project name="platform/packages/apps/ThemePicker" />
   <project name="LineageOS/android_packages_apps_Trebuchet" path="packages/apps/Trebuchet" remote="github" revision="lineage-21.0" />
   <project name="LineageOS/android_packages_apps_ThemePicker" path="packages/apps/ThemePicker" remote="github" revision="lineage-21.0" />
+  <project name="LineageOS/android_packages_apps_Eleven" path="packages/apps/ThemePicker" remote="github" revision="lineage-21.0" />
 </manifest>
