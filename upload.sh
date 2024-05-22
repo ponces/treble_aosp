@@ -15,7 +15,7 @@ BD=$HOME/builds
 TAG="$(date +v%Y.%m.%d)"
 GUSER="brunochanrio"
 GREPO="ChanrioDroid"
-GITHUB_API_TOKEN="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"
+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"
 
 createRelease() {
     echo "--> Creating release $TAG"
