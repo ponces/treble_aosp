@@ -10,7 +10,7 @@ echo
 
 set -e
 
-BL=$PWD/treble_aosp
+BL=$PWD
 BD=$HOME/builds
 
 initRepos() {
@@ -87,25 +87,19 @@ buildVndkliteVariant() {
 }
 
 buildVariants() {
-    buildVariant treble_a64_bvN
-    buildVariant treble_a64_bgN
-    buildVariant treble_arm64_bvN
-    buildVariant treble_arm64_bgN
-    buildVndkliteVariant treble_a64_bvN
-    buildVndkliteVariant treble_a64_bgN
-    buildVndkliteVariant treble_arm64_bvN
-    buildVndkliteVariant treble_arm64_bgN
+    buildVariant chanriodroid_a64_bgN
+    buildVariant chanriodroid_arm64_bgN
 }
 
 generatePackages() {
     echo "--> Generating packages"
     buildDate="$(date +%Y%m%d)"
-    find $BD/ -name "system-treble_*.img" | while read file; do
+    find $BD/ -name "system-chanriodroid_*.img" | while read file; do
         filename="$(basename $file)"
         [[ "$filename" == *"_a64"* ]] && arch="arm32_binder64" || arch="arm64"
         [[ "$filename" == *"_bvN"* ]] && variant="vanilla" || variant="gapps"
         [[ "$filename" == *"-vndklite"* ]] && vndk="-vndklite" || vndk=""
-        name="aosp-${arch}-ab-${variant}${vndk}-14.0-$buildDate"
+        name="chanriodroid-${arch}-ab-${variant}${vndk}-14.0-$buildDate"
         xz -cv "$file" -T0 > $BD/"$name".img.xz
     done
     rm -rf $BD/system-*.img
@@ -118,15 +112,15 @@ generateOta() {
     buildDate="$(date +%Y%m%d)"
     timestamp="$START"
     json="{\"version\": \"$version\",\"date\": \"$timestamp\",\"variants\": ["
-    find $BD/ -name "aosp-*-14.0-$buildDate.img.xz" | sort | {
+    find $BD/ -name "chanriodroid-*-14.0-$buildDate.img.xz" | sort | {
         while read file; do
             filename="$(basename $file)"
             [[ "$filename" == *"-arm32"* ]] && arch="a64" || arch="arm64"
             [[ "$filename" == *"-vanilla"* ]] && variant="v" || variant="g"
             [[ "$filename" == *"-vndklite"* ]] && vndk="-vndklite" || vndk=""
-            name="treble_${arch}_b${variant}N${vndk}"
+            name="chanriodroid_${arch}_b${variant}N${vndk}"
             size=$(wc -c $file | awk '{print $1}')
-            url="https://github.com/ponces/treble_aosp/releases/download/$version/$filename"
+            url="https://github.com/brunochanrio/ChanrioDroid/releases/download/$version/$filename"
             json="${json} {\"name\": \"$name\",\"size\": \"$size\",\"url\": \"$url\"},"
         done
         json="${json%?}]}"

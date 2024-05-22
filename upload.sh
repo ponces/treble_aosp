@@ -13,8 +13,9 @@ set -e
 BL=$PWD/treble_aosp
 BD=$HOME/builds
 TAG="$(date +v%Y.%m.%d)"
-GUSER="ponces"
-GREPO="treble_aosp"
+GUSER="brunochanrio"
+GREPO="ChanrioDroid"
+GITHUB_API_TOKEN="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"
 
 createRelease() {
     echo "--> Creating release $TAG"
