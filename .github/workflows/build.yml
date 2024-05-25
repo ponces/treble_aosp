@@ -1,0 +1,48 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - android-14.0
+
+concurrency: 
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+            cd build
+            docker build -t aosp .
+            docker run --name aosp -it --detach --privileged --env GITHUB_API_TOKEN=${{ secrets.GH_TOKEN }} aosp /bin/bash
+            docker exec aosp /bin/sh -c "git clone https://github.com/ponces/treble_aosp"
+
+  build:
+    needs: setup
+    runs-on: self-hosted
+    steps:
+      - name: Build ROM
+        run: docker exec aosp /bin/sh -c "bash treble_aosp/build.sh"
+
+  upload:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Upload to GitHub
+        run: docker exec aosp /bin/sh -c "bash treble_aosp/upload.sh"
+
+  cleanup:
+    needs: upload
+    runs-on: self-hosted
+    if: ${{ always() }}
+    steps:
+      - name: Cleanup
+        run: |
+          docker stop aosp || true
+          docker system prune -f
