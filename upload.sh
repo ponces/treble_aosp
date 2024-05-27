@@ -16,6 +16,11 @@ TAG="$(date +v%Y.%m.%d)"
 GUSER="ponces"
 GREPO="treble_aosp"
 
+SKIPOTA=false
+if [ "$1" == "--skip-ota" ]; then
+    SKIPOTA=true
+fi
+
 createRelease() {
     echo "--> Creating release $TAG"
     res=$(curl -s -L -X POST \
@@ -55,7 +60,7 @@ START=$(date +%s)
 
 createRelease
 uploadAssets
-#updateOta
+[ "$SKIPOTA" = false ] && updateOta
 
 END=$(date +%s)
 ELAPSEDM=$(($(($END-$START))/60))
