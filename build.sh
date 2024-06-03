@@ -12,6 +12,7 @@ set -e
 
 BL=$PWD/treble_aosp
 BD=$HOME/builds
+BV=$1
 
 initRepos() {
     echo "--> Initializing workspace"
@@ -143,7 +144,7 @@ syncRepos
 applyPatches
 setupEnv
 buildTrebleApp
-buildVariants
+[ ! -z "$BV" ] && buildVariant "$BV" || buildVariants
 generatePackages
 generateOta
 
