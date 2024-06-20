@@ -1,46 +1,46 @@
 {
-  "version": "v2024.06.19",
-  "date": "1718796272",
+  "version": "v2024.05.09",
+  "date": "1715241738",
   "variants": [
     {
       "name": "treble_a64_bgN",
-      "size": "950836264",
-      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.06.19/aosp-arm32_binder64-ab-gapps-14.0-20240619.img.xz"
+      "size": "897355620",
+      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.05.09/aosp-arm32_binder64-ab-gapps-14.0-20240509.img.xz"
     },
     {
       "name": "treble_a64_bgN-vndklite",
-      "size": "867922112",
-      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.06.19/aosp-arm32_binder64-ab-gapps-vndklite-14.0-20240619.img.xz"
+      "size": "857896516",
+      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.05.09/aosp-arm32_binder64-ab-gapps-vndklite-14.0-20240509.img.xz"
     },
     {
       "name": "treble_a64_bvN",
-      "size": "621103188",
-      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.06.19/aosp-arm32_binder64-ab-vanilla-14.0-20240619.img.xz"
+      "size": "583452280",
+      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.05.09/aosp-arm32_binder64-ab-vanilla-14.0-20240509.img.xz"
     },
     {
       "name": "treble_a64_bvN-vndklite",
-      "size": "581996032",
-      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.06.19/aosp-arm32_binder64-ab-vanilla-vndklite-14.0-20240619.img.xz"
+      "size": "566778516",
+      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.05.09/aosp-arm32_binder64-ab-vanilla-vndklite-14.0-20240509.img.xz"
     },
     {
       "name": "treble_arm64_bgN",
-      "size": "1340949032",
-      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.06.19/aosp-arm64-ab-gapps-14.0-20240619.img.xz"
+      "size": "1266469276",
+      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.05.09/aosp-arm64-ab-gapps-14.0-20240509.img.xz"
     },
     {
       "name": "treble_arm64_bgN-vndklite",
-      "size": "1197762996",
-      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.06.19/aosp-arm64-ab-gapps-vndklite-14.0-20240619.img.xz"
+      "size": "1178927880",
+      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.05.09/aosp-arm64-ab-gapps-vndklite-14.0-20240509.img.xz"
     },
     {
       "name": "treble_arm64_bvN",
-      "size": "827936632",
-      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.06.19/aosp-arm64-ab-vanilla-14.0-20240619.img.xz"
+      "size": "781760768",
+      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.05.09/aosp-arm64-ab-vanilla-14.0-20240509.img.xz"
     },
     {
       "name": "treble_arm64_bvN-vndklite",
-      "size": "793153012",
-      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.06.19/aosp-arm64-ab-vanilla-vndklite-14.0-20240619.img.xz"
+      "size": "738478812",
+      "url": "https://github.com/ponces/treble_aosp/releases/download/v2024.05.09/aosp-arm64-ab-vanilla-vndklite-14.0-20240509.img.xz"
     }
   ]
 }
