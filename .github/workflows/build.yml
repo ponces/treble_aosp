@@ -54,11 +54,3 @@ jobs:
         with:
           name: ${{ env.BUILD_VARIANT }}
           path: builds/*.xz
-
-  cleanup:
-    needs: build
-    runs-on: self-hosted
-    if: ${{ always() }}
-    steps:
-      - name: Cleanup
-        run: docker stop test || true

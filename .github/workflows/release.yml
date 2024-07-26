@@ -58,11 +58,3 @@ jobs:
           body: "## Changelog\n- ...\n\n## Notes\n- ..."
           draft: true
           prerelease: false
-
-  cleanup:
-    needs: build
-    runs-on: self-hosted
-    if: ${{ always() }}
-    steps:
-      - name: Cleanup
-        run: docker stop treble || true
