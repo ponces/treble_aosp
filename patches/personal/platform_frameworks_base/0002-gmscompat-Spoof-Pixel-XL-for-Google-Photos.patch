@@ -21,7 +21,7 @@ index cff1250c..dfbf69a0 100644
  
      private static volatile boolean sIsGms = false;
 @@ -74,6 +75,15 @@ public final class AttestationHooks {
-         setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N_MR1);
+         setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.LOLLIPOP);
      }
  
 +    private static void spoofGooglePhotos() {

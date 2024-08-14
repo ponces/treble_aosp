@@ -116,14 +116,14 @@ index 00000000..cff1250c
 +    }
 +
 +    private static void spoofBuildGms() {
-+        setBuildField("PRODUCT", "sailfish");
-+        setBuildField("DEVICE", "sailfish");
++        setBuildField("PRODUCT", "husky_beta");
++        setBuildField("DEVICE", "husky");
 +        setBuildField("MANUFACTURER", "Google");
 +        setBuildField("BRAND", "google");
-+        setBuildField("MODEL", "Pixel");
-+        setBuildField("FINGERPRINT", "google/sailfish/sailfish:10/QPP3.190404.015/5505587:user/release-keys");
-+        setVersionField("SECURITY_PATCH", "2019-05-05");
-+        setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N_MR1);
++        setBuildField("MODEL", "Pixel 8 Pro");
++        setBuildField("FINGERPRINT", "google/husky_beta/husky:15/AP31.240617.015/12207491:user/release-keys");
++        setVersionField("SECURITY_PATCH", "2024-09-05");
++        setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.LOLLIPOP);
 +    }
 +
 +    public static void initApplicationBeforeOnCreate(Application app) {
