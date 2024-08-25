@@ -116,13 +116,13 @@ index 00000000..cff1250c
 +    }
 +
 +    private static void spoofBuildGms() {
-+        setBuildField("PRODUCT", "husky_beta");
-+        setBuildField("DEVICE", "husky");
++        setBuildField("PRODUCT", "akita_beta");
++        setBuildField("DEVICE", "akita");
 +        setBuildField("MANUFACTURER", "Google");
 +        setBuildField("BRAND", "google");
-+        setBuildField("MODEL", "Pixel 8 Pro");
-+        setBuildField("FINGERPRINT", "google/husky_beta/husky:15/AP31.240617.015/12207491:user/release-keys");
-+        setVersionField("SECURITY_PATCH", "2024-09-05");
++        setBuildField("MODEL", "Pixel 8a");
++        setBuildField("FINGERPRINT", "google/akita_beta/akita:15/AP31.240617.015/12207491:user/release-keys");
++        setVersionField("SECURITY_PATCH", "2024-08-05");
 +        setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.LOLLIPOP);
 +    }
 +
