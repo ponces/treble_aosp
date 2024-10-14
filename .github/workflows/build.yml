@@ -10,7 +10,7 @@ on:
         type: string
   push:
     branches:
-      - android-14.0
+      - android-15.0
     paths-ignore:
       - '.github/**'
       - 'config/**'
